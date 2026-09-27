@@ -1,5 +1,12 @@
 # WEB·SUITE
 
+<p align="center">
+  <img src="docs/intro.webp" alt="Animation d'intro WEB·SUITE : WEB_CAO, WEB_ANTENNA, WEB_3D" width="800">
+</p>
+
+<p align="center"><sub>Intro du lanceur (<code>websuite-intro.html</code>) —
+<a href="https://raw.githack.com/pilou33620/web_suite/main/websuite-intro.html">voir la version interactive</a></sub></p>
+
 Lanceur des trois outils web :
 
 | Outil | Rôle | Dépôt |
@@ -40,7 +47,7 @@ et ne se met plus à jour.
 Dépendances propres aux outils :
 
 - **WEB_CAO** : `numpy`, `scipy` facultatifs (solveurs SI/PI). L'installateur propose de les installer.
-- **WEB_ANTENNA** : openEMS + ParaView pour lancer les simulations, à installer à la main
+- **WEB_ANTENNA** : openEMS pour lancer les simulations, à installer à la main
   (Python 3.10/3.11), voir le guide en tête de `WEB_ANTENNA/requirements.txt`.
 - **WEB_3D** : aucune.
 

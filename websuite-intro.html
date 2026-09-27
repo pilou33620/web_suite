@@ -1,0 +1,1170 @@
+<!doctype html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>WEB·SUITE Intro</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Michroma&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+  :root {
+    color-scheme: dark;
+    --ink: #020617;
+    --text: #e6edff;
+    --muted: #8ea3d9;
+  }
+  html, body { height: 100%; }
+  body {
+    margin: 0;
+    background: var(--ink);
+    color: var(--text);
+    overflow: hidden;
+    font-family: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  }
+  #stage { position: fixed; inset: 0; width: 100%; height: 100%; display: block; background: var(--ink); cursor: pointer; }
+  #replay {
+    position: fixed;
+    right: 16px;
+    bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+    font: 500 12px/1 "IBM Plex Mono", ui-monospace, Menlo, monospace;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--text);
+    background: rgba(8, 20, 60, .55);
+    border: 1px solid rgba(142, 163, 217, .45);
+    padding: 10px 14px;
+    cursor: pointer;
+    backdrop-filter: blur(6px);
+  }
+  #replay:hover { border-color: #e6edff; }
+  #replay:focus-visible { outline: 2px solid #4fe0ff; outline-offset: 2px; }
+</style>
+
+<canvas id="stage" aria-label="Animation d'introduction WEB·SUITE : WEB_CAO, WEB_ANTENNA, WEB_3D"></canvas>
+<button id="replay" type="button" hidden>↻ Rejouer</button>
+
+<script>
+/* =====================================================================
+   WEB·SUITE — intro animée (10 s), canvas 2D pur, aucune dépendance.
+   API pour le futur launcher :
+     WebSuiteIntro.play()        relance depuis 0
+     WebSuiteIntro.renderAt(t)   dessine l'image à t secondes (0..10)
+     WebSuiteIntro.skip()        saute à l'écran final
+     window 'websuite:intro-end' événement émis à la fin
+   ===================================================================== */
+(() => {
+'use strict';
+
+const CONFIG = {
+  duration: 10,
+  brand: 'WEB·SUITE',
+  tagline: 'ÉLECTRONIQUE · RF · MÉCANIQUE',
+  prompt: 'CHOISISSEZ VOTRE OUTIL',
+  tools: [
+    { id: 'web_cao',     name: 'WEB_CAO',     sub: 'Schéma & routage PCB',        color: '#ff9a4d', glow: '#ffd2a3' },
+    { id: 'web_antenna', name: 'WEB_ANTENNA', sub: 'Simulation d’antennes RF', color: '#4fe0ff', glow: '#c8f6ff' },
+    { id: 'web_3d',      name: 'WEB_3D',      sub: 'Modélisation & assemblage 3D', color: '#8dffb8', glow: '#dcffe9' },
+  ],
+};
+
+const DISPLAY = '"Michroma", "Eurostile", "Arial Black", system-ui, sans-serif';
+const MONO = '"IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace';
+
+/* ---------- math utils ---------- */
+const clamp = (v, a = 0, b = 1) => Math.max(a, Math.min(b, v));
+const lerp = (a, b, t) => a + (b - a) * t;
+const seg = (t, a, b) => clamp((t - a) / (b - a));
+const easeIO = t => t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+const easeOut = t => 1 - Math.pow(1 - t, 3);
+const easeOutExpo = t => t >= 1 ? 1 : 1 - Math.pow(2, -10 * t);
+const easeOutBack = t => { const c1 = 1.5, c3 = c1 + 1; return 1 + c3 * Math.pow(t - 1, 3) + c1 * Math.pow(t - 1, 2); };
+function mulberry(seed) { return () => { seed |= 0; seed = seed + 0x6D2B79F5 | 0; let t = Math.imul(seed ^ seed >>> 15, 1 | seed); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+const hash = (a, b = 0) => { let h = Math.imul(a | 0, 374761393) + Math.imul(b | 0, 668265263); h = Math.imul(h ^ h >>> 13, 1274126177); return ((h ^ h >>> 16) >>> 0) / 4294967296; };
+const hexA = (hex, a) => { const n = parseInt(hex.slice(1), 16); return `rgba(${n >> 16 & 255},${n >> 8 & 255},${n & 255},${a})`; };
+
+/* ---------- canvas ---------- */
+const canvas = document.getElementById('stage');
+const ctx = canvas.getContext('2d');
+const buf = document.createElement('canvas');
+const b = buf.getContext('2d');
+let W = 0, H = 0, DPR = 1, portrait = false;
+
+function resize() {
+  DPR = Math.min(window.devicePixelRatio || 1, 2);
+  W = window.innerWidth; H = window.innerHeight;
+  portrait = W / H < 0.9;
+  for (const c of [canvas, buf]) { c.width = Math.round(W * DPR); c.height = Math.round(H * DPR); }
+  if (!playing) renderAt(lastT);
+}
+
+/* =====================================================================
+   SCENE DATA — the board (units: mm). Board lies in XZ plane, y up.
+   ===================================================================== */
+const BW = 100, BD = 70, BT = 1.6;
+const rnd = mulberry(7);
+const comps = [];   // boxes on the board
+const pads = [];
+const traces = [];
+const vias = [];
+const holes = [[-45, -30], [45, -30], [-45, 30], [45, 30]];
+const CHIP = { x: -6, z: 0, w: 22, d: 22, h: 2.4 };
+const FEED = { x: 36, z: -22 };
+
+comps.push({ ...CHIP, kind: 'chip' });
+comps.push({ x: -45.5, z: 4, w: 9, d: 8, h: 3.4, kind: 'usb' });
+comps.push({ x: 16, z: -19, w: 8, d: 5, h: 1.4, kind: 'ic' });
+comps.push({ x: 18, z: 14, w: 9, d: 9, h: 1.6, kind: 'ic' });
+comps.push({ x: -28, z: -20, w: 7, d: 5, h: 1.4, kind: 'ic' });
+comps.push({ x: -28, z: 20, w: 5, d: 3.2, h: 1.2, kind: 'xtal' });
+comps.push({ x: 24, z: -5, w: 6, d: 6, h: 1.2, kind: 'ic' });
+for (let i = 0; i < 10; i++) comps.push({ x: -22.86 + i * 2.54 * 1.8, z: 30.5, w: 2.2, d: 2.2, h: 2.6, kind: 'pin' });
+// passives
+const passiveSpots = [
+  [-19, -8], [-19, -4], [-19, 4], [-19, 8], [7, -8], [7, -3], [7, 3], [7, 8], [-10, -15], [-4, -15], [2, -15],
+  [-10, 15], [-4, 15], [2, 15], [-34, -6], [-34, 0], [-34, 6], [10, -24], [22, -26], [28, 8], [28, 20], [12, 24],
+  [-38, -22], [-38, 22], [-16, 24], [30, -14],
+];
+for (const [x, z] of passiveSpots) {
+  const rot = rnd() > .5;
+  comps.push({ x, z, w: rot ? 1.2 : 2.0, d: rot ? 2.0 : 1.2, h: 0.7, kind: 'r' });
+}
+
+// 45° router: A -> B, returns point list
+function route45(ax, az, bx, bz, first) {
+  const dx = bx - ax, dz = bz - az, adx = Math.abs(dx), adz = Math.abs(dz);
+  const sx = Math.sign(dx), sz = Math.sign(dz);
+  const pts = [[ax, az]];
+  if (first === 'x') {
+    const straight = adx - adz;
+    if (straight > 0) { pts.push([ax + sx * straight, az]); }
+    else { pts.push([ax, az + sz * (-straight)]); }
+  } else {
+    const straight = adz - adx;
+    if (straight > 0) { pts.push([ax, az + sz * straight]); }
+    else { pts.push([ax + sx * (-straight), az]); }
+  }
+  pts.push([bx, bz]);
+  return pts;
+}
+function addTrace(pts, t0, w = 0.6) {
+  let len = 0; const segs = [];
+  for (let i = 1; i < pts.length; i++) { const l = Math.hypot(pts[i][0] - pts[i - 1][0], pts[i][1] - pts[i - 1][1]); segs.push(l); len += l; }
+  traces.push({ pts, segs, len, t0, w });
+  pads.push(pts[0], pts[pts.length - 1]);
+  if (pts.length > 2 && rnd() > .45) vias.push(pts[1]);
+}
+// chip pin escape: 5 pins per side
+{
+  let k = 0;
+  const targets = [
+    ...[[-19, -8], [-19, -4], [-19, 4], [-19, 8], [-34, 0]].map(p => ['L', p]),
+    ...[[7, -8], [7, -3], [16, -19], [24, -5], [18, 14]].map(p => ['R', p]),
+    ...[[-10, -15], [-4, -15], [2, -15], [10, -24], [-28, -20]].map(p => ['T', p]),
+    ...[[-10, 15], [-4, 15], [2, 15], [-28, 20], [12, 24]].map(p => ['B', p]),
+  ];
+  const side = { L: 0, R: 0, T: 0, B: 0 };
+  for (const [s, [tx, tz]] of targets) {
+    const i = side[s]++; const off = -8 + i * 4;
+    let ax, az, first;
+    if (s === 'L') { ax = CHIP.x - 11; az = CHIP.z + off; first = 'x'; }
+    if (s === 'R') { ax = CHIP.x + 11; az = CHIP.z + off; first = 'x'; }
+    if (s === 'T') { ax = CHIP.x + off; az = CHIP.z - 11; first = 'z'; }
+    if (s === 'B') { ax = CHIP.x + off; az = CHIP.z + 11; first = 'z'; }
+    addTrace(route45(ax, az, tx, tz, first), 1.75 + (k++ % 20) * 0.075 + rnd() * .1);
+  }
+  // long buses
+  addTrace([[-41, 4], [-37, 4], [-34, 1], [-34, 0]], 1.85, 0.9);
+  addTrace([[-41, 2], [-36, -3], [-34, -6]], 1.95, 0.9);
+  addTrace([[-22.86, 30.5], [-22.86, 26], [-19, 22], [-16, 22], [-16, 24]], 2.4);
+  addTrace([[-18.3, 30.5], [-18.3, 27], [-12, 21], [-10, 21], [-10, 15]], 2.5);
+  addTrace([[18, 14], [26, 14], [28, 16], [28, 20]], 2.6);
+  addTrace([[24, -5], [28, -1], [28, 8]], 2.7);
+  addTrace([[16, -19], [22, -25], [22, -26]], 2.75);
+  addTrace([[24, -5], [30, -11], [30, -14]], 2.8);
+  addTrace([[30, -14], [33, -17], [33, -22], [FEED.x, FEED.z]], 2.95, 0.9); // RF feed
+}
+// meander antenna (inverted-F + meander) near right edge
+const ANT = [[FEED.x, FEED.z], [FEED.x, -30], [41, -30], [41, -18], [44, -18], [44, -30], [47, -30], [47, -12], [44, -12], [44, -6], [47, -6], [47, 6]];
+let ANT_LEN = 0; const ANT_SEGS = [];
+for (let i = 1; i < ANT.length; i++) { const l = Math.hypot(ANT[i][0] - ANT[i - 1][0], ANT[i][1] - ANT[i - 1][1]); ANT_SEGS.push(l); ANT_LEN += l; }
+
+// stars / dust
+const stars = Array.from({ length: 260 }, (_, i) => ({ x: hash(i, 1), y: hash(i, 2), z: .2 + hash(i, 3) * .8, tw: hash(i, 4) * 6.28 }));
+
+/* =====================================================================
+   CAMERA
+   ===================================================================== */
+const KF = [
+  [0.0, { yaw: -1.10, pitch: 0.34, dist: 2400, cx: .50, cy: .40, tx: 0,  tz: 0,   roll: .10 }],
+  [1.3, { yaw: -0.80, pitch: 0.52, dist: 760,  cx: .50, cy: .38, tx: 0,  tz: 0,   roll: .02 }],
+  [2.1, { yaw: -0.58, pitch: 0.64, dist: 245,  cx: .67, cy: .55, tx: -2, tz: 0,   roll: -.06 }],
+  [4.0, { yaw: -0.22, pitch: 0.80, dist: 245,  cx: .66, cy: .56, tx: 12, tz: -4,  roll: -.02 }],
+  [6.6, { yaw: 0.42,  pitch: 0.70, dist: 245,  cx: .66, cy: .56, tx: 16, tz: -10, roll: .04 }],
+  [7.6, { yaw: 0.70,  pitch: 0.58, dist: 290,  cx: .68, cy: .60, tx: 4,  tz: -4,  roll: .03 }],
+  [8.6, { yaw: 0.95,  pitch: 0.48, dist: 320,  cx: .68, cy: .58, tx: 0,  tz: 0,   roll: .02 }],
+  [10., { yaw: 1.35,  pitch: 0.58, dist: 520,  cx: .50, cy: .30, tx: 0,  tz: 0,   roll: 0 }],
+];
+function camAt(t) {
+  let i = 0; while (i < KF.length - 2 && t > KF[i + 1][0]) i++;
+  const [t0, a] = KF[i], [t1, c] = KF[i + 1];
+  const u = i === 0 ? easeOut(seg(t, t0, t1)) : easeIO(seg(t, t0, t1));
+  const o = {}; for (const k in a) o[k] = lerp(a[k], c[k], u);
+  if (portrait) { o.cx = .5; o.cy = t < 1.3 ? .36 : t < 8.6 ? lerp(.36, .33, easeIO(seg(t, 1.3, 2.1))) : lerp(.33, .22, easeIO(seg(t, 8.6, 10))); o.dist *= 1.02; }
+  return o;
+}
+let CAM, F, CY, SY, CP, SP, CR, SR, OX, OY;
+function setCam(t) {
+  CAM = camAt(t);
+  F = portrait ? W * 1.55 : Math.min(W * .95, H * 1.75);
+  CY = Math.cos(CAM.yaw); SY = Math.sin(CAM.yaw);
+  CP = Math.cos(CAM.pitch); SP = Math.sin(CAM.pitch);
+  CR = Math.cos(CAM.roll); SR = Math.sin(CAM.roll);
+  OX = CAM.cx * W; OY = CAM.cy * H;
+}
+function view(x, y, z) {
+  x -= CAM.tx; z -= CAM.tz;
+  const x1 = x * CY - z * SY, z1 = x * SY + z * CY;
+  const yv = y * CP + z1 * SP, zv = -y * SP + z1 * CP;
+  return [x1, yv, zv];
+}
+function proj(x, y, z) {
+  const [xv, yv, zv] = view(x, y, z);
+  const d = CAM.dist + zv, s = F / Math.max(d, 1);
+  const px = xv * s, py = -yv * s;
+  return [OX + px * CR - py * SR, OY + px * SR + py * CR, d];
+}
+function rotN(nx, ny, nz) { // rotation only, for normals
+  const x1 = nx * CY - nz * SY, z1 = nx * SY + nz * CY;
+  return [x1, ny * CP + z1 * SP, -ny * SP + z1 * CP];
+}
+const LIGHT = (() => { const l = [-0.35, 0.85, -0.4]; const n = Math.hypot(...l); return l.map(v => v / n); })();
+
+/* ---------- 3D primitives ---------- */
+function boxFaces(x0, x1, y0, y1, z0, z1, opts = {}) {
+  const P = [
+    [x0, y0, z0], [x1, y0, z0], [x1, y0, z1], [x0, y0, z1],
+    [x0, y1, z0], [x1, y1, z0], [x1, y1, z1], [x0, y1, z1],
+  ];
+  const F_ = [
+    { i: [4, 5, 6, 7], n: [0, 1, 0], top: true },
+    { i: [0, 3, 2, 1], n: [0, -1, 0], bottom: true },
+    { i: [0, 1, 5, 4], n: [0, 0, -1] },
+    { i: [2, 3, 7, 6], n: [0, 0, 1] },
+    { i: [1, 2, 6, 5], n: [1, 0, 0] },
+    { i: [3, 0, 4, 7], n: [-1, 0, 0] },
+  ];
+  const out = [];
+  for (const f of F_) {
+    if (opts.noTop && f.top) continue;
+    if (opts.noBottom && f.bottom) continue;
+    const wp = f.i.map(k => P[k]);
+    const c = wp.reduce((a, p) => [a[0] + p[0] / 4, a[1] + p[1] / 4, a[2] + p[2] / 4], [0, 0, 0]);
+    const nv = rotN(...f.n), cv = view(...c);
+    const facing = nv[0] * cv[0] + nv[1] * cv[1] + nv[2] * (cv[2] + CAM.dist) < 0;
+    const lit = .32 + .68 * Math.max(0, f.n[0] * LIGHT[0] + f.n[1] * LIGHT[1] + f.n[2] * LIGHT[2]);
+    out.push({ pts: wp.map(p => proj(...p)), depth: proj(...c)[2], facing, lit, top: !!f.top, n: f.n });
+  }
+  return out;
+}
+const BOX_EDGES = [[0, 1], [1, 2], [2, 3], [3, 0], [4, 5], [5, 6], [6, 7], [7, 4], [0, 4], [1, 5], [2, 6], [3, 7]];
+function boxEdges(x0, x1, y0, y1, z0, z1) {
+  const P = [[x0, y0, z0], [x1, y0, z0], [x1, y0, z1], [x0, y0, z1], [x0, y1, z0], [x1, y1, z0], [x1, y1, z1], [x0, y1, z1]].map(p => proj(...p));
+  return BOX_EDGES.map(([a, c]) => [P[a], P[c]]);
+}
+function shade(rgb, k) { return `rgb(${Math.round(rgb[0] * k)},${Math.round(rgb[1] * k)},${Math.round(rgb[2] * k)})`; }
+function poly(g, pts) { g.beginPath(); g.moveTo(pts[0][0], pts[0][1]); for (let i = 1; i < pts.length; i++) g.lineTo(pts[i][0], pts[i][1]); g.closePath(); }
+
+/* =====================================================================
+   RENDER
+   ===================================================================== */
+let lastT = 0;
+
+function drawBackground(g, t) {
+  const cx = W * (portrait ? .5 : .66), cy = H * (portrait ? .36 : .55);
+  const R = Math.hypot(W, H) * .75;
+  const bg = g.createRadialGradient(cx, cy, 0, cx, cy, R);
+  const lift = .55 + .45 * easeOut(seg(t, 0, 1.6));
+  bg.addColorStop(0, `rgba(${Math.round(18 * lift)},${Math.round(58 * lift)},${Math.round(190 * lift)},1)`);
+  bg.addColorStop(.38, `rgba(${Math.round(8 * lift)},${Math.round(30 * lift)},${Math.round(112 * lift)},1)`);
+  bg.addColorStop(1, '#020617');
+  g.fillStyle = bg; g.fillRect(0, 0, W, H);
+
+  // stars / dust with parallax drift
+  for (let i = 0; i < stars.length; i++) {
+    const s = stars[i];
+    const x = ((s.x + t * .006 * s.z) % 1) * W;
+    const y = s.y * H;
+    const a = (.25 + .75 * (.5 + .5 * Math.sin(t * 2.2 + s.tw))) * s.z * .55;
+    g.fillStyle = `rgba(200,220,255,${a})`;
+    const r = s.z * 1.3;
+    g.fillRect(x, y, r, r);
+  }
+}
+
+function drawGroundRings(g, t, alpha) {
+  if (alpha <= 0) return;
+  g.save(); g.globalCompositeOperation = 'lighter';
+  const y = -14;
+  for (let k = 0; k < 3; k++) {
+    const R = 62 + k * 34 + Math.sin(t * .8 + k) * 2;
+    g.beginPath();
+    for (let i = 0; i <= 96; i++) {
+      const a = i / 96 * Math.PI * 2;
+      const p = proj(Math.cos(a) * R, y, Math.sin(a) * R);
+      i ? g.lineTo(p[0], p[1]) : g.moveTo(p[0], p[1]);
+    }
+    g.strokeStyle = `rgba(150,190,255,${alpha * (.28 - k * .06)})`;
+    g.lineWidth = 1;
+    g.stroke();
+  }
+  g.restore();
+}
+
+function polylinePartial(g, pts3, segs, len, frac) {
+  let remain = len * frac; if (remain <= 0) return null;
+  g.beginPath();
+  let p = proj(...pts3[0]); g.moveTo(p[0], p[1]);
+  let head = p;
+  for (let i = 1; i < pts3.length; i++) {
+    const l = segs[i - 1];
+    if (remain >= l) { p = proj(...pts3[i]); g.lineTo(p[0], p[1]); head = p; remain -= l; }
+    else {
+      const u = remain / l, a = pts3[i - 1], c = pts3[i];
+      p = proj(a[0] + (c[0] - a[0]) * u, a[1] + (c[1] - a[1]) * u, a[2] + (c[2] - a[2]) * u);
+      g.lineTo(p[0], p[1]); head = p; break;
+    }
+  }
+  return head;
+}
+
+function drawBoard(g, t) {
+  const wf = easeIO(seg(t, 6.75, 7.35));             // wireframe amount (WEB_3D)
+  const fin = easeIO(seg(t, 8.6, 9.4));               // finale dim
+  const dieGlow = .35 + .65 * easeOut(seg(t, .3, 1.6));
+  const cyan = '#4fe0ff', mint = '#8dffb8';
+  const mmScale = F / CAM.dist; // px per mm near board
+
+  // ---- board slab
+  const bf = boxFaces(-BW / 2, BW / 2, -BT, 0, -BD / 2, BD / 2, { noBottom: true });
+  const maskRGB = [14, 26, 58];
+  for (const f of bf) {
+    if (!f.facing) continue;
+    g.globalAlpha = 1 - wf * .85;
+    poly(g, f.pts.map(p => [p[0], p[1]]));
+    g.fillStyle = f.top ? '#0b1834' : shade([40, 58, 110], f.lit);
+    g.fill();
+    g.globalAlpha = 1;
+  }
+  // board top gradient sheen + grid
+  {
+    const c = [[-BW / 2, 0, -BD / 2], [BW / 2, 0, -BD / 2], [BW / 2, 0, BD / 2], [-BW / 2, 0, BD / 2]].map(p => proj(...p));
+    g.save();
+    poly(g, c); g.clip();
+    g.globalAlpha = (1 - wf) * .9;
+    // copper pour hatch (ground plane)
+    g.strokeStyle = 'rgba(90,120,200,0.10)'; g.lineWidth = 1;
+    g.beginPath();
+    for (let x = -BW / 2; x <= BW / 2; x += 4) { const a = proj(x, 0.01, -BD / 2), q = proj(x, 0.01, BD / 2); g.moveTo(a[0], a[1]); g.lineTo(q[0], q[1]); }
+    for (let z = -BD / 2; z <= BD / 2; z += 4) { const a = proj(-BW / 2, 0.01, z), q = proj(BW / 2, 0.01, z); g.moveTo(a[0], a[1]); g.lineTo(q[0], q[1]); }
+    g.stroke();
+    // antenna keep-out zone
+    const ko = [[33, 0.02, -BD / 2], [BW / 2, 0.02, -BD / 2], [BW / 2, 0.02, 12], [33, 0.02, 12]].map(p => proj(...p));
+    poly(g, ko); g.fillStyle = 'rgba(2,8,24,0.55)'; g.fill();
+    g.restore();
+    g.globalAlpha = 1;
+  }
+  // board outline (always; becomes mint in wireframe)
+  {
+    const edges = boxEdges(-BW / 2, BW / 2, -BT, 0, -BD / 2, BD / 2);
+    g.save(); g.globalCompositeOperation = 'lighter';
+    g.strokeStyle = wf > 0 ? hexA(mint, .25 + .6 * wf) : 'rgba(120,150,230,0.35)';
+    g.lineWidth = 1;
+    g.beginPath(); for (const [a, c] of edges) { g.moveTo(a[0], a[1]); g.lineTo(c[0], c[1]); } g.stroke();
+    g.restore();
+  }
+
+  // ---- mounting holes (gold rings like the reference)
+  for (const [hx, hz] of holes) {
+    g.beginPath();
+    for (let i = 0; i <= 24; i++) { const a = i / 24 * 6.283; const p = proj(hx + Math.cos(a) * 2.6, 0.02, hz + Math.sin(a) * 2.6); i ? g.lineTo(p[0], p[1]) : g.moveTo(p[0], p[1]); }
+    g.fillStyle = `rgba(214,160,70,${(1 - wf) * .95})`; g.fill();
+    g.beginPath();
+    for (let i = 0; i <= 24; i++) { const a = i / 24 * 6.283; const p = proj(hx + Math.cos(a) * 1.4, 0.03, hz + Math.sin(a) * 1.4); i ? g.lineTo(p[0], p[1]) : g.moveTo(p[0], p[1]); }
+    g.fillStyle = '#01040d'; g.fill();
+  }
+
+  // ---- traces (WEB_CAO routing)
+  g.save(); g.lineCap = 'round'; g.lineJoin = 'round';
+  const cao = seg(t, 1.5, 4.0);
+  const settleDim = 1 - .45 * seg(t, 4.0, 4.6) - .35 * wf;
+  for (const tr of traces) {
+    const frac = easeIO(seg(t, tr.t0, tr.t0 + .55));
+    if (frac <= 0) continue;
+    const pts3 = tr.pts.map(p => [p[0], 0.05, p[1]]);
+    const lw = Math.max(1, tr.w * mmScale);
+    const hot = frac < 1 ? 1 : Math.max(0, 1 - (t - tr.t0 - .55) * 2.2);
+    g.globalCompositeOperation = 'source-over';
+    polylinePartial(g, pts3, tr.segs, tr.len, frac);
+    g.strokeStyle = wf > 0 ? hexA(mint, (.25 + .35 * (1 - wf)) * settleDim + .25 * wf) : `rgba(${Math.round(lerp(190, 255, hot))},${Math.round(lerp(112, 210, hot))},${Math.round(lerp(58, 150, hot))},${.9 * settleDim})`;
+    g.lineWidth = lw; g.stroke();
+    if (hot > 0) {
+      g.globalCompositeOperation = 'lighter';
+      const head = polylinePartial(g, pts3, tr.segs, tr.len, frac);
+      g.strokeStyle = `rgba(255,150,70,${.35 * hot})`; g.lineWidth = lw * 3.2; g.stroke();
+      if (head && frac < 1) {
+        const r = lw * 3;
+        const gr = g.createRadialGradient(head[0], head[1], 0, head[0], head[1], r * 3);
+        gr.addColorStop(0, 'rgba(255,230,190,.95)'); gr.addColorStop(1, 'rgba(255,140,60,0)');
+        g.fillStyle = gr; g.beginPath(); g.arc(head[0], head[1], r * 3, 0, 6.283); g.fill();
+      }
+    }
+  }
+  g.restore();
+  // pads & vias pop in with routing
+  const padA = seg(t, 1.6, 2.2);
+  if (padA > 0) {
+    for (let i = 0; i < pads.length; i++) {
+      const [px, pz] = pads[i];
+      const s = .8;
+      const q = [[px - s, 0.06, pz - s], [px + s, 0.06, pz - s], [px + s, 0.06, pz + s], [px - s, 0.06, pz + s]].map(p => proj(...p));
+      poly(g, q); g.fillStyle = wf > 0 ? hexA(mint, .35 * wf + .2) : `rgba(214,150,80,${.85 * padA * settleDim})`; g.fill();
+    }
+    for (let i = 0; i < vias.length; i++) {
+      const pop = easeOutBack(seg(t, 2.2 + i * .05, 2.5 + i * .05));
+      if (pop <= 0) continue;
+      const [vx, vz] = vias[i];
+      const c = proj(vx, 0.08, vz), r = Math.max(1.2, 1.1 * mmScale * pop);
+      g.beginPath(); g.arc(c[0], c[1], r, 0, 6.283); g.fillStyle = wf > 0 ? hexA(mint, .6) : '#d9a060'; g.fill();
+      g.beginPath(); g.arc(c[0], c[1], r * .45, 0, 6.283); g.fillStyle = '#020714'; g.fill();
+    }
+  }
+
+  // ---- antenna trace (WEB_ANTENNA)
+  {
+    const antP = easeIO(seg(t, 3.9, 4.7));
+    const pts3 = ANT.map(p => [p[0], 0.06, p[1]]);
+    g.save(); g.lineCap = 'square'; g.lineJoin = 'miter';
+    // dim copper version always visible once routed
+    const baseA = seg(t, 2.9, 3.4) * (1 - .5 * wf);
+    if (baseA > 0) {
+      polylinePartial(g, pts3, ANT_SEGS, ANT_LEN, 1);
+      g.strokeStyle = wf > 0 ? hexA(mint, .5 * wf + .2) : `rgba(200,130,70,${.75 * baseA})`; g.lineWidth = Math.max(1, 1.2 * mmScale); g.stroke();
+    }
+    if (antP > 0) {
+      const energ = antP * (1 - seg(t, 6.5, 7.0));
+      g.globalCompositeOperation = 'lighter';
+      polylinePartial(g, pts3, ANT_SEGS, ANT_LEN, antP);
+      g.strokeStyle = hexA(cyan, .9 * energ); g.lineWidth = Math.max(1.2, 1.2 * mmScale); g.stroke();
+      polylinePartial(g, pts3, ANT_SEGS, ANT_LEN, antP);
+      g.strokeStyle = hexA(cyan, .25 * energ); g.lineWidth = Math.max(4, 4 * mmScale); g.stroke();
+    }
+    g.restore();
+  }
+
+  // ---- components (painter sorted)
+  const faces = [];
+  const lidOpen = 0;
+  for (const c of comps) {
+    const x0 = c.x - c.w / 2, x1 = c.x + c.w / 2, z0 = c.z - c.d / 2, z1 = c.z + c.d / 2;
+    const fs = boxFaces(x0, x1, 0, c.h, z0, z1, { noBottom: true });
+    for (const f of fs) if (f.facing) faces.push({ f, c });
+  }
+  faces.sort((a, b) => b.f.depth - a.f.depth);
+  const COL = {
+    chip: [30, 34, 46], ic: [26, 30, 40], usb: [150, 160, 180], xtal: [170, 175, 190], pin: [205, 170, 90], r: [60, 55, 50],
+  };
+  for (const { f, c } of faces) {
+    const pts = f.pts.map(p => [p[0], p[1]]);
+    g.globalAlpha = 1 - wf * .9;
+    poly(g, pts);
+    g.fillStyle = shade(COL[c.kind], f.top ? 1.15 : f.lit);
+    g.fill();
+    if (c.kind === 'r' && f.top) { // end caps
+      g.globalAlpha = (1 - wf);
+    }
+    g.globalAlpha = 1;
+    if (wf > 0) {
+      g.save(); g.globalCompositeOperation = 'lighter';
+      poly(g, pts); g.strokeStyle = hexA(mint, .55 * wf); g.lineWidth = 1; g.stroke(); g.restore();
+    } else if (f.top && c.kind !== 'r') {
+      poly(g, pts); g.strokeStyle = 'rgba(160,180,230,.18)'; g.lineWidth = 1; g.stroke();
+    }
+    // chip die glow on top face
+    if (c.kind === 'chip' && f.top) {
+      const s = 6.5;
+      const tiles = [];
+      for (let ix = -1; ix <= 1; ix++) for (let iz = -1; iz <= 1; iz++) tiles.push([ix, iz]);
+      for (const [ix, iz] of tiles) {
+        const cx = CHIP.x + ix * 4.4, cz = CHIP.z + iz * 4.4, h = 1.9;
+        const q = [[cx - h, CHIP.h + .01, cz - h], [cx + h, CHIP.h + .01, cz - h], [cx + h, CHIP.h + .01, cz + h], [cx - h, CHIP.h + .01, cz + h]].map(p => proj(...p));
+        const flick = .55 + .45 * Math.sin(t * 5 + ix * 1.7 + iz * 2.3);
+        // color: green-white (CAO) -> cyan (ANT) -> mint (3D)
+        const ant = seg(t, 4.0, 4.5) * (1 - seg(t, 6.6, 7.0));
+        const r = lerp(lerp(150, 90, ant), 141, wf), gg = lerp(255, 225, ant), bb = lerp(lerp(200, 255, ant), 184, wf);
+        poly(g, q.map(p => [p[0], p[1]]));
+        g.fillStyle = `rgba(${r | 0},${gg | 0},${bb | 0},${(.25 + .6 * flick) * dieGlow})`;
+        g.fill();
+      }
+      // bloom
+      const cc = proj(CHIP.x, CHIP.h, CHIP.z);
+      const rr = s * 2.8 * mmScale;
+      g.save(); g.globalCompositeOperation = 'lighter';
+      const gr = g.createRadialGradient(cc[0], cc[1], 0, cc[0], cc[1], rr);
+      gr.addColorStop(0, `rgba(120,255,210,${.35 * dieGlow * (1 - fin * .5)})`); gr.addColorStop(1, 'rgba(60,180,255,0)');
+      g.fillStyle = gr; g.beginPath(); g.arc(cc[0], cc[1], rr, 0, 6.283); g.fill(); g.restore();
+    }
+  }
+}
+
+// jet-like colormap used by EM solvers (low gain -> deep blue, max -> red)
+const JET = [[0, [20, 40, 170]], [.25, [30, 140, 255]], [.45, [40, 230, 230]], [.62, [120, 255, 120]], [.8, [255, 225, 60]], [1, [255, 70, 50]]];
+function jet(v) {
+  v = clamp(v);
+  for (let i = 1; i < JET.length; i++) {
+    if (v <= JET[i][0]) {
+      const [a, ca] = JET[i - 1], [c, cc] = JET[i], u = (v - a) / (c - a);
+      return [lerp(ca[0], cc[0], u), lerp(ca[1], cc[1], u), lerp(ca[2], cc[2], u)];
+    }
+  }
+  return JET[JET.length - 1][1];
+}
+// far-field gain of the PCB meander monopole: donut around the antenna axis (z),
+// pushed away from the ground plane (+x) and slightly upward.
+function farGain(dx, dy, dz) {
+  const s = Math.sqrt(Math.max(0, 1 - dz * dz));      // sin(theta) from antenna axis
+  let g = Math.pow(s, 2.4) * (1 + .45 * dx) * (1 + .10 * dy);
+  return g / 1.6;                                    // normalised ~0..1
+}
+const RAD_NT = 30, RAD_NP = 56;
+function drawRadiation(g, t) {
+  const grow = easeOutBack(seg(t, 4.45, 5.5));
+  const out = 1 - easeIO(seg(t, 6.45, 6.95));
+  const a = seg(t, 4.45, 4.8) * out;
+  if (a <= 0.001 || grow <= 0.001) return;
+  const ox = 44, oy = 3, oz = -12;                     // antenna centre
+  const R0 = 30 * grow;
+  const spin = .25 * Math.sin((t - 4.45) * 1.2) * (1 - seg(t, 4.45, 5.5)); // settles as it converges
+  const cs = Math.cos(spin), sn = Math.sin(spin);
+
+  // ground wave rings on the board plane
+  g.save(); g.globalCompositeOperation = 'lighter';
+  for (let k = 0; k < 4; k++) {
+    if (t < 4.3 + k * .12) continue;
+    const ph = ((t - 4.3) * .5 + k / 4) % 1;
+    const R = 6 + ph * 90;
+    g.beginPath();
+    for (let i = 0; i <= 80; i++) { const an = i / 80 * 6.283; const p = proj(ox + Math.cos(an) * R, 0.1, oz + Math.sin(an) * R); i ? g.lineTo(p[0], p[1]) : g.moveTo(p[0], p[1]); }
+    g.strokeStyle = `rgba(79,224,255,${.32 * (1 - ph) * out * seg(t, 4.3, 4.8)})`; g.lineWidth = 1; g.stroke();
+  }
+  g.restore();
+
+  // build the mesh (theta from antenna axis z, phi around it)
+  const V = [];
+  for (let i = 0; i <= RAD_NT; i++) {
+    const th = i / RAD_NT * Math.PI;
+    const row = [];
+    for (let j = 0; j <= RAD_NP; j++) {
+      const ph = j / RAD_NP * Math.PI * 2;
+      // direction in antenna frame, then spun around z so the lobe turns slowly
+      let dx = Math.sin(th) * Math.cos(ph), dy = Math.sin(th) * Math.sin(ph), dz = Math.cos(th);
+      const gn = farGain(dx, dy, dz);
+      const r = R0 * (.02 + .98 * gn);
+      const rx = dx * cs - dy * sn, ry = dx * sn + dy * cs;
+      const w = [ox + rx * r, oy + ry * r, oz + dz * r];
+      row.push({ p: proj(w[0], w[1], w[2]), gn });
+    }
+    V.push(row);
+  }
+  const quads = [];
+  for (let i = 0; i < RAD_NT; i++) for (let j = 0; j < RAD_NP; j++) {
+    const q = [V[i][j], V[i][j + 1], V[i + 1][j + 1], V[i + 1][j]];
+    const depth = (q[0].p[2] + q[1].p[2] + q[2].p[2] + q[3].p[2]) / 4;
+    const gn = (q[0].gn + q[1].gn + q[2].gn + q[3].gn) / 4;
+    // screen-space orientation -> fake lighting (front faces brighter)
+    const ax = q[1].p[0] - q[0].p[0], ay = q[1].p[1] - q[0].p[1], bx = q[3].p[0] - q[0].p[0], by = q[3].p[1] - q[0].p[1];
+    const area = ax * by - ay * bx;
+    quads.push({ q, depth, gn, front: area < 0 });
+  }
+  quads.sort((m, n) => n.depth - m.depth);
+
+  g.save();
+  g.lineJoin = 'round';
+  // reveal sweep: gain bands appear from low to high as the solver "converges"
+  const conv = easeOut(seg(t, 4.6, 5.6));
+  for (const { q, gn, front } of quads) {
+    const c = jet(gn * (.35 + .65 * conv));
+    const k = front ? 1 : .55;
+    g.beginPath();
+    g.moveTo(q[0].p[0], q[0].p[1]); g.lineTo(q[1].p[0], q[1].p[1]); g.lineTo(q[2].p[0], q[2].p[1]); g.lineTo(q[3].p[0], q[3].p[1]); g.closePath();
+    g.fillStyle = `rgba(${c[0] * k | 0},${c[1] * k | 0},${c[2] * k | 0},${(front ? .5 : .22) * a})`;
+    g.fill();
+    g.strokeStyle = `rgba(${Math.min(255, c[0] * 1.2 + 40) | 0},${Math.min(255, c[1] * 1.2 + 40) | 0},${Math.min(255, c[2] * 1.2 + 40) | 0},${(front ? .38 : .12) * a})`;
+    g.lineWidth = .6;
+    g.stroke();
+  }
+  // soft bloom on the hot lobe
+  g.globalCompositeOperation = 'lighter';
+  const hot = proj(ox + R0 * .85 * cs, oy + R0 * .85 * sn, oz);
+  const br = R0 * F / CAM.dist * .9;
+  const gr = g.createRadialGradient(hot[0], hot[1], 0, hot[0], hot[1], br);
+  gr.addColorStop(0, `rgba(255,170,80,${.22 * a * conv})`); gr.addColorStop(1, 'rgba(255,120,60,0)');
+  g.fillStyle = gr; g.beginPath(); g.arc(hot[0], hot[1], br, 0, 6.283); g.fill();
+
+  // antenna axis + feed point
+  const z0 = proj(ox, oy, oz - R0 * .7), z1 = proj(ox, oy, oz + R0 * .7);
+  g.setLineDash([3, 4]); g.strokeStyle = `rgba(200,240,255,${.5 * a})`; g.lineWidth = 1;
+  g.beginPath(); g.moveTo(z0[0], z0[1]); g.lineTo(z1[0], z1[1]); g.stroke(); g.setLineDash([]);
+  const fp = proj(FEED.x, .2, FEED.z);
+  const fg = g.createRadialGradient(fp[0], fp[1], 0, fp[0], fp[1], 22);
+  fg.addColorStop(0, `rgba(210,250,255,${.9 * a})`); fg.addColorStop(1, 'rgba(79,224,255,0)');
+  g.fillStyle = fg; g.beginPath(); g.arc(fp[0], fp[1], 22, 0, 6.283); g.fill();
+  g.restore();
+
+  // gain colour bar (dBi) next to the lobe
+  const lb = seg(t, 5.1, 5.5) * out;
+  if (lb > 0) {
+    const c = proj(ox, oy, oz);
+    const rpx = R0 * F / CAM.dist;
+    const bh = clamp(rpx * 1.3, 70, 150), bw = 7;
+    let bx = c[0] + rpx * 1.15 + 14, by = c[1] - bh / 2 - rpx * .2;
+    const mono = Math.max(10, Math.min(W, H) * .0115);
+    g.save();
+    g.font = `500 ${mono}px ${MONO}`;
+    const labW = g.measureText('−20 dBi').width;
+    bx = Math.min(bx, W - bw - labW - 24);
+    by = clamp(by, 60, H - bh - 70);
+    g.globalAlpha = lb;
+    const lg = g.createLinearGradient(0, by + bh, 0, by);
+    for (const [s, col] of JET) lg.addColorStop(s, `rgb(${col[0]},${col[1]},${col[2]})`);
+    g.fillStyle = lg; g.fillRect(bx, by, bw, bh);
+    g.strokeStyle = 'rgba(230,237,255,.5)'; g.lineWidth = 1; g.strokeRect(bx - .5, by - .5, bw + 1, bh + 1);
+    g.fillStyle = '#e6edff'; g.textBaseline = 'middle'; g.textAlign = 'left';
+    g.fillText('+2.1 dBi', bx + bw + 8, by + 2);
+    g.fillStyle = 'rgba(142,163,217,.95)';
+    g.fillText('−20 dBi', bx + bw + 8, by + bh - 2);
+    g.fillText('GAIN', bx, by - mono * 1.1);
+    g.restore();
+  }
+}
+
+function drawEnclosure(g, t) {
+  const on = seg(t, 6.7, 7.0) * (1 - .55 * easeIO(seg(t, 8.7, 9.6)));
+  if (on <= 0) return;
+  const mint = '#8dffb8';
+  const drop = 1 - easeIO(seg(t, 6.85, 7.9));
+  const lift = 1 - easeIO(seg(t, 7.1, 8.25));
+  const x0 = -54, x1 = 54, z0 = -39, z1 = 39;
+  const bottomOff = -30 * drop, lidOff = 34 * lift;
+  const parts = [
+    { y0: -10 + bottomOff, y1: -1.6 + bottomOff, open: 'top' },
+    { y0: 0.2 + lidOff, y1: 9 + lidOff, open: 'bottom' },
+  ];
+  g.save();
+  for (const p of parts) {
+    const fs = boxFaces(x0, x1, p.y0, p.y1, z0, z1, { noTop: p.open === 'top', noBottom: p.open === 'bottom' });
+    for (const f of fs) {
+      poly(g, f.pts.map(q => [q[0], q[1]]));
+      g.fillStyle = hexA(mint, (f.facing ? .07 : .035) * on); g.fill();
+    }
+    g.globalCompositeOperation = 'lighter';
+    const e = boxEdges(x0, x1, p.y0, p.y1, z0, z1);
+    g.strokeStyle = hexA(mint, .75 * on); g.lineWidth = 1.2;
+    g.beginPath(); for (const [a, c] of e) { g.moveTo(a[0], a[1]); g.lineTo(c[0], c[1]); } g.stroke();
+    // inner wall offset (shell thickness)
+    const e2 = boxEdges(x0 + 2, x1 - 2, p.y0 + (p.open === 'top' ? 2 : 0), p.y1 - (p.open === 'bottom' ? 2 : 0), z0 + 2, z1 - 2);
+    g.strokeStyle = hexA(mint, .25 * on);
+    g.beginPath(); for (const [a, c] of e2) { g.moveTo(a[0], a[1]); g.lineTo(c[0], c[1]); } g.stroke();
+    g.globalCompositeOperation = 'source-over';
+  }
+  // USB cut-out on left wall of bottom shell
+  {
+    const y0 = -1.6 + bottomOff - 0.5, y1 = y0 + 4.5;
+    const q = [[x0, y0, 0], [x0, y0, 8], [x0, y1, 8], [x0, y1, 0]].map(p => proj(...p));
+    poly(g, q.map(p => [p[0], p[1]])); g.strokeStyle = hexA(mint, .9 * on); g.lineWidth = 1.2; g.stroke();
+  }
+  // standoffs
+  g.globalCompositeOperation = 'lighter';
+  for (const [hx, hz] of holes) {
+    const a = proj(hx, -1.6, hz), c = proj(hx, -10 + bottomOff, hz);
+    g.beginPath(); g.moveTo(a[0], a[1]); g.lineTo(c[0], c[1]); g.strokeStyle = hexA(mint, .35 * on); g.stroke();
+  }
+  // dimension lines
+  const dimA = seg(t, 7.6, 8.1) * (1 - seg(t, 8.5, 8.8));
+  if (dimA > 0) {
+    const yb = -10;
+    const zf = z1 + 10;
+    const L = proj(x0, yb, zf), R = proj(x1, yb, zf);
+    const La = proj(x0, yb, z1), Ra = proj(x1, yb, z1);
+    g.strokeStyle = hexA(mint, .8 * dimA); g.lineWidth = 1;
+    g.beginPath(); g.moveTo(La[0], La[1]); g.lineTo(L[0], L[1]); g.moveTo(Ra[0], Ra[1]); g.lineTo(R[0], R[1]);
+    const mid = [(L[0] + R[0]) / 2, (L[1] + R[1]) / 2];
+    const grow = easeOut(seg(t, 7.6, 8.0));
+    g.moveTo(lerp(mid[0], L[0], grow), lerp(mid[1], L[1], grow)); g.lineTo(lerp(mid[0], R[0], grow), lerp(mid[1], R[1], grow));
+    g.stroke();
+    g.globalCompositeOperation = 'source-over';
+    g.fillStyle = hexA(mint, dimA);
+    g.font = `500 ${Math.round(clamp(W * .0085, 10, 15))}px ${MONO}`;
+    g.textAlign = 'center'; g.textBaseline = 'bottom';
+    g.fillText('108.0 mm', mid[0], mid[1] - 6);
+    const D0 = proj(x1 + 10, yb, z0), D1 = proj(x1 + 10, yb, z1);
+    g.strokeStyle = hexA(mint, .8 * dimA);
+    g.beginPath(); g.moveTo(D0[0], D0[1]); g.lineTo(D1[0], D1[1]); g.stroke();
+    g.textAlign = 'left'; g.textBaseline = 'middle';
+    g.fillText('78.0 mm', (D0[0] + D1[0]) / 2 + 8, (D0[1] + D1[1]) / 2);
+  }
+  g.restore();
+}
+
+/* ---------- glitch text ---------- */
+const GLYPHS = '01<>/\\#%&*+=[]{}ΣΩΔ▲■◆';
+function glitchText(g, txt, x, y, size, opts) {
+  const { p = 1, color = '#e6edff', font = DISPLAY, weight = 400, align = 'left', spacing = 0.04, ghost = true, seed = 0, t = 0, maxW = 0, glow = null } = opts;
+  if (p <= 0) return 0;
+  g.save();
+  g.font = `${weight} ${size}px ${font}`;
+  if (maxW) { const m = [...txt].reduce((a, ch) => a + g.measureText(ch).width + size * spacing, 0); if (m > maxW) { size *= maxW / m; g.font = `${weight} ${size}px ${font}`; } }
+  g.textBaseline = 'alphabetic';
+  const chars = [...txt];
+  const ws = chars.map(ch => g.measureText(ch).width + size * spacing);
+  const total = ws.reduce((a, c) => a + c, 0) - size * spacing;
+  let sx = align === 'center' ? x - total / 2 : align === 'right' ? x - total : x;
+  const n = chars.length;
+  const front = p * (n + 4);
+  const frame = Math.floor(t * 30);
+  const jitter = (1 - p) * size * .09;
+  const dx = jitter + (hash(frame, seed) > .92 ? size * .04 : 0);
+  const drawPass = (ox, oy, style, comp) => {
+    g.globalCompositeOperation = comp;
+    g.fillStyle = style;
+    let cx = sx;
+    for (let i = 0; i < n; i++) {
+      if (i < front) {
+        const resolved = i < front - 4;
+        let ch = chars[i];
+        if (!resolved && ch !== ' ') ch = GLYPHS[Math.floor(hash(frame + i * 7, seed + i) * GLYPHS.length)];
+        const yo = resolved ? 0 : (hash(frame, i + seed) - .5) * size * .2;
+        g.fillText(ch, cx + ox, y + oy + yo);
+      }
+      cx += ws[i];
+    }
+  };
+  if (ghost && p < .98) {
+    const ga = .5 * (1 - p);
+    drawPass(0, size * .14, hexA('#9fb8ff', ga), 'lighter');   // doubled line like the reference, only while it resolves
+  }
+  if (dx > .3) {
+    drawPass(-dx, 0, 'rgba(255,60,90,.55)', 'lighter');
+    drawPass(dx, 0, 'rgba(60,220,255,.55)', 'lighter');
+  }
+  if (glow && p > .5) { g.shadowColor = hexA(glow, .75 * (p - .5) * 2); g.shadowBlur = size * .35; }
+  drawPass(0, 0, color, 'source-over');
+  g.restore();
+  return total;
+}
+const reveal = (t, a, b, inDur = .5, outDur = .28) => Math.min(easeOut(seg(t, a, a + inDur)), 1 - seg(t, b - outDur, b));
+
+/* ---------- HUD panels (screen space) ---------- */
+function hudFrame(g, x, y, w, h, color, a) {
+  const c = Math.min(w, h) * .12;
+  g.save();
+  g.globalAlpha = a;
+  g.fillStyle = 'rgba(6,16,48,.55)';
+  g.beginPath(); g.moveTo(x + c, y); g.lineTo(x + w, y); g.lineTo(x + w, y + h - c); g.lineTo(x + w - c, y + h); g.lineTo(x, y + h); g.lineTo(x, y + c); g.closePath();
+  g.fill();
+  g.strokeStyle = hexA(color, .55); g.lineWidth = 1; g.stroke();
+  // double offset edge like the reference cards
+  g.strokeStyle = hexA(color, .18);
+  g.beginPath(); g.moveTo(x + c + 5, y - 5); g.lineTo(x + w + 5, y - 5); g.lineTo(x + w + 5, y + h - c - 5); g.stroke();
+  g.restore();
+}
+
+function fitSize(g, txt, size, font, maxW, spacing = .04) {
+  g.save(); g.font = `400 ${size}px ${font}`;
+  const w = [...txt].reduce((acc, ch) => acc + g.measureText(ch).width + size * spacing, 0) - size * spacing;
+  g.restore();
+  return w > maxW ? size * maxW / w : size;
+}
+function toolBlock(g, t, idx, tin, tout) {
+  const tool = CONFIG.tools[idx];
+  const p = reveal(t, tin, tout, .4, .3);
+  if (p <= 0) return null;
+  const U = portrait ? W / 430 : Math.min(W / 1920, H / 1080);
+  const x = portrait ? 20 : W * .065;
+  const yTop = portrait ? H * .53 : H * .26;
+  const cut = tool.name.indexOf('_') + 1;
+  const prefix = tool.name.slice(0, cut), main = tool.name.slice(cut);
+  const mono = Math.max(11, portrait ? 13 : 20 * U);
+  const pre = portrait ? Math.min(W * .085, 36) : 64 * U;
+  const big = fitSize(g, main, portrait ? Math.min(W * .17, 76) : 128 * U, DISPLAY, portrait ? W - 40 : W * .33);
+  const outP = 1 - seg(t, tout - .3, tout);
+  // eyebrow: index + line in tool colour
+  g.save();
+  g.font = `500 ${mono}px ${MONO}`; g.fillStyle = hexA(tool.color, p); g.textBaseline = 'alphabetic';
+  const eb = `0${idx + 1} / 03`;
+  g.fillText(eb, x, yTop);
+  const ebw = g.measureText(eb).width;
+  g.fillRect(x + ebw + 14, yTop - mono * .35, (portrait ? 70 : 140 * U) * easeOut(seg(t, tin + .05, tin + .45)), 2);
+  g.restore();
+  // "WEB_" small, muted
+  const preY = yTop + pre * 1.55;
+  glitchText(g, prefix, x, preY, pre, { p: easeOut(seg(t, tin, tin + .35)) * outP, color: 'rgba(214,226,255,.92)', ghost: false, t, seed: idx * 13 + 1, spacing: .06 });
+  // distinctive part: large, bright, haloed in the tool colour
+  const bigY = preY + big * 1.02;
+  glitchText(g, main, x - big * .04, bigY, big, { p: easeOut(seg(t, tin + .05, tin + .5)) * outP, color: '#ffffff', glow: tool.color, t, seed: idx * 31 + 3 });
+  // underline in tool colour
+  g.save(); g.globalAlpha = outP;
+  g.fillStyle = tool.color;
+  g.fillRect(x, bigY + big * .22, (portrait ? W - 40 : W * .40) * .35 * easeOut(seg(t, tin + .25, tin + .75)), 3);
+  g.restore();
+  // subtitle
+  const subY = bigY + big * .22 + mono * 2.4;
+  glitchText(g, tool.sub.toUpperCase(), x, subY, mono, { p: easeOut(seg(t, tin + .2, tin + .7)) * outP, font: MONO, weight: 500, color: tool.glow, ghost: false, t, seed: idx * 17 + 9, spacing: .12 });
+  return { x, y: subY + mono * 2.0, U, mono: Math.max(11, portrait ? 12.5 : 17 * U), p };
+}
+
+function panelCAO(g, t, box) {
+  if (!box) return;
+  const { x, y, U, mono } = box;
+  const a = reveal(t, 2.0, 3.9, .4, .3);
+  if (a <= 0) return;
+  const w = portrait ? W - 40 : 430 * U, h = portrait ? mono * 5.4 : 150 * U;
+  hudFrame(g, x, y, w, h, '#ff9a4d', a);
+  const routed = traces.filter(tr => t > tr.t0 + .55).length;
+  const rows = [
+    ['PISTES ROUTÉES', `${String(routed).padStart(2, '0')} / ${traces.length}`],
+    ['VIAS', String(vias.filter((_, i) => t > 2.35 + i * .05).length).padStart(2, '0')],
+    ['DRC', t > 3.45 ? '0 ERREUR ✓' : 'ANALYSE…'],
+  ];
+  g.save(); g.globalAlpha = a;
+  g.font = `400 ${mono * .95}px ${MONO}`; g.textBaseline = 'middle';
+  const lh = h / (rows.length + 1);
+  rows.forEach(([k, v], i) => {
+    const yy = y + lh * (i + 1);
+    g.fillStyle = 'rgba(142,163,217,.9)'; g.textAlign = 'left'; g.fillText(k, x + mono * 1.3, yy);
+    g.fillStyle = i === 2 && t > 3.45 ? '#8dffb8' : '#ffd2a3'; g.textAlign = 'right'; g.fillText(v, x + w - mono * 1.3, yy);
+  });
+  g.restore();
+}
+
+function panelANT(g, t, box) {
+  if (!box) return;
+  const { x, y, U, mono } = box;
+  const a = reveal(t, 4.55, 6.5, .4, .3);
+  if (a <= 0) return;
+  const w = portrait ? W - 40 : 430 * U, h = portrait ? Math.min(H * .15, 130) : 190 * U;
+  hudFrame(g, x, y, w, h, '#4fe0ff', a);
+  g.save(); g.globalAlpha = a;
+  const px = x + mono * 1.3, py = y + mono * 1.9, pw = w - mono * 2.6, ph = h - mono * 3.4;
+  g.font = `500 ${mono * .85}px ${MONO}`; g.textBaseline = 'alphabetic';
+  g.fillStyle = 'rgba(142,163,217,.95)'; g.fillText('S11 (dB) · 1 – 4 GHz', px, y + mono * 1.35);
+  // grid
+  g.strokeStyle = 'rgba(79,224,255,.14)'; g.lineWidth = 1;
+  g.beginPath();
+  for (let i = 0; i <= 4; i++) { const yy = py + ph * i / 4; g.moveTo(px, yy); g.lineTo(px + pw, yy); }
+  for (let i = 0; i <= 6; i++) { const xx = px + pw * i / 6; g.moveTo(xx, py); g.lineTo(xx, py + ph); }
+  g.stroke();
+  // -10 dB line
+  const dbY = db => py + ph * clamp(-db / 25);
+  g.setLineDash([3, 4]); g.strokeStyle = 'rgba(255,154,77,.55)';
+  g.beginPath(); g.moveTo(px, dbY(-10)); g.lineTo(px + pw, dbY(-10)); g.stroke(); g.setLineDash([]);
+  // curve
+  const s11 = f => { const d = (f - 2.45) / .11; return -1.5 - 17 * Math.exp(-d * d) - 3.2 * Math.exp(-Math.pow((f - 3.6) / .25, 2)) + .6 * Math.sin(f * 7); };
+  const draw = easeIO(seg(t, 4.7, 5.9));
+  g.beginPath();
+  const N = 140;
+  for (let i = 0; i <= N * draw; i++) {
+    const f = 1 + 3 * i / N, xx = px + pw * i / N, yy = dbY(s11(f));
+    i ? g.lineTo(xx, yy) : g.moveTo(xx, yy);
+  }
+  g.strokeStyle = '#4fe0ff'; g.lineWidth = 1.8; g.stroke();
+  g.globalCompositeOperation = 'lighter'; g.strokeStyle = 'rgba(79,224,255,.25)'; g.lineWidth = 5; g.stroke();
+  g.globalCompositeOperation = 'source-over';
+  // marker
+  const mk = seg(t, 5.5, 5.8);
+  if (mk > 0) {
+    const fx = px + pw * (2.45 - 1) / 3, fy = dbY(s11(2.45));
+    g.fillStyle = hexA('#c8f6ff', mk);
+    g.beginPath(); g.arc(fx, fy, 3.5, 0, 6.283); g.fill();
+    g.font = `500 ${mono * .85}px ${MONO}`;
+    g.textAlign = 'left'; g.textBaseline = 'middle';
+    g.fillText('−18.4 dB @ 2.45 GHz', fx + 10, fy - 2);
+  }
+  g.restore();
+}
+
+function panel3D(g, t, box) {
+  if (!box) return;
+  const { x, y, U, mono } = box;
+  const a = reveal(t, 7.1, 8.5, .4, .3);
+  if (a <= 0) return;
+  const w = portrait ? W - 40 : 430 * U, h = portrait ? mono * 5.4 : 150 * U;
+  hudFrame(g, x, y, w, h, '#8dffb8', a);
+  const asm = easeIO(seg(t, 7.1, 8.25));
+  const gap = (1 - asm) * 34;
+  const rows = [
+    ['PIÈCES', '3 · CARTE + BOÎTIER'],
+    ['JEU COUVERCLE', `${gap.toFixed(1).padStart(5, ' ')} mm`],
+    ['ASSEMBLAGE', asm >= 1 ? 'VALIDÉ ✓' : `${Math.round(asm * 100)} %`],
+  ];
+  g.save(); g.globalAlpha = a;
+  g.font = `400 ${mono * .95}px ${MONO}`; g.textBaseline = 'middle';
+  const lh = h / (rows.length + 1);
+  rows.forEach(([k, v], i) => {
+    const yy = y + lh * (i + 1);
+    g.fillStyle = 'rgba(142,163,217,.9)'; g.textAlign = 'left'; g.fillText(k, x + mono * 1.3, yy);
+    g.fillStyle = '#dcffe9'; g.textAlign = 'right'; g.fillText(v, x + w - mono * 1.3, yy);
+  });
+  g.restore();
+}
+
+/* ---------- top bar & progress ---------- */
+function chrome(g, t) {
+  const a = easeOut(seg(t, .15, .8));
+  const U = portrait ? W / 430 : Math.min(W / 1920, H / 1080);
+  const mono = Math.max(10, portrait ? 11 : 15 * U);
+  const pad = portrait ? 20 : W * .035;
+  const top = (portrait ? 26 : 44 * U) + mono;
+  g.save(); g.globalAlpha = a;
+  g.font = `400 ${mono * 1.15}px ${DISPLAY}`; g.fillStyle = '#e6edff'; g.textBaseline = 'alphabetic';
+  g.fillText(CONFIG.brand, pad, top);
+  const bw = g.measureText(CONFIG.brand).width;
+  if (!portrait) {
+    g.fillStyle = 'rgba(142,163,217,.6)'; g.fillRect(pad + bw + 18, top - mono, 1, mono * 1.2);
+    g.font = `500 ${mono * .85}px ${MONO}`; g.fillStyle = 'rgba(142,163,217,.95)';
+    g.fillText(CONFIG.tagline, pad + bw + 36, top - 1);
+  }
+  g.textAlign = 'right'; g.font = `500 ${mono * .85}px ${MONO}`; g.fillStyle = 'rgba(142,163,217,.95)';
+  const tc = `${String(Math.floor(Math.min(t, 10))).padStart(2, '0')}:${String(Math.floor((Math.min(t, 10) % 1) * 30)).padStart(2, '0')}`;
+  g.fillText(t < 8.6 ? `INIT · ${tc}` : 'PRÊT', W - pad, top - 1);
+  // bottom progress rail with 3 tool segments
+  const by = H - (portrait ? 34 : 54 * U);
+  const bx0 = pad, bx1 = W - pad;
+  g.fillStyle = 'rgba(142,163,217,.18)'; g.fillRect(bx0, by, bx1 - bx0, 1);
+  const marks = [1.5, 4.0, 6.6, 8.6];
+  const cols = ['#e6edff', ...CONFIG.tools.map(x => x.color)];
+  for (let i = 0; i < 4; i++) {
+    const s0 = i === 0 ? 0 : marks[i - 1], s1 = marks[i];
+    const f = seg(t, s0, s1);
+    const X0 = lerp(bx0, bx1, s0 / 10), X1 = lerp(bx0, bx1, s1 / 10);
+    g.fillStyle = hexA(cols[i], .9); g.fillRect(X0, by - 1, (X1 - X0) * f, 3);
+  }
+  if (!portrait) {
+    g.textAlign = 'left'; g.font = `500 ${mono * .75}px ${MONO}`;
+    ['INTRO', ...CONFIG.tools.map(x => x.name)].forEach((lab, i) => {
+      const s0 = i === 0 ? 0 : marks[i - 1];
+      const on = t >= s0;
+      g.fillStyle = on ? hexA(cols[i], .95) : 'rgba(142,163,217,.45)';
+      g.fillText(lab, lerp(bx0, bx1, s0 / 10), by - mono * .9);
+    });
+  }
+  g.restore();
+}
+
+/* ---------- intro title ---------- */
+function introTitle(g, t) {
+  const p = reveal(t, .25, 1.45, .7, .28);
+  if (p <= 0) return;
+  const U = portrait ? W / 430 : Math.min(W / 1920, H / 1080);
+  const size = portrait ? Math.min(W * .12, 56) : 132 * U;
+  const x = W / 2, y = portrait ? H * .64 : H * .66;
+  glitchText(g, CONFIG.brand, x, y, size, { maxW: W - 40, p: easeOut(seg(t, .25, 1.0)) * (1 - seg(t, 1.2, 1.45)), align: 'center', t, seed: 99 });
+  const ms = Math.max(11, portrait ? 12 : 19 * U);
+  glitchText(g, CONFIG.tagline, x, y + size * .75, ms, { p: easeOut(seg(t, .55, 1.15)) * (1 - seg(t, 1.2, 1.45)), align: 'center', font: MONO, weight: 500, color: 'rgba(170,195,255,.95)', ghost: false, t, seed: 5, spacing: .22 });
+}
+
+/* ---------- finale: tool cards ---------- */
+function finale(g, t) {
+  if (t < 8.6) return;
+  const U = portrait ? W / 430 : Math.min(W / 1920, H / 1080);
+  const size = portrait ? Math.min(W * .105, 50) : 104 * U;
+  const cxm = W / 2;
+  const titleY = portrait ? H * .47 : H * .60;
+  glitchText(g, CONFIG.brand, cxm, titleY, size, { maxW: W - 40, p: easeOut(seg(t, 8.7, 9.35)), align: 'center', t, seed: 41 });
+  const ms = Math.max(11, portrait ? 12 : 17 * U);
+  glitchText(g, CONFIG.prompt, cxm, titleY + size * .78, ms, { p: easeOut(seg(t, 8.95, 9.5)), align: 'center', font: MONO, weight: 500, color: 'rgba(170,195,255,.95)', ghost: false, t, seed: 12, spacing: .24 });
+
+  // cards
+  const n = CONFIG.tools.length;
+  let cw, ch, positions;
+  if (portrait) {
+    cw = W - 40; ch = Math.min(64, H * .075);
+    const y0 = titleY + size * .78 + ms * 2.4;
+    positions = CONFIG.tools.map((_, i) => [20, y0 + i * (ch + 12)]);
+  } else {
+    cw = 440 * U; ch = 160 * U;
+    const gap = 32 * U, total = n * cw + (n - 1) * gap;
+    const y0 = titleY + size * .78 + ms * 2.6;
+    positions = CONFIG.tools.map((_, i) => [cxm - total / 2 + i * (cw + gap), y0]);
+  }
+  CONFIG.tools.forEach((tool, i) => {
+    const s = 9.0 + i * .14;
+    const p = easeOutExpo(seg(t, s, s + .55));
+    if (p <= 0) return;
+    const [x, y0] = positions[i];
+    const y = y0 + (1 - p) * (portrait ? 20 : 60 * U);
+    const flick = hash(Math.floor(t * 30), i + 70) > .6 && p < .9 ? .35 : 1;
+    hudFrame(g, x, y, cw, ch, tool.color, p * flick);
+    g.save(); g.globalAlpha = p * flick;
+    // icon
+    const ir = portrait ? ch * .26 : ch * .2;
+    const icx = x + (portrait ? ch * .55 : cw * .14), icy = y + ch * .5;
+    g.strokeStyle = tool.color; g.lineWidth = 1.5; g.lineCap = 'round'; g.lineJoin = 'round';
+    g.globalCompositeOperation = 'lighter';
+    if (i === 0) { // trace + pads
+      g.beginPath(); g.moveTo(icx - ir, icy + ir * .6); g.lineTo(icx - ir * .2, icy + ir * .6); g.lineTo(icx + ir * .5, icy - ir * .1); g.lineTo(icx + ir, icy - ir * .1); g.stroke();
+      g.beginPath(); g.moveTo(icx - ir, icy - ir * .4); g.lineTo(icx - ir * .3, icy - ir * .4); g.lineTo(icx + ir * .3, icy - ir); g.stroke();
+      g.fillStyle = tool.color;
+      for (const [a, c] of [[-ir, ir * .6], [ir, -ir * .1], [-ir, -ir * .4], [ir * .3, -ir]]) { g.beginPath(); g.arc(icx + a, icy + c, 2.6, 0, 6.283); g.fill(); }
+    } else if (i === 1) { // radiating rings
+      for (let k = 1; k <= 3; k++) { g.globalAlpha = p * flick * (1.1 - k * .25); g.beginPath(); g.arc(icx, icy + ir * .5, ir * k * .38, Math.PI * 1.15, Math.PI * 1.85); g.stroke(); }
+      g.globalAlpha = p * flick;
+      g.beginPath(); g.moveTo(icx, icy + ir * .5); g.lineTo(icx, icy + ir); g.stroke();
+      g.fillStyle = tool.color; g.beginPath(); g.arc(icx, icy + ir * .5, 2.6, 0, 6.283); g.fill();
+    } else { // iso cube
+      const k = ir * .9, rot = t * .9;
+      const v = [[-1, -1, -1], [1, -1, -1], [1, 1, -1], [-1, 1, -1], [-1, -1, 1], [1, -1, 1], [1, 1, 1], [-1, 1, 1]].map(([a, bq, c]) => {
+        const xa = a * Math.cos(rot) - c * Math.sin(rot), za = a * Math.sin(rot) + c * Math.cos(rot);
+        const yb = bq * Math.cos(.6) - za * Math.sin(.6);
+        return [icx + xa * k * .62, icy + yb * k * .62];
+      });
+      g.beginPath(); for (const [a, c] of BOX_EDGES) { g.moveTo(...v[a]); g.lineTo(...v[c]); } g.stroke();
+    }
+    g.globalCompositeOperation = 'source-over';
+    // labels
+    const tx = portrait ? x + ch * 1.15 : x + cw * .25;
+    const nameSize = fitSize(g, tool.name, portrait ? Math.min(W * .05, 21) : 30 * U, DISPLAY, (x + cw - 16) - tx);
+    g.textAlign = 'left';
+    glitchText(g, tool.name, tx, y + ch * (portrait ? .5 : .5), nameSize, { p: easeOut(seg(t, s + .05, s + .45)), t, seed: 200 + i, ghost: false, spacing: .03, color: '#ffffff', glow: tool.color });
+    g.font = `500 ${Math.max(11, portrait ? 12 : 17 * U)}px ${MONO}`; g.fillStyle = hexA(tool.glow, .95); g.textBaseline = 'alphabetic';
+    g.fillText(tool.sub, tx, y + ch * (portrait ? .8 : .74));
+    g.restore();
+  });
+}
+
+/* ---------- scanlines / vignette / screen glitch ---------- */
+let scanPat = null;
+function scanlines(g) {
+  if (!scanPat) {
+    const c = document.createElement('canvas'); c.width = 2; c.height = 3;
+    const x = c.getContext('2d'); x.fillStyle = 'rgba(0,0,0,.18)'; x.fillRect(0, 2, 2, 1);
+    scanPat = g.createPattern(c, 'repeat');
+  }
+  g.fillStyle = scanPat; g.fillRect(0, 0, W, H);
+  const v = g.createRadialGradient(W / 2, H / 2, Math.min(W, H) * .35, W / 2, H / 2, Math.hypot(W, H) * .62);
+  v.addColorStop(0, 'rgba(0,0,0,0)'); v.addColorStop(1, 'rgba(0,2,10,.6)');
+  g.fillStyle = v; g.fillRect(0, 0, W, H);
+}
+function glitchAmount(t) {
+  let gmax = 0;
+  for (const m of [1.5, 4.0, 6.6, 8.6]) gmax = Math.max(gmax, 1 - Math.abs(t - m) / .14);
+  return clamp(gmax);
+}
+
+function renderAt(t) {
+  t = clamp(t, 0, CONFIG.duration);
+  lastT = t;
+  setCam(t);
+  const g = b;
+  g.setTransform(DPR, 0, 0, DPR, 0, 0);
+  g.globalAlpha = 1; g.globalCompositeOperation = 'source-over';
+  drawBackground(g, t);
+
+  // scan sweep at start (like a boot)
+  const sweep = seg(t, .05, .9);
+  if (sweep > 0 && sweep < 1) {
+    const y = H * easeIO(sweep);
+    const gr = g.createLinearGradient(0, y - 60, 0, y + 2);
+    gr.addColorStop(0, 'rgba(120,170,255,0)'); gr.addColorStop(1, 'rgba(160,200,255,.35)');
+    g.fillStyle = gr; g.fillRect(0, y - 60, W, 62);
+  }
+
+  const fin = easeIO(seg(t, 8.65, 9.6));
+  drawGroundRings(g, t, seg(t, .4, 1.4));
+  g.save();
+  g.globalAlpha = lerp(1, .42, fin);
+  drawBoard(g, t);
+  drawEnclosure(g, t);
+  drawRadiation(g, t);
+  g.restore();
+
+  introTitle(g, t);
+  const b1 = toolBlock(g, t, 0, 1.6, 3.95); panelCAO(g, t, b1);
+  const b2 = toolBlock(g, t, 1, 4.1, 6.5); panelANT(g, t, b2);
+  const b3 = toolBlock(g, t, 2, 6.7, 8.55); panel3D(g, t, b3);
+  finale(g, t);
+  chrome(g, t);
+  scanlines(g);
+
+  // composite to screen with slice glitch on transitions
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  ctx.globalCompositeOperation = 'source-over';
+  ctx.drawImage(buf, 0, 0);
+  const ga = glitchAmount(t);
+  if (ga > .02) {
+    const frame = Math.floor(t * 60);
+    const bands = 3 + Math.floor(ga * 9);
+    for (let i = 0; i < bands; i++) {
+      const y = hash(frame, i) * buf.height;
+      const h = (4 + hash(frame, i + 50) * 40) * DPR * ga;
+      const dx = (hash(frame, i + 99) - .5) * 90 * DPR * ga;
+      ctx.drawImage(buf, 0, y, buf.width, h, dx, y, buf.width, h);
+    }
+    ctx.globalCompositeOperation = 'lighter';
+    ctx.globalAlpha = .18 * ga;
+    ctx.drawImage(buf, 6 * DPR * ga, 0);
+    ctx.globalAlpha = 1;
+    ctx.globalCompositeOperation = 'source-over';
+    ctx.fillStyle = `rgba(200,225,255,${.12 * ga})`;
+    ctx.fillRect(0, hash(frame, 7) * buf.height, buf.width, 2 * DPR);
+  }
+}
+
+/* =====================================================================
+   PLAYBACK
+   ===================================================================== */
+let playing = false, t0 = 0, raf = 0;
+const replayBtn = document.getElementById('replay');
+function tick(now) {
+  const t = (now - t0) / 1000;
+  renderAt(t);
+  if (t >= CONFIG.duration) {
+    playing = false;
+    replayBtn.hidden = false;
+    window.dispatchEvent(new CustomEvent('websuite:intro-end', { detail: { tools: CONFIG.tools } }));
+    if (typeof api.onEnd === 'function') api.onEnd();
+    return;
+  }
+  raf = requestAnimationFrame(tick);
+}
+function play() {
+  cancelAnimationFrame(raf);
+  replayBtn.hidden = true;
+  playing = true; t0 = performance.now();
+  raf = requestAnimationFrame(tick);
+}
+function skip() { cancelAnimationFrame(raf); playing = false; renderAt(CONFIG.duration); replayBtn.hidden = false; }
+
+const api = { config: CONFIG, play, skip, renderAt, onEnd: null, get duration() { return CONFIG.duration; } };
+window.WebSuiteIntro = api;
+
+replayBtn.addEventListener('click', e => { e.stopPropagation(); play(); });
+canvas.addEventListener('click', () => { if (playing) skip(); else play(); });
+window.addEventListener('keydown', e => {
+  if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); playing ? skip() : play(); }
+  if (e.key === 'Escape') skip();
+});
+window.addEventListener('resize', resize);
+
+const reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+resize();
+renderAt(0);
+const ready = (document.fonts && document.fonts.load)
+  ? Promise.race([
+      Promise.all([document.fonts.load(`400 40px Michroma`), document.fonts.load(`500 16px "IBM Plex Mono"`)]),
+      new Promise(r => setTimeout(r, 1500)),
+    ])
+  : Promise.resolve();
+ready.then(() => {
+  if (window.__NO_AUTOPLAY__) { renderAt(0); return; }
+  if (reduced) skip(); else play();
+});
+})();
+</script>
+</html>

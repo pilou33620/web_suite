@@ -1,0 +1,439 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>WEB·SUITE</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23020617'/%3E%3Cpath d='M6 22h8l6-8h6M6 12h6l4-5' stroke='%234fe0ff' stroke-width='2.4' fill='none' stroke-linecap='round'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Michroma&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+  :root {
+    color-scheme: dark;
+    --ink: #020617;
+    --panel: rgba(6, 16, 48, .62);
+    --text: #e6edff;
+    --muted: #8ea3d9;
+    --faint: rgba(142, 163, 217, .28);
+    --ok: #8dffb8;
+    --err: #ff6b7d;
+    --display: "Michroma", "Eurostile", "Arial Black", system-ui, sans-serif;
+    --mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  }
+  * { box-sizing: border-box; }
+  [hidden] { display: none !important; }
+  html, body { min-height: 100%; }
+  body {
+    margin: 0;
+    color: var(--text);
+    font: 400 14px/1.5 var(--mono);
+    background:
+      radial-gradient(ellipse 80% 70% at 50% 38%, rgba(18, 58, 190, .55), rgba(8, 30, 112, .35) 42%, transparent 78%),
+      var(--ink);
+    background-attachment: fixed;
+  }
+  body::before {                     /* trame de circuit, très discrète */
+    content: ""; position: fixed; inset: 0; pointer-events: none;
+    background-image:
+      linear-gradient(rgba(90, 120, 200, .07) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(90, 120, 200, .07) 1px, transparent 1px);
+    background-size: 44px 44px;
+    mask-image: radial-gradient(ellipse at 50% 40%, #000 20%, transparent 75%);
+  }
+  body::after {                      /* lignes de balayage, comme l'intro */
+    content: ""; position: fixed; inset: 0; pointer-events: none;
+    background: repeating-linear-gradient(transparent 0 2px, rgba(0, 0, 0, .16) 2px 3px);
+  }
+
+  /* ---------- intro ---------- */
+  #intro-voile {
+    position: fixed; inset: 0; z-index: 20; background: var(--ink);
+    transition: opacity .7s ease;
+  }
+  /* visibility et non display : l'iframe garde sa taille, sinon l'intro
+     redessinerait sur un canvas 0x0 à son événement resize (drawImage échoue) */
+  #intro-voile.cache { opacity: 0; pointer-events: none; visibility: hidden; transition: opacity .7s ease, visibility 0s .7s; }
+  #intro-voile iframe { width: 100%; height: 100%; border: 0; display: block; }
+  #passer {
+    position: absolute; right: 16px; bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+    font: 500 12px/1 var(--mono); letter-spacing: .12em; text-transform: uppercase;
+    color: var(--text); background: rgba(8, 20, 60, .55);
+    border: 1px solid rgba(142, 163, 217, .45); padding: 10px 14px; cursor: pointer;
+    backdrop-filter: blur(6px);
+  }
+  #passer:hover { border-color: var(--text); }
+
+  /* ---------- lanceur ---------- */
+  .page {
+    position: relative; max-width: 1320px; margin: 0 auto;
+    padding: 28px clamp(16px, 3.5vw, 56px) 40px;
+    min-height: 100vh; display: flex; flex-direction: column;
+    opacity: 0; transform: translateY(12px); transition: opacity .8s ease, transform .8s ease;
+  }
+  .page.visible { opacity: 1; transform: none; }
+
+  header { display: flex; align-items: center; gap: 18px; flex-wrap: wrap; }
+  .marque { font: 400 17px/1 var(--display); letter-spacing: .06em; }
+  .slogan { color: var(--muted); font-size: 12px; letter-spacing: .14em; padding-left: 18px; border-left: 1px solid var(--faint); }
+  header .droite { margin-left: auto; display: flex; gap: 10px; align-items: center; }
+  .etat-global { color: var(--muted); font-size: 12px; letter-spacing: .14em; }
+
+  .titre { text-align: center; margin: clamp(40px, 10vh, 110px) 0 clamp(28px, 5vh, 52px); }
+  .titre h1 {
+    margin: 0; font: 400 clamp(34px, 6.4vw, 92px)/1.05 var(--display); letter-spacing: .04em;
+    text-shadow: 0 .14em 0 rgba(159, 184, 255, .12);
+  }
+  .titre p { margin: 14px 0 0; color: rgba(170, 195, 255, .95); font-size: clamp(11px, 1.1vw, 15px); letter-spacing: .26em; }
+
+  .cartes { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(16px, 2vw, 34px); }
+  @media (max-width: 900px) { .cartes { grid-template-columns: 1fr; } .slogan { display: none; } }
+
+  .carte {
+    --c: #fff;
+    position: relative; padding: 22px 22px 18px; min-height: 250px;
+    display: flex; flex-direction: column; gap: 14px;
+    background: var(--panel);
+    clip-path: polygon(22px 0, 100% 0, 100% calc(100% - 22px), calc(100% - 22px) 100%, 0 100%, 0 22px);
+    isolation: isolate;
+    container-type: inline-size;
+  }
+  .carte::before {                   /* liseré coupé aux coins */
+    content: ""; position: absolute; inset: 0; z-index: -1; padding: 1px;
+    background: linear-gradient(135deg, color-mix(in srgb, var(--c) 75%, transparent), color-mix(in srgb, var(--c) 22%, transparent));
+    clip-path: inherit;
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor; mask-composite: exclude;
+  }
+  .carte::after {                    /* halo au survol */
+    content: ""; position: absolute; inset: 0; z-index: -2; opacity: 0; transition: opacity .3s;
+    background: radial-gradient(circle at 20% 0%, color-mix(in srgb, var(--c) 18%, transparent), transparent 60%);
+  }
+  .carte:hover::after { opacity: 1; }
+  .entete { display: flex; align-items: center; gap: 16px; }
+  .icone { width: 54px; height: 54px; flex: none; color: var(--c); filter: drop-shadow(0 0 6px color-mix(in srgb, var(--c) 55%, transparent)); }
+  .num { color: var(--c); font-size: 12px; letter-spacing: .12em; }
+  .carte h2 { margin: 2px 0 0; font: 400 clamp(15px, 5.4cqi, 24px)/1.15 var(--display); letter-spacing: .03em; white-space: nowrap; }
+  .sous { color: color-mix(in srgb, var(--c) 45%, #fff); font-size: 13px; }
+
+  .statut { display: flex; align-items: center; gap: 8px; font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+  .statut::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: currentColor; flex: none; }
+  .statut.actif { color: var(--ok); }
+  .statut.actif::before { box-shadow: 0 0 8px var(--ok); }
+  .statut.occupe { color: var(--c); }
+  .statut.occupe::before { animation: pulse 1s ease-in-out infinite; }
+  .statut.erreur { color: var(--err); }
+  .statut.absent::before { background: transparent; border: 1px solid currentColor; }
+  @keyframes pulse { 50% { opacity: .25; } }
+  .message { min-height: 2.9em; color: var(--muted); font-size: 12px; overflow-wrap: anywhere;
+             display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+
+  .actions { margin-top: auto; display: flex; gap: 10px; flex-wrap: wrap; }
+  button, .bouton {
+    font: 500 12px/1 var(--mono); letter-spacing: .12em; text-transform: uppercase;
+    color: var(--text); background: rgba(8, 20, 60, .55);
+    border: 1px solid rgba(142, 163, 217, .45); padding: 11px 15px; cursor: pointer;
+    text-decoration: none; display: inline-flex; align-items: center; gap: 8px;
+  }
+  button:hover, .bouton:hover { border-color: var(--text); }
+  button:focus-visible, .bouton:focus-visible { outline: 2px solid #4fe0ff; outline-offset: 2px; }
+  button:disabled { opacity: .45; cursor: default; border-color: rgba(142, 163, 217, .45); }
+  .principal { background: color-mix(in srgb, var(--c, #4fe0ff) 16%, rgba(8, 20, 60, .7)); border-color: var(--c, #4fe0ff); color: #fff; }
+  .principal:hover { background: color-mix(in srgb, var(--c, #4fe0ff) 28%, rgba(8, 20, 60, .7)); }
+  .discret { border-color: transparent; background: transparent; color: var(--muted); padding-left: 6px; padding-right: 6px; }
+  .discret:hover { color: var(--text); border-color: transparent; }
+
+  .pied { margin-top: auto; padding-top: 36px; display: flex; gap: 16px; align-items: center; flex-wrap: wrap; color: var(--muted); font-size: 12px; }
+  .pied .chemin { overflow-wrap: anywhere; }
+  .pied .alerte { color: #ffd2a3; }
+  #tout { --c: #e6edff; }
+
+  dialog {
+    width: min(900px, calc(100vw - 32px)); max-height: 80vh; padding: 0;
+    color: var(--text); background: #050c24; border: 1px solid var(--faint);
+  }
+  dialog::backdrop { background: rgba(2, 6, 23, .75); backdrop-filter: blur(3px); }
+  dialog .barre { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-bottom: 1px solid var(--faint); }
+  dialog .barre strong { font: 400 14px var(--display); letter-spacing: .05em; }
+  dialog .barre button { margin-left: auto; }
+  dialog pre { margin: 0; padding: 16px; max-height: calc(80vh - 60px); overflow: auto; font: 12px/1.55 var(--mono); white-space: pre-wrap; color: #c7d3f5; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .page, #intro-voile { transition: none; }
+    .statut.occupe::before { animation: none; }
+  }
+</style>
+</head>
+<body>
+
+<div id="intro-voile" class="cache">
+  <iframe id="intro" title="Animation d'introduction WEB·SUITE"></iframe>
+  <button id="passer" type="button">Passer ›</button>
+</div>
+
+<div class="page" id="page">
+  <header>
+    <span class="marque">WEB·SUITE</span>
+    <span class="slogan">ÉLECTRONIQUE · RF · MÉCANIQUE</span>
+    <div class="droite">
+      <span class="etat-global" id="etat-global">CONNEXION…</span>
+      <button class="discret" id="revoir" type="button" title="Rejouer l'animation d'introduction">↻ Intro</button>
+    </div>
+  </header>
+
+  <section class="titre">
+    <h1>WEB·SUITE</h1>
+    <p>CHOISISSEZ VOTRE OUTIL</p>
+  </section>
+
+  <section class="cartes" id="cartes" aria-live="polite"></section>
+
+  <footer class="pied">
+    <button id="tout" class="principal" type="button" hidden>⇩ Télécharger les outils manquants</button>
+    <span class="alerte" id="sans-git" hidden>git introuvable : les outils seront téléchargés en zip, sans mise à jour automatique.</span>
+    <span class="chemin" id="racine"></span>
+  </footer>
+</div>
+
+<dialog id="journal">
+  <div class="barre"><strong id="journal-titre">Journal</strong><button type="button" id="journal-fermer">Fermer</button></div>
+  <pre id="journal-texte"></pre>
+</dialog>
+
+<script>
+(() => {
+'use strict';
+
+const ICONES = {
+  web_cao: '<svg viewBox="0 0 54 54" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M7 36h12l10-12h18"/><path d="M7 20h9l7-9h9"/><path d="M29 44l8-8h10"/><g fill="currentColor"><circle cx="7" cy="36" r="2.6"/><circle cx="47" cy="24" r="2.6"/><circle cx="7" cy="20" r="2.6"/><circle cx="32" cy="11" r="2.6"/><circle cx="47" cy="36" r="2.6"/></g></svg>',
+  web_antenna: '<svg viewBox="0 0 54 54" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M27 30v18"/><circle cx="27" cy="30" r="2.6" fill="currentColor"/><path d="M19 22a11 11 0 0 1 16 0" opacity=".95"/><path d="M13 16a20 20 0 0 1 28 0" opacity=".7"/><path d="M7 10a29 29 0 0 1 40 0" opacity=".45"/></svg>',
+  web_3d: '<svg viewBox="0 0 54 54" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M27 6l18 10v22L27 48 9 38V16z"/><path d="M9 16l18 10 18-10M27 26v22"/><path d="M18 11l18 10v6" opacity=".4"/></svg>',
+};
+
+const $ = s => document.querySelector(s);
+const cartes = $('#cartes');
+let etat = null;
+let minuteur = 0;
+const attente = {};          // id -> onglet ouvert en attendant que le serveur réponde
+
+/* ---------------- API ---------------- */
+async function api(chemin, corps) {
+  const opts = corps === undefined ? {} : {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'X-WebSuite': '1' },
+    body: JSON.stringify(corps),
+  };
+  const r = await fetch(chemin, opts);
+  if (!r.ok) throw new Error((await r.json().catch(() => ({}))).erreur || r.statusText);
+  return r.json();
+}
+
+async function rafraichir() {
+  clearTimeout(minuteur);
+  try {
+    const d = await api('/api/etat');
+    etat = d;
+    rendre();
+    $('#etat-global').textContent = 'PRÊT';
+  } catch (e) {
+    $('#etat-global').textContent = 'LANCEUR ARRÊTÉ';
+  }
+  const occupe = etat && etat.outils.some(o => o.phase === 'installation' || o.phase === 'demarrage');
+  minuteur = setTimeout(rafraichir, occupe ? 800 : 4000);
+}
+
+/* ---------------- rendu ---------------- */
+function statutDe(o) {
+  if (o.phase === 'installation') return ['occupe', 'Téléchargement…'];
+  if (o.phase === 'demarrage') return ['occupe', 'Démarrage…'];
+  if (o.phase === 'actif') return ['actif', `En cours · port ${o.port}`];
+  if (o.phase === 'erreur') return ['erreur', 'Erreur'];
+  return o.installe ? ['', 'Installé'] : ['absent', 'Non installé'];
+}
+
+function boutons(o) {
+  const b = [];
+  if (!o.installe) {
+    b.push(`<button class="principal" data-action="installer" ${o.phase === 'installation' ? 'disabled' : ''}>⇩ Télécharger</button>`);
+  } else if (o.phase === 'actif') {
+    b.push(`<a class="bouton principal" href="${o.url}" target="_blank" rel="noopener">Ouvrir ↗</a>`);
+    b.push('<button data-action="arreter">■ Arrêter</button>');
+  } else if (o.phase === 'demarrage') {
+    b.push('<button class="principal" disabled>Démarrage…</button>');
+    b.push('<button data-action="arreter">■ Annuler</button>');
+  } else {
+    b.push('<button class="principal" data-action="lancer">▶ Lancer</button>');
+  }
+  b.push('<button class="discret" data-action="journal">Journal</button>');
+  return b.join('');
+}
+
+function rendre() {
+  const d = etat;
+  $('#racine').textContent = `Dossier des outils : ${d.racine}`;
+  $('#sans-git').hidden = d.git;
+  const manquants = d.outils.filter(o => !o.installe && o.phase !== 'installation');
+  $('#tout').hidden = manquants.length === 0;
+  $('#tout').textContent = manquants.length === d.outils.length
+    ? '⇩ Télécharger les 3 outils' : `⇩ Télécharger les outils manquants (${manquants.length})`;
+
+  d.outils.forEach((o, i) => {
+    let c = cartes.querySelector(`[data-id="${o.id}"]`);
+    if (!c) {
+      c = document.createElement('article');
+      c.className = 'carte'; c.dataset.id = o.id; c.style.setProperty('--c', o.couleur);
+      c.innerHTML = `
+        <div class="entete">
+          <div class="icone">${ICONES[o.id] || ''}</div>
+          <div><div class="num">0${i + 1} / 0${d.outils.length}</div><h2>${o.nom}</h2></div>
+        </div>
+        <div class="sous">${o.sous_titre}</div>
+        <div class="statut"></div>
+        <div class="message"></div>
+        <div class="actions"></div>`;
+      cartes.appendChild(c);
+    }
+    const [cls, libelle] = statutDe(o);
+    const st = c.querySelector('.statut');
+    st.className = 'statut ' + cls; st.textContent = libelle;
+    let msg = o.message || (o.installe ? o.dossier : 'Sera cloné depuis GitHub dans ' + o.dossier);
+    if (o.installe && !o.phase && o.dependances === 'guide') msg = 'Simulations : openEMS à installer (voir requirements.txt de l’outil).';
+    c.querySelector('.message').textContent = msg;
+    c.querySelector('.message').title = msg;
+    const html = boutons(o);
+    const act = c.querySelector('.actions');
+    if (act.dataset.html !== html) { act.innerHTML = html; act.dataset.html = html; }
+
+    // onglet ouvert pendant le démarrage : on y envoie l'outil dès qu'il répond
+    const w = attente[o.id];
+    if (w) {
+      if (o.phase === 'actif' && o.url) { if (!w.closed) w.location.href = o.url; delete attente[o.id]; }
+      else if (o.phase !== 'demarrage') { if (!w.closed) w.close(); delete attente[o.id]; }
+    }
+  });
+}
+
+function ongletAttente(o) {
+  const w = window.open('', '_blank');
+  if (!w) return null;       // bloqueur de fenêtres : le bouton « Ouvrir » prendra le relais
+  w.document.write(`<!doctype html><meta charset="utf-8"><title>${o.nom} — démarrage</title>
+    <body style="margin:0;height:100vh;display:grid;place-items:center;background:#020617;color:#e6edff;font:500 14px/1.6 'IBM Plex Mono',Consolas,monospace;letter-spacing:.12em;text-align:center">
+    <div><div style="color:${o.couleur};font-size:22px;letter-spacing:.05em">${o.nom}</div>DÉMARRAGE DU SERVEUR…<br><span style="color:#8ea3d9;font-size:12px">vérification des mises à jour, quelques secondes</span></div>`);
+  w.document.close();
+  return w;
+}
+
+cartes.addEventListener('click', async e => {
+  const btn = e.target.closest('button[data-action]');
+  if (!btn) return;
+  const id = btn.closest('.carte').dataset.id;
+  const o = etat.outils.find(x => x.id === id);
+  const action = btn.dataset.action;
+  if (action === 'journal') return ouvrirJournal(o);
+  if (action === 'lancer') { const w = ongletAttente(o); if (w) attente[id] = w; }
+  btn.disabled = true;
+  try {
+    const d = await api('/api/' + action, { id });
+    etat.outils = d.outils; rendre();
+  } catch (err) {
+    alert(`${o.nom} : ${err.message}`);
+    if (attente[id]) { attente[id].close(); delete attente[id]; }
+  }
+  rafraichir();
+});
+
+$('#tout').addEventListener('click', async () => {
+  $('#tout').disabled = true;
+  try { await api('/api/installer', { id: 'tous' }); } catch (err) { alert(err.message); }
+  $('#tout').disabled = false;
+  rafraichir();
+});
+
+/* ---------------- journal ---------------- */
+const dlg = $('#journal');
+let journalId = null, journalMinuteur = 0;
+async function chargerJournal() {
+  if (!journalId || !dlg.open) return;
+  try {
+    const { texte } = await api('/api/journal?id=' + journalId);
+    const pre = $('#journal-texte');
+    const enBas = pre.scrollTop + pre.clientHeight >= pre.scrollHeight - 8;
+    pre.textContent = texte || '(vide)';
+    if (enBas) pre.scrollTop = pre.scrollHeight;
+  } catch (e) { /* le lanceur a pu s'arrêter */ }
+  journalMinuteur = setTimeout(chargerJournal, 1500);
+}
+function ouvrirJournal(o) {
+  journalId = o.id;
+  $('#journal-titre').textContent = `Journal · ${o.nom}`;
+  $('#journal-texte').textContent = '…';
+  dlg.showModal();
+  chargerJournal().then(() => { const p = $('#journal-texte'); p.scrollTop = p.scrollHeight; });
+}
+$('#journal-fermer').addEventListener('click', () => dlg.close());
+dlg.addEventListener('close', () => { clearTimeout(journalMinuteur); journalId = null; });
+
+/* ---------------- intro ---------------- */
+const voile = $('#intro-voile'), cadre = $('#intro'), page = $('#page');
+let introOuverte = false, secours = 0;
+
+function montrerLanceur() { page.classList.add('visible'); }
+
+function fermerIntro(delai = 0) {
+  if (!introOuverte) return;
+  introOuverte = false;
+  clearTimeout(secours);
+  setTimeout(() => {
+    voile.classList.add('cache');
+    montrerLanceur();
+  }, delai);
+  try { sessionStorage.setItem('websuite-intro-vue', '1'); } catch (e) { /* stockage indisponible */ }
+}
+
+function brancherIntro() {
+  let w;
+  try { w = cadre.contentWindow; w.document; } catch (e) { return; }
+  // Fin naturelle : on laisse l'écran final (les 3 cartes) un instant, puis fondu.
+  w.addEventListener('websuite:intro-end', () => fermerIntro(900));
+  // Un clic ou une touche dans l'intro la saute : ici, cela veut dire « au lanceur ».
+  const sauter = ev => { ev.stopPropagation(); ev.preventDefault(); fermerIntro(); };
+  w.document.addEventListener('click', sauter, true);
+  w.document.addEventListener('keydown', ev => {
+    if ([' ', 'Enter', 'Escape'].includes(ev.key)) sauter(ev);
+  }, true);
+  const replay = w.document.getElementById('replay');
+  if (replay) replay.style.display = 'none';
+}
+
+function jouerIntro() {
+  introOuverte = true;
+  voile.classList.remove('cache');
+  const api_ = (() => { try { return cadre.contentWindow.WebSuiteIntro; } catch (e) { return null; } })();
+  if (api_) api_.play();
+  else cadre.src = 'websuite-intro.html';
+  clearTimeout(secours);
+  // Si l'intro ne se charge pas. Chargée, elle émet sa fin elle-même, même
+  // si elle a été mise en pause dans un onglet en arrière-plan.
+  secours = setTimeout(() => {
+    try { if (cadre.contentWindow.WebSuiteIntro) return; } catch (e) { /* inaccessible */ }
+    fermerIntro();
+  }, 14000);
+  setTimeout(() => { try { cadre.contentWindow.focus(); } catch (e) {} }, 100);
+}
+
+cadre.addEventListener('load', brancherIntro);
+$('#passer').addEventListener('click', () => fermerIntro());
+$('#revoir').addEventListener('click', jouerIntro);
+window.addEventListener('keydown', e => { if (introOuverte && e.key === 'Escape') fermerIntro(); });
+
+let dejaVue = false;
+try { dejaVue = sessionStorage.getItem('websuite-intro-vue') === '1'; } catch (e) { /* idem */ }
+const sansAnimation = matchMedia('(prefers-reduced-motion: reduce)').matches;
+if (dejaVue || sansAnimation || new URLSearchParams(location.search).has('sans-intro')) montrerLanceur();
+else jouerIntro();
+
+rafraichir();
+})();
+</script>
+</body>
+</html>

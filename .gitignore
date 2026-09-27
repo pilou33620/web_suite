@@ -1,0 +1,24 @@
+# Les outils : chacun a son propre dépôt git, cloné ici par installer.py
+WEB_CAO/
+WEB_ANTENNA/
+WEB_3D/
+
+# Ancien emplacement du lanceur
+WEB_SUITE/
+
+# Journaux des outils lancés par le lanceur
+journaux/
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+env/
+
+# Windows / IDE
+Thumbs.db
+Desktop.ini
+.vscode/
+.idea/
+.claude/

@@ -1,0 +1,31 @@
+# =============================================================================
+# WEB·SUITE -- Dépendances Python
+#
+# Le lanceur (web_suite.py) et l'installateur (installer.py) n'utilisent que la
+# bibliothèque standard Python (3.8 ou plus récent) : il n'y a RIEN à installer
+# par pip pour WEB_SUITE elle-même.
+#
+# Ce qu'il faut en revanche, ce sont les OUTILS. Lancez :
+#
+#      python installer.py          (ou double-clic sur installer.cmd)
+#
+# Le menu demande lequel télécharger :
+#
+#      1  WEB_CAO       Schéma & routage PCB
+#      2  WEB_ANTENNA   Simulation d'antennes RF
+#      3  WEB_3D        Modélisation & assemblage 3D
+#      4  Les trois
+#
+# Chaque outil est cloné depuis GitHub (https://github.com/pilou33620/...)
+# dans un sous-dossier (WEB_CAO/, WEB_ANTENNA/, WEB_3D/) et garde son propre
+# dépôt git ; ces dossiers sont ignorés par le .gitignore de WEB_SUITE.
+# git est recommandé (https://git-scm.com) : sans lui l'outil est téléchargé en
+# zip et ne se met plus à jour tout seul.
+#
+# Dépendances propres à chaque outil, installées à part :
+#   - WEB_CAO      numpy, scipy (facultatifs, solveurs SI/PI) : l'installateur
+#                  propose de les installer
+#   - WEB_ANTENNA  openEMS pour les simulations : voir le guide en
+#                  tête de WEB_ANTENNA/requirements.txt (Python 3.10 / 3.11)
+#   - WEB_3D       aucune
+# =============================================================================
