@@ -1,10 +1,10 @@
 """WEB·SUITE — lanceur des outils WEB_CAO, WEB_ANTENNA et WEB_3D.
 
-    python web_suite.py                 ouvre le lanceur dans le navigateur
-    python web_suite.py --installer     menu de téléchargement des outils seulement
+    python lanceur/web_suite.py              ouvre le lanceur dans le navigateur
+    python lanceur/web_suite.py --installer  menu de téléchargement des outils seulement
 
 Le lanceur joue l'animation d'intro, puis propose les trois outils : il les
-télécharge s'ils manquent (git clone dans un sous-dossier), démarre leur serveur
+télécharge s'ils manquent (git clone à la racine du dépôt), démarre leur serveur
 et ouvre leur page. Fermer cette fenêtre arrête les outils lancés depuis elle.
 
 Bibliothèque standard seule. Le serveur n'écoute que sur 127.0.0.1 : il lance
@@ -26,6 +26,7 @@ import installer
 import outils
 
 ICI = outils.ICI
+DEPOT = os.path.dirname(ICI)                           # racine du dépôt git WEB_SUITE
 PORT_DEFAUT = 8100
 FICHIERS_SERVIS = {"/": "index.html", "/index.html": "index.html", "/websuite-intro.html": "websuite-intro.html"}
 
@@ -34,35 +35,53 @@ FICHIERS_SERVIS = {"/": "index.html", "/index.html": "index.html", "/websuite-in
 # Mise à jour de WEB_SUITE elle-même, comme les outils le font au démarrage
 # ---------------------------------------------------------------------------
 def _git(*args, timeout=10):
-    return subprocess.run(["git", *args], cwd=ICI, capture_output=True, text=True,
+    return subprocess.run(["git", *args], cwd=DEPOT, capture_output=True, text=True,
                           timeout=timeout, creationflags=outils.SANS_FENETRE,
                           env=dict(os.environ, GIT_TERMINAL_PROMPT="0"))
 
 
 def verifier_et_appliquer_maj():
-    """git pull si le dépôt a une branche distante en avance et rien de modifié."""
-    if not os.path.isdir(os.path.join(ICI, ".git")) or not outils.git_disponible():
+    """git pull si le dépôt a une branche distante en avance et rien de modifié.
+
+    Renvoie True si une mise à jour vient d'être appliquée (il faut relancer)."""
+    if not os.path.isdir(os.path.join(DEPOT, ".git")):
+        return False                                   # copie zip : rien à comparer
+    if not outils.git_disponible():
+        print("  [!] git introuvable : mises à jour de WEB_SUITE non vérifiées.")
         return False
+    print("  Recherche de mises à jour de WEB_SUITE...", end=" ", flush=True)
     try:
         if _git("fetch", "--quiet", "origin").returncode != 0:
+            print("GitHub injoignable, ignorée.")
             return False
         if _git("rev-parse", "--verify", "@{u}").returncode != 0:
-            return False                               # pas encore de dépôt distant suivi
+            print("aucune branche distante suivie.")
+            return False
         retard = _git("rev-list", "HEAD..@{u}", "--count").stdout.strip()
         if not retard.isdigit() or int(retard) == 0:
+            print("à jour.")
             return False
         if _git("status", "--porcelain", "-uno").stdout.strip():
-            print("  [!] Mise à jour disponible, mais des fichiers sont modifiés : ignorée.")
+            print("\n  [!] %s mise(s) à jour disponible(s), mais des fichiers sont modifiés :"
+                  " ignorée(s)." % retard)
             return False
-        print("  [*] %s mise(s) à jour de WEB_SUITE : téléchargement..." % retard)
-        return _git("pull", "--ff-only", timeout=60).returncode == 0
+        print("%s mise(s) à jour, téléchargement..." % retard, flush=True)
+        if _git("pull", "--ff-only", "--quiet", timeout=60).returncode != 0:
+            print("  [!] git pull a échoué : on garde la version actuelle.")
+            return False
+        print("  [*] WEB_SUITE mis à jour, redémarrage.", flush=True)
+        return True
     except (OSError, subprocess.SubprocessError):
+        print("délai dépassé, ignorée.")
         return False
 
 
 def redemarrer():
+    # Chemin absolu reconstruit : sous Python 3.8, __file__ peut être relatif
+    # et le dossier courant a déjà changé (os.chdir(ICI)).
     env = dict(os.environ, WEB_SUITE_DEJA_MAJ="1")
-    code = subprocess.call([sys.executable, os.path.abspath(__file__)] + sys.argv[1:], env=env)
+    script = os.path.join(ICI, "web_suite.py")
+    code = subprocess.call([sys.executable, script] + sys.argv[1:], env=env)
     os._exit(code)
 
 
@@ -130,7 +149,7 @@ class Lanceur(SimpleHTTPRequestHandler):
         oid = corps.get("id")
         g = self.gestionnaire
         actions = {"/api/installer": g.installer, "/api/lancer": g.lancer,
-                   "/api/arreter": g.arreter}
+                   "/api/arreter": g.arreter, "/api/openems": g.installer_openems}
         if url.path not in actions:
             return self._json({"erreur": "action inconnue"}, HTTPStatus.NOT_FOUND)
         ids = [o["id"] for o in outils.CATALOGUE] if oid == "tous" else [oid]

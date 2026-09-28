@@ -5,7 +5,8 @@ Aucune dépendance hors bibliothèque standard. Ce module est partagé par
 
 Disposition attendue sur le disque :
 
-    WEB_TOOLS/         <- ce dépôt (web_suite.py, installer.py, ...)
+    WEB_TOOLS/         <- ce dépôt (installer.cmd, demarrer_WEB_SUITE.cmd)
+    ├── lanceur/       <- ce module, web_suite.py, installer.py, pages...
     ├── WEB_CAO/       <- un dépôt git par outil, cloné ici
     ├── WEB_ANTENNA/      et ignoré par le .gitignore de WEB_SUITE
     └── WEB_3D/
@@ -23,8 +24,8 @@ import time
 import urllib.request
 import zipfile
 
-ICI = os.path.dirname(os.path.abspath(__file__))
-RACINE_DEFAUT = ICI
+ICI = os.path.dirname(os.path.abspath(__file__))       # lanceur/
+RACINE_DEFAUT = os.path.dirname(ICI)                   # racine du dépôt, où vivent les outils
 DOSSIER_JOURNAUX = os.path.join(ICI, "journaux")
 
 WINDOWS = os.name == "nt"
@@ -53,8 +54,8 @@ CATALOGUE = [
         "script": "web_antenna.py",
         "port": 8732,
         "args": ["--local", "--sans-navigateur"],
-        # openEMS : Python 3.10/3.11 et archives binaires, à la main.
-        "dependances": "guide",
+        # openEMS : archive binaire + venv Python 3.10/3.11, voir installer_openems().
+        "dependances": "openems",
     },
     {
         "id": "web_3d",
@@ -71,6 +72,20 @@ CATALOGUE = [
 PAR_ID = {o["id"]: o for o in CATALOGUE}
 
 DELAI_DEMARRAGE = 90       # s : la vérification GitHub des outils peut prendre du temps
+
+# Dernière version stable d'openEMS pour Windows. Ses roues Python n'existent
+# que pour CPython 3.10 et 3.11 : c'est ce qui impose un venv à part.
+OPENEMS_URL = ("https://github.com/thliebig/openEMS-Project/releases/download/"
+               "v0.0.36/openEMS_v0.0.36.zip")
+OPENEMS_VERIF = (
+    "import os,sys\n"
+    "d=sys.argv[1]\n"
+    "os.add_dll_directory(d)\n"
+    "os.environ['PATH']=d+os.pathsep+os.environ.get('PATH','')\n"
+    "import CSXCAD, openEMS\n"
+    "from importlib.metadata import version\n"
+    "print('openEMS', version('openEMS'), '/ Python', sys.version.split()[0])\n"
+)
 RE_URL = re.compile(r"https?://([\w.\-]+|\[[0-9a-fA-F:]+\]):(\d{2,5})")
 
 
@@ -110,28 +125,11 @@ def installer(outil, racine=RACINE_DEFAUT, ecrire=print):
 
     if git_disponible():
         ecrire("git clone %s" % outil["depot"])
-        proc = subprocess.Popen(
-            ["git", "clone", "--progress", outil["depot"], cible],
-            stdout=subprocess.PIPE, stderr=subprocess.STDOUT, stdin=subprocess.DEVNULL,
-            creationflags=SANS_FENETRE,
-        )
-        # git réécrit sa ligne de progression avec \r : on découpe dessus aussi.
-        tampon = b""
-        while True:
-            bloc = proc.stdout.read(256)
-            if not bloc:
-                break
-            tampon += bloc
-            *lignes, tampon = re.split(rb"[\r\n]", tampon)
-            for ligne in lignes:
-                if ligne.strip():
-                    ecrire(ligne.decode("utf-8", "replace").strip())
-        if tampon.strip():
-            ecrire(tampon.decode("utf-8", "replace").strip())
-        if proc.wait() == 0 and est_installe(outil, racine):
+        code = _executer(["git", "clone", "--progress", outil["depot"], cible], ecrire)
+        if code == 0 and est_installe(outil, racine):
             ecrire("[OK] %s installé." % outil["nom"])
             return True
-        ecrire("[X] git clone a échoué (code %s)." % proc.returncode)
+        ecrire("[X] git clone a échoué (code %s)." % code)
         return False
 
     url = outil["depot"][:-4] + "/archive/refs/heads/main.zip"
@@ -141,26 +139,60 @@ def installer(outil, racine=RACINE_DEFAUT, ecrire=print):
         with urllib.request.urlopen(url, timeout=60) as rep:
             donnees = rep.read()
         with zipfile.ZipFile(io.BytesIO(donnees)) as z:
-            prefixe = z.namelist()[0].split("/")[0] + "/"
-            for nom in z.namelist():
-                relatif = nom[len(prefixe):]
-                if not relatif:
-                    continue
-                chemin = os.path.normpath(os.path.join(cible, relatif))
-                if not chemin.startswith(os.path.normpath(cible) + os.sep):
-                    continue                           # entrée hors du dossier : ignorée
-                if nom.endswith("/"):
-                    os.makedirs(chemin, exist_ok=True)
-                else:
-                    os.makedirs(os.path.dirname(chemin), exist_ok=True)
-                    with z.open(nom) as src, open(chemin, "wb") as dst:
-                        shutil.copyfileobj(src, dst)
+            _extraire(z, z.namelist()[0].split("/")[0] + "/", cible)
     except Exception as exc:                           # noqa: BLE001
         ecrire("[X] Téléchargement impossible : %s" % exc)
         return False
     ok = est_installe(outil, racine)
     ecrire("[OK] %s installé." % outil["nom"] if ok else "[X] Archive incomplète.")
     return ok
+
+
+def _executer(cmd, ecrire, cwd=None):
+    """Lance une commande et recopie sa sortie ligne à ligne. Renvoie le code de sortie."""
+    try:
+        proc = subprocess.Popen(
+            cmd, cwd=cwd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+            stdin=subprocess.DEVNULL, creationflags=SANS_FENETRE,
+            env=dict(os.environ, PYTHONIOENCODING="utf-8"),
+        )
+    except OSError as exc:
+        ecrire("[X] %s : %s" % (cmd[0], exc))
+        return -1
+    # git et pip réécrivent leur ligne de progression avec \r : on découpe dessus aussi.
+    tampon = b""
+    while True:
+        bloc = proc.stdout.read(256)
+        if not bloc:
+            break
+        tampon += bloc
+        *lignes, tampon = re.split(rb"[\r\n]", tampon)
+        for ligne in lignes:
+            if ligne.strip():
+                ecrire(ligne.decode("utf-8", "replace").strip())
+    if tampon.strip():
+        ecrire(tampon.decode("utf-8", "replace").strip())
+    return proc.wait()
+
+
+def _extraire(z, prefixe, cible):
+    """Extrait les entrées de l'archive qui commencent par `prefixe` dans `cible`."""
+    base = os.path.normpath(cible)
+    for nom in z.namelist():
+        if not nom.startswith(prefixe):
+            continue
+        relatif = nom[len(prefixe):]
+        if not relatif:
+            continue
+        chemin = os.path.normpath(os.path.join(base, relatif))
+        if not chemin.startswith(base + os.sep):
+            continue                                   # entrée hors du dossier : ignorée
+        if nom.endswith("/"):
+            os.makedirs(chemin, exist_ok=True)
+        else:
+            os.makedirs(os.path.dirname(chemin), exist_ok=True)
+            with z.open(nom) as src, open(chemin, "wb") as dst:
+                shutil.copyfileobj(src, dst)
 
 
 def installer_dependances(outil, racine=RACINE_DEFAUT, ecrire=print):
@@ -174,6 +206,199 @@ def installer_dependances(outil, racine=RACINE_DEFAUT, ecrire=print):
            else "[!] pip a échoué (code %d) : l'outil démarre quand même, "
                 "sans ses solveurs avancés." % code)
     return code == 0
+
+
+# ---------------------------------------------------------------------------
+# openEMS (WEB_ANTENNA)
+# ---------------------------------------------------------------------------
+# Trois morceaux, que WEB_ANTENNA sait retrouver tout seul une fois en place :
+#   WEB_ANTENNA/openEMS/   l'archive binaire (DLL, openEMS.exe, roues Python)
+#   WEB_ANTENNA/env/       un venv Python 3.10 ou 3.11, où les roues s'installent
+#   requirements.txt       numpy, h5py, et CSXCAD/openEMS pris dans openEMS/python
+def _dossier_openems(outil, racine):
+    return os.path.join(dossier(outil, racine), "openEMS")
+
+
+def _python_env(outil, racine):
+    return os.path.join(dossier(outil, racine), "env", "Scripts", "python.exe")
+
+
+def openems_pret(outil, racine=RACINE_DEFAUT):
+    """Test rapide (sans lancer Python) : binaires en place et roues installées dans env/."""
+    if outil.get("dependances") != "openems":
+        return None
+    paquets = os.path.join(dossier(outil, racine), "env", "Lib", "site-packages")
+    return (os.path.isfile(os.path.join(_dossier_openems(outil, racine), "CSXCAD.dll"))
+            and os.path.isfile(_python_env(outil, racine))
+            and os.path.isdir(os.path.join(paquets, "openEMS"))
+            and os.path.isdir(os.path.join(paquets, "CSXCAD")))
+
+
+def _sortie(cmd, delai=30):
+    """Sortie d'une commande courte, ou '' si elle échoue."""
+    try:
+        r = subprocess.run(cmd, capture_output=True, text=True, timeout=delai,
+                           stdin=subprocess.DEVNULL, creationflags=SANS_FENETRE)
+    except (OSError, subprocess.SubprocessError):
+        return ""
+    return r.stdout.strip() if r.returncode == 0 else ""
+
+
+def _version_python(exe):
+    """'3.10' pour un Python 64 bits, '' sinon (32 bits, introuvable, cassé)."""
+    return _sortie([exe, "-c", "import sys,struct;"
+                    "print('%d.%d' % sys.version_info[:2] if struct.calcsize('P') == 8 else '')"])
+
+
+def _versions_roues(dossier_oe):
+    """Versions de Python pour lesquelles l'archive fournit des roues : {'3.10', '3.11'}."""
+    versions = set()
+    try:
+        noms = os.listdir(os.path.join(dossier_oe, "python"))
+    except OSError:
+        return versions
+    for nom in noms:
+        m = re.search(r"-cp3(\d+)-", nom)
+        if nom.endswith(".whl") and m:
+            versions.add("3." + m.group(1))
+    return versions
+
+
+def _trouver_python(versions):
+    """Un Python 64 bits de l'une de ces versions, ou None. Le lanceur py d'abord."""
+    for v in sorted(versions, reverse=True):
+        exe = _sortie(["py", "-" + v, "-c", "import sys;print(sys.executable)"])
+        if exe and _version_python(exe) == v:
+            return exe
+    candidats = [sys.executable] + [shutil.which("python" + v) for v in sorted(versions, reverse=True)]
+    for exe in candidats:
+        if exe and _version_python(exe) in versions:
+            return exe
+    return None
+
+
+def _telecharger_openems(cible, ecrire):
+    """Télécharge l'archive openEMS et l'extrait dans `cible`. Renvoie True si CSXCAD.dll y est."""
+    ecrire("Téléchargement de %s" % OPENEMS_URL)
+    tmp = cible + ".zip.part"
+    try:
+        with urllib.request.urlopen(OPENEMS_URL, timeout=60) as rep, open(tmp, "wb") as f:
+            total = int(rep.headers.get("Content-Length") or 0)
+            lu, palier = 0, 0
+            while True:
+                bloc = rep.read(1 << 20)
+                if not bloc:
+                    break
+                f.write(bloc)
+                lu += len(bloc)
+                if total and lu * 100 // total >= palier + 10:
+                    palier = lu * 100 // total // 10 * 10
+                    ecrire("  %d %%  (%.0f / %.0f Mo)" % (palier, lu / 1e6, total / 1e6))
+        with zipfile.ZipFile(tmp) as z:
+            # L'archive range tout sous un dossier (openEMS/ aujourd'hui) : on
+            # prend celui qui contient CSXCAD.dll, pour ne pas finir en openEMS/openEMS/.
+            dll = [n for n in z.namelist() if n.lower().endswith("/csxcad.dll") or n.lower() == "csxcad.dll"]
+            if not dll:
+                ecrire("[X] L'archive ne contient pas CSXCAD.dll : format inattendu.")
+                return False
+            ecrire("Extraction dans %s" % cible)
+            _extraire(z, min(dll, key=len)[:-len("CSXCAD.dll")], cible)
+    except Exception as exc:                           # noqa: BLE001
+        ecrire("[X] Téléchargement d'openEMS impossible : %s" % exc)
+        return False
+    finally:
+        try:
+            os.remove(tmp)
+        except OSError:
+            pass
+    return os.path.isfile(os.path.join(cible, "CSXCAD.dll"))
+
+
+def installer_openems(outil, racine=RACINE_DEFAUT, ecrire=print):
+    """Installe openEMS pour WEB_ANTENNA : archive binaire, venv env/, pip. Renvoie True si prêt.
+
+    Chaque étape déjà faite est sautée : on peut relancer après avoir corrigé
+    ce qui manquait (typiquement : installer Python 3.10 ou 3.11).
+    """
+    if outil.get("dependances") != "openems":
+        return True
+    if not WINDOWS:
+        ecrire("[!] Installation automatique d'openEMS : Windows seulement. "
+               "Voir le guide en tête de %s." % os.path.join(dossier(outil, racine), "requirements.txt"))
+        return False
+    if not est_installe(outil, racine):
+        ecrire("[X] %s n'est pas installé." % outil["nom"])
+        return False
+    # Chemin long et réel : venv échoue sur un nom court 8.3 (PIERRE~1.REN).
+    racine = os.path.realpath(racine)
+    base = dossier(outil, racine)
+    if len(base) > 140:
+        # pip écrit dans env\Lib\site-packages des chemins de ~120 caractères de plus.
+        ecrire("[!] Dossier très profond (%d caractères) : Windows limite les chemins à 260," % len(base))
+        ecrire("    pip risque d'échouer (« WinError 206 »). Rapprochez WEB_SUITE de la racine du disque.")
+
+    # 1. Les binaires
+    oe = _dossier_openems(outil, racine)
+    if os.path.isfile(os.path.join(oe, "CSXCAD.dll")):
+        ecrire("[OK] Binaires openEMS déjà présents : %s" % oe)
+    elif os.path.isdir(oe) and os.listdir(oe):
+        ecrire("[X] %s existe mais ne contient pas CSXCAD.dll : dossier laissé intact." % oe)
+        ecrire("    Videz-le ou supprimez-le, puis relancez l'installation d'openEMS.")
+        return False
+    elif not _telecharger_openems(oe, ecrire):
+        return False
+    else:
+        ecrire("[OK] Binaires openEMS installés.")
+
+    versions = _versions_roues(oe) or {"3.10", "3.11"}
+    liste = " ou ".join(sorted(versions))
+
+    # 2. Le venv
+    py_env = _python_env(outil, racine)
+    if os.path.isfile(py_env):
+        v = _version_python(py_env)
+        if v not in versions:
+            ecrire("[X] %s existe déjà avec Python %s : openEMS demande Python %s (64 bits)."
+                   % (os.path.dirname(os.path.dirname(py_env)), v or "?", liste))
+            ecrire("    Supprimez ce dossier env\\ puis relancez l'installation d'openEMS.")
+            return False
+        ecrire("[OK] Environnement Python %s déjà présent : env\\" % v)
+        if not _sortie([py_env, "-m", "pip", "--version"]):
+            ecrire("pip manque dans env\\ : réinstallation par ensurepip")
+            if _executer([py_env, "-m", "ensurepip", "--upgrade", "--default-pip"], ecrire) != 0:
+                ecrire("[X] Impossible de réparer pip : supprimez env\\ et relancez.")
+                return False
+    else:
+        exe = _trouver_python(versions)
+        if not exe:
+            ecrire("[X] Aucun Python %s 64 bits sur ce poste, et les roues openEMS n'existent" % liste)
+            ecrire("    que pour ces versions. Installez Python 3.11 64 bits :")
+            ecrire("      https://www.python.org/downloads/windows/   ou   winget install Python.Python.3.11")
+            ecrire("    puis relancez l'installation d'openEMS (les binaires sont gardés).")
+            return False
+        ecrire("Création de l'environnement env\\ avec %s" % exe)
+        dossier_env = os.path.join(base, "env")
+        if _executer([exe, "-m", "venv", dossier_env], ecrire) != 0 or not os.path.isfile(py_env):
+            # Un env\ à moitié créé (sans pip) serait pris pour bon à la relance.
+            shutil.rmtree(dossier_env, ignore_errors=True)
+            ecrire("[X] La création de env\\ a échoué.")
+            return False
+
+    # 3. Les paquets. cwd = l'outil : requirements.txt cherche les roues dans openEMS/python.
+    ecrire("pip install -r requirements.txt  (numpy, h5py, CSXCAD, openEMS)")
+    code = _executer([py_env, "-m", "pip", "install", "--disable-pip-version-check",
+                      "-r", "requirements.txt"], ecrire, cwd=base)
+    if code != 0:
+        ecrire("[X] pip a échoué (code %d) : voir les lignes ci-dessus." % code)
+        return False
+
+    # 4. La preuve : import CSXCAD, openEMS avec les DLL de l'archive.
+    rapport = _sortie([py_env, "-c", OPENEMS_VERIF, oe], delai=60)
+    if not rapport:
+        ecrire("[X] openEMS est installé mais « import openEMS » échoue encore.")
+        return False
+    ecrire("[OK] %s — les simulations de %s sont disponibles." % (rapport, outil["nom"]))
+    return True
 
 
 # ---------------------------------------------------------------------------
@@ -290,6 +515,7 @@ class Gestionnaire:
                     "id": o["id"], "nom": o["nom"], "sous_titre": o["sous_titre"],
                     "couleur": o["couleur"], "dependances": o["dependances"],
                     "installe": est_installe(o, self.racine),
+                    "openems": openems_pret(o, self.racine),
                     "dossier": dossier(o, self.racine),
                     "phase": e["phase"], "message": e["message"],
                     "url": e["url"], "port": e["port"],
@@ -331,6 +557,20 @@ class Gestionnaire:
 
     # -- actions -------------------------------------------------------------
     def installer(self, oid):
+        return self._installer_en_fond(oid, installer, "Installé.")
+
+    def installer_openems(self, oid):
+        o = PAR_ID[oid]
+        if o["dependances"] != "openems" or not est_installe(o, self.racine):
+            return False
+        with self.verrou:
+            if self.etats[oid]["phase"] in ("demarrage", "actif"):
+                self.etats[oid]["message"] = "Arrêtez l'outil avant d'installer openEMS."
+                return False
+        return self._installer_en_fond(oid, installer_openems,
+                                       "openEMS installé : les simulations sont disponibles.")
+
+    def _installer_en_fond(self, oid, fonction, message_ok):
         o = PAR_ID[oid]
         with self.verrou:
             if self.etats[oid]["phase"] == "installation":
@@ -338,11 +578,15 @@ class Gestionnaire:
             self.etats[oid].update(phase="installation", message="Préparation…")
 
         def tache():
-            ok = installer(o, self.racine, lambda t: self._noter(oid, t))
+            try:
+                ok = fonction(o, self.racine, lambda t: self._noter(oid, t))
+            except Exception as exc:                   # noqa: BLE001
+                self._noter(oid, "[X] Erreur inattendue : %s" % exc)
+                ok = False
             with self.verrou:
                 self.etats[oid]["phase"] = None if ok else "erreur"
                 if ok:
-                    self.etats[oid]["message"] = "Installé."
+                    self.etats[oid]["message"] = message_ok
         threading.Thread(target=tache, daemon=True).start()
         return True
 

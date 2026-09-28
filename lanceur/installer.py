@@ -1,10 +1,10 @@
 """Installation des outils WEB·SUITE : demande lequel télécharger (ou les trois).
 
-    python installer.py              menu interactif
-    python installer.py cao 3d       installe directement WEB_CAO et WEB_3D
-    python installer.py tous         installe les trois
+    python lanceur/installer.py      menu interactif
+    python lanceur/installer.py cao 3d   installe directement WEB_CAO et WEB_3D
+    python lanceur/installer.py tous     installe les trois
 
-Chaque outil est cloné depuis GitHub dans un sous-dossier de ce dépôt
+Chaque outil est cloné depuis GitHub à la racine de ce dépôt
 (WEB_CAO/, WEB_ANTENNA/, WEB_3D/, ignorés par git), et garde son propre dépôt
 git : il se met à jour seul à
 chaque démarrage.
@@ -98,11 +98,14 @@ def installer(ids, racine, demander_dependances=True):
             if oui("Installer les dépendances Python facultatives de %s "
                    "(numpy, scipy : solveurs avancés) ?" % o["nom"]):
                 outils.installer_dependances(o, racine, lambda t: print("  " + t))
-        elif o["dependances"] == "guide":
+        elif o["dependances"] == "openems" and not outils.openems_pret(o, racine):
             print()
-            print("  %s démarre sans rien d'autre. Pour lancer les simulations," % o["nom"])
-            print("  openEMS s'installe à la main (Python 3.10/3.11) :")
-            print("  suivez le guide en tête de %s\\requirements.txt" % outils.dossier(o, racine))
+            print("  %s démarre sans rien d'autre, mais ses simulations demandent openEMS." % o["nom"])
+            if demander_dependances and oui(
+                    "Installer openEMS maintenant (~50 Mo, Python 3.10 ou 3.11 requis) ?"):
+                outils.installer_openems(o, racine, lambda t: print("  " + t))
+            else:
+                print("  Plus tard : python lanceur/installer.py antenna")
 
     echecs = len(ids) - len(installes)
     print()
@@ -120,7 +123,7 @@ def main(argv=None):
     ap.add_argument("--racine", default=outils.RACINE_DEFAUT,
                     help="dossier où cloner les outils (défaut : le dossier de WEB_SUITE)")
     ap.add_argument("--sans-dependances", action="store_true",
-                    help="ne pas proposer l'installation des dépendances pip")
+                    help="ne pas proposer l'installation des dépendances (pip, openEMS)")
     args = ap.parse_args(argv)
 
     if args.outils:

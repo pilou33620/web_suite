@@ -244,7 +244,7 @@ async function rafraichir() {
 
 /* ---------------- rendu ---------------- */
 function statutDe(o) {
-  if (o.phase === 'installation') return ['occupe', 'Téléchargement…'];
+  if (o.phase === 'installation') return ['occupe', o.installe ? 'Installation d’openEMS…' : 'Téléchargement…'];
   if (o.phase === 'demarrage') return ['occupe', 'Démarrage…'];
   if (o.phase === 'actif') return ['actif', `En cours · port ${o.port}`];
   if (o.phase === 'erreur') return ['erreur', 'Erreur'];
@@ -261,8 +261,11 @@ function boutons(o) {
   } else if (o.phase === 'demarrage') {
     b.push('<button class="principal" disabled>Démarrage…</button>');
     b.push('<button data-action="arreter">■ Annuler</button>');
+  } else if (o.phase === 'installation') {
+    b.push('<button class="principal" disabled>Installation…</button>');
   } else {
     b.push('<button class="principal" data-action="lancer">▶ Lancer</button>');
+    if (o.openems === false) b.push('<button data-action="openems" title="Télécharge openEMS (~50 Mo), crée env\\ en Python 3.10/3.11 et installe ses paquets">⚙ Installer openEMS</button>');
   }
   b.push('<button class="discret" data-action="journal">Journal</button>');
   return b.join('');
@@ -297,7 +300,7 @@ function rendre() {
     const st = c.querySelector('.statut');
     st.className = 'statut ' + cls; st.textContent = libelle;
     let msg = o.message || (o.installe ? o.dossier : 'Sera cloné depuis GitHub dans ' + o.dossier);
-    if (o.installe && !o.phase && o.dependances === 'guide') msg = 'Simulations : openEMS à installer (voir requirements.txt de l’outil).';
+    if (o.installe && !o.phase && o.openems === false) msg = 'Simulations : openEMS pas encore installé (bouton « Installer openEMS »).';
     c.querySelector('.message').textContent = msg;
     c.querySelector('.message').title = msg;
     const html = boutons(o);
