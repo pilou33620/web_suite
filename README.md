@@ -25,8 +25,8 @@ Python 3.8+ suffit pour WEB_SUITE : bibliothèque standard seule (voir `lanceur/
 
 ```
 WEB_TOOLS/                  <- ce dépôt
-├── installer.cmd           <- télécharge les outils
-├── demarrer_WEB_SUITE.cmd  <- lance WEB·SUITE
+├── installer.cmd / .sh     <- télécharge les outils (Windows / Linux, Raspberry Pi)
+├── demarrer_WEB_SUITE.cmd / .sh  <- lance WEB·SUITE
 ├── lanceur/                <- code du lanceur : web_suite.py, installer.py, outils.py, pages
 ├── WEB_CAO/                <- clonés ici par l'installateur, chacun avec son dépôt git,
 ├── WEB_ANTENNA/               ignorés par le .gitignore de WEB_SUITE
@@ -38,6 +38,10 @@ WEB_TOOLS/                  <- ce dépôt
    Le menu demande lequel installer : `1`, `2`, `3`, plusieurs (`1 3`) ou `4` pour les trois.
    Sans menu : `python lanceur/installer.py cao 3d`, `python lanceur/installer.py tous`.
 3. Lancer : double-clic sur **`demarrer_WEB_SUITE.cmd`** (ou `python lanceur/web_suite.py`).
+
+Sous Linux / Raspberry Pi, mêmes étapes avec `./installer.sh` et `./demarrer_WEB_SUITE.sh`
+(`python3` et `git` : `sudo apt install python3 git`). Le lanceur ouvre le navigateur du Pi ;
+l'installation automatique d'openEMS reste réservée à Windows.
 
 Au premier démarrage sans aucun outil, `web_suite.py` pose la même question en
 console. La page propose aussi **Télécharger** sur chaque carte et un bouton
