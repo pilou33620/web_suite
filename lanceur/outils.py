@@ -486,8 +486,11 @@ class _Job:
 class Gestionnaire:
     """État des outils (installation, serveur lancé) partagé par le lanceur web."""
 
-    def __init__(self, racine=RACINE_DEFAUT):
+    def __init__(self, racine=RACINE_DEFAUT, reseau=False):
         self.racine = racine
+        # reseau : les outils écoutent sur le réseau local (sans --local) pour
+        # qu'une tablette ou un autre poste puisse les ouvrir.
+        self.reseau = reseau
         self.verrou = threading.Lock()
         self.job = _Job()
         self.etats = {o["id"]: {"phase": None, "message": "", "url": None,
@@ -550,8 +553,8 @@ class Gestionnaire:
         for m in RE_URL.finditer(texte):
             port = int(m.group(2))
             if repond(port):
-                # --local : le serveur n'écoute que sur 127.0.0.1, quelle que
-                # soit l'adresse réseau qu'il affiche.
+                # Le lanceur tourne sur la même machine : 127.0.0.1 répond
+                # toujours. La page remplace l'hôte par celui qu'elle utilise.
                 return "http://127.0.0.1:%d/" % port
         return None
 
@@ -601,7 +604,8 @@ class Gestionnaire:
                 e.update(phase="erreur", message="Outil non installé.")
                 return False
             port = port_libre(o["port"])
-            cmd = [sys.executable, "-u", o["script"], "--port", str(port)] + o["args"]
+            args = [x for x in o["args"] if not (self.reseau and x == "--local")]
+            cmd = [sys.executable, "-u", o["script"], "--port", str(port)] + args
             env = dict(os.environ, PYTHONIOENCODING="utf-8", PYTHONUNBUFFERED="1")
             with open(self.journal(oid), "a", encoding="utf-8") as f:
                 f.write("\n=== lancement %s : %s\n" % (time.strftime("%Y-%m-%d %H:%M:%S"),

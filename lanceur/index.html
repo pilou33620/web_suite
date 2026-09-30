@@ -251,12 +251,21 @@ function statutDe(o) {
   return o.installe ? ['', 'Installé'] : ['absent', 'Non installé'];
 }
 
+// L'outil tourne sur la même machine que le lanceur : on garde l'hôte par
+// lequel cette page a été ouverte (127.0.0.1 en local, l'IP du poste depuis
+// une tablette), seul le port change.
+function urlOutil(o) {
+  const u = new URL(o.url);
+  u.hostname = location.hostname;
+  return u.href;
+}
+
 function boutons(o) {
   const b = [];
   if (!o.installe) {
     b.push(`<button class="principal" data-action="installer" ${o.phase === 'installation' ? 'disabled' : ''}>⇩ Télécharger</button>`);
   } else if (o.phase === 'actif') {
-    b.push(`<a class="bouton principal" href="${o.url}" target="_blank" rel="noopener">Ouvrir ↗</a>`);
+    b.push(`<a class="bouton principal" href="${urlOutil(o)}" target="_blank" rel="noopener">Ouvrir ↗</a>`);
     b.push('<button data-action="arreter">■ Arrêter</button>');
   } else if (o.phase === 'demarrage') {
     b.push('<button class="principal" disabled>Démarrage…</button>');
@@ -310,7 +319,7 @@ function rendre() {
     // onglet ouvert pendant le démarrage : on y envoie l'outil dès qu'il répond
     const w = attente[o.id];
     if (w) {
-      if (o.phase === 'actif' && o.url) { if (!w.closed) w.location.href = o.url; delete attente[o.id]; }
+      if (o.phase === 'actif' && o.url) { if (!w.closed) w.location.href = urlOutil(o); delete attente[o.id]; }
       else if (o.phase !== 'demarrage') { if (!w.closed) w.close(); delete attente[o.id]; }
     }
   });

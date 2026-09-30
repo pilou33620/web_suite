@@ -8,11 +8,14 @@ Le lanceur joue l'animation d'intro, puis propose les trois outils : il les
 télécharge s'ils manquent (git clone à la racine du dépôt), démarre leur serveur
 et ouvre leur page. Fermer cette fenêtre arrête les outils lancés depuis elle.
 
-Bibliothèque standard seule. Le serveur n'écoute que sur 127.0.0.1 : il lance
-des programmes, il n'a rien à faire sur le réseau.
+Bibliothèque standard seule. Par défaut le serveur n'écoute que sur 127.0.0.1 :
+il lance des programmes. Avec --reseau (défaut sur Raspberry Pi), le lanceur et
+les outils écoutent sur le réseau local, sans authentification : à réserver à un
+réseau de confiance. --local force l'écoute locale.
 """
 
 import argparse
+import socket
 import json
 import os
 import subprocess
@@ -163,13 +166,32 @@ class Lanceur(SimpleHTTPRequestHandler):
         return self._json({"ok": True, "outils": g.etat()})
 
 
-def ouvrir_serveur(port):
+def ouvrir_serveur(port, hote="127.0.0.1"):
     for essai in range(port, port + 10):
         try:
-            return ThreadingHTTPServer(("127.0.0.1", essai), Lanceur)
+            return ThreadingHTTPServer((hote, essai), Lanceur)
         except OSError:
             continue
     raise OSError("aucun port libre entre %d et %d" % (port, port + 9))
+
+
+def adresse_reseau():
+    """L'adresse IPv4 du poste sur le réseau local (aucun paquet n'est envoyé)."""
+    try:
+        with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
+            s.connect(("192.168.255.255", 1))
+            ip = s.getsockname()[0]
+            if not ip.startswith("127."):
+                return ip
+    except OSError:
+        pass
+    try:
+        ip = socket.gethostbyname(socket.gethostname())
+        if not ip.startswith("127."):
+            return ip
+    except OSError:
+        pass
+    return None
 
 
 def est_raspberry_pi():
@@ -197,10 +219,18 @@ def main(argv=None):
                     help="ouvrir le navigateur au démarrage même sur Raspberry Pi")
     ap.add_argument("--sans-navigateur", action="store_true",
                     help="ne pas ouvrir le navigateur au démarrage")
+    ecoute = ap.add_mutually_exclusive_group()
+    ecoute.add_argument("--reseau", dest="reseau", action="store_true", default=None,
+                        help="écouter sur le réseau local : ouvrir WEB·SUITE depuis un autre "
+                             "appareil (défaut sur Raspberry Pi)")
+    ecoute.add_argument("--local", dest="reseau", action="store_false",
+                        help="n'écouter que sur 127.0.0.1 (défaut hors Raspberry Pi)")
     ap.add_argument("--sans-maj", dest="verifier_maj", action="store_false", default=True,
                     help="ne pas vérifier les mises à jour GitHub au démarrage")
     args = ap.parse_args(argv)
     racine = os.path.abspath(args.racine)
+    pi = est_raspberry_pi()
+    reseau = pi if args.reseau is None else args.reseau
 
     if args.installer:
         return installer.main(["--racine", racine])
@@ -216,9 +246,9 @@ def main(argv=None):
         print("\n  Aucun outil installé dans %s." % racine)
         installer.installer(installer.menu(racine), racine)
 
-    Lanceur.gestionnaire = outils.Gestionnaire(racine)
+    Lanceur.gestionnaire = outils.Gestionnaire(racine, reseau=reseau)
     try:
-        serveur = ouvrir_serveur(args.port)
+        serveur = ouvrir_serveur(args.port, "0.0.0.0" if reseau else "127.0.0.1")
     except OSError as exc:
         print("  [X] %s" % exc)
         return 1
@@ -228,6 +258,14 @@ def main(argv=None):
     print("  WEB·SUITE")
     print("  " + "-" * 48)
     print("  Adresse   %s" % url)
+    ip = adresse_reseau() if reseau else None
+    url_reseau = "http://%s:%d/" % (ip, serveur.server_address[1]) if ip else None
+    if url_reseau:
+        print("  Réseau    %s   (tablette, téléphone, autre poste)" % url_reseau)
+    elif reseau:
+        print("  Réseau    écoute sur le réseau, adresse IP du poste introuvable")
+    else:
+        print("  Réseau    désactivé (--reseau pour y accéder depuis un autre appareil)")
     print("  Outils    %s" % racine)
     for o in outils.CATALOGUE:
         print("            %-12s %s" % (o["nom"], "installé" if outils.est_installe(o, racine)
@@ -237,9 +275,9 @@ def main(argv=None):
     print()
     sys.stdout.flush()
 
-    ouvrir = not args.sans_navigateur and (args.navigateur or not est_raspberry_pi())
+    ouvrir = not args.sans_navigateur and (args.navigateur or not pi)
     if not ouvrir:
-        print("  Navigateur non ouvert : aller sur %s" % url)
+        print("  Navigateur non ouvert : aller sur %s" % (url_reseau or url))
         print()
         sys.stdout.flush()
     else:

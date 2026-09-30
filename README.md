@@ -41,7 +41,8 @@ WEB_TOOLS/                  <- ce dépôt
 
 Sous Linux / Raspberry Pi, mêmes étapes avec `./installer.sh` et `./demarrer_WEB_SUITE.sh`
 (`python3` et `git` : `sudo apt install python3 git`). Sur Raspberry Pi, le lanceur
-n'ouvre pas le navigateur : ouvrir l'adresse affichée (`http://127.0.0.1:8100/`) ou lancer avec `--navigateur` ;
+n'ouvre pas le navigateur et écoute sur le réseau local : ouvrir depuis n'importe quel appareil
+l'adresse **Réseau** affichée (`http://<ip-du-pi>:8100/`), ou lancer avec `--navigateur` ;
 l'installation automatique d'openEMS reste réservée à Windows.
 
 Au premier démarrage sans aucun outil, `web_suite.py` pose la même question en
@@ -68,8 +69,13 @@ Dépendances propres aux outils :
 
 ```
 python lanceur/web_suite.py [--port 8100] [--racine DOSSIER] [--installer]
-                    [--navigateur | --sans-navigateur] [--sans-maj]
+                    [--navigateur | --sans-navigateur] [--reseau | --local] [--sans-maj]
 ```
+
+- `--reseau` : le lanceur et les outils écoutent sur le réseau local ; l'adresse
+  **Réseau** affichée s'ouvre depuis une tablette, un téléphone ou un autre poste.
+  C'est le défaut sur Raspberry Pi. Aucune authentification : réseau de confiance uniquement.
+  `--local` force l'écoute sur `127.0.0.1` seulement (défaut ailleurs).
 
 - Le navigateur s'ouvre automatiquement, sauf sur Raspberry Pi.
   `--navigateur` force l'ouverture, `--sans-navigateur` l'empêche partout.
@@ -82,9 +88,9 @@ python lanceur/web_suite.py [--port 8100] [--racine DOSSIER] [--installer]
 
 ## Fonctionnement
 
-- Le lanceur n'écoute que sur `127.0.0.1` et refuse les requêtes d'action sans
+- Le lanceur n'écoute que sur `127.0.0.1` (sauf `--reseau`) et refuse les requêtes d'action sans
   l'en-tête `X-WebSuite` : aucune page tierce ne peut lancer ou télécharger un outil.
-- Les outils sont démarrés avec `--local --sans-navigateur` sur leur port habituel
+- Les outils sont démarrés avec `--local --sans-navigateur` (sans `--local` en mode réseau) sur leur port habituel
   (CAO 8000, ANTENNA 8732, 3D 8139) ou le suivant s'il est pris.
 - Leur sortie console va dans `lanceur/journaux/<outil>.log`, lisible depuis le bouton
   **Journal** de chaque carte.
