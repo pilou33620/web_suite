@@ -1,6 +1,7 @@
 """WEB·SUITE — lanceur des outils WEB_CAO, WEB_ANTENNA et WEB_3D.
 
     python lanceur/web_suite.py              ouvre le lanceur dans le navigateur
+                                             (sauf sur Raspberry Pi : adresse affichée en console)
     python lanceur/web_suite.py --installer  menu de téléchargement des outils seulement
 
 Le lanceur joue l'animation d'intro, puis propose les trois outils : il les
@@ -171,6 +172,18 @@ def ouvrir_serveur(port):
     raise OSError("aucun port libre entre %d et %d" % (port, port + 9))
 
 
+def est_raspberry_pi():
+    """Vrai si la machine est un Raspberry Pi (modèle lu dans le device tree)."""
+    for chemin in ("/proc/device-tree/model", "/sys/firmware/devicetree/base/model"):
+        try:
+            with open(chemin, "rb") as f:
+                if b"raspberry pi" in f.read().lower():
+                    return True
+        except OSError:
+            pass
+    return False
+
+
 def main(argv=None):
     installer._console_utf8()
     ap = argparse.ArgumentParser(description="Lanceur WEB·SUITE.")
@@ -180,6 +193,8 @@ def main(argv=None):
                     help="dossier contenant les outils (défaut : le dossier de WEB_SUITE)")
     ap.add_argument("--installer", action="store_true",
                     help="ouvrir seulement le menu de téléchargement des outils")
+    ap.add_argument("--navigateur", action="store_true",
+                    help="ouvrir le navigateur au démarrage même sur Raspberry Pi")
     ap.add_argument("--sans-navigateur", action="store_true",
                     help="ne pas ouvrir le navigateur au démarrage")
     ap.add_argument("--sans-maj", dest="verifier_maj", action="store_false", default=True,
@@ -222,7 +237,12 @@ def main(argv=None):
     print()
     sys.stdout.flush()
 
-    if not args.sans_navigateur:
+    ouvrir = not args.sans_navigateur and (args.navigateur or not est_raspberry_pi())
+    if not ouvrir:
+        print("  Navigateur non ouvert : aller sur %s" % url)
+        print()
+        sys.stdout.flush()
+    else:
         threading.Timer(0.6, lambda: webbrowser.open(url)).start()
     try:
         serveur.serve_forever()

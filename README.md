@@ -40,7 +40,8 @@ WEB_TOOLS/                  <- ce dépôt
 3. Lancer : double-clic sur **`demarrer_WEB_SUITE.cmd`** (ou `python lanceur/web_suite.py`).
 
 Sous Linux / Raspberry Pi, mêmes étapes avec `./installer.sh` et `./demarrer_WEB_SUITE.sh`
-(`python3` et `git` : `sudo apt install python3 git`). Le lanceur ouvre le navigateur du Pi ;
+(`python3` et `git` : `sudo apt install python3 git`). Sur Raspberry Pi, le lanceur
+n'ouvre pas le navigateur : ouvrir l'adresse affichée (`http://127.0.0.1:8100/`) ou lancer avec `--navigateur` ;
 l'installation automatique d'openEMS reste réservée à Windows.
 
 Au premier démarrage sans aucun outil, `web_suite.py` pose la même question en
@@ -67,8 +68,11 @@ Dépendances propres aux outils :
 
 ```
 python lanceur/web_suite.py [--port 8100] [--racine DOSSIER] [--installer]
-                    [--sans-navigateur] [--sans-maj]
+                    [--navigateur | --sans-navigateur] [--sans-maj]
 ```
+
+- Le navigateur s'ouvre automatiquement, sauf sur Raspberry Pi.
+  `--navigateur` force l'ouverture, `--sans-navigateur` l'empêche partout.
 
 - `--racine` : dossier contenant les outils (défaut : la racine du dépôt, parent de `lanceur/`).
 - `--installer` : ouvre seulement le menu de téléchargement.
