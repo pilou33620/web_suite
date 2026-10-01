@@ -612,7 +612,7 @@ class Gestionnaire:
             port = port_libre(o["port"])
             args = [x for x in o["args"] if not (self.reseau and x == "--local")]
             cmd = ([sys.executable, "-u", o["script"], "--port", str(port)] + args
-                   + projets.arguments(oid, self.racine))
+                   + projets.arguments(oid, self.racine, self.reseau))
             env = dict(os.environ, PYTHONIOENCODING="utf-8", PYTHONUNBUFFERED="1")
             with open(self.journal(oid), "a", encoding="utf-8") as f:
                 f.write("\n=== lancement %s : %s\n" % (time.strftime("%Y-%m-%d %H:%M:%S"),

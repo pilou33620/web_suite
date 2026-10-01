@@ -33,11 +33,16 @@ def dossier(racine):
     return os.path.join(racine, "PROJETS")
 
 
-def arguments(oid, racine):
-    """Les options qui pointent l'outil vers ses dossiers de PROJETS."""
+def arguments(oid, racine, reseau=False):
+    """Les options qui pointent l'outil vers ses dossiers de PROJETS.
+
+    reseau : le lanceur écoute sur le réseau (--reseau). WEB_CAO y ferme
+    d'office ses routes de projet ; --projets-reseau les rouvre, confinées
+    à PROJETS/CAO et à la LIB. WEB_ANTENNA, lui, les sert déjà au réseau."""
     p = dossier(racine)
     if oid == "web_cao":
-        return ["--projets", os.path.join(p, "CAO"), "--lib", os.path.join(p, "LIB_CAO")]
+        return (["--projets", os.path.join(p, "CAO"), "--lib", os.path.join(p, "LIB_CAO")]
+                + (["--projets-reseau"] if reseau else []))
     if oid == "web_antenna":
         return ["--projets", os.path.join(p, "ANTENNA")]
     return []
@@ -168,4 +173,6 @@ if __name__ == "__main__":
         with open(os.path.join(dossier(b), "projets.txt"), encoding="utf-8") as f:
             assert "[WEB_CAO]\ncarte_alim\n" in f.read()
         assert os.path.isdir(os.path.join(dossier(b), "3D"))
+    assert "--projets-reseau" in arguments("web_cao", "x", reseau=True)
+    assert "--projets-reseau" not in arguments("web_cao", "x")
     print("OK")
