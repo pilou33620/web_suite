@@ -107,6 +107,55 @@ def git_disponible():
 
 
 # ---------------------------------------------------------------------------
+# Mise à jour (git pull), pour WEB_SUITE comme pour les outils
+# ---------------------------------------------------------------------------
+# Statuts après lesquels l'outil n'a pas à refaire sa propre vérification.
+MAJ_FAITE = ("a_jour", "maj", "hors_ligne", "sans_git")
+FRAICHEUR_MAJ = 600        # s : au-delà, l'outil revérifie lui-même à son lancement
+
+
+def _git(dossier, *args, timeout=10):
+    return subprocess.run(["git", *args], cwd=dossier, capture_output=True, text=True,
+                          timeout=timeout, stdin=subprocess.DEVNULL, creationflags=SANS_FENETRE,
+                          env=dict(os.environ, GIT_TERMINAL_PROMPT="0"))
+
+
+def maj_depot(dossier, ecrire=print):
+    """git pull --ff-only si la branche distante est en avance et rien n'est modifié.
+
+    Renvoie 'maj', 'a_jour', 'hors_ligne', 'sans_git', 'modifie' (fichiers
+    modifiés : rien n'est touché) ou 'echec'."""
+    if not os.path.isdir(os.path.join(dossier, ".git")):
+        return "sans_git"                              # copie zip : rien à comparer
+    if not git_disponible():
+        ecrire("git introuvable : mises à jour non vérifiées.")
+        return "sans_git"
+    try:
+        if _git(dossier, "fetch", "--quiet", "origin").returncode != 0:
+            ecrire("GitHub injoignable : mise à jour ignorée.")
+            return "hors_ligne"
+        if _git(dossier, "rev-parse", "--verify", "@{u}").returncode != 0:
+            ecrire("Aucune branche distante suivie.")
+            return "a_jour"
+        retard = _git(dossier, "rev-list", "HEAD..@{u}", "--count").stdout.strip()
+        if not retard.isdigit() or int(retard) == 0:
+            ecrire("À jour.")
+            return "a_jour"
+        if _git(dossier, "status", "--porcelain", "-uno").stdout.strip():
+            ecrire("%s mise(s) à jour disponible(s), mais des fichiers sont modifiés." % retard)
+            return "modifie"
+        ecrire("%s mise(s) à jour, téléchargement…" % retard)
+        if _git(dossier, "pull", "--ff-only", "--quiet", timeout=60).returncode != 0:
+            ecrire("git pull a échoué : on garde la version actuelle.")
+            return "echec"
+        ecrire("Mis à jour (%s commit(s))." % retard)
+        return "maj"
+    except (OSError, subprocess.SubprocessError):
+        ecrire("Délai dépassé : mise à jour ignorée.")
+        return "hors_ligne"
+
+
+# ---------------------------------------------------------------------------
 # Installation
 # ---------------------------------------------------------------------------
 def installer(outil, racine=RACINE_DEFAUT, ecrire=print):
@@ -498,6 +547,10 @@ class Gestionnaire:
         self.etats = {o["id"]: {"phase": None, "message": "", "url": None,
                                 "port": None, "proc": None, "debut": 0.0}
                       for o in CATALOGUE}
+        self.verifs = {}                               # id -> (statut maj_depot, heure)
+        self.maj_finie = {o["id"]: threading.Event() for o in CATALOGUE}
+        for ev in self.maj_finie.values():
+            ev.set()
         os.makedirs(DOSSIER_JOURNAUX, exist_ok=True)
 
     def journal(self, oid):
@@ -562,6 +615,36 @@ class Gestionnaire:
         return None
 
     # -- actions -------------------------------------------------------------
+    def verifier_maj_outils(self):
+        """Cherche les mises à jour de chaque outil installé, en parallèle et en fond.
+
+        Lancé au démarrage du lanceur, pendant l'animation : les outils lancés
+        ensuite reçoivent --sans-maj et démarrent sans refaire la vérification."""
+        for o in CATALOGUE:
+            oid = o["id"]
+            if not est_installe(o, self.racine):
+                continue
+            with self.verrou:
+                self.etats[oid].update(phase="maj", message="Recherche de mises à jour…")
+            self.maj_finie[oid].clear()
+
+            def tache(o=o, oid=oid):
+                try:
+                    statut = maj_depot(dossier(o, self.racine), lambda t: self._noter(oid, t))
+                except Exception as exc:               # noqa: BLE001
+                    self._noter(oid, "[X] Vérification des mises à jour : %s" % exc)
+                    statut = "echec"
+                with self.verrou:
+                    self.verifs[oid] = (statut, time.time())
+                    if self.etats[oid]["phase"] == "maj":
+                        self.etats[oid]["phase"] = None
+                self.maj_finie[oid].set()
+            threading.Thread(target=tache, daemon=True).start()
+
+    def _maj_deja_faite(self, oid):
+        statut, quand = self.verifs.get(oid, (None, 0.0))
+        return statut in MAJ_FAITE and time.time() - quand < FRAICHEUR_MAJ
+
     def installer(self, oid):
         return self._installer_en_fond(oid, installer, "Installé.")
 
@@ -598,6 +681,7 @@ class Gestionnaire:
 
     def lancer(self, oid):
         o = PAR_ID[oid]
+        self.maj_finie[oid].wait(90)       # vérification du démarrage pas finie : on l'attend
         if self.etats[oid]["phase"] not in ("demarrage", "actif") and git_disponible():
             # La lib ou un projet a pu changer sur un autre PC depuis le démarrage.
             self._noter(oid, projets.tirer(self.racine))
@@ -611,6 +695,9 @@ class Gestionnaire:
                 return False
             port = port_libre(o["port"])
             args = [x for x in o["args"] if not (self.reseau and x == "--local")]
+            deja_maj = self._maj_deja_faite(oid)
+            if deja_maj:
+                args.append("--sans-maj")
             cmd = ([sys.executable, "-u", o["script"], "--port", str(port)] + args
                    + projets.arguments(oid, self.racine, self.reseau))
             env = dict(os.environ, PYTHONIOENCODING="utf-8", PYTHONUNBUFFERED="1")
@@ -631,7 +718,8 @@ class Gestionnaire:
                 sortie.close()
             self.job.ajouter(proc)
             e.update(phase="demarrage", proc=proc, port=port, url=None, debut=time.time(),
-                     message="Démarrage (vérification des mises à jour)…")
+                     message="Démarrage…" if deja_maj
+                     else "Démarrage (vérification des mises à jour)…")
             return True
 
     def arreter(self, oid):

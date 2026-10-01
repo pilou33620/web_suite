@@ -63,6 +63,12 @@
     backdrop-filter: blur(6px);
   }
   #passer:hover { border-color: var(--text); }
+  #intro-maj {
+    position: absolute; left: 16px; right: 130px; bottom: calc(26px + env(safe-area-inset-bottom, 0px));
+    font: 500 11px/1.4 var(--mono); letter-spacing: .12em; text-transform: uppercase;
+    color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    pointer-events: none;
+  }
 
   /* ---------- lanceur ---------- */
   .page {
@@ -169,6 +175,7 @@
 <div id="intro-voile" class="cache">
   <iframe id="intro" title="Animation d'introduction WEB·SUITE"></iframe>
   <button id="passer" type="button">Passer ›</button>
+  <div id="intro-maj" aria-live="polite"></div>
 </div>
 
 <div class="page" id="page">
@@ -238,13 +245,14 @@ async function rafraichir() {
   } catch (e) {
     $('#etat-global').textContent = 'LANCEUR ARRÊTÉ';
   }
-  const occupe = etat && etat.outils.some(o => o.phase === 'installation' || o.phase === 'demarrage');
+  const occupe = etat && etat.outils.some(o => ['installation', 'demarrage', 'maj'].includes(o.phase));
   minuteur = setTimeout(rafraichir, occupe ? 800 : 4000);
 }
 
 /* ---------------- rendu ---------------- */
 function statutDe(o) {
   if (o.phase === 'installation') return ['occupe', o.installe ? 'Installation d’openEMS…' : 'Téléchargement…'];
+  if (o.phase === 'maj') return ['occupe', 'Mise à jour…'];
   if (o.phase === 'demarrage') return ['occupe', 'Démarrage…'];
   if (o.phase === 'actif') return ['actif', `En cours · port ${o.port}`];
   if (o.phase === 'erreur') return ['erreur', 'Erreur'];
@@ -272,6 +280,8 @@ function boutons(o) {
     b.push('<button data-action="arreter">■ Annuler</button>');
   } else if (o.phase === 'installation') {
     b.push('<button class="principal" disabled>Installation…</button>');
+  } else if (o.phase === 'maj') {
+    b.push('<button class="principal" disabled>Mise à jour…</button>');
   } else {
     b.push('<button class="principal" data-action="lancer">▶ Lancer</button>');
     if (o.openems === false) b.push('<button data-action="openems" title="Télécharge openEMS (~50 Mo), crée env\\ en Python 3.10/3.11 et installe ses paquets">⚙ Installer openEMS</button>');
@@ -289,6 +299,12 @@ function rendre() {
   $('#tout').hidden = manquants.length === 0;
   $('#tout').textContent = manquants.length === d.outils.length
     ? '⇩ Télécharger les 3 outils' : `⇩ Télécharger les outils manquants (${manquants.length})`;
+
+  // Pendant l'intro : où en est la recherche de mises à jour de chaque outil.
+  const verifies = d.outils.filter(o => o.installe);
+  $('#intro-maj').textContent = verifies.some(o => o.phase === 'maj')
+    ? 'Mises à jour · ' + verifies.map(o => o.nom + (o.phase === 'maj' ? ' …' : ' ✓')).join('  ·  ')
+    : '';
 
   d.outils.forEach((o, i) => {
     let c = cartes.querySelector(`[data-id="${o.id}"]`);
@@ -442,7 +458,17 @@ function brancherIntro() {
   let w;
   try { w = cadre.contentWindow; w.document; } catch (e) { return; }
   // Fin naturelle : on laisse l'écran final (les 3 cartes) un instant, puis fondu.
-  w.addEventListener('websuite:intro-end', () => fermerIntro(900));
+  // Les mises à jour des outils tournent pendant l'animation : on les attend
+  // (30 s au plus) avant de rendre la main.
+  w.addEventListener('websuite:intro-end', () => {
+    const limite = Date.now() + 30000;
+    (function attendre() {
+      if (!introOuverte) return;
+      const enCours = etat && etat.outils.some(o => o.phase === 'maj');
+      if (enCours && Date.now() < limite) return setTimeout(attendre, 300);
+      fermerIntro(900);
+    })();
+  });
   // Un clic ou une touche dans l'intro la saute : ici, cela veut dire « au lanceur ».
   const sauter = ev => { ev.stopPropagation(); ev.preventDefault(); fermerIntro(); };
   w.document.addEventListener('click', sauter, true);

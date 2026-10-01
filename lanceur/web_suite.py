@@ -39,46 +39,13 @@ FICHIERS_SERVIS = {"/": "index.html", "/index.html": "index.html", "/websuite-in
 # ---------------------------------------------------------------------------
 # Mise à jour de WEB_SUITE elle-même, comme les outils le font au démarrage
 # ---------------------------------------------------------------------------
-def _git(*args, timeout=10):
-    return subprocess.run(["git", *args], cwd=DEPOT, capture_output=True, text=True,
-                          timeout=timeout, creationflags=outils.SANS_FENETRE,
-                          env=dict(os.environ, GIT_TERMINAL_PROMPT="0"))
-
-
 def verifier_et_appliquer_maj():
-    """git pull si le dépôt a une branche distante en avance et rien de modifié.
-
-    Renvoie True si une mise à jour vient d'être appliquée (il faut relancer)."""
-    if not os.path.isdir(os.path.join(DEPOT, ".git")):
-        return False                                   # copie zip : rien à comparer
-    if not outils.git_disponible():
-        print("  [!] git introuvable : mises à jour de WEB_SUITE non vérifiées.")
+    """Renvoie True si une mise à jour de WEB_SUITE vient d'être appliquée (il faut relancer)."""
+    print("  Recherche de mises à jour de WEB_SUITE...", flush=True)
+    if outils.maj_depot(DEPOT, lambda t: print("    " + t, flush=True)) != "maj":
         return False
-    print("  Recherche de mises à jour de WEB_SUITE...", end=" ", flush=True)
-    try:
-        if _git("fetch", "--quiet", "origin").returncode != 0:
-            print("GitHub injoignable, ignorée.")
-            return False
-        if _git("rev-parse", "--verify", "@{u}").returncode != 0:
-            print("aucune branche distante suivie.")
-            return False
-        retard = _git("rev-list", "HEAD..@{u}", "--count").stdout.strip()
-        if not retard.isdigit() or int(retard) == 0:
-            print("à jour.")
-            return False
-        if _git("status", "--porcelain", "-uno").stdout.strip():
-            print("\n  [!] %s mise(s) à jour disponible(s), mais des fichiers sont modifiés :"
-                  " ignorée(s)." % retard)
-            return False
-        print("%s mise(s) à jour, téléchargement..." % retard, flush=True)
-        if _git("pull", "--ff-only", "--quiet", timeout=60).returncode != 0:
-            print("  [!] git pull a échoué : on garde la version actuelle.")
-            return False
-        print("  [*] WEB_SUITE mis à jour, redémarrage.", flush=True)
-        return True
-    except (OSError, subprocess.SubprocessError):
-        print("délai dépassé, ignorée.")
-        return False
+    print("  [*] WEB_SUITE mis à jour, redémarrage.", flush=True)
+    return True
 
 
 def redemarrer():
@@ -263,6 +230,9 @@ def main(argv=None):
         print("  Projets : %s" % projets.preparer(racine), flush=True)
 
     Lanceur.gestionnaire = outils.Gestionnaire(racine, reseau=reseau)
+    if args.verifier_maj:
+        # Pendant l'animation d'intro : les outils lancés ensuite n'ont plus à le faire.
+        Lanceur.gestionnaire.verifier_maj_outils()
     try:
         serveur = ouvrir_serveur(args.port, "0.0.0.0" if reseau else "127.0.0.1")
     except OSError as exc:
