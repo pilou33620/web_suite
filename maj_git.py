@@ -14,6 +14,7 @@ PROJETS = [
     "WEB_CAO",
     "WEB_3D",
     "WEB_ANTENNA",
+    "PROJETS",          # projets + LIB_CAO (dépôt WEB_SUITE_PROJETS, géré aussi par le lanceur)
 ]
 
 
