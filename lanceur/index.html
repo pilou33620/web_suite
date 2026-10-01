@@ -358,13 +358,32 @@ cartes.addEventListener('click', async e => {
   rafraichir();
 });
 
+/* Premier envoi depuis un poste neuf : git doit savoir qui signe les commits.
+   Demandé une fois, retenu dans le dépôt PROJETS de ce poste. */
+async function demanderIdentite() {
+  for (;;) {
+    const nom = prompt('Premier envoi depuis ce poste.\nVotre nom pour les commits git :');
+    if (!nom) return false;
+    const email = prompt('Votre adresse e-mail (celle de votre compte GitHub) :');
+    if (!email) return false;
+    const r = await api('/api/identite', { nom, email });
+    if (r.ok) return true;
+    alert(r.message);
+  }
+}
+
 async function envoyer(o) {
   const defaut = `Session ${o.nom} ${new Date().toLocaleString('fr-FR')}`;
   const message = prompt(`${o.nom} : projets modifiés.\nMessage du commit (Annuler = plus tard) :`, defaut);
   if (message === null) return;
   $('#etat-global').textContent = 'ENVOI SUR GITHUB…';
   try {
-    const d = await api('/api/envoyer', { id: o.id, message: message || defaut });
+    const corps = { id: o.id, message: message || defaut };
+    let d = await api('/api/envoyer', corps);
+    if (d.identite) {
+      if (!await demanderIdentite()) { rafraichir(); return; }
+      d = await api('/api/envoyer', corps);
+    }
     etat.outils = d.outils; rendre();
     if (!d.ok) alert(`${o.nom} : ${d.message}`);
   } catch (err) { alert(`${o.nom} : ${err.message}`); }

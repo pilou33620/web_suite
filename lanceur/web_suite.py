@@ -153,9 +153,16 @@ class Lanceur(SimpleHTTPRequestHandler):
             return self._json({"erreur": "JSON invalide"}, HTTPStatus.BAD_REQUEST)
         oid = corps.get("id")
         g = self.gestionnaire
+        if url.path == "/api/identite":
+            ok, texte = projets.definir_identite(g.racine, corps.get("nom"), corps.get("email"))
+            return self._json({"ok": ok, "message": texte})
         if url.path == "/api/envoyer":
             if oid not in outils.PAR_ID:
                 return self._json({"erreur": "outil inconnu"}, HTTPStatus.BAD_REQUEST)
+            if projets.identite_manquante(g.racine):
+                # Poste neuf (Raspberry Pi...) : la page demande nom et e-mail, puis renvoie.
+                return self._json({"ok": False, "identite": True, "outils": g.etat(),
+                                   "message": "git ne connaît pas encore votre nom et e-mail."})
             ok, texte = g.envoyer(oid, str(corps.get("message") or ""))
             return self._json({"ok": ok, "message": texte, "outils": g.etat()})
         actions = {"/api/installer": g.installer, "/api/lancer": g.lancer,

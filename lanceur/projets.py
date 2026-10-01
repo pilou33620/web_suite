@@ -13,6 +13,7 @@ de conflit on s'arrête et on prévient, sans rien fusionner tout seul.
 """
 
 import os
+import re
 import subprocess
 import threading
 
@@ -129,6 +130,33 @@ def ecrire_liste(p):
         f.write("\n".join(lignes))
 
 
+def identite_manquante(racine):
+    """True si git ne sait pas qui signe les commits de PROJETS.
+
+    Cas d'un poste neuf, typiquement le Raspberry Pi : sans user.name et
+    user.email, le commit échoue. La page les demande alors une fois."""
+    p = dossier(racine)
+    return any(_git(p, "config", cle, timeout=10)[0] != 0
+               for cle in ("user.name", "user.email"))
+
+
+def definir_identite(racine, nom, email):
+    """Enregistre nom et e-mail dans la config du dépôt PROJETS (pas en global :
+    on ne règle que ce que le lanceur utilise). Renvoie (ok, message)."""
+    nom = " ".join(str(nom or "").split())
+    email = str(email or "").strip()
+    if not nom or len(nom) > 100:
+        return False, "Nom invalide."
+    if len(email) > 200 or not re.fullmatch(r"[^\s@]+@[^\s@]+\.[^\s@]+", email):
+        return False, "Adresse e-mail invalide."
+    with _verrou:
+        p = dossier(racine)
+        for cle, valeur in (("user.name", nom), ("user.email", email)):
+            if _git(p, "config", cle, valeur, timeout=10)[0] != 0:
+                return False, "git config %s a échoué." % cle
+    return True, "Identité git enregistrée pour PROJETS."
+
+
 def envoyer(racine, oid, message):
     """commit + pull --rebase + push des dossiers de l'outil. Renvoie (ok, message)."""
     p = dossier(racine)
@@ -155,6 +183,10 @@ if __name__ == "__main__":
     # Vérification : un dépôt nu joue GitHub, deux racines jouent deux PC.
     import tempfile
     with tempfile.TemporaryDirectory() as tmp:
+        # Poste neuf : aucune identité git, ni globale ni système.
+        vide = os.path.join(tmp, "gitconfig-vide")
+        open(vide, "w").close()
+        os.environ.update(GIT_CONFIG_GLOBAL=vide, GIT_CONFIG_NOSYSTEM="1")
         nu = os.path.join(tmp, "github.git")
         _git(tmp, "init", "--bare", nu)
         a, b = os.path.join(tmp, "pc_a"), os.path.join(tmp, "pc_b")
@@ -163,8 +195,11 @@ if __name__ == "__main__":
         os.makedirs(os.path.join(dossier(a), "CAO", "carte_alim"))
         open(os.path.join(dossier(a), "CAO", "carte_alim", "projet.cao.json"), "w").close()
         assert en_attente(a, "web_cao")
-        _git(dossier(a), "config", "user.name", "test")
-        _git(dossier(a), "config", "user.email", "test@example.com")
+        assert identite_manquante(a)
+        assert not envoyer(a, "web_cao", "sans identité")[0]
+        assert not definir_identite(a, "test", "pas-un-mail")[0]
+        assert definir_identite(a, " test ", "test@example.com")[0]
+        assert not identite_manquante(a)
         ok, msg = envoyer(a, "web_cao", "nouveau projet")
         assert ok, msg
         assert not en_attente(a, "web_cao")
