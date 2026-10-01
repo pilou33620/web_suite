@@ -146,10 +146,18 @@ class Lanceur(SimpleHTTPRequestHandler):
         return self._json({"ok": True, "outils": g.etat()})
 
 
+class Serveur(ThreadingHTTPServer):
+    def handle_error(self, request, client_address):
+        # Le navigateur a fermé la connexion avant la réponse : rien à dire.
+        if isinstance(sys.exc_info()[1], (ConnectionAbortedError, ConnectionResetError, BrokenPipeError)):
+            return
+        super().handle_error(request, client_address)
+
+
 def ouvrir_serveur(port, hote="127.0.0.1"):
     for essai in range(port, port + 10):
         try:
-            return ThreadingHTTPServer((hote, essai), Lanceur)
+            return Serveur((hote, essai), Lanceur)
         except OSError:
             continue
     raise OSError("aucun port libre entre %d et %d" % (port, port + 9))

@@ -11,13 +11,17 @@ Lanceur des trois outils web :
 
 | Outil | Rôle | Dépôt |
 |---|---|---|
-| **WEB_CAO** | Schéma & routage PCB | https://github.com/pilou33620/WEB_CAO |
-| **WEB_ANTENNA** | Simulation d'antennes RF (openEMS) | https://github.com/pilou33620/WEB_ANTENNA |
-| **WEB_3D** | Modélisation & assemblage 3D | https://github.com/pilou33620/WEB_3D |
+| **WEB_CAO** | Schéma & routage PCB, Gestion LIB, visionneuse IPC-2581, simulation SI / PI / RF, vérification de la carte | https://github.com/pilou33620/WEB_CAO |
+| **WEB_ANTENNA** | Simulation d'antennes RF (openEMS) : import de carte, mode conception, balayage, champs | https://github.com/pilou33620/WEB_ANTENNA |
+| **WEB_3D** | Visionneuse 3D (STEP / IGES / BREP / 3MF / OBJ / STL), mesure façon Fusion 360 | https://github.com/pilou33620/WEB_3D |
 
-Au démarrage, le lanceur joue l'animation d'intro (`websuite-intro.html`), puis affiche une
-carte par outil : **Télécharger** s'il manque, **Lancer** s'il est là. Lancer démarre
-le serveur de l'outil en arrière-plan et ouvre sa page dans un nouvel onglet.
+Le détail de chaque outil est dans son propre README.
+
+Au démarrage, le lanceur joue l'animation d'intro (`websuite-intro.html`) pendant qu'il cherche
+les mises à jour des outils, puis affiche une carte par outil : **Télécharger** s'il manque,
+**Lancer** s'il est là. Lancer démarre le serveur de l'outil en arrière-plan et ouvre sa page
+dans un nouvel onglet. Les projets de tous les outils vivent dans `PROJETS/`, synchronisé
+avec GitHub (voir [Projets](#projets)).
 
 ## Installation
 
@@ -27,10 +31,12 @@ Python 3.8+ suffit pour WEB_SUITE : bibliothèque standard seule (voir `lanceur/
 WEB_TOOLS/                  <- ce dépôt
 ├── installer.cmd / .sh     <- télécharge les outils (Windows / Linux, Raspberry Pi)
 ├── demarrer_WEB_SUITE.cmd / .sh  <- lance WEB·SUITE
-├── lanceur/                <- code du lanceur : web_suite.py, installer.py, outils.py, pages
+├── maj_git.py              <- état git de WEB_SUITE, des outils et de PROJETS (voir plus bas)
+├── lanceur/                <- code du lanceur : web_suite.py, installer.py, outils.py, projets.py, pages
 ├── WEB_CAO/                <- clonés ici par l'installateur, chacun avec son dépôt git,
 ├── WEB_ANTENNA/               ignorés par le .gitignore de WEB_SUITE
-└── WEB_3D/
+├── WEB_3D/
+└── PROJETS/                <- projets + LIB_CAO, dépôt WEB_SUITE_PROJETS (cloné au démarrage)
 ```
 
 1. Cloner ce dépôt : `git clone https://github.com/pilou33620/WEB_SUITE.git WEB_TOOLS`.
@@ -49,9 +55,8 @@ Au premier démarrage sans aucun outil, `web_suite.py` pose la même question en
 console. La page propose aussi **Télécharger** sur chaque carte et un bouton
 pour tout télécharger d'un coup.
 
-Chaque outil garde son propre dépôt git et se met à jour seul au démarrage.
-git est recommandé (https://git-scm.com) : sans lui, l'outil est téléchargé en zip
-et ne se met plus à jour.
+git est recommandé (https://git-scm.com) : sans lui, les outils sont téléchargés en zip,
+ne se mettent plus à jour, et les projets ne sont pas synchronisés.
 
 Dépendances propres aux outils :
 
@@ -65,6 +70,48 @@ Dépendances propres aux outils :
   guide en tête de `WEB_ANTENNA/requirements.txt`.
 - **WEB_3D** : aucune.
 
+## Mises à jour
+
+Chaque dépôt garde son propre git et se met à jour par `git pull --ff-only`, jamais
+par-dessus des fichiers modifiés (« des fichiers sont modifiés » s'affiche alors et rien
+n'est touché) :
+
+- **WEB_SUITE** se vérifie avant d'ouvrir son serveur et redémarre seul s'il vient d'être mis à jour.
+- **Les outils installés** se vérifient tous en parallèle pendant l'animation d'intro :
+  la carte affiche « Mise à jour… » et le bandeau de l'intro « Mises à jour · WEB_CAO ✓ … ».
+  L'intro attend la fin (30 s au plus) avant de rendre la main. Un outil lancé dans les
+  10 minutes qui suivent reçoit `--sans-maj` et démarre sans refaire la vérification ;
+  au-delà, il revérifie lui-même.
+- `--sans-maj` coupe les deux.
+
+## Projets
+
+Les projets et la bibliothèque de composants de WEB_CAO sont dans `PROJETS/`, un dépôt git
+à part (https://github.com/pilou33620/WEB_SUITE_PROJETS), ignoré par WEB_SUITE :
+
+```
+PROJETS/
+├── projets.txt       <- liste des projets par outil, réécrite à chaque envoi
+├── CAO/<projet>/     <- WEB_CAO --projets
+├── LIB_CAO/          <- WEB_CAO --lib (catalogue, empreintes, symboles, modèles)
+├── ANTENNA/<projet>/ <- WEB_ANTENNA --projets (les calculs/ openEMS ne sont pas envoyés)
+└── 3D/               <- réservé à WEB_3D
+```
+
+- **Au démarrage**, le lanceur le clone (ou le crée en local si GitHub est vide ou
+  injoignable), puis le met à jour (`pull --rebase`).
+- **Avant chaque lancement d'outil**, il tire à nouveau : un projet ou la LIB modifiés sur
+  un autre poste sont donc à jour. L'outil est lancé pointé sur ses dossiers de `PROJETS/`.
+- **À l'arrêt d'un outil**, s'il a des modifications, la page demande un message de commit
+  puis envoie (commit + pull + push) ses seuls dossiers. Annuler remet à plus tard : le bouton
+  **⇧ Envoyer sur GitHub** reste sur la carte tant que quelque chose attend.
+- **Poste neuf** (Raspberry Pi…) : si git ne connaît ni nom ni e-mail, la page les demande
+  au premier envoi et les enregistre dans la config du dépôt `PROJETS` seulement (pas en global).
+  Au premier push, Git Credential Manager ouvre sa fenêtre de connexion GitHub.
+- **Conflit** : rien n'est fusionné automatiquement ; le lanceur annule le rebase et indique
+  le dossier où régler la situation à la main. Hors ligne, tout reste en local et part au
+  prochain envoi réussi.
+
 ## Options
 
 ```
@@ -74,7 +121,9 @@ python lanceur/web_suite.py [--port 8100] [--racine DOSSIER] [--installer]
 
 - `--reseau` : le lanceur et les outils écoutent sur le réseau local ; l'adresse
   **Réseau** affichée s'ouvre depuis une tablette, un téléphone ou un autre poste.
-  C'est le défaut sur Raspberry Pi. Aucune authentification : réseau de confiance uniquement.
+  C'est le défaut sur Raspberry Pi. WEB_CAO y est lancé avec `--projets-reseau` pour que
+  ses projets et la LIB restent ouverts depuis l'autre appareil (confinés à `PROJETS/`).
+  Aucune authentification : réseau de confiance uniquement.
   `--local` force l'écoute sur `127.0.0.1` seulement (défaut ailleurs).
 
 - Le navigateur s'ouvre automatiquement, sauf sur Raspberry Pi.
@@ -82,7 +131,7 @@ python lanceur/web_suite.py [--port 8100] [--racine DOSSIER] [--installer]
 
 - `--racine` : dossier contenant les outils (défaut : la racine du dépôt, parent de `lanceur/`).
 - `--installer` : ouvre seulement le menu de téléchargement.
-- `--sans-maj` : ne pas vérifier les mises à jour de WEB_SUITE sur GitHub.
+- `--sans-maj` : ne vérifier les mises à jour ni de WEB_SUITE ni des outils.
 - La page accepte `?sans-intro` pour sauter l'animation. Elle ne la rejoue pas
   non plus quand on recharge l'onglet ; le bouton **↻ Intro** la relance.
 
@@ -91,7 +140,23 @@ python lanceur/web_suite.py [--port 8100] [--racine DOSSIER] [--installer]
 - Le lanceur n'écoute que sur `127.0.0.1` (sauf `--reseau`) et refuse les requêtes d'action sans
   l'en-tête `X-WebSuite` : aucune page tierce ne peut lancer ou télécharger un outil.
 - Les outils sont démarrés avec `--local --sans-navigateur` (sans `--local` en mode réseau) sur leur port habituel
-  (CAO 8000, ANTENNA 8732, 3D 8139) ou le suivant s'il est pris.
+  (CAO 8000, ANTENNA 8732, 3D 8139) ou le suivant s'il est pris, avec `--projets` / `--lib`
+  vers `PROJETS/`, et `--sans-maj` si le lanceur vient de les vérifier.
 - Leur sortie console va dans `lanceur/journaux/<outil>.log`, lisible depuis le bouton
   **Journal** de chaque carte.
 - Fermer la fenêtre de WEB_SUITE (ou Ctrl+C) arrête les outils lancés depuis elle.
+
+## maj_git.py
+
+`python maj_git.py` fait le tour de WEB_SUITE, des trois outils et de `PROJETS/` :
+modifications locales, commits à pousser ou à récupérer. Pour chaque dépôt en retard, il
+propose de commiter, de tirer (`pull --rebase`) puis de pousser, en demandant à chaque étape.
+
+## Vérifications
+
+```
+python lanceur/projets.py
+```
+
+Joue deux postes et un faux GitHub (dépôt nu) : création, identité git manquante, envoi,
+clonage sur l'autre poste, `projets.txt`. Affiche `OK` si tout passe.
