@@ -2,6 +2,8 @@
 WEB_CAO/
 WEB_ANTENNA/
 WEB_3D/
+# Les projets : leur propre dépôt (WEB_SUITE_PROJETS), géré par lanceur/projets.py
+PROJETS/
 
 # Ancien emplacement du lanceur
 WEB_SUITE/

@@ -276,13 +276,14 @@ function boutons(o) {
     b.push('<button class="principal" data-action="lancer">▶ Lancer</button>');
     if (o.openems === false) b.push('<button data-action="openems" title="Télécharge openEMS (~50 Mo), crée env\\ en Python 3.10/3.11 et installe ses paquets">⚙ Installer openEMS</button>');
   }
+  if (o.a_envoyer && o.phase !== 'installation') b.push('<button data-action="envoyer" title="commit + push des projets de cet outil vers GitHub">⇧ Envoyer sur GitHub</button>');
   b.push('<button class="discret" data-action="journal">Journal</button>');
   return b.join('');
 }
 
 function rendre() {
   const d = etat;
-  $('#racine').textContent = `Dossier des outils : ${d.racine}`;
+  $('#racine').textContent = `Dossier des outils : ${d.racine} · Projets : ${d.projets}`;
   $('#sans-git').hidden = d.git;
   const manquants = d.outils.filter(o => !o.installe && o.phase !== 'installation');
   $('#tout').hidden = manquants.length === 0;
@@ -342,17 +343,33 @@ cartes.addEventListener('click', async e => {
   const o = etat.outils.find(x => x.id === id);
   const action = btn.dataset.action;
   if (action === 'journal') return ouvrirJournal(o);
+  if (action === 'envoyer') return envoyer(o);
   if (action === 'lancer') { const w = ongletAttente(o); if (w) attente[id] = w; }
   btn.disabled = true;
   try {
     const d = await api('/api/' + action, { id });
     etat.outils = d.outils; rendre();
+    // Fin de session : on propose tout de suite d'envoyer ce qui a changé.
+    if (action === 'arreter' && d.outils.find(x => x.id === id).a_envoyer) await envoyer(o);
   } catch (err) {
     alert(`${o.nom} : ${err.message}`);
     if (attente[id]) { attente[id].close(); delete attente[id]; }
   }
   rafraichir();
 });
+
+async function envoyer(o) {
+  const defaut = `Session ${o.nom} ${new Date().toLocaleString('fr-FR')}`;
+  const message = prompt(`${o.nom} : projets modifiés.\nMessage du commit (Annuler = plus tard) :`, defaut);
+  if (message === null) return;
+  $('#etat-global').textContent = 'ENVOI SUR GITHUB…';
+  try {
+    const d = await api('/api/envoyer', { id: o.id, message: message || defaut });
+    etat.outils = d.outils; rendre();
+    if (!d.ok) alert(`${o.nom} : ${d.message}`);
+  } catch (err) { alert(`${o.nom} : ${err.message}`); }
+  rafraichir();
+}
 
 $('#tout').addEventListener('click', async () => {
   $('#tout').disabled = true;

@@ -24,6 +24,8 @@ import time
 import urllib.request
 import zipfile
 
+import projets
+
 ICI = os.path.dirname(os.path.abspath(__file__))       # lanceur/
 RACINE_DEFAUT = os.path.dirname(ICI)                   # racine du dépôt, où vivent les outils
 DOSSIER_JOURNAUX = os.path.join(ICI, "journaux")
@@ -511,6 +513,7 @@ class Gestionnaire:
     def etat(self):
         sortie = []
         for o in CATALOGUE:
+            a_envoyer = projets.en_attente(self.racine, o["id"])    # git status, hors verrou
             with self.verrou:
                 e = self.etats[o["id"]]
                 self._actualiser(o, e)
@@ -521,7 +524,7 @@ class Gestionnaire:
                     "openems": openems_pret(o, self.racine),
                     "dossier": dossier(o, self.racine),
                     "phase": e["phase"], "message": e["message"],
-                    "url": e["url"], "port": e["port"],
+                    "url": e["url"], "port": e["port"], "a_envoyer": a_envoyer,
                 })
         return sortie
 
@@ -595,6 +598,9 @@ class Gestionnaire:
 
     def lancer(self, oid):
         o = PAR_ID[oid]
+        if self.etats[oid]["phase"] not in ("demarrage", "actif") and git_disponible():
+            # La lib ou un projet a pu changer sur un autre PC depuis le démarrage.
+            self._noter(oid, projets.tirer(self.racine))
         with self.verrou:
             e = self.etats[oid]
             self._actualiser(o, e)
@@ -605,7 +611,8 @@ class Gestionnaire:
                 return False
             port = port_libre(o["port"])
             args = [x for x in o["args"] if not (self.reseau and x == "--local")]
-            cmd = [sys.executable, "-u", o["script"], "--port", str(port)] + args
+            cmd = ([sys.executable, "-u", o["script"], "--port", str(port)] + args
+                   + projets.arguments(oid, self.racine))
             env = dict(os.environ, PYTHONIOENCODING="utf-8", PYTHONUNBUFFERED="1")
             with open(self.journal(oid), "a", encoding="utf-8") as f:
                 f.write("\n=== lancement %s : %s\n" % (time.strftime("%Y-%m-%d %H:%M:%S"),
@@ -635,6 +642,11 @@ class Gestionnaire:
         if proc is not None and proc.poll() is None:
             _tuer(proc)
         return True
+
+    def envoyer(self, oid, message):
+        ok, texte = projets.envoyer(self.racine, oid, message)
+        self._noter(oid, texte)
+        return ok, texte
 
     def arreter_tout(self):
         for o in CATALOGUE:

@@ -28,6 +28,7 @@ from urllib.parse import parse_qs, urlparse
 
 import installer
 import outils
+import projets
 
 ICI = outils.ICI
 DEPOT = os.path.dirname(ICI)                           # racine du dépôt git WEB_SUITE
@@ -125,7 +126,7 @@ class Lanceur(SimpleHTTPRequestHandler):
             return self._fichier(FICHIERS_SERVIS[url.path])
         if url.path == "/api/etat":
             return self._json({"racine": g.racine, "git": outils.git_disponible(),
-                               "outils": g.etat()})
+                               "projets": projets.dossier(g.racine), "outils": g.etat()})
         if url.path == "/api/journal":
             oid = parse_qs(url.query).get("id", [""])[0]
             if oid not in outils.PAR_ID:
@@ -152,6 +153,11 @@ class Lanceur(SimpleHTTPRequestHandler):
             return self._json({"erreur": "JSON invalide"}, HTTPStatus.BAD_REQUEST)
         oid = corps.get("id")
         g = self.gestionnaire
+        if url.path == "/api/envoyer":
+            if oid not in outils.PAR_ID:
+                return self._json({"erreur": "outil inconnu"}, HTTPStatus.BAD_REQUEST)
+            ok, texte = g.envoyer(oid, str(corps.get("message") or ""))
+            return self._json({"ok": ok, "message": texte, "outils": g.etat()})
         actions = {"/api/installer": g.installer, "/api/lancer": g.lancer,
                    "/api/arreter": g.arreter, "/api/openems": g.installer_openems}
         if url.path not in actions:
@@ -246,6 +252,9 @@ def main(argv=None):
         print("\n  Aucun outil installé dans %s." % racine)
         installer.installer(installer.menu(racine), racine)
 
+    if outils.git_disponible():
+        print("  Projets : %s" % projets.preparer(racine), flush=True)
+
     Lanceur.gestionnaire = outils.Gestionnaire(racine, reseau=reseau)
     try:
         serveur = ouvrir_serveur(args.port, "0.0.0.0" if reseau else "127.0.0.1")
@@ -267,6 +276,7 @@ def main(argv=None):
     else:
         print("  Réseau    désactivé (--reseau pour y accéder depuis un autre appareil)")
     print("  Outils    %s" % racine)
+    print("  Projets   %s" % projets.dossier(racine))
     for o in outils.CATALOGUE:
         print("            %-12s %s" % (o["nom"], "installé" if outils.est_installe(o, racine)
                                          else "non installé"))
