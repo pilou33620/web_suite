@@ -43,3 +43,14 @@ jobs:
               assert corps(f) == ref, f + " : verifier_et_appliquer_maj diverge de WEB_CAO"
           print("les trois copies sont identiques")
           EOF
+
+      # Même raison pour le lecteur IPC-2581 : WEB_CAO et WEB_ANTENNA en ont
+      # chacun une copie, qui avait divergé (chacune avait une correction que
+      # l'autre n'avait pas). Une correction se fait désormais des deux côtés.
+      - name: Outils — le lecteur IPC-2581 est le même dans WEB_CAO et WEB_ANTENNA
+        run: |
+          for f in ipc2581_data.py ipc2581_parser.py ipc2581_json.py; do
+            diff <(tr -d '\r' < ../WEB_CAO/python/$f) <(tr -d '\r' < ../WEB_ANTENNA/python/$f) > /dev/null \
+              || { echo "python/$f diffère entre WEB_CAO et WEB_ANTENNA"; exit 1; }
+          done
+          echo "lecteur IPC-2581 identique dans les deux outils"
