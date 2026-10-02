@@ -107,4 +107,29 @@ with tempfile.TemporaryDirectory() as tmp:
 windows, outils.WINDOWS = outils.WINDOWS, False
 verifier("pas de bouton openEMS hors Windows", outils.openems_pret(outils.PAR_ID["web_antenna"]), None)
 outils.WINDOWS = windows
+
+# openEMS : une archive dont l'empreinte n'est pas la bonne n'est pas extraite.
+import io            # noqa: E402
+import zipfile       # noqa: E402
+fausse = io.BytesIO()
+with zipfile.ZipFile(fausse, "w") as z:
+    z.writestr("openEMS/CSXCAD.dll", b"pas la vraie")
+
+
+class Reponse(io.BytesIO):
+    headers = {}
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *_):
+        return False
+
+
+vraie_urlopen, outils.urllib.request.urlopen = outils.urllib.request.urlopen, lambda *a, **k: Reponse(fausse.getvalue())
+with tempfile.TemporaryDirectory() as tmp:
+    cible = os.path.join(tmp, "openEMS")
+    verifier("archive refusée", outils._telecharger_openems(cible, lambda t: None), False)
+    verifier("rien d'extrait ni de .part laissé", sorted(os.listdir(tmp)), [])
+outils.urllib.request.urlopen = vraie_urlopen
 print("OK")

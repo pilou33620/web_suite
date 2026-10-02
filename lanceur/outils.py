@@ -12,6 +12,7 @@ Disposition attendue sur le disque :
     └── WEB_3D/
 """
 
+import hashlib
 import io
 import os
 import re
@@ -80,6 +81,11 @@ JOURNAL_MAX = 1024 * 1024  # o : au-delà, le journal passe en .log.1 au lanceme
 # que pour CPython 3.10 et 3.11 : c'est ce qui impose un venv à part.
 OPENEMS_URL = ("https://github.com/thliebig/openEMS-Project/releases/download/"
                "v0.0.36/openEMS_v0.0.36.zip")
+# L'empreinte de cette archive, relevée le 02/10/2026 (GitHub n'en publie pas
+# pour cette version). Les binaires qu'elle contient sont exécutés : une archive
+# tronquée ou différente est refusée avant d'être extraite. Changer OPENEMS_URL
+# demande de changer l'empreinte avec elle.
+OPENEMS_SHA256 = "e0d62b1176c0897ad18876b45667de877d7d3b58b37c0be95545f9b988896059"
 OPENEMS_VERIF = (
     "import os,sys\n"
     "d=sys.argv[1]\n"
@@ -336,6 +342,7 @@ def _telecharger_openems(cible, ecrire):
     """Télécharge l'archive openEMS et l'extrait dans `cible`. Renvoie True si CSXCAD.dll y est."""
     ecrire("Téléchargement de %s" % OPENEMS_URL)
     tmp = cible + ".zip.part"
+    empreinte = hashlib.sha256()
     try:
         with urllib.request.urlopen(OPENEMS_URL, timeout=60) as rep, open(tmp, "wb") as f:
             total = int(rep.headers.get("Content-Length") or 0)
@@ -345,10 +352,15 @@ def _telecharger_openems(cible, ecrire):
                 if not bloc:
                     break
                 f.write(bloc)
+                empreinte.update(bloc)
                 lu += len(bloc)
                 if total and lu * 100 // total >= palier + 10:
                     palier = lu * 100 // total // 10 * 10
                     ecrire("  %d %%  (%.0f / %.0f Mo)" % (palier, lu / 1e6, total / 1e6))
+        if empreinte.hexdigest() != OPENEMS_SHA256:
+            ecrire("[X] L'archive téléchargée n'est pas celle attendue (empreinte SHA-256 "
+                   "différente) : rien n'est installé. Téléchargement tronqué ? Réessayez.")
+            return False
         with zipfile.ZipFile(tmp) as z:
             # L'archive range tout sous un dossier (openEMS/ aujourd'hui) : on
             # prend celui qui contient CSXCAD.dll, pour ne pas finir en openEMS/openEMS/.
