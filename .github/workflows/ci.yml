@@ -1,0 +1,45 @@
+name: bancs d'essai
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  essais:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Projets — deux postes et un faux GitHub
+        run: python lanceur/projets.py
+
+      - name: Serveur du lanceur — Host, jeton du mode réseau, X-WebSuite
+        run: python lanceur/banc_serveur.py
+
+      # La mise à jour au démarrage est recopiée dans chaque outil, qui doit
+      # tourner seul, sans le lanceur : on ne peut pas la partager. On vérifie
+      # donc que les trois copies restent la même.
+      - name: Outils — la mise à jour automatique est la même partout
+        run: |
+          for o in WEB_CAO WEB_ANTENNA WEB_3D; do
+            git clone --quiet --depth 1 https://github.com/pilou33620/$o.git ../$o
+          done
+          python - <<'EOF'
+          import ast
+          def corps(f):
+              src = open(f, encoding="utf-8").read()
+              for n in ast.walk(ast.parse(src)):
+                  if isinstance(n, ast.FunctionDef) and n.name == "verifier_et_appliquer_maj":
+                      texte = ast.get_source_segment(src, n)
+                      for nom in ("WEB_CAO", "WEB_ANTENNA", "WEB_3D", "RACINE", "ROOT"):
+                          texte = texte.replace(nom, "X")
+                      return [l.split("#")[0].rstrip() for l in texte.splitlines()]
+          ref = corps("../WEB_CAO/web_CAO.py")
+          for f in ("../WEB_ANTENNA/web_antenna.py", "../WEB_3D/web_3D.py"):
+              assert corps(f) == ref, f + " : verifier_et_appliquer_maj diverge de WEB_CAO"
+          print("les trois copies sont identiques")
+          EOF
