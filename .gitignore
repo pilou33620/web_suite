@@ -10,6 +10,8 @@ WEB_SUITE/
 
 # Journaux des outils lancés par le lanceur
 journaux/
+# Jeton du mode --reseau (lanceur/web_suite.py)
+lanceur/jeton-reseau.txt
 
 # Python
 __pycache__/

@@ -123,7 +123,10 @@ python lanceur/web_suite.py [--port 8100] [--racine DOSSIER] [--installer]
   **Réseau** affichée s'ouvre depuis une tablette, un téléphone ou un autre poste.
   C'est le défaut sur Raspberry Pi. WEB_CAO y est lancé avec `--projets-reseau` pour que
   ses projets et la LIB restent ouverts depuis l'autre appareil (confinés à `PROJETS/`).
-  Aucune authentification : réseau de confiance uniquement.
+  L'adresse **Réseau** se termine par `?jeton=…` : le lanceur exige ce jeton de tout
+  autre appareil (le premier passage le range dans un cookie, l'adresse se garde en favori).
+  Il est conservé dans `lanceur/jeton-reseau.txt` ; supprimer ce fichier en crée un neuf.
+  Les outils, eux, restent sans authentification : réseau de confiance uniquement.
   `--local` force l'écoute sur `127.0.0.1` seulement (défaut ailleurs).
 
 - Le navigateur s'ouvre automatiquement, sauf sur Raspberry Pi.
@@ -139,6 +142,8 @@ python lanceur/web_suite.py [--port 8100] [--racine DOSSIER] [--installer]
 
 - Le lanceur n'écoute que sur `127.0.0.1` (sauf `--reseau`) et refuse les requêtes d'action sans
   l'en-tête `X-WebSuite` : aucune page tierce ne peut lancer ou télécharger un outil.
+  Il refuse aussi tout en-tête `Host` qui n'est ni une adresse IP, ni `localhost`, ni le nom
+  du poste : une page piégée par DNS rebinding ne peut pas se faire passer pour lui.
 - Les outils sont démarrés avec `--local --sans-navigateur` (sans `--local` en mode réseau) sur leur port habituel
   (CAO 8000, ANTENNA 8732, 3D 8139) ou le suivant s'il est pris, avec `--projets` / `--lib`
   vers `PROJETS/`, et `--sans-maj` si le lanceur vient de les vérifier.
@@ -160,3 +165,10 @@ python lanceur/projets.py
 
 Joue deux postes et un faux GitHub (dépôt nu) : création, identité git manquante, envoi,
 clonage sur l'autre poste, `projets.txt`. Affiche `OK` si tout passe.
+
+```
+python lanceur/banc_serveur.py
+```
+
+Serveur du lanceur avec un gestionnaire factice : `Host` étranger, `X-WebSuite`, taille
+des requêtes, jeton du mode réseau (refus, cookie, ce poste exempté). Affiche `OK`.

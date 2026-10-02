@@ -10,11 +10,16 @@ et ouvre leur page. Fermer cette fenêtre arrête les outils lancés depuis elle
 
 Bibliothèque standard seule. Par défaut le serveur n'écoute que sur 127.0.0.1 :
 il lance des programmes. Avec --reseau (défaut sur Raspberry Pi), le lanceur et
-les outils écoutent sur le réseau local, sans authentification : à réserver à un
-réseau de confiance. --local force l'écoute locale.
+les outils écoutent sur le réseau local ; le lanceur exige alors des autres
+appareils le jeton de l'adresse « Réseau » affichée en console. Les outils, eux,
+restent sans authentification : à réserver à un réseau de confiance. --local
+force l'écoute locale.
 """
 
 import argparse
+import hmac
+import ipaddress
+import secrets
 import socket
 import json
 import os
@@ -23,6 +28,7 @@ import sys
 import threading
 import webbrowser
 from http import HTTPStatus
+from http.cookies import CookieError, SimpleCookie
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from urllib.parse import parse_qs, urlparse
 
@@ -34,6 +40,49 @@ ICI = outils.ICI
 DEPOT = os.path.dirname(ICI)                           # racine du dépôt git WEB_SUITE
 PORT_DEFAUT = 8100
 FICHIERS_SERVIS = {"/": "index.html", "/index.html": "index.html", "/websuite-intro.html": "websuite-intro.html"}
+CORPS_MAX = 64 * 1024                                  # les actions ne portent qu'un id et un message
+FICHIER_JETON = os.path.join(ICI, "jeton-reseau.txt")  # ignoré par git
+BISCUIT = "websuite_jeton"
+
+
+def hote_permis(entete):
+    """L'en-tête Host désigne-t-il ce poste ? (parade au DNS rebinding)
+
+    Une page piégée qui fait résoudre son nom vers 127.0.0.1 devient « de même
+    origine », ajoute X-WebSuite sans pré-vol et pilote le lanceur ; elle envoie
+    alors SON nom dans Host. Une IP littérale ne se rebranche pas : on accepte
+    toutes les IP (la tablette tape celle du poste), localhost et le nom du poste.
+    """
+    h = (entete or "").strip().lower().rstrip(".")
+    if h.startswith("["):
+        h = h[1:].split("]")[0]
+    elif h.count(":") == 1:
+        h = h.split(":")[0]
+    nom = socket.gethostname().lower()
+    if h in ("", "localhost", nom, nom + ".local"):
+        return True
+    try:
+        ipaddress.ip_address(h.split("%")[0])
+        return True
+    except ValueError:
+        return False
+
+
+def jeton_reseau():
+    """Le jeton du mode réseau, gardé d'un démarrage à l'autre : les favoris
+    de la tablette restent bons. Supprimer le fichier en crée un neuf."""
+    try:
+        with open(FICHIER_JETON, encoding="utf-8") as f:
+            jeton = f.read().strip()
+        if len(jeton) >= 16:
+            return jeton
+    except OSError:
+        pass
+    jeton = secrets.token_urlsafe(16)
+    fd = os.open(FICHIER_JETON, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
+    with os.fdopen(fd, "w", encoding="utf-8") as f:
+        f.write(jeton + "\n")
+    return jeton
 
 
 # ---------------------------------------------------------------------------
@@ -62,9 +111,43 @@ def redemarrer():
 # ---------------------------------------------------------------------------
 class Lanceur(SimpleHTTPRequestHandler):
     gestionnaire = None                                # outils.Gestionnaire
+    jeton = None                                       # en --reseau : exigé des autres appareils
 
     def log_message(self, fmt, *args):                 # la console reste lisible
         pass
+
+    def parse_request(self):
+        if not super().parse_request():
+            return False
+        if not hote_permis(self.headers.get("Host")):
+            self.send_error(HTTPStatus.FORBIDDEN, "Host non autorise (protection DNS rebinding)")
+            return False
+        if self.jeton and not self._de_ce_poste() and not self._jeton_recu():
+            # Sans cela, tout appareil du réseau poussait sur GitHub avec les
+            # identifiants de ce poste et changeait son identité git.
+            self.send_error(HTTPStatus.FORBIDDEN, "Jeton manquant",
+                            "Ouvrir l'adresse Reseau affichee dans la console du lanceur "
+                            "(elle se termine par ?jeton=...).")
+            return False
+        return True
+
+    def _de_ce_poste(self):
+        try:
+            ip = ipaddress.ip_address(self.client_address[0].split("%")[0])
+        except ValueError:
+            return False
+        return (getattr(ip, "ipv4_mapped", None) or ip).is_loopback
+
+    def _jeton_url(self):
+        return parse_qs(urlparse(self.path).query).get("jeton", [""])[0]
+
+    def _jeton_recu(self):
+        try:
+            biscuit = SimpleCookie(self.headers.get("Cookie") or "")
+        except CookieError:
+            biscuit = {}
+        recus = [self._jeton_url(), biscuit[BISCUIT].value if BISCUIT in biscuit else ""]
+        return any(r and hmac.compare_digest(r, self.jeton) for r in recus)
 
     def _json(self, donnees, statut=HTTPStatus.OK):
         corps = json.dumps(donnees, ensure_ascii=False).encode("utf-8")
@@ -89,6 +172,16 @@ class Lanceur(SimpleHTTPRequestHandler):
     def do_GET(self):
         url = urlparse(self.path)
         g = self.gestionnaire
+        if self.jeton and self._jeton_url():
+            # Le jeton passe dans un cookie et quitte l'adresse : il ne reste
+            # ni dans l'historique, ni dans un lien recopié.
+            self.send_response(HTTPStatus.SEE_OTHER)
+            self.send_header("Set-Cookie", "%s=%s; Path=/; Max-Age=31536000; HttpOnly; SameSite=Strict"
+                             % (BISCUIT, self.jeton))
+            self.send_header("Location", url.path or "/")
+            self.send_header("Content-Length", "0")
+            self.end_headers()
+            return
         if url.path in FICHIERS_SERVIS:
             return self._fichier(FICHIERS_SERVIS[url.path])
         if url.path == "/api/etat":
@@ -115,8 +208,13 @@ class Lanceur(SimpleHTTPRequestHandler):
         url = urlparse(self.path)
         try:
             longueur = int(self.headers.get("Content-Length") or 0)
+            if not 0 <= longueur <= CORPS_MAX:
+                self.close_connection = True
+                return self._json({"erreur": "requête trop grande"}, HTTPStatus.REQUEST_ENTITY_TOO_LARGE)
             corps = json.loads(self.rfile.read(longueur) or b"{}")
         except ValueError:
+            return self._json({"erreur": "JSON invalide"}, HTTPStatus.BAD_REQUEST)
+        if not isinstance(corps, dict):
             return self._json({"erreur": "JSON invalide"}, HTTPStatus.BAD_REQUEST)
         oid = corps.get("id")
         g = self.gestionnaire
@@ -238,6 +336,7 @@ def main(argv=None):
         print("  Projets : %s" % projets.preparer(racine), flush=True)
 
     Lanceur.gestionnaire = outils.Gestionnaire(racine, reseau=reseau)
+    Lanceur.jeton = jeton_reseau() if reseau else None
     if args.verifier_maj:
         # Pendant l'animation d'intro : les outils lancés ensuite n'ont plus à le faire.
         Lanceur.gestionnaire.verifier_maj_outils()
@@ -253,11 +352,15 @@ def main(argv=None):
     print("  " + "-" * 48)
     print("  Adresse   %s" % url)
     ip = adresse_reseau() if reseau else None
-    url_reseau = "http://%s:%d/" % (ip, serveur.server_address[1]) if ip else None
+    url_reseau = ("http://%s:%d/?jeton=%s" % (ip, serveur.server_address[1], Lanceur.jeton)
+                  if ip else None)
     if url_reseau:
-        print("  Réseau    %s   (tablette, téléphone, autre poste)" % url_reseau)
+        print("  Réseau    %s" % url_reseau)
+        print("            (tablette, téléphone, autre poste : le jeton est exigé ;")
+        print("             supprimer lanceur/jeton-reseau.txt pour en changer)")
     elif reseau:
         print("  Réseau    écoute sur le réseau, adresse IP du poste introuvable")
+        print("            jeton à ajouter à l'adresse : ?jeton=%s" % Lanceur.jeton)
     else:
         print("  Réseau    désactivé (--reseau pour y accéder depuis un autre appareil)")
     print("  Outils    %s" % racine)
