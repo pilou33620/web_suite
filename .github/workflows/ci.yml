@@ -54,3 +54,21 @@ jobs:
               || { echo "python/$f diffère entre WEB_CAO et WEB_ANTENNA"; exit 1; }
           done
           echo "lecteur IPC-2581 identique dans les deux outils"
+
+      # La feuille de l'assistant IA : WEB_ANTENNA reprend celle de WEB_CAO et
+      # n'ajoute qu'EN FIN de fichier, après son propre bandeau. Tout ce qui
+      # précède ce bandeau doit rester un début de la feuille de WEB_CAO :
+      # WEB_CAO peut ajouter à la fin (ce que WEB_ANTENNA n'utilise pas), mais
+      # une règle changée au milieu d'un côté seulement est une divergence.
+      - name: Outils — la feuille de l'assistant IA de WEB_ANTENNA suit celle de WEB_CAO
+        run: |
+          python - <<'PY'
+          def lire(f):
+              s = open(f, encoding="utf-8").read().replace("\r\n", "\n")
+              return s[s.index("*/") + 2:]          # sans le bandeau de tête
+          cao = lire("../WEB_CAO/commun/ia-assistant.css")
+          ant = lire("../WEB_ANTENNA/css/ia.css")
+          commun = ant[:ant.index("/* ====", 1)].rstrip()
+          assert cao.startswith(commun), "css/ia.css de WEB_ANTENNA a divergé de commun/ia-assistant.css de WEB_CAO"
+          print("feuille de l'assistant : %d lignes communes, identiques" % commun.count("\n"))
+          PY
