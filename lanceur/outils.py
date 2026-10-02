@@ -74,6 +74,7 @@ CATALOGUE = [
 PAR_ID = {o["id"]: o for o in CATALOGUE}
 
 DELAI_DEMARRAGE = 90       # s : la vérification GitHub des outils peut prendre du temps
+JOURNAL_MAX = 1024 * 1024  # o : au-delà, le journal passe en .log.1 au lancement suivant
 
 # Dernière version stable d'openEMS pour Windows. Ses roues Python n'existent
 # que pour CPython 3.10 et 3.11 : c'est ce qui impose un venv à part.
@@ -275,8 +276,11 @@ def _python_env(outil, racine):
 
 
 def openems_pret(outil, racine=RACINE_DEFAUT):
-    """Test rapide (sans lancer Python) : binaires en place et roues installées dans env/."""
-    if outil.get("dependances") != "openems":
+    """Test rapide (sans lancer Python) : binaires en place et roues installées dans env/.
+
+    None hors Windows : l'installation automatique y est refusée (voir
+    installer_openems), la page n'a donc pas à proposer son bouton."""
+    if outil.get("dependances") != "openems" or not WINDOWS:
         return None
     paquets = os.path.join(dossier(outil, racine), "env", "Lib", "site-packages")
     return (os.path.isfile(os.path.join(_dossier_openems(outil, racine), "CSXCAD.dll"))
@@ -701,6 +705,7 @@ class Gestionnaire:
             cmd = ([sys.executable, "-u", o["script"], "--port", str(port)] + args
                    + projets.arguments(oid, self.racine, self.reseau))
             env = dict(os.environ, PYTHONIOENCODING="utf-8", PYTHONUNBUFFERED="1")
+            _tourner(self.journal(oid))
             with open(self.journal(oid), "a", encoding="utf-8") as f:
                 f.write("\n=== lancement %s : %s\n" % (time.strftime("%Y-%m-%d %H:%M:%S"),
                                                         " ".join(cmd)))
@@ -739,6 +744,18 @@ class Gestionnaire:
     def arreter_tout(self):
         for o in CATALOGUE:
             self.arreter(o["id"])
+
+
+def _tourner(chemin):
+    """Un journal trop gros passe en .log.1 (l'ancien .log.1 est remplacé).
+
+    Au lancement seulement, avant d'y écrire : l'outil précédent est arrêté,
+    personne n'a le fichier ouvert. Le bouton Journal ne lit que la fin du .log."""
+    try:
+        if os.path.getsize(chemin) > JOURNAL_MAX:
+            os.replace(chemin, chemin + ".1")
+    except OSError:
+        pass
 
 
 def _tuer(proc):

@@ -89,4 +89,22 @@ Distant.distant = False
 verifier("ce poste sans jeton", req("/").status, 200)
 
 serveur.shutdown()
+
+# Journaux : un journal trop gros passe en .log.1 au lancement suivant.
+outils = web_suite.outils
+with tempfile.TemporaryDirectory() as tmp:
+    journal = os.path.join(tmp, "web_3d.log")
+    with open(journal, "w") as f:
+        f.write("a" * (outils.JOURNAL_MAX + 1))
+    outils._tourner(journal)
+    verifier("journal tourné", (os.path.exists(journal), os.path.exists(journal + ".1")), (False, True))
+    with open(journal, "w") as f:
+        f.write("petit")
+    outils._tourner(journal)
+    verifier("petit journal gardé", os.path.exists(journal), True)
+
+# Hors Windows (Pi), l'installation d'openEMS est refusée : pas de bouton.
+windows, outils.WINDOWS = outils.WINDOWS, False
+verifier("pas de bouton openEMS hors Windows", outils.openems_pret(outils.PAR_ID["web_antenna"]), None)
+outils.WINDOWS = windows
 print("OK")

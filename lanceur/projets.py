@@ -5,7 +5,7 @@
     ├── CAO/<projet>/     <- WEB_CAO --projets
     ├── LIB_CAO/          <- WEB_CAO --lib
     ├── ANTENNA/<projet>/ <- WEB_ANTENNA --projets
-    └── 3D/               <- pas encore de projets dans WEB_3D
+    └── 3D/               <- WEB_3D --projets (modèles rangés depuis la visionneuse)
 
 Le lanceur tire (pull) au démarrage et avant chaque lancement d'outil, et
 envoie (commit + push) quand on arrête un outil. Un seul utilisateur : en cas
@@ -57,6 +57,8 @@ def arguments(oid, racine, reseau=False):
                 + (["--projets-reseau"] if reseau else []))
     if oid == "web_antenna":
         return ["--projets", os.path.join(p, "ANTENNA")]
+    if oid == "web_3d":
+        return ["--projets", os.path.join(p, "3D")]
     return []
 
 
@@ -173,7 +175,8 @@ def ecrire_liste(p):
     for titre, nom in SECTIONS:
         lignes.append("[%s]" % titre)
         base = os.path.join(p, nom)
-        lignes += sorted(n for n in os.listdir(base) if os.path.isdir(os.path.join(base, n))) \
+        # Un dossier par projet (CAO, ANTENNA), un fichier par modèle (3D).
+        lignes += sorted(n for n in os.listdir(base) if not n.startswith(".")) \
             if os.path.isdir(base) else []
         lignes.append("")
     with open(os.path.join(p, "projets.txt"), "w", encoding="utf-8", newline="\n") as f:

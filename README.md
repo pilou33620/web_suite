@@ -95,7 +95,7 @@ PROJETS/
 ├── CAO/<projet>/     <- WEB_CAO --projets
 ├── LIB_CAO/          <- WEB_CAO --lib (catalogue, empreintes, symboles, modèles)
 ├── ANTENNA/<projet>/ <- WEB_ANTENNA --projets (les calculs/ openEMS ne sont pas envoyés)
-└── 3D/               <- réservé à WEB_3D
+└── 3D/               <- WEB_3D --projets (modèles ouverts et rangés depuis la visionneuse)
 ```
 
 - **Au démarrage**, le lanceur le clone (ou le crée en local si GitHub est vide ou
