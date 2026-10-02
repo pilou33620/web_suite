@@ -14,8 +14,10 @@ de conflit on s'arrête et on prévient, sans rien fusionner tout seul.
 
 import os
 import re
+import shutil
 import subprocess
 import threading
+import time
 
 DEPOT = "https://github.com/pilou33620/WEB_SUITE_PROJETS.git"
 BRANCHE = "main"
@@ -25,7 +27,16 @@ SANS_FENETRE = 0x08000000 if os.name == "nt" else 0
 DOSSIERS = {"web_cao": ("CAO", "LIB_CAO"), "web_antenna": ("ANTENNA",), "web_3d": ("3D",)}
 SECTIONS = (("WEB_CAO", "CAO"), ("WEB_ANTENNA", "ANTENNA"), ("WEB_3D", "3D"))
 # Les résultats d'openEMS se recalculent et pèsent vite des centaines de Mo.
-GITIGNORE = "ANTENNA/*/calculs/\n"
+# Les zip des packs Murata sont déballés à côté (lier_modeles_murata.py), et
+# c'est le déballé qui est suivi : un zip ne se compresse pas en différences.
+GITIGNORE = "ANTENNA/*/calculs/\nLIB_CAO/**/*.zip\n"
+# Fins de ligne normalisées dans le dépôt : un PC Windows (autocrlf) et le Pi
+# ne doivent pas se renvoyer des fichiers modifiés de la première à la dernière ligne.
+GITATTRIBUTES = "* text=auto\n"
+# Sans LC_ALL=C, un git traduit (Pi en fr_FR) ne dit plus « CONFLICT » ;
+# GIT_OPTIONAL_LOCKS=0 : le git status de l'affichage ne prend plus index.lock
+# pendant le commit d'un envoi.
+ENV_GIT = dict(GIT_TERMINAL_PROMPT="0", LC_ALL="C", LANGUAGE="C", GIT_OPTIONAL_LOCKS="0")
 
 _verrou = threading.Lock()                             # une commande git à la fois
 
@@ -56,7 +67,7 @@ def _git(cwd, *args, timeout=60):
         r = subprocess.run(["git", *args], cwd=cwd, capture_output=True, text=True,
                            encoding="utf-8", errors="replace", timeout=timeout,
                            stdin=subprocess.DEVNULL, creationflags=SANS_FENETRE,
-                           env=dict(os.environ, GIT_TERMINAL_PROMPT="0"))
+                           env=dict(os.environ, **ENV_GIT))
     except (OSError, subprocess.SubprocessError) as exc:
         return 1, str(exc)
     return r.returncode, (r.stdout + r.stderr).strip()
@@ -65,10 +76,15 @@ def _git(cwd, *args, timeout=60):
 def preparer(racine, depot=DEPOT):
     """Crée ou récupère PROJETS/, puis le met à jour. Renvoie un message lisible."""
     p = dossier(racine)
+    note = ""
     with _verrou:
         if not os.path.isdir(os.path.join(p, ".git")):
             vide = not os.path.isdir(p) or not os.listdir(p)
-            if not vide or _git(racine, "clone", depot, p, timeout=600)[0] != 0:
+            if not vide:
+                ok, note = _adopter(racine, p, depot)
+                if not ok:
+                    return note
+            elif _git(racine, "clone", depot, p, timeout=600)[0] != 0:
                 # Dépôt pas encore créé sur GitHub, ou hors ligne : on part en
                 # local, le premier envoi réussi le remplira.
                 os.makedirs(p, exist_ok=True)
@@ -85,11 +101,36 @@ def preparer(racine, depot=DEPOT):
             os.makedirs(os.path.join(p, nom), exist_ok=True)
             if not os.listdir(os.path.join(p, nom)):
                 open(os.path.join(p, nom, ".gitkeep"), "w").close()   # git ignore les dossiers vides
-        gi = os.path.join(p, ".gitignore")
-        if not os.path.isfile(gi):
-            with open(gi, "w", encoding="utf-8") as f:
-                f.write(GITIGNORE)
-        return etat
+        for nom, texte in ((".gitignore", GITIGNORE), (".gitattributes", GITATTRIBUTES)):
+            if not os.path.isfile(os.path.join(p, nom)):
+                with open(os.path.join(p, nom), "w", encoding="utf-8", newline="\n") as f:
+                    f.write(texte)
+        return (note + " " + etat).strip()
+
+
+def _adopter(racine, p, depot):
+    """PROJETS/ rempli mais sans .git : on clone à côté plutôt que git init.
+
+    Un init donnait un historique sans lien avec GitHub, donc un conflit
+    garanti au premier envoi. On clone dans PROJETS.clone, on y ajoute les
+    fichiers locaux que GitHub n'a pas (GitHub gagne quand les deux existent),
+    et l'ancien dossier reste intact à côté, en sauvegarde. Renvoie (ok, message)."""
+    neuf = p + ".clone"
+    shutil.rmtree(neuf, ignore_errors=True)
+    if _git(racine, "clone", depot, neuf, timeout=600)[0] != 0:
+        shutil.rmtree(neuf, ignore_errors=True)
+        return False, ("[!] %s existe sans git et GitHub est injoignable : rien n'est "
+                       "synchronisé, nouvel essai au prochain démarrage." % p)
+    shutil.copytree(p, neuf, dirs_exist_ok=True,
+                    copy_function=lambda src, dst: os.path.exists(dst) or shutil.copy2(src, dst))
+    sauvegarde = p + time.strftime(".avant-git-%Y%m%d-%H%M%S")
+    try:
+        os.rename(p, sauvegarde)
+    except OSError as exc:
+        shutil.rmtree(neuf, ignore_errors=True)
+        return False, "[!] %s n'a pas pu être mis de côté (fichier ouvert ?) : %s" % (p, exc)
+    os.rename(neuf, p)
+    return True, "PROJETS relié à GitHub ; l'ancien dossier est gardé dans %s." % sauvegarde
 
 
 def tirer(racine):
@@ -103,19 +144,28 @@ def _tirer(p):
         return "Projets à jour."
     if "couldn't find remote ref" in sortie or "Repository not found" in sortie:
         return "Dépôt GitHub vide ou pas encore créé : projets gardés en local."
-    if "CONFLICT" in sortie or "conflict" in sortie:
+    # Le dossier de rebase plutôt que le texte : il reste aussi quand git a été
+    # coupé par le délai, et ne laisse jamais PROJETS en plein rebase.
+    en_rebase = any(os.path.isdir(os.path.join(p, ".git", d)) for d in ("rebase-merge", "rebase-apply"))
+    if en_rebase or "CONFLICT" in sortie:
         _git(p, "rebase", "--abort")
         return "[X] Conflit avec GitHub : rien n'a été fusionné, à régler à la main dans %s." % p
     return "GitHub injoignable : on travaille en local (%s)." % (sortie.splitlines() or ["?"])[-1]
 
 
 def en_attente(racine, oid):
-    """True si les dossiers de l'outil ont des modifs à envoyer."""
+    """True si les dossiers de l'outil ont des modifs à envoyer, ou des commits
+    pas encore poussés (envoi précédent fait hors ligne)."""
     p = dossier(racine)
     if not os.path.isdir(os.path.join(p, ".git")):
         return False
     code, sortie = _git(p, "status", "--porcelain", "--", *DOSSIERS[oid], timeout=20)
-    return code == 0 and bool(sortie)
+    if code == 0 and sortie:
+        return True
+    # --not --remotes=origin : marche aussi avant le tout premier push (pas d'@{u}).
+    code, sortie = _git(p, "rev-list", "--count", "HEAD", "--not", "--remotes=origin",
+                        "--", *DOSSIERS[oid], timeout=20)
+    return code == 0 and sortie.isdigit() and int(sortie) > 0
 
 
 def ecrire_liste(p):
@@ -164,7 +214,10 @@ def envoyer(racine, oid, message):
         if not os.path.isdir(os.path.join(p, ".git")):
             return False, "PROJETS n'est pas un dépôt git."
         ecrire_liste(p)
-        _git(p, "add", "-A", "--", *DOSSIERS[oid], "projets.txt", ".gitignore")
+        # Un chemin absent ferait échouer tout l'add (« pathspec did not match »).
+        racine_fichiers = [f for f in ("projets.txt", ".gitignore", ".gitattributes")
+                           if os.path.exists(os.path.join(p, f))]
+        _git(p, "add", "-A", "--", *DOSSIERS[oid], *racine_fichiers)
         if _git(p, "diff", "--cached", "--quiet")[0] != 0:
             code, sortie = _git(p, "commit", "-m", message.strip() or "Session " + oid)
             if code != 0:
@@ -208,6 +261,43 @@ if __name__ == "__main__":
         with open(os.path.join(dossier(b), "projets.txt"), encoding="utf-8") as f:
             assert "[WEB_CAO]\ncarte_alim\n" in f.read()
         assert os.path.isdir(os.path.join(dossier(b), "3D"))
+        assert os.path.isfile(os.path.join(dossier(a), ".gitattributes"))
+        # Les zip de la LIB ne partent pas, leur contenu déballé si.
+        os.makedirs(os.path.join(dossier(a), "LIB_CAO", "pack"))
+        for nom in ("pack.zip", "pack/m.mod"):
+            open(os.path.join(dossier(a), "LIB_CAO", nom), "w").close()
+        assert envoyer(a, "web_cao", "pack")[0]
+        suivis = _git(dossier(a), "ls-files", "LIB_CAO")[1]
+        assert "pack/m.mod" in suivis and ".zip" not in suivis, suivis
+        # Envoi hors ligne : rien à commiter ensuite, mais un commit à pousser.
+        fa = os.path.join(dossier(a), "CAO", "carte_alim", "projet.cao.json")
+        fb = os.path.join(dossier(b), "CAO", "carte_alim", "projet.cao.json")
+        assert definir_identite(b, "b", "b@example.com")[0]
+        _git(dossier(b), "remote", "set-url", "origin", os.path.join(tmp, "absent.git"))
+        with open(fb, "w") as f:
+            f.write("b")
+        ok, msg = envoyer(b, "web_cao", "hors ligne")
+        assert not ok and msg.startswith("[!]"), msg
+        assert not _git(dossier(b), "status", "--porcelain", "--", "CAO", "LIB_CAO")[1]
+        assert en_attente(b, "web_cao")
+        _git(dossier(b), "remote", "set-url", "origin", nu)
+        # Conflit : détecté, et PROJETS n'est pas laissé en plein rebase.
+        with open(fa, "w") as f:
+            f.write("a")
+        assert envoyer(a, "web_cao", "a")[0]
+        ok, msg = envoyer(b, "web_cao", "conflit")
+        assert not ok and msg.startswith("[X] Conflit"), msg
+        assert not os.path.isdir(os.path.join(dossier(b), ".git", "rebase-merge"))
+        # PROJETS rempli sans .git : cloné à côté, le local ajouté, l'ancien gardé.
+        c = os.path.join(tmp, "pc_c")
+        os.makedirs(os.path.join(dossier(c), "CAO", "perso"))
+        open(os.path.join(dossier(c), "CAO", "perso", "p.json"), "w").close()
+        print(preparer(c, nu))
+        assert os.path.isdir(os.path.join(dossier(c), ".git"))
+        assert os.path.isfile(os.path.join(dossier(c), "CAO", "perso", "p.json"))
+        with open(os.path.join(dossier(c), "CAO", "carte_alim", "projet.cao.json")) as f:
+            assert f.read() == "a"
+        assert any(n.startswith("PROJETS.avant-git-") for n in os.listdir(c))
     assert "--projets-reseau" in arguments("web_cao", "x", reseau=True)
     assert "--projets-reseau" not in arguments("web_cao", "x")
     print("OK")

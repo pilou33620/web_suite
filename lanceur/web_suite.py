@@ -380,6 +380,20 @@ def main(argv=None):
         sys.stdout.flush()
     else:
         threading.Timer(0.6, lambda: webbrowser.open(url)).start()
+    if os.name != "nt":
+        # Fermer le terminal (SIGHUP) ou un kill/systemctl stop (SIGTERM) doit
+        # arrêter les outils comme Ctrl+C : ils sont dans leur propre session,
+        # rien d'autre ne les arrêterait. Sous Windows, l'objet Job s'en charge.
+        import signal
+
+        signaux = (signal.SIGHUP, signal.SIGTERM)
+
+        def arreter(*_):
+            for sig in signaux:                        # un second signal n'interrompt pas l'arrêt
+                signal.signal(sig, signal.SIG_IGN)
+            raise KeyboardInterrupt
+        for sig in signaux:
+            signal.signal(sig, arreter)
     try:
         serveur.serve_forever()
     except KeyboardInterrupt:

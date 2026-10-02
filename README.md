@@ -99,17 +99,23 @@ PROJETS/
 ```
 
 - **Au démarrage**, le lanceur le clone (ou le crée en local si GitHub est vide ou
-  injoignable), puis le met à jour (`pull --rebase`).
+  injoignable), puis le met à jour (`pull --rebase`). Un `PROJETS/` déjà rempli mais sans
+  git est cloné à côté : ses fichiers absents de GitHub y sont ajoutés, et l'ancien dossier
+  reste en sauvegarde (`PROJETS.avant-git-<date>`).
+- **Fins de ligne et zip** : `.gitattributes` (`* text=auto`) normalise le dépôt entre
+  Windows et le Pi ; les `.zip` de `LIB_CAO` ne sont pas envoyés (leur contenu déballé, si).
 - **Avant chaque lancement d'outil**, il tire à nouveau : un projet ou la LIB modifiés sur
   un autre poste sont donc à jour. L'outil est lancé pointé sur ses dossiers de `PROJETS/`.
 - **À l'arrêt d'un outil**, s'il a des modifications, la page demande un message de commit
   puis envoie (commit + pull + push) ses seuls dossiers. Annuler remet à plus tard : le bouton
-  **⇧ Envoyer sur GitHub** reste sur la carte tant que quelque chose attend.
+  **⇧ Envoyer sur GitHub** reste sur la carte tant que quelque chose attend, modification
+  à commiter ou commit pas encore poussé.
 - **Poste neuf** (Raspberry Pi…) : si git ne connaît ni nom ni e-mail, la page les demande
   au premier envoi et les enregistre dans la config du dépôt `PROJETS` seulement (pas en global).
   Au premier push, Git Credential Manager ouvre sa fenêtre de connexion GitHub.
 - **Conflit** : rien n'est fusionné automatiquement ; le lanceur annule le rebase et indique
-  le dossier où régler la situation à la main. Hors ligne, tout reste en local et part au
+  le dossier où régler la situation à la main (git y tourne en `LC_ALL=C` : un git traduit
+  ne trompe pas la détection, et PROJETS n'est jamais laissé en plein rebase). Hors ligne, tout reste en local et part au
   prochain envoi réussi.
 
 ## Options
@@ -149,7 +155,8 @@ python lanceur/web_suite.py [--port 8100] [--racine DOSSIER] [--installer]
   vers `PROJETS/`, et `--sans-maj` si le lanceur vient de les vérifier.
 - Leur sortie console va dans `lanceur/journaux/<outil>.log`, lisible depuis le bouton
   **Journal** de chaque carte.
-- Fermer la fenêtre de WEB_SUITE (ou Ctrl+C) arrête les outils lancés depuis elle.
+- Fermer la fenêtre de WEB_SUITE (ou Ctrl+C) arrête les outils lancés depuis elle. Sous Linux,
+  fermer le terminal (SIGHUP) ou `kill` (SIGTERM) aussi.
 
 ## maj_git.py
 

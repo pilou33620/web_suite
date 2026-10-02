@@ -62,7 +62,13 @@ def mettre_a_jour(repo, modifs, avance, retard, upstream):
         code, out = git(repo, "pull", "--rebase", "--autostash")
         print("  " + out.replace("\n", "\n  "))
         if code != 0:
-            print("  !! Pull échoué (conflit ?), à régler à la main dans ce dossier.")
+            # Ne pas laisser le dépôt en plein rebase : le lanceur et les outils
+            # le liraient ensuite tel quel. Les commits locaux restent intacts.
+            if any((Path(repo) / ".git" / d).is_dir() for d in ("rebase-merge", "rebase-apply")):
+                git(repo, "rebase", "--abort")
+                print("  !! Conflit : rebase annulé, rien n'a été fusionné. À régler à la main dans ce dossier.")
+            else:
+                print("  !! Pull échoué, à régler à la main dans ce dossier.")
             return
     if avance and oui(f"Pousser {avance} commit(s) local(aux) (push) ?"):
         code, out = git(repo, "push")

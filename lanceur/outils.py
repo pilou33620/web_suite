@@ -756,4 +756,10 @@ def _tuer(proc):
     try:
         proc.wait(5)
     except subprocess.TimeoutExpired:
+        if not WINDOWS:
+            # Tout le groupe : le serveur relancé dans son venv (WEB_ANTENNA) aussi.
+            try:
+                os.killpg(proc.pid, signal.SIGKILL)
+            except OSError:
+                pass
         proc.kill()
