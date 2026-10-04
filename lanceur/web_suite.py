@@ -1,7 +1,7 @@
 """WEB·SUITE — lanceur des outils WEB_CAO, WEB_ANTENNA et WEB_3D.
 
     python lanceur/web_suite.py              ouvre le lanceur dans le navigateur
-                                             (sauf sur Raspberry Pi : adresse affichée en console)
+                                             (sauf sur Raspberry Pi et Termux : adresse affichée en console)
     python lanceur/web_suite.py --installer  menu de téléchargement des outils seulement
 
 Le lanceur joue l'animation d'intro, puis propose les trois outils : il les
@@ -9,7 +9,7 @@ télécharge s'ils manquent (git clone à la racine du dépôt), démarre leur s
 et ouvre leur page. Fermer cette fenêtre arrête les outils lancés depuis elle.
 
 Bibliothèque standard seule. Par défaut le serveur n'écoute que sur 127.0.0.1 :
-il lance des programmes. Avec --reseau (défaut sur Raspberry Pi), le lanceur et
+il lance des programmes. Avec --reseau (défaut sur Raspberry Pi et Termux), le lanceur et
 les outils écoutent sur le réseau local ; le lanceur exige alors des autres
 appareils le jeton de l'adresse « Réseau » affichée en console. Les outils, eux,
 restent sans authentification : à réserver à un réseau de confiance. --local
@@ -292,6 +292,12 @@ def est_raspberry_pi():
     return False
 
 
+def poste_serveur():
+    """Vrai sur une machine qui sert les autres appareils (Raspberry Pi, téléphone
+    Termux) : réseau local par défaut, et pas de navigateur ouvert sur place."""
+    return outils.TERMUX or est_raspberry_pi()
+
+
 def main(argv=None):
     installer._console_utf8()
     ap = argparse.ArgumentParser(description="Lanceur WEB·SUITE.")
@@ -302,21 +308,21 @@ def main(argv=None):
     ap.add_argument("--installer", action="store_true",
                     help="ouvrir seulement le menu de téléchargement des outils")
     ap.add_argument("--navigateur", action="store_true",
-                    help="ouvrir le navigateur au démarrage même sur Raspberry Pi")
+                    help="ouvrir le navigateur au démarrage même sur Raspberry Pi ou Termux")
     ap.add_argument("--sans-navigateur", action="store_true",
                     help="ne pas ouvrir le navigateur au démarrage")
     ecoute = ap.add_mutually_exclusive_group()
     ecoute.add_argument("--reseau", dest="reseau", action="store_true", default=None,
                         help="écouter sur le réseau local : ouvrir WEB·SUITE depuis un autre "
-                             "appareil (défaut sur Raspberry Pi)")
+                             "appareil (défaut sur Raspberry Pi et Termux)")
     ecoute.add_argument("--local", dest="reseau", action="store_false",
-                        help="n'écouter que sur 127.0.0.1 (défaut hors Raspberry Pi)")
+                        help="n'écouter que sur 127.0.0.1 (défaut ailleurs)")
     ap.add_argument("--sans-maj", dest="verifier_maj", action="store_false", default=True,
                     help="ne pas vérifier les mises à jour GitHub au démarrage")
     args = ap.parse_args(argv)
     racine = os.path.abspath(args.racine)
-    pi = est_raspberry_pi()
-    reseau = pi if args.reseau is None else args.reseau
+    serveur_dedie = poste_serveur()
+    reseau = serveur_dedie if args.reseau is None else args.reseau
 
     if args.installer:
         return installer.main(["--racine", racine])
@@ -373,7 +379,7 @@ def main(argv=None):
     print()
     sys.stdout.flush()
 
-    ouvrir = not args.sans_navigateur and (args.navigateur or not pi)
+    ouvrir = not args.sans_navigateur and (args.navigateur or not serveur_dedie)
     if not ouvrir:
         print("  Navigateur non ouvert : aller sur %s" % (url_reseau or url))
         print()

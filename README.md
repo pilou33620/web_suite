@@ -55,7 +55,9 @@ Sous **Termux** (Android) : `pkg install python git`, puis `./installer.sh`. L'i
 détecte Termux et installe `numpy` / `scipy` de WEB_CAO par `pkg install python-numpy
 python-scipy` (paquets précompilés) au lieu de pip, qui n'a pas de roue Android et
 échouerait en tentant de les compiler (cmake, ninja). Lancer WEB_SUITE avec la `python` de
-Termux, hors venv, pour qu'elle voie ces paquets.
+Termux, hors venv, pour qu'elle voie ces paquets. Comme sur Raspberry Pi, `./demarrer_WEB_SUITE.sh`
+y démarre directement en mode réseau, sans ouvrir de navigateur : ouvrir l'adresse **Réseau**
+affichée depuis l'autre appareil (garder `termux-wake-lock` actif).
 
 Au premier démarrage sans aucun outil, `web_suite.py` pose la même question en
 console. La page propose aussi **Télécharger** sur chaque carte et un bouton
@@ -134,7 +136,7 @@ python lanceur/web_suite.py [--port 8100] [--racine DOSSIER] [--installer]
 
 - `--reseau` : le lanceur et les outils écoutent sur le réseau local ; l'adresse
   **Réseau** affichée s'ouvre depuis une tablette, un téléphone ou un autre poste.
-  C'est le défaut sur Raspberry Pi. WEB_CAO y est lancé avec `--projets-reseau` pour que
+  C'est le défaut sur Raspberry Pi et sous Termux. WEB_CAO y est lancé avec `--projets-reseau` pour que
   ses projets et la LIB restent ouverts depuis l'autre appareil (confinés à `PROJETS/`).
   L'adresse **Réseau** se termine par `?jeton=…` : le lanceur exige ce jeton de tout
   autre appareil (le premier passage le range dans un cookie, l'adresse se garde en favori).
@@ -142,7 +144,7 @@ python lanceur/web_suite.py [--port 8100] [--racine DOSSIER] [--installer]
   Les outils, eux, restent sans authentification : réseau de confiance uniquement.
   `--local` force l'écoute sur `127.0.0.1` seulement (défaut ailleurs).
 
-- Le navigateur s'ouvre automatiquement, sauf sur Raspberry Pi.
+- Le navigateur s'ouvre automatiquement, sauf sur Raspberry Pi et sous Termux.
   `--navigateur` force l'ouverture, `--sans-navigateur` l'empêche partout.
 
 - `--racine` : dossier contenant les outils (défaut : la racine du dépôt, parent de `lanceur/`).

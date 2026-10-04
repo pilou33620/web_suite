@@ -14,6 +14,7 @@ import tempfile
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import outils  # noqa: E402
+import web_suite  # noqa: E402
 
 REQ = """\
 # commentaire
@@ -67,6 +68,9 @@ def main():
         lignes = []
         assert not outils.installer_dependances(outils.PAR_ID["web_cao"], tmp, lignes.append)
         assert any("numpy" in l and "introuvable" in l for l in lignes), lignes
+
+    # 4. Termux : le lanceur sert les autres appareils (réseau, pas de navigateur).
+    assert web_suite.poste_serveur()
 
     print("OK")
 
