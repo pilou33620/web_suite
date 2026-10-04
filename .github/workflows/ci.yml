@@ -20,6 +20,9 @@ jobs:
       - name: Serveur du lanceur — Host, jeton du mode réseau, X-WebSuite
         run: python lanceur/banc_serveur.py
 
+      - name: Termux — numpy/scipy par pkg, pas par pip
+        run: python lanceur/banc_termux.py
+
       # La mise à jour au démarrage est recopiée dans chaque outil, qui doit
       # tourner seul, sans le lanceur : on ne peut pas la partager. On vérifie
       # donc que les trois copies restent la même.

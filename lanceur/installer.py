@@ -55,7 +55,8 @@ def menu(racine):
     print("  Dossier : %s" % racine)
     if not outils.git_disponible():
         print("  [!] git introuvable : les outils seront téléchargés en zip et")
-        print("      ne pourront pas se mettre à jour seuls. https://git-scm.com")
+        print("      ne pourront pas se mettre à jour seuls. %s"
+              % ("pkg install git" if outils.TERMUX else "https://git-scm.com"))
     print()
     for i, o in enumerate(outils.CATALOGUE, 1):
         etat = "installé" if outils.est_installe(o, racine) else "à télécharger"
@@ -95,8 +96,9 @@ def installer(ids, racine, demander_dependances=True):
     for o in installes:
         if o["dependances"] == "pip" and demander_dependances:
             print()
+            via = " par pkg (Termux)" if outils.TERMUX else ""
             if oui("Installer les dépendances Python facultatives de %s "
-                   "(numpy, scipy : solveurs avancés) ?" % o["nom"]):
+                   "(numpy, scipy : solveurs avancés)%s ?" % (o["nom"], via)):
                 outils.installer_dependances(o, racine, lambda t: print("  " + t))
         elif o["dependances"] == "openems" and not outils.openems_pret(o, racine):
             print()

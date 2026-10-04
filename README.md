@@ -51,6 +51,12 @@ n'ouvre pas le navigateur et écoute sur le réseau local : ouvrir depuis n'impo
 l'adresse **Réseau** affichée (`http://<ip-du-pi>:8100/`), ou lancer avec `--navigateur` ;
 l'installation automatique d'openEMS reste réservée à Windows.
 
+Sous **Termux** (Android) : `pkg install python git`, puis `./installer.sh`. L'installateur
+détecte Termux et installe `numpy` / `scipy` de WEB_CAO par `pkg install python-numpy
+python-scipy` (paquets précompilés) au lieu de pip, qui n'a pas de roue Android et
+échouerait en tentant de les compiler (cmake, ninja). Lancer WEB_SUITE avec la `python` de
+Termux, hors venv, pour qu'elle voie ces paquets.
+
 Au premier démarrage sans aucun outil, `web_suite.py` pose la même question en
 console. La page propose aussi **Télécharger** sur chaque carte et un bouton
 pour tout télécharger d'un coup.
@@ -60,7 +66,8 @@ ne se mettent plus à jour, et les projets ne sont pas synchronisés.
 
 Dépendances propres aux outils :
 
-- **WEB_CAO** : `numpy`, `scipy` facultatifs (solveurs SI/PI). L'installateur propose de les installer.
+- **WEB_CAO** : `numpy`, `scipy` facultatifs (solveurs SI/PI). L'installateur propose de les installer
+  (par pip, ou par `pkg` sous Termux).
 - **WEB_ANTENNA** : openEMS pour lancer les simulations. L'installateur propose de
   l'installer (ou `python lanceur/installer.py antenna`, ou le bouton **Installer openEMS** de
   la carte) : il télécharge l'archive openEMS v0.0.36 (~50 Mo) dans `WEB_ANTENNA/openEMS/`,
@@ -179,3 +186,10 @@ python lanceur/banc_serveur.py
 
 Serveur du lanceur avec un gestionnaire factice : `Host` étranger, `X-WebSuite`, taille
 des requêtes, jeton du mode réseau (refus, cookie, ce poste exempté). Affiche `OK`.
+
+```
+python lanceur/banc_termux.py
+```
+
+Joue Termux avec un faux `pkg` : `numpy` / `scipy` partent à `pkg install`, rien à pip, et un
+paquet toujours introuvable après coup est signalé. Affiche `OK`.
