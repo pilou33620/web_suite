@@ -48,9 +48,16 @@ def main():
         bin_ = os.path.join(tmp, "bin")
         os.makedirs(bin_)
         trace = os.path.join(tmp, "pkg.log")
-        faux = os.path.join(bin_, "pkg")
+        # Sous Windows, un script shell ne s'exécute pas (WinError 193) : le
+        # faux pkg y est un .cmd, que shutil.which trouve aussi.
+        if os.name == "nt":
+            faux = os.path.join(bin_, "pkg.cmd")
+            contenu = '@echo %%*> "%s"\r\n@echo faux pkg : %%*\r\n' % trace
+        else:
+            faux = os.path.join(bin_, "pkg")
+            contenu = '#!/bin/sh\necho "$@" > "%s"\necho "faux pkg : $@"\n' % trace
         with open(faux, "w") as f:
-            f.write('#!/bin/sh\necho "$@" > "%s"\necho "faux pkg : $@"\n' % trace)
+            f.write(contenu)
         os.chmod(faux, os.stat(faux).st_mode | stat.S_IEXEC)
         os.environ["PATH"] = bin_ + os.pathsep + os.environ.get("PATH", "")
 
