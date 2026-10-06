@@ -210,6 +210,26 @@ def definir_identite(racine, nom, email):
     return True, "Identité git enregistrée pour PROJETS."
 
 
+# Ce que git répond quand GitHub ne sait pas qui pousse. Sous Windows, Git
+# Credential Manager ouvre sa fenêtre ; sur un Raspberry Pi ou sous Termux, il
+# n'y en a pas, et GIT_TERMINAL_PROMPT=0 interdit la question en console.
+REFUS_AUTH = ("could not read username", "could not read password",
+              "terminal prompts disabled", "authentication failed",
+              "invalid username or password", "permission denied",
+              "the requested url returned error: 403", "error: 403")
+
+
+def echec_push(sortie):
+    """Le message d'un push refusé : si c'est l'authentification, dire quoi faire."""
+    if any(m in sortie.lower() for m in REFUS_AUTH):
+        return ("[!] Enregistré sur ce poste, mais GitHub refuse l'envoi : ce poste n'est "
+                "pas encore connecté à votre compte GitHub. Une seule fois, dans un terminal "
+                "de ce poste : « gh auth login » puis « gh auth setup-git » (README de "
+                "WEB_SUITE, « Sauvegarder depuis une tablette »). Le prochain envoi partira.")
+    return ("[!] Enregistré en local, mais l'envoi sur GitHub a échoué "
+            "(réessayé au prochain envoi) : %s" % (sortie.splitlines() or ["?"])[-1])
+
+
 def envoyer(racine, oid, message):
     """commit + pull --rebase + push des dossiers de l'outil. Renvoie (ok, message)."""
     p = dossier(racine)
@@ -230,8 +250,7 @@ def envoyer(racine, oid, message):
             return False, tire
         code, sortie = _git(p, "push", "-u", "origin", BRANCHE, timeout=600)
         if code != 0:
-            return False, ("[!] Enregistré en local, mais l'envoi sur GitHub a échoué "
-                           "(réessayé au prochain envoi) : %s" % (sortie.splitlines() or ["?"])[-1])
+            return False, echec_push(sortie)
         return True, "Envoyé sur GitHub."
 
 
@@ -301,6 +320,12 @@ if __name__ == "__main__":
         with open(os.path.join(dossier(c), "CAO", "carte_alim", "projet.cao.json")) as f:
             assert f.read() == "a"
         assert any(n.startswith("PROJETS.avant-git-") for n in os.listdir(c))
+    # Push refusé faute d'identifiants (Pi, Termux) : le message dit quoi faire.
+    assert "gh auth login" in echec_push(
+        "fatal: could not read Username for 'https://github.com': terminal prompts disabled")
+    assert "gh auth login" in echec_push("remote: Permission to x.git denied.\n"
+                                         "fatal: unable to access '...': The requested URL returned error: 403")
+    assert "gh auth" not in echec_push("fatal: unable to access '...': Could not resolve host: github.com")
     assert "--projets-reseau" in arguments("web_cao", "x", reseau=True)
     assert "--projets-reseau" not in arguments("web_cao", "x")
     print("OK")

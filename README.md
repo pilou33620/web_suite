@@ -127,6 +127,46 @@ PROJETS/
   ne trompe pas la détection, et PROJETS n'est jamais laissé en plein rebase). Hors ligne, tout reste en local et part au
   prochain envoi réussi.
 
+### Sauvegarder depuis une tablette
+
+Cas typique : WEB_SUITE tourne sur un téléphone (Termux) ou un Raspberry Pi, et l'on
+dessine sur l'iPad.
+
+**Une seule fois, sur le serveur** (téléphone ou Pi), connecter git à votre compte GitHub.
+Sous Windows, Git Credential Manager s'en charge au premier envoi ; ni Termux ni le Pi
+n'en ont, et l'envoi serait refusé (le lanceur le dit alors en clair). Dans un terminal
+du serveur :
+
+```
+pkg install gh            # Termux      (Raspberry Pi : sudo apt install gh)
+gh auth login             # GitHub.com → HTTPS → « Login with a web browser »
+gh auth setup-git
+```
+
+`gh auth login` affiche un code à 8 caractères : l'ouvrir sur l'iPad, à l'adresse
+https://github.com/login/device, saisir le code, valider. `gh auth setup-git` dit ensuite
+à git d'utiliser cette connexion ; elle reste valable d'un démarrage à l'autre.
+Sur le Pi, le terminal peut être une session SSH depuis l'iPad.
+
+**Ensuite, à chaque fois, depuis l'iPad** :
+
+1. ouvrir l'adresse **Réseau** du lanceur (celle qui se termine par `?jeton=…`, à garder
+   en favori) et lancer WEB_CAO ;
+2. sur la page d'accueil de WEB_CAO, ouvrir ou créer le projet : il vit sur le serveur,
+   dans `PROJETS/CAO/<projet>/` ;
+3. dans l'éditeur (schéma ou PCB), **Fichier → Enregistrer + GitHub**, ou le bouton
+   **💾 Sauver** de la barre tactile. Le document est écrit sur le serveur, puis envoyé :
+   un message de commit est demandé (Annuler = enregistrer sans envoyer), et au tout
+   premier envoi, votre nom et votre e-mail pour git.
+
+C'est le lanceur qui envoie (commit + pull + push de `CAO/` et `LIB_CAO/`), exactement comme
+le bouton **⇧ Envoyer sur GitHub** de sa page : WEB_CAO lui relaie la demande. Le relai
+exige le même jeton que le lanceur — l'iPad le porte déjà, dans le cookie posé par
+l'adresse **Réseau** — et un autre appareil du réseau ne peut donc pas pousser sur
+GitHub avec les identifiants du serveur. **Enregistrer** seul (Ctrl+S) écrit sur le
+serveur sans rien envoyer ; arrêter l'outil depuis le lanceur propose toujours d'envoyer
+ce qui attend.
+
 ## Options
 
 ```

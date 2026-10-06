@@ -352,6 +352,8 @@ def main(argv=None):
         print("  [X] %s" % exc)
         return 1
     url = "http://127.0.0.1:%d/" % serveur.server_address[1]
+    Lanceur.gestionnaire.lanceur = url.rstrip("/")
+    Lanceur.gestionnaire.jeton = Lanceur.jeton
 
     print()
     print("  WEB·SUITE")

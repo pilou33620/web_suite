@@ -647,6 +647,13 @@ class Gestionnaire:
         # reseau : les outils écoutent sur le réseau local (sans --local) pour
         # qu'une tablette ou un autre poste puisse les ouvrir.
         self.reseau = reseau
+        # L'adresse du lanceur sur ce poste et le jeton du mode réseau, fixés
+        # par web_suite.py une fois le serveur ouvert. Passés aux outils par
+        # l'environnement (une option inconnue ferait échouer un outil plus
+        # ancien) : WEB_CAO y relaie « Enregistrer + GitHub » depuis l'éditeur,
+        # en exigeant le même jeton que le lanceur des autres appareils.
+        self.lanceur = None
+        self.jeton = None
         self.verrou = threading.Lock()
         self.job = _Job()
         self.etats = {o["id"]: {"phase": None, "message": "", "url": None,
@@ -806,6 +813,11 @@ class Gestionnaire:
             cmd = ([sys.executable, "-u", o["script"], "--port", str(port)] + args
                    + projets.arguments(oid, self.racine, self.reseau))
             env = dict(os.environ, PYTHONIOENCODING="utf-8", PYTHONUNBUFFERED="1")
+            env.pop("WEBSUITE_JETON", None)
+            if self.lanceur:
+                env["WEBSUITE_LANCEUR"] = self.lanceur
+                if self.jeton:
+                    env["WEBSUITE_JETON"] = self.jeton
             _tourner(self.journal(oid))
             with open(self.journal(oid), "a", encoding="utf-8") as f:
                 f.write("\n=== lancement %s : %s\n" % (time.strftime("%Y-%m-%d %H:%M:%S"),
