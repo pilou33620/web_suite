@@ -226,8 +226,48 @@ def echec_push(sortie):
                 "pas encore connecté à votre compte GitHub. Une seule fois, dans un terminal "
                 "de ce poste : « gh auth login » puis « gh auth setup-git » (README de "
                 "WEB_SUITE, « Sauvegarder depuis une tablette »). Le prochain envoi partira.")
-    return ("[!] Enregistré en local, mais l'envoi sur GitHub a échoué "
-            "(réessayé au prochain envoi) : %s" % (sortie.splitlines() or ["?"])[-1])
+    return ("[!] Enregistré sur ce poste ; GitHub injoignable pour l'instant (pas "
+            "d'Internet ?). Rien n'est perdu : l'envoi repart tout seul dès que la "
+            "connexion revient, et au prochain démarrage. (%s)" % _cause(sortie))
+
+
+def _cause(sortie):
+    """La ligne de git qui dit pourquoi : « fatal: ... », sinon la dernière."""
+    lignes = [l.strip() for l in sortie.splitlines() if l.strip()] or ["?"]
+    return next((l for l in lignes if l.startswith("fatal:")), lignes[-1])
+
+
+def commits_a_pousser(racine):
+    """Commits de PROJETS pas encore sur GitHub : les envois faits hors ligne.
+
+    --not --remotes=origin : marche aussi avant le tout premier push (pas d'@{u})."""
+    p = dossier(racine)
+    if not os.path.isdir(os.path.join(p, ".git")):
+        return 0
+    code, sortie = _git(p, "rev-list", "--count", "HEAD", "--not", "--remotes=origin", timeout=20)
+    return int(sortie) if code == 0 and sortie.isdigit() else 0
+
+
+def pousser_en_attente(racine, delai=120):
+    """Renvoie à GitHub ce qui a été enregistré hors ligne (pull --rebase + push).
+
+    Rien n'est commité ici : on ne pousse que ce qu'un envoi a déjà enregistré,
+    avec son message. Renvoie None si rien n'attend, sinon (ok, message).
+    Délai plus court qu'un envoi demandé : un Wi-Fi sans Internet peut laisser
+    une connexion pendre, et l'essai suivant viendra de toute façon."""
+    p = dossier(racine)
+    with _verrou:
+        n = commits_a_pousser(racine)
+        if not n:
+            return None
+        tire = _tirer(p)
+        if tire.startswith("[X]"):
+            return False, tire
+        code, sortie = _git(p, "push", "-u", "origin", BRANCHE, timeout=delai)
+        if code != 0:
+            return False, echec_push(sortie)
+        return True, ("Revenu en ligne : %d enregistrement(s) fait(s) hors ligne envoyé(s) "
+                      "sur GitHub." % n)
 
 
 def envoyer(racine, oid, message):
@@ -320,12 +360,34 @@ if __name__ == "__main__":
         with open(os.path.join(dossier(c), "CAO", "carte_alim", "projet.cao.json")) as f:
             assert f.read() == "a"
         assert any(n.startswith("PROJETS.avant-git-") for n in os.listdir(c))
+        # Hors ligne puis retour d'Internet : ce qui attend repart tout seul.
+        assert definir_identite(c, "c", "c@example.com")[0]
+        assert pousser_en_attente(c) is None                 # rien n'attend
+        with open(os.path.join(dossier(c), "CAO", "perso", "p.json"), "w") as f:
+            f.write("hors ligne")
+        _git(dossier(c), "remote", "set-url", "origin", os.path.join(tmp, "absent.git"))
+        ok, msg = envoyer(c, "web_cao", "dans le train")
+        assert not ok and "repart tout seul" in msg, msg
+        assert commits_a_pousser(c) >= 1
+        ok, msg = pousser_en_attente(c)                      # toujours hors ligne
+        assert not ok and commits_a_pousser(c) >= 1, msg
+        _git(dossier(c), "remote", "set-url", "origin", nu)   # Internet revient
+        ok, msg = pousser_en_attente(c)
+        assert ok and "hors ligne" in msg, msg
+        assert commits_a_pousser(c) == 0 and not en_attente(c, "web_cao")
+        assert "dans le train" in _git(nu, "log", "-1", "--format=%s", BRANCHE)[1]
+        assert pousser_en_attente(c) is None
     # Push refusé faute d'identifiants (Pi, Termux) : le message dit quoi faire.
     assert "gh auth login" in echec_push(
         "fatal: could not read Username for 'https://github.com': terminal prompts disabled")
     assert "gh auth login" in echec_push("remote: Permission to x.git denied.\n"
                                          "fatal: unable to access '...': The requested URL returned error: 403")
     assert "gh auth" not in echec_push("fatal: unable to access '...': Could not resolve host: github.com")
+    assert "Could not resolve host" in echec_push(
+        "fatal: unable to access 'https://github.com/x.git/': Could not resolve host: github.com\n")
+    assert "fatal: '/x' does not appear" in echec_push(
+        "fatal: '/x' does not appear to be a git repository\nfatal: Could not read from remote "
+        "repository.\n\nPlease make sure you have the correct access rights\nand the repository exists.")
     assert "--projets-reseau" in arguments("web_cao", "x", reseau=True)
     assert "--projets-reseau" not in arguments("web_cao", "x")
     print("OK")

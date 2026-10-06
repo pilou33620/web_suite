@@ -186,7 +186,8 @@ class Lanceur(SimpleHTTPRequestHandler):
             return self._fichier(FICHIERS_SERVIS[url.path])
         if url.path == "/api/etat":
             return self._json({"racine": g.racine, "git": outils.git_disponible(),
-                               "projets": projets.dossier(g.racine), "outils": g.etat()})
+                               "projets": projets.dossier(g.racine), "outils": g.etat(),
+                               "envoi_auto": getattr(g, "envoi_auto", None)})
         if url.path == "/api/journal":
             oid = parse_qs(url.query).get("id", [""])[0]
             if oid not in outils.PAR_ID:
@@ -354,6 +355,9 @@ def main(argv=None):
     url = "http://127.0.0.1:%d/" % serveur.server_address[1]
     Lanceur.gestionnaire.lanceur = url.rstrip("/")
     Lanceur.gestionnaire.jeton = Lanceur.jeton
+    if outils.git_disponible():
+        # Ce qui a été enregistré hors ligne repart dès que GitHub répond.
+        Lanceur.gestionnaire.demarrer_envoi_auto()
 
     print()
     print("  WEB·SUITE")

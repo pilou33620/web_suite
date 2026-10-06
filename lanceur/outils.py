@@ -85,6 +85,11 @@ CATALOGUE = [
 PAR_ID = {o["id"]: o for o in CATALOGUE}
 
 DELAI_DEMARRAGE = 90       # s : la vérification GitHub des outils peut prendre du temps
+# Envoi automatique de ce qui a été enregistré hors ligne : un essai au
+# démarrage, puis toutes les minutes tant que quelque chose attend, en
+# espaçant jusqu'à 5 min si GitHub reste injoignable (hors ligne, un essai échoue
+# en une fraction de seconde : il ne coûte rien).
+ENVOI_AUTO_MIN, ENVOI_AUTO_MAX = 60, 300
 JOURNAL_MAX = 1024 * 1024  # o : au-delà, le journal passe en .log.1 au lancement suivant
 
 # Dernière version stable d'openEMS pour Windows. Ses roues Python n'existent
@@ -654,6 +659,9 @@ class Gestionnaire:
         # en exigeant le même jeton que le lanceur des autres appareils.
         self.lanceur = None
         self.jeton = None
+        # Dernier essai d'envoi automatique, affiché sur la page : {"attente": n
+        # commits pas encore sur GitHub, "message": ..., "ok": bool|None}.
+        self.envoi_auto = {"attente": 0, "message": "", "ok": None}
         self.verrou = threading.Lock()
         self.job = _Job()
         self.etats = {o["id"]: {"phase": None, "message": "", "url": None,
@@ -852,7 +860,44 @@ class Gestionnaire:
     def envoyer(self, oid, message):
         ok, texte = projets.envoyer(self.racine, oid, message)
         self._noter(oid, texte)
+        self.envoi_auto.update(attente=projets.commits_a_pousser(self.racine),
+                               message="" if ok else texte, ok=None if ok else False)
         return ok, texte
+
+    # -- envoi automatique de ce qui a été enregistré hors ligne -----------
+    def essai_envoi_auto(self):
+        """Un essai. Renvoie le résultat de projets.pousser_en_attente (None :
+        rien n'attendait). Le journal ne note que ce qui change, pas chaque échec."""
+        r = projets.pousser_en_attente(self.racine)
+        attente = projets.commits_a_pousser(self.racine)
+        if r is not None:
+            ok, texte = r
+            if texte != self.envoi_auto["message"]:
+                with open(self.journal("web_cao"), "a", encoding="utf-8") as f:
+                    f.write("[envoi automatique] %s\n" % texte)
+            self.envoi_auto.update(message=texte, ok=ok)
+        elif not attente:
+            self.envoi_auto.update(message="", ok=None)
+        self.envoi_auto["attente"] = attente
+        return r
+
+    def demarrer_envoi_auto(self, arret=None):
+        """Fil de fond : un essai tout de suite (redémarrage du serveur), puis
+        tant que quelque chose attend. Ce qui n'attend rien coûte un git rev-list."""
+        arret = arret or threading.Event()
+
+        def boucle():
+            delai = ENVOI_AUTO_MIN
+            while not arret.is_set():
+                try:
+                    r = self.essai_envoi_auto()
+                except Exception as exc:            # un fil mort n'enverrait plus jamais
+                    r = (False, str(exc))
+                delai = (min(delai * 2, ENVOI_AUTO_MAX) if r is not None and not r[0]
+                         else ENVOI_AUTO_MIN)
+                arret.wait(delai)
+        threading.Thread(target=boucle, daemon=True, name="envoi-auto").start()
+        return arret
 
     def arreter_tout(self):
         for o in CATALOGUE:

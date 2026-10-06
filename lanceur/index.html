@@ -197,6 +197,7 @@
 
   <footer class="pied">
     <button id="tout" class="principal" type="button" hidden>⇩ Télécharger les outils manquants</button>
+    <span class="alerte" id="envoi-auto" hidden></span>
     <span class="alerte" id="sans-git" hidden>git introuvable : les outils seront téléchargés en zip, sans mise à jour automatique.</span>
     <span class="chemin" id="racine"></span>
   </footer>
@@ -295,6 +296,12 @@ function rendre() {
   const d = etat;
   $('#racine').textContent = `Dossier des outils : ${d.racine} · Projets : ${d.projets}`;
   $('#sans-git').hidden = d.git;
+  // Enregistré hors ligne : en attente d'Internet, ou revenu en ligne.
+  const ea = d.envoi_auto || {};
+  $('#envoi-auto').hidden = !ea.attente && !ea.ok;
+  $('#envoi-auto').textContent = ea.attente
+    ? `⏳ ${ea.attente} enregistrement(s) pas encore sur GitHub : envoi automatique dès que la connexion revient.` + (ea.message && !ea.ok ? ` (${ea.message})` : '')
+    : (ea.ok ? `✓ ${ea.message}` : '');
   const manquants = d.outils.filter(o => !o.installe && o.phase !== 'installation');
   $('#tout').hidden = manquants.length === 0;
   $('#tout').textContent = manquants.length === d.outils.length

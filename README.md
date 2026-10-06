@@ -124,8 +124,14 @@ PROJETS/
   Au premier push, Git Credential Manager ouvre sa fenêtre de connexion GitHub.
 - **Conflit** : rien n'est fusionné automatiquement ; le lanceur annule le rebase et indique
   le dossier où régler la situation à la main (git y tourne en `LC_ALL=C` : un git traduit
-  ne trompe pas la détection, et PROJETS n'est jamais laissé en plein rebase). Hors ligne, tout reste en local et part au
-  prochain envoi réussi.
+  ne trompe pas la détection, et PROJETS n'est jamais laissé en plein rebase).
+- **Hors ligne** : l'envoi enregistre quand même (le commit est fait sur le poste) et rien
+  n'est perdu. Le lanceur renvoie ensuite **tout seul** ce qui attend : un essai dès son
+  démarrage, puis toutes les minutes tant qu'un enregistrement n'est pas sur GitHub (en
+  espaçant jusqu'à 5 minutes si la connexion tarde). La page l'affiche (« ⏳ n
+  enregistrement(s) pas encore sur GitHub »), puis le confirme une fois parti. Seul ce qui a
+  été enregistré par un envoi part ainsi, avec son message : des modifications jamais
+  envoyées (Annuler au message de commit) attendent le prochain envoi.
 
 ### Sauvegarder depuis une tablette
 
@@ -163,7 +169,10 @@ C'est le lanceur qui envoie (commit + pull + push de `CAO/` et `LIB_CAO/`), exac
 le bouton **⇧ Envoyer sur GitHub** de sa page : WEB_CAO lui relaie la demande. Le relai
 exige le même jeton que le lanceur — l'iPad le porte déjà, dans le cookie posé par
 l'adresse **Réseau** — et un autre appareil du réseau ne peut donc pas pousser sur
-GitHub avec les identifiants du serveur. **Enregistrer** seul (Ctrl+S) écrit sur le
+GitHub avec les identifiants du serveur. Sans Internet (téléphone hors réseau, box
+coupée), Sauver enregistre quand même sur le serveur et le dit : l'envoi repart tout seul
+dès que la connexion revient, ou au redémarrage du serveur (voir « Hors ligne » plus haut).
+**Enregistrer** seul (Ctrl+S) écrit sur le
 serveur sans rien envoyer ; arrêter l'outil depuis le lanceur propose toujours d'envoyer
 ce qui attend.
 
