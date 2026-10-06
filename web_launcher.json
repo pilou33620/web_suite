@@ -1,0 +1,4 @@
+{
+  "cmd": "python -u lanceur/web_suite.py --port {port} --sans-navigateur --reseau",
+  "keep": ["WEB_CAO", "WEB_ANTENNA", "WEB_3D", "PROJETS", "journaux", "lanceur/jeton-reseau.txt", "lanceur/journaux"]
+}
