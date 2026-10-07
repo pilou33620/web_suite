@@ -34,6 +34,7 @@ from http.cookies import CookieError, SimpleCookie
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from urllib.parse import parse_qs, urlparse
 
+import connexion_github
 import installer
 import outils
 import projets
@@ -480,6 +481,10 @@ def main(argv=None):
 
     if outils.git_disponible():
         print("  Projets : %s" % projets.preparer(racine), flush=True)
+        if sys.stdin is not None and sys.stdin.isatty():
+            # Téléphone, Pi : se connecter à GitHub ici, une fois, plutôt que de
+            # l'apprendre à la tablette au premier envoi (connexion_github.py).
+            connexion_github.proposer(racine)
 
     Lanceur.gestionnaire = outils.Gestionnaire(racine, reseau=reseau)
     Lanceur.jeton = jeton_reseau() if reseau else None

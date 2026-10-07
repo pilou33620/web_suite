@@ -140,19 +140,23 @@ dessine sur l'iPad.
 
 **Une seule fois, sur le serveur** (téléphone ou Pi), connecter git à votre compte GitHub.
 Sous Windows, Git Credential Manager s'en charge au premier envoi ; ni Termux ni le Pi
-n'en ont, et l'envoi serait refusé (le lanceur le dit alors en clair). Dans un terminal
-du serveur :
+n'en ont. Le lanceur s'en occupe donc au démarrage, dans son terminal : s'il voit que git
+n'a pas encore d'identifiants pour github.com, il demande
 
 ```
-pkg install gh            # Termux      (Raspberry Pi : sudo apt install gh)
-gh auth login             # GitHub.com → HTTPS → « Login with a web browser »
-gh auth setup-git
+  GitHub : ce serveur n'est pas encore connecté à votre compte.
+  Se connecter maintenant ? [O/n, j = ne plus demander] :
 ```
 
-`gh auth login` affiche un code à 8 caractères : l'ouvrir sur l'iPad, à l'adresse
-https://github.com/login/device, saisir le code, valider. `gh auth setup-git` dit ensuite
-à git d'utiliser cette connexion ; elle reste valable d'un démarrage à l'autre.
-Sur le Pi, le terminal peut être une session SSH depuis l'iPad.
+Entrée (oui) : il installe `gh` s'il manque (`pkg install gh` sous Termux,
+`sudo apt-get install gh` sur le Pi), lance `gh auth login`, qui affiche un code à
+8 caractères à saisir sur https://github.com/login/device (depuis le téléphone, l'iPad ou
+un PC), puis `gh auth setup-git`. Le nom et l'e-mail des commits sont pris au compte
+GitHub : l'iPad n'a plus à les demander. La connexion reste valable d'un démarrage à
+l'autre, la question ne revient pas. `n` la remet au prochain démarrage, `j` ne la pose
+plus (supprimer `PROJETS/.git/websuite-sans-github` pour la retrouver). Sur le Pi, le
+terminal peut être une session SSH depuis l'iPad. À la main, c'est `gh auth login`
+puis `gh auth setup-git`.
 
 **Ensuite, à chaque fois, depuis l'iPad** :
 

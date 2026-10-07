@@ -222,10 +222,11 @@ REFUS_AUTH = ("could not read username", "could not read password",
 def echec_push(sortie):
     """Le message d'un push refusé : si c'est l'authentification, dire quoi faire."""
     if any(m in sortie.lower() for m in REFUS_AUTH):
-        return ("[!] Enregistré sur ce poste, mais GitHub refuse l'envoi : ce poste n'est "
-                "pas encore connecté à votre compte GitHub. Une seule fois, dans un terminal "
-                "de ce poste : « gh auth login » puis « gh auth setup-git » (README de "
-                "WEB_SUITE, « Sauvegarder depuis une tablette »). Le prochain envoi partira.")
+        return ("[!] Enregistré sur ce serveur, mais GitHub refuse l'envoi : le serveur "
+                "n'est pas encore connecté à votre compte GitHub. Relancez le lanceur dans "
+                "son terminal : il propose de s'y connecter, une seule fois (ou, à la main : "
+                "« gh auth login » puis « gh auth setup-git »). Rien n'est perdu : l'envoi "
+                "repartira tout seul une fois connecté.")
     return ("[!] Enregistré sur ce poste ; GitHub injoignable pour l'instant (pas "
             "d'Internet ?). Rien n'est perdu : l'envoi repart tout seul dès que la "
             "connexion revient, et au prochain démarrage. (%s)" % _cause(sortie))
