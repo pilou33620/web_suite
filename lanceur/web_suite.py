@@ -45,9 +45,12 @@ FICHIERS_SERVIS = {"/": "index.html", "/index.html": "index.html", "/websuite-in
 CORPS_MAX = 64 * 1024                                  # les actions ne portent qu'un id et un message
 FICHIER_JETON = os.path.join(ICI, "jeton-reseau.txt")  # ignoré par git
 BISCUIT = "websuite_jeton"
-# Pages ouvertes à un appareil qui n'a pas encore le jeton : celle qui demande
-# le code d'appairage, et la route qui le vérifie.
-PAGES_APPAIRAGE = ("/", "/index.html")
+# Pages ouvertes à un appareil qui n'a pas encore le jeton : l'accueil (qui le
+# renvoie vers la page du code), la page du code, et la route qui le vérifie.
+# La page du code a SA propre adresse : servie à « / » comme le lanceur, Safari
+# la ressortait de son cache après un bon code, au lieu du lanceur.
+PAGE_APPAIRAGE = "/appairage"
+PAGES_APPAIRAGE = ("/", "/index.html", PAGE_APPAIRAGE)
 
 
 def hote_permis(entete):
@@ -262,9 +265,18 @@ class Lanceur(SimpleHTTPRequestHandler):
         self.send_response(HTTPStatus.OK)
         self.send_header("Content-Type", "text/html; charset=utf-8")
         self.send_header("Content-Length", str(len(corps)))
-        self.send_header("Cache-Control", "no-cache")
+        # no-store : ces pages dépendent de l'autorisation de l'appareil, une
+        # copie gardée par le navigateur montrerait la mauvaise
+        self.send_header("Cache-Control", "no-store")
         self.end_headers()
         self.wfile.write(corps)
+
+    def _rediriger(self, ou):
+        self.send_response(HTTPStatus.SEE_OTHER)
+        self.send_header("Location", ou)
+        self.send_header("Cache-Control", "no-store")
+        self.send_header("Content-Length", "0")
+        self.end_headers()
 
     def _biscuit_jeton(self):
         return ("%s=%s; Path=/; Max-Age=31536000; HttpOnly; SameSite=Strict"
@@ -276,8 +288,12 @@ class Lanceur(SimpleHTTPRequestHandler):
         if not self.autorise:
             # Appareil sans jeton : la page qui demande le code d'appairage
             # (le code s'affiche, s'il le faut, dans le terminal du serveur).
+            if url.path != PAGE_APPAIRAGE:
+                return self._rediriger(PAGE_APPAIRAGE)
             self.appairage.preparer()
             return self._fichier("appairage.html")
+        if url.path == PAGE_APPAIRAGE:
+            return self._rediriger("/")                # déjà autorisé : au lanceur
         if self.jeton and self._jeton_url():
             # Le jeton passe dans un cookie et quitte l'adresse : il ne reste
             # ni dans l'historique, ni dans un lien recopié.
@@ -336,6 +352,10 @@ class Lanceur(SimpleHTTPRequestHandler):
             self.end_headers()
             self.wfile.write(donnees)
             return
+        if url.path == "/api/appairer":
+            # Déjà autorisé (un premier envoi du code a réussi, la page a été
+            # validée deux fois) : rien à vérifier, la page passe au lanceur.
+            return self._json({"ok": True, "message": "Cet appareil est déjà autorisé."})
         oid = corps.get("id")
         g = self.gestionnaire
         if url.path == "/api/identite":

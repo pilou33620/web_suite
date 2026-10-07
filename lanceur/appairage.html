@@ -86,6 +86,10 @@ async function valider() {
   envoi = false; bouton.disabled = false;
 }
 
+// Déjà autorisé (code validé dans un autre onglet, page restée ouverte) : au lanceur.
+fetch('/api/etat', { credentials: 'same-origin', cache: 'no-store' })
+  .then(r => { if (r.ok) location.replace('/'); }).catch(() => {});
+
 document.getElementById('f').addEventListener('submit', e => { e.preventDefault(); valider(); });
 // 6 chiffres tapés : on valide tout seul, et l'affichage se groupe par 3
 champ.addEventListener('input', () => {
