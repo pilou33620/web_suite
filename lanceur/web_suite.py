@@ -102,7 +102,23 @@ def redemarrer():
     # et le dossier courant a déjà changé (os.chdir(ICI)).
     env = dict(os.environ, WEB_SUITE_DEJA_MAJ="1")
     script = os.path.join(ICI, "web_suite.py")
-    code = subprocess.call([sys.executable, script] + sys.argv[1:], env=env)
+    cmd = [sys.executable, script] + sys.argv[1:]
+    sys.stdout.flush()
+    if os.name != "nt":
+        # Linux, Pi, Termux : le nouveau lanceur REMPLACE celui-ci, comme le
+        # fait WEB_CAO. Un parent qui attendait recevait lui aussi Ctrl+C et
+        # l'affichait en trace d'erreur sous le « Arrêt. » de l'enfant ; et un
+        # kill visait le parent en laissant l'enfant tourner.
+        os.execve(sys.executable, cmd, env)
+    proc = subprocess.Popen(cmd, env=env)
+    while True:
+        try:
+            code = proc.wait()
+            break
+        except KeyboardInterrupt:
+            # Ctrl+C atteint aussi l'enfant, qui arrête ses outils et sort
+            # proprement : on l'attend, sans trace d'erreur.
+            continue
     os._exit(code)
 
 
