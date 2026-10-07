@@ -156,8 +156,9 @@ Sur le Pi, le terminal peut être une session SSH depuis l'iPad.
 
 **Ensuite, à chaque fois, depuis l'iPad** :
 
-1. ouvrir l'adresse **Réseau** du lanceur (celle qui se termine par `?jeton=…`, à garder
-   en favori) et lancer WEB_CAO ;
+1. ouvrir l'adresse **Réseau** du lanceur (`http://<adresse>:8100/`, affichée en bas du
+   terminal du serveur) ; la première fois, et à chaque changement d'adresse du serveur,
+   saisir le **code d'appairage** à 6 chiffres affiché juste en dessous. Puis lancer WEB_CAO ;
 2. sur la page d'accueil de WEB_CAO, ouvrir ou créer le projet : il vit sur le serveur,
    dans `PROJETS/CAO/<projet>/` ;
 3. dans l'éditeur (schéma ou PCB), **Fichier → Enregistrer + GitHub**, ou le bouton
@@ -167,8 +168,8 @@ Sur le Pi, le terminal peut être une session SSH depuis l'iPad.
 
 C'est le lanceur qui envoie (commit + pull + push de `CAO/` et `LIB_CAO/`), exactement comme
 le bouton **⇧ Envoyer sur GitHub** de sa page : WEB_CAO lui relaie la demande. Le relai
-exige le même jeton que le lanceur — l'iPad le porte déjà, dans le cookie posé par
-l'adresse **Réseau** — et un autre appareil du réseau ne peut donc pas pousser sur
+exige le même jeton que le lanceur — l'iPad le porte déjà, dans le cookie reçu avec le
+code d'appairage — et un autre appareil du réseau ne peut donc pas pousser sur
 GitHub avec les identifiants du serveur. Sans Internet (téléphone hors réseau, box
 coupée), Sauver enregistre quand même sur le serveur et le dit : l'envoi repart tout seul
 dès que la connexion revient, ou au redémarrage du serveur (voir « Hors ligne » plus haut).
@@ -187,9 +188,15 @@ python lanceur/web_suite.py [--port 8100] [--racine DOSSIER] [--installer]
   **Réseau** affichée s'ouvre depuis une tablette, un téléphone ou un autre poste.
   C'est le défaut sur Raspberry Pi et sous Termux. WEB_CAO y est lancé avec `--projets-reseau` pour que
   ses projets et la LIB restent ouverts depuis l'autre appareil (confinés à `PROJETS/`).
-  L'adresse **Réseau** se termine par `?jeton=…` : le lanceur exige ce jeton de tout
-  autre appareil (le premier passage le range dans un cookie, l'adresse se garde en favori).
-  Il est conservé dans `lanceur/jeton-reseau.txt` ; supprimer ce fichier en crée un neuf.
+  Le lanceur exige un jeton de tout autre appareil. Pour ne pas avoir à le taper, l'appareil
+  ouvre simplement `http://<adresse>:8100/` et saisit le **code d'appairage** à 6 chiffres
+  affiché dans le terminal du serveur : le bon code lui donne le jeton, rangé dans un cookie
+  (un an). Le code sert une fois, vit 10 minutes, et 5 erreurs l'annulent avec une minute
+  d'attente ; chaque nouveau code s'affiche dans le terminal, une série d'essais s'y voit.
+  Le cookie vaut pour une adresse : si celle du serveur change (partage de connexion, 4G,
+  autre Wi-Fi), on ressaisit un code. L'adresse complète `?jeton=…`, toujours affichée,
+  marche aussi sans code. Le jeton est conservé dans `lanceur/jeton-reseau.txt` ;
+  supprimer ce fichier en crée un neuf (les appareils déjà appairés le sont alors à refaire).
   Les outils, eux, restent sans authentification : réseau de confiance uniquement.
   `--local` force l'écoute sur `127.0.0.1` seulement (défaut ailleurs).
 
@@ -236,7 +243,8 @@ python lanceur/banc_serveur.py
 ```
 
 Serveur du lanceur avec un gestionnaire factice : `Host` étranger, `X-WebSuite`, taille
-des requêtes, jeton du mode réseau (refus, cookie, ce poste exempté). Affiche `OK`.
+des requêtes, jeton du mode réseau (refus, cookie, ce poste exempté), code d'appairage
+(usage unique, expiration, cinq erreurs puis pause). Affiche `OK`.
 
 ```
 python lanceur/banc_termux.py

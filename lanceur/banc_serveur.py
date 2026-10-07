@@ -7,6 +7,7 @@ n'est lancé, cloné ni poussé) et joue un appareil distant en masquant la bouc
 locale. Affiche OK si tout passe.
 """
 import http.client
+import json
 import os
 import sys
 import tempfile
@@ -51,7 +52,7 @@ def req(chemin, methode="GET", hote=None, entetes=None, corps=b""):
         c.putheader("Content-Length", (entetes or {}).get("Content-Length") or str(len(corps)))
     c.endheaders(corps if methode == "POST" and corps else None)
     r = c.getresponse()
-    r.read()
+    r.corps = r.read()
     c.close()
     return r
 
@@ -72,9 +73,17 @@ verifier("JSON non objet", req("/api/arreter", "POST", entetes={"X-WebSuite": "1
 
 # Mode réseau, appareil distant
 Distant.jeton = "j" * 22
+affiches = []
+Distant.appairage = web_suite.Appairage(afficher=affiches.append)
 Distant.distant = True
-verifier("distant sans jeton", req("/").status, 403)
-verifier("distant, faux jeton", req("/?jeton=faux").status, 403)
+r = req("/")
+verifier("distant sans jeton : page du code", (r.status, "appairer" in r.corps.decode()), (200, True))
+verifier("le code s'affiche dans le terminal", len(affiches), 1)
+verifier("distant sans jeton : pas l'état", req("/api/etat").status, 403)
+verifier("distant sans jeton : pas l'intro", req("/websuite-intro.html").status, 403)
+verifier("distant sans jeton : pas d'action", req("/api/arreter", "POST", entetes={"X-WebSuite": "1"},
+                                                corps=b'{"id":"web_3d"}').status, 403)
+verifier("distant, faux jeton", req("/?jeton=faux").status, 200)        # page du code, pas l'outil
 verifier("distant, faux biscuit", req("/api/etat", entetes={"Cookie": "websuite_jeton=faux"}).status, 403)
 r = req("/?jeton=" + Distant.jeton)
 verifier("bon jeton -> redirection", r.status, 303)
@@ -84,7 +93,45 @@ verifier("biscuit -> page", req("/", entetes={"Cookie": biscuit}).status, 200)
 verifier("biscuit -> action", req("/api/arreter", "POST", entetes={"Cookie": biscuit, "X-WebSuite": "1"},
                                   corps=b'{"id":"web_3d"}').status, 200)
 verifier("action reçue", Factice.arrete, "web_3d")
-verifier("biscuit illisible", req("/", entetes={"Cookie": '";;=='}).status, 403)
+verifier("biscuit illisible -> page du code", "appairer" in req("/", entetes={"Cookie": '";;=='}).corps.decode(), True)
+
+
+# Code d'appairage : le bon donne le cookie du jeton, une seule fois.
+def appairer(code, x=True):
+    return req("/api/appairer", "POST", entetes={"X-WebSuite": "1"} if x else {},
+               corps=json.dumps({"code": code}).encode())
+
+
+A = Distant.appairage
+code = A.code
+verifier("code à 6 chiffres", (len(code), code.isdigit()), (6, True))
+verifier("appairer sans X-WebSuite", appairer(code, x=False).status, 403)
+faux = "%06d" % ((int(code) + 1) % 10 ** 6)
+r = appairer(faux)
+verifier("faux code refusé", (r.status, r.getheader("Set-Cookie")), (403, None))
+r = appairer(code[:3] + " " + code[3:])                   # tel qu'affiché, espace compris
+verifier("bon code accepté", r.status, 200)
+biscuit = r.getheader("Set-Cookie").split(";")[0]
+verifier("le cookie est celui du jeton", biscuit, "websuite_jeton=" + Distant.jeton)
+verifier("cookie du code -> outils", req("/api/etat", entetes={"Cookie": biscuit}).status, 200)
+verifier("code à usage unique", appairer(code).status, 403)
+verifier("nouveau code affiché après usage", len(affiches) >= 2, True)
+# Cinq erreurs brûlent le code, et l'on attend avant le suivant.
+A.preparer()
+code = A.code
+for _ in range(A.ESSAIS):
+    r = appairer("000000" if code != "000000" else "111111")
+verifier("cinq erreurs : code annulé", A.code, None)
+verifier("pendant la pause, même le bon code échoue", appairer(code).status, 403)
+verifier("la pause est annoncée", "attendez" in json.loads(appairer(code).corps)["message"], True)
+A.bloque = 0
+r = req("/")
+verifier("après la pause, la page affiche un nouveau code", (r.status, A.code is not None and A.code != code), (200, True))
+# Un code trop vieux ne sert plus.
+A.expire = 0
+r = appairer(A.code)
+verifier("code expiré refusé", r.status, 403)
+verifier("et remplacé", "nouveau code" in json.loads(r.corps)["message"], True)
 Distant.distant = False
 verifier("ce poste sans jeton", req("/").status, 200)
 

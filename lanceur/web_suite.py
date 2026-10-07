@@ -11,7 +11,8 @@ et ouvre leur page. Fermer cette fenêtre arrête les outils lancés depuis elle
 Bibliothèque standard seule. Par défaut le serveur n'écoute que sur 127.0.0.1 :
 il lance des programmes. Avec --reseau (défaut sur Raspberry Pi et Termux), le lanceur et
 les outils écoutent sur le réseau local ; le lanceur exige alors des autres
-appareils le jeton de l'adresse « Réseau » affichée en console. Les outils, eux,
+appareils un jeton, qu'ils reçoivent en saisissant le code d'appairage affiché en
+console (ou avec l'adresse « Réseau » complète, ?jeton=...). Les outils, eux,
 restent sans authentification : à réserver à un réseau de confiance. --local
 force l'écoute locale.
 """
@@ -26,6 +27,7 @@ import os
 import subprocess
 import sys
 import threading
+import time
 import webbrowser
 from http import HTTPStatus
 from http.cookies import CookieError, SimpleCookie
@@ -43,6 +45,9 @@ FICHIERS_SERVIS = {"/": "index.html", "/index.html": "index.html", "/websuite-in
 CORPS_MAX = 64 * 1024                                  # les actions ne portent qu'un id et un message
 FICHIER_JETON = os.path.join(ICI, "jeton-reseau.txt")  # ignoré par git
 BISCUIT = "websuite_jeton"
+# Pages ouvertes à un appareil qui n'a pas encore le jeton : celle qui demande
+# le code d'appairage, et la route qui le vérifie.
+PAGES_APPAIRAGE = ("/", "/index.html")
 
 
 def hote_permis(entete):
@@ -66,6 +71,74 @@ def hote_permis(entete):
         return True
     except ValueError:
         return False
+
+
+class Appairage:
+    """Code court affiché dans le terminal, à saisir sur la tablette.
+
+    Taper le jeton (22 caractères) à chaque changement d'adresse du téléphone
+    était pénible : l'iPad ne le garde que pour l'adresse où il l'a reçu. Le
+    code à 6 chiffres ne remplace pas le jeton, il le DONNE : bon code, la
+    tablette reçoit le cookie du jeton, comme avec l'adresse ?jeton=...
+    Seul un appareil qui voit l'écran du serveur peut donc entrer.
+
+    Deviner : un code ne vit que DUREE secondes, sert une fois, et ESSAIS
+    erreurs le brûlent, avec PAUSE secondes avant le suivant. Chaque nouveau
+    code s'affiche dans le terminal : une série d'essais ne passe pas inaperçue.
+    """
+    DUREE, ESSAIS, PAUSE = 600, 5, 60
+
+    def __init__(self, afficher=None):
+        self.afficher = afficher or (lambda texte: print(texte, flush=True))
+        self.verrou = threading.Lock()
+        self.code = None
+        self.expire = 0.0
+        self.echecs = 0
+        self.bloque = 0.0
+
+    @staticmethod
+    def lisible(code):
+        return code[:3] + " " + code[3:]
+
+    def _neuf(self, maintenant):
+        self.code = "%06d" % secrets.randbelow(10 ** 6)
+        self.expire = maintenant + self.DUREE
+        self.echecs = 0
+        self.afficher("  Code d'appairage : %s   (à saisir sur la tablette, valable %d min)"
+                      % (self.lisible(self.code), self.DUREE // 60))
+
+    def preparer(self):
+        """Un code valable existe (en créer un, et l'afficher, s'il le faut).
+        Renvoie les secondes d'attente si les essais sont suspendus, sinon 0."""
+        with self.verrou:
+            maintenant = time.monotonic()
+            if maintenant < self.bloque:
+                return int(self.bloque - maintenant) + 1
+            if not self.code or maintenant >= self.expire:
+                self._neuf(maintenant)
+            return 0
+
+    def essayer(self, saisi):
+        """Renvoie (ok, message)."""
+        saisi = "".join(c for c in str(saisi or "") if c.isdigit())
+        with self.verrou:
+            maintenant = time.monotonic()
+            if maintenant < self.bloque:
+                return False, ("Trop d'essais : attendez %d s, un nouveau code s'affichera "
+                               "sur le serveur." % (int(self.bloque - maintenant) + 1))
+            if not self.code or maintenant >= self.expire:
+                self._neuf(maintenant)
+                return False, "Code expiré : un nouveau code est affiché sur le serveur."
+            if len(saisi) == 6 and hmac.compare_digest(saisi, self.code):
+                self.code = None                   # usage unique
+                return True, "Appareil autorisé."
+            self.echecs += 1
+            if self.echecs >= self.ESSAIS:
+                self.code = None
+                self.bloque = maintenant + self.PAUSE
+                return False, ("Trop d'essais : code annulé. Dans %d s, rechargez la page : "
+                               "un nouveau code s'affichera sur le serveur." % self.PAUSE)
+            return False, "Code incorrect (%d essai(s) restant(s))." % (self.ESSAIS - self.echecs)
 
 
 def jeton_reseau():
@@ -128,6 +201,8 @@ def redemarrer():
 class Lanceur(SimpleHTTPRequestHandler):
     gestionnaire = None                                # outils.Gestionnaire
     jeton = None                                       # en --reseau : exigé des autres appareils
+    appairage = None                                   # en --reseau : le code court (Appairage)
+    autorise = True                                    # par requête, fixé dans parse_request
 
     def log_message(self, fmt, *args):                 # la console reste lisible
         pass
@@ -138,7 +213,13 @@ class Lanceur(SimpleHTTPRequestHandler):
         if not hote_permis(self.headers.get("Host")):
             self.send_error(HTTPStatus.FORBIDDEN, "Host non autorise (protection DNS rebinding)")
             return False
-        if self.jeton and not self._de_ce_poste() and not self._jeton_recu():
+        self.autorise = not (self.jeton and not self._de_ce_poste() and not self._jeton_recu())
+        chemin = urlparse(self.path).path
+        if not self.autorise and self.appairage and (
+                (self.command == "GET" and chemin in PAGES_APPAIRAGE)
+                or (self.command == "POST" and chemin == "/api/appairer")):
+            return True                                # la page du code, et sa vérification
+        if not self.autorise:
             # Sans cela, tout appareil du réseau poussait sur GitHub avec les
             # identifiants de ce poste et changeait son identité git.
             self.send_error(HTTPStatus.FORBIDDEN, "Jeton manquant",
@@ -185,15 +266,23 @@ class Lanceur(SimpleHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(corps)
 
+    def _biscuit_jeton(self):
+        return ("%s=%s; Path=/; Max-Age=31536000; HttpOnly; SameSite=Strict"
+                % (BISCUIT, self.jeton))
+
     def do_GET(self):
         url = urlparse(self.path)
         g = self.gestionnaire
+        if not self.autorise:
+            # Appareil sans jeton : la page qui demande le code d'appairage
+            # (le code s'affiche, s'il le faut, dans le terminal du serveur).
+            self.appairage.preparer()
+            return self._fichier("appairage.html")
         if self.jeton and self._jeton_url():
             # Le jeton passe dans un cookie et quitte l'adresse : il ne reste
             # ni dans l'historique, ni dans un lien recopié.
             self.send_response(HTTPStatus.SEE_OTHER)
-            self.send_header("Set-Cookie", "%s=%s; Path=/; Max-Age=31536000; HttpOnly; SameSite=Strict"
-                             % (BISCUIT, self.jeton))
+            self.send_header("Set-Cookie", self._biscuit_jeton())
             self.send_header("Location", url.path or "/")
             self.send_header("Content-Length", "0")
             self.end_headers()
@@ -233,6 +322,20 @@ class Lanceur(SimpleHTTPRequestHandler):
             return self._json({"erreur": "JSON invalide"}, HTTPStatus.BAD_REQUEST)
         if not isinstance(corps, dict):
             return self._json({"erreur": "JSON invalide"}, HTTPStatus.BAD_REQUEST)
+        if not self.autorise:
+            # Seule route ouverte sans jeton (parse_request) : le bon code
+            # donne à l'appareil le cookie du jeton, rien de plus.
+            ok, texte = self.appairage.essayer(corps.get("code"))
+            donnees = json.dumps({"ok": ok, "message": texte}, ensure_ascii=False).encode("utf-8")
+            self.send_response(HTTPStatus.OK if ok else HTTPStatus.FORBIDDEN)
+            if ok:
+                self.send_header("Set-Cookie", self._biscuit_jeton())
+            self.send_header("Content-Type", "application/json; charset=utf-8")
+            self.send_header("Content-Length", str(len(donnees)))
+            self.send_header("Cache-Control", "no-store")
+            self.end_headers()
+            self.wfile.write(donnees)
+            return
         oid = corps.get("id")
         g = self.gestionnaire
         if url.path == "/api/identite":
@@ -360,6 +463,7 @@ def main(argv=None):
 
     Lanceur.gestionnaire = outils.Gestionnaire(racine, reseau=reseau)
     Lanceur.jeton = jeton_reseau() if reseau else None
+    Lanceur.appairage = Appairage() if reseau else None
     if args.verifier_maj:
         # Pendant l'animation d'intro : les outils lancés ensuite n'ont plus à le faire.
         Lanceur.gestionnaire.verifier_maj_outils()
@@ -383,9 +487,11 @@ def main(argv=None):
     url_reseau = ("http://%s:%d/?jeton=%s" % (ip, serveur.server_address[1], Lanceur.jeton)
                   if ip else None)
     if url_reseau:
-        print("  Réseau    %s" % url_reseau)
-        print("            (tablette, téléphone, autre poste : le jeton est exigé ;")
-        print("             supprimer lanceur/jeton-reseau.txt pour en changer)")
+        print("  Réseau    http://%s:%d/" % (ip, serveur.server_address[1]))
+        print("            tablette, téléphone, autre poste : ouvrir cette adresse,")
+        print("            puis saisir le code d'appairage affiché ci-dessous")
+        print("            (ou directement, sans code : %s ;" % url_reseau)
+        print("             supprimer lanceur/jeton-reseau.txt pour changer de jeton)")
     elif reseau:
         print("  Réseau    écoute sur le réseau, adresse IP du poste introuvable")
         print("            jeton à ajouter à l'adresse : ?jeton=%s" % Lanceur.jeton)
@@ -403,11 +509,17 @@ def main(argv=None):
 
     ouvrir = not args.sans_navigateur and (args.navigateur or not serveur_dedie)
     if not ouvrir:
-        print("  Navigateur non ouvert : aller sur %s" % (url_reseau or url))
+        print("  Navigateur non ouvert : aller sur %s"
+              % ("http://%s:%d/" % (ip, serveur.server_address[1]) if url_reseau else url))
+        if Lanceur.appairage:
+            # en dernier, là où l'œil tombe ; un nouveau code s'affiche ici aussi
+            Lanceur.appairage.preparer()
         print()
         sys.stdout.flush()
     else:
         threading.Timer(0.6, lambda: webbrowser.open(url)).start()
+        if Lanceur.appairage:
+            Lanceur.appairage.preparer()
     if os.name != "nt":
         # Fermer le terminal (SIGHUP) ou un kill/systemctl stop (SIGTERM) doit
         # arrêter les outils comme Ctrl+C : ils sont dans leur propre session,

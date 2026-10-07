@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>WEB·SUITE · Appairage</title>
+<!-- Servie à un appareil qui n'a pas encore le jeton du mode réseau (web_suite.py,
+     classe Appairage). Rien d'externe : le serveur peut être hors ligne. -->
+<style>
+  :root {
+    --ink: #020617; --panel: rgba(6, 16, 48, .62); --text: #e6edff; --muted: #8ea3d9;
+    --faint: rgba(142, 163, 217, .28); --ok: #8dffb8; --err: #ff6b7d;
+    --mono: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body {
+    display: grid; place-items: center; min-height: 100vh; min-height: 100dvh;
+    padding: 24px 16px; color: var(--text);
+    font: 400 15px/1.5 var(--mono);
+    background: radial-gradient(ellipse at 50% 0%, rgba(40, 80, 200, .25), transparent 60%), var(--ink);
+  }
+  main {
+    width: 100%; max-width: 420px; padding: 28px 24px; border: 1px solid var(--faint);
+    border-radius: 14px; background: var(--panel); text-align: center;
+  }
+  .marque { letter-spacing: .3em; font-weight: 600; font-size: 13px; color: var(--muted); }
+  h1 { font-size: 20px; margin: 14px 0 6px; letter-spacing: .04em; }
+  p { color: var(--muted); margin: 0 0 20px; font-size: 13.5px; }
+  input {
+    width: 100%; padding: 14px 10px; border-radius: 10px; border: 1px solid var(--faint);
+    background: rgba(2, 6, 23, .7); color: var(--text); text-align: center;
+    font: 600 30px/1 var(--mono); letter-spacing: .35em; outline: none;
+  }
+  input:focus { border-color: var(--text); }
+  button {
+    margin-top: 14px; width: 100%; padding: 12px; border-radius: 10px; border: 1px solid var(--text);
+    background: rgba(8, 20, 60, .55); color: var(--text); font: 600 14px/1 var(--mono);
+    letter-spacing: .12em; text-transform: uppercase; cursor: pointer;
+  }
+  button:disabled { opacity: .5; cursor: default; }
+  #etat { min-height: 1.5em; margin-top: 14px; font-size: 13px; }
+  #etat.err { color: var(--err); }
+  #etat.ok { color: var(--ok); }
+</style>
+</head>
+<body>
+<main>
+  <div class="marque">WEB·SUITE</div>
+  <h1>Code d'appairage</h1>
+  <p>Saisissez le code à 6 chiffres affiché dans le terminal du serveur
+     (téléphone, Raspberry Pi). Cet appareil s'en souviendra ensuite.</p>
+  <form id="f" autocomplete="off">
+    <input id="code" inputmode="numeric" pattern="[0-9 ]*" maxlength="7"
+           autocomplete="one-time-code" placeholder="000 000" aria-label="Code d'appairage" autofocus>
+    <button id="ok" type="submit">Valider</button>
+  </form>
+  <div id="etat" role="status"></div>
+</main>
+<script>
+const champ = document.getElementById('code');
+const etat = document.getElementById('etat');
+const bouton = document.getElementById('ok');
+let envoi = false;
+
+function dire(texte, classe) { etat.textContent = texte; etat.className = classe || ''; }
+
+async function valider() {
+  const code = champ.value.replace(/\D/g, '');
+  if (code.length !== 6) { dire('Le code a 6 chiffres.', 'err'); return; }
+  if (envoi) return;
+  envoi = true; bouton.disabled = true; dire('Vérification…');
+  try {
+    const r = await fetch('/api/appairer', {
+      method: 'POST', credentials: 'same-origin',
+      headers: { 'X-WebSuite': '1', 'Content-Type': 'application/json' },
+      body: JSON.stringify({ code })
+    });
+    const d = await r.json().catch(() => ({}));
+    if (d.ok) { dire('Appareil autorisé.', 'ok'); location.replace('/'); return; }
+    dire(d.message || ('Refusé (' + r.status + ').'), 'err');
+    champ.select();
+  } catch (e) {
+    dire('Serveur injoignable : ' + e.message, 'err');
+  }
+  envoi = false; bouton.disabled = false;
+}
+
+document.getElementById('f').addEventListener('submit', e => { e.preventDefault(); valider(); });
+// 6 chiffres tapés : on valide tout seul, et l'affichage se groupe par 3
+champ.addEventListener('input', () => {
+  const c = champ.value.replace(/\D/g, '').slice(0, 6);
+  champ.value = c.length > 3 ? c.slice(0, 3) + ' ' + c.slice(3) : c;
+  if (c.length === 6) valider();
+});
+</script>
+</body>
+</html>
