@@ -133,6 +133,8 @@ def git_disponible():
 # ---------------------------------------------------------------------------
 # Statuts après lesquels l'outil n'a pas à refaire sa propre vérification.
 MAJ_FAITE = ("a_jour", "maj", "hors_ligne", "sans_git")
+# Bilan affiché en console quand maj_depot n'a rien écrit (copie zip, sans .git).
+BILAN_SANS_TEXTE = {"sans_git": "copie sans git : pas de mise à jour automatique."}
 FRAICHEUR_MAJ = 600        # s : au-delà, l'outil revérifie lui-même à son lancement
 
 
@@ -667,7 +669,7 @@ class Gestionnaire:
         self.etats = {o["id"]: {"phase": None, "message": "", "url": None,
                                 "port": None, "proc": None, "debut": 0.0}
                       for o in CATALOGUE}
-        self.verifs = {}                               # id -> (statut maj_depot, heure)
+        self.verifs = {}                    # id -> (statut maj_depot, heure, dernier message)
         self.maj_finie = {o["id"]: threading.Event() for o in CATALOGUE}
         for ev in self.maj_finie.values():
             ev.set()
@@ -749,20 +751,37 @@ class Gestionnaire:
             self.maj_finie[oid].clear()
 
             def tache(o=o, oid=oid):
+                dernier = [""]
+
+                def noter(texte):
+                    dernier[0] = texte
+                    self._noter(oid, texte)
                 try:
-                    statut = maj_depot(dossier(o, self.racine), lambda t: self._noter(oid, t))
+                    statut = maj_depot(dossier(o, self.racine), noter)
                 except Exception as exc:               # noqa: BLE001
-                    self._noter(oid, "[X] Vérification des mises à jour : %s" % exc)
+                    noter("[X] Vérification des mises à jour : %s" % exc)
                     statut = "echec"
                 with self.verrou:
-                    self.verifs[oid] = (statut, time.time())
+                    self.verifs[oid] = (statut, time.time(), dernier[0])
                     if self.etats[oid]["phase"] == "maj":
                         self.etats[oid]["phase"] = None
                 self.maj_finie[oid].set()
             threading.Thread(target=tache, daemon=True).start()
 
+    def bilan_maj(self, oid, delai=0):
+        """Résultat de la vérification du démarrage, pour la console.
+
+        None si elle tourne encore après `delai` secondes, '' si l'outil n'a
+        pas été vérifié (non installé, --sans-maj)."""
+        if not self.maj_finie[oid].wait(delai):
+            return None
+        statut, _, texte = self.verifs.get(oid, (None, 0.0, ""))
+        if statut is None:
+            return ""
+        return texte or BILAN_SANS_TEXTE.get(statut, statut)
+
     def _maj_deja_faite(self, oid):
-        statut, quand = self.verifs.get(oid, (None, 0.0))
+        statut, quand, _ = self.verifs.get(oid, (None, 0.0, ""))
         return statut in MAJ_FAITE and time.time() - quand < FRAICHEUR_MAJ
 
     def installer(self, oid):

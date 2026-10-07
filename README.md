@@ -91,6 +91,11 @@ n'est touché) :
   L'intro attend la fin (30 s au plus) avant de rendre la main. Un outil lancé dans les
   10 minutes qui suivent reçoit `--sans-maj` et démarre sans refaire la vérification ;
   au-delà, il revérifie lui-même.
+- Le bilan s'affiche aussi dans le terminal, sous l'adresse (utile sur Termux et Pi, où
+  la page s'ouvre ailleurs) : une ligne pour WEB_SUITE et une par outil, par exemple
+  `WEB_CAO  installé · Mis à jour (2 commit(s)).`, `installé · À jour.`, ou
+  `GitHub injoignable : mise à jour ignorée.`. Le lanceur attend les outils 30 s au plus ;
+  un retardataire s'affiche plus bas dès qu'il a fini.
 - `--sans-maj` coupe les deux.
 
 ## Projets

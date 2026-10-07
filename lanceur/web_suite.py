@@ -165,19 +165,61 @@ def jeton_reseau():
 # ---------------------------------------------------------------------------
 # Mise à jour de WEB_SUITE elle-même, comme les outils le font au démarrage
 # ---------------------------------------------------------------------------
+# Attente des vérifications des outils avant d'afficher leur bilan en console.
+# Au-delà, le bilan d'un outil s'affiche plus bas, dès qu'il arrive.
+DELAI_BILAN_MAJ = 30
+
+
 def verifier_et_appliquer_maj():
-    """Renvoie True si une mise à jour de WEB_SUITE vient d'être appliquée (il faut relancer)."""
+    """-> (True si WEB_SUITE vient d'être mis à jour et doit redémarrer, dernier message)."""
     print("  Recherche de mises à jour de WEB_SUITE...", flush=True)
-    if outils.maj_depot(DEPOT, lambda t: print("    " + t, flush=True)) != "maj":
-        return False
+    dernier = [""]
+
+    def ecrire(texte):
+        dernier[0] = texte
+        print("    " + texte, flush=True)
+    statut = outils.maj_depot(DEPOT, ecrire)
+    texte = dernier[0] or outils.BILAN_SANS_TEXTE.get(statut, statut)
+    if statut != "maj":
+        return False, texte
     print("  [*] WEB_SUITE mis à jour, redémarrage.", flush=True)
-    return True
+    return True, texte
 
 
-def redemarrer():
+def bilans_outils(gestionnaire, racine, verifie):
+    """-> ([(outil, état pour le bandeau)], [outils dont la vérification tourne encore])."""
+    installes = [o for o in outils.CATALOGUE if outils.est_installe(o, racine)]
+    if verifie and any(not gestionnaire.maj_finie[o["id"]].is_set() for o in installes):
+        print("  Recherche de mises à jour des outils...", flush=True)
+    fin = time.time() + DELAI_BILAN_MAJ
+    etats, en_retard = [], []
+    for o in outils.CATALOGUE:
+        if o not in installes:
+            etats.append((o, "non installé"))
+            continue
+        bilan = gestionnaire.bilan_maj(o["id"], max(0.0, fin - time.time())) if verifie else ""
+        if bilan is None:
+            en_retard.append(o)
+            bilan = "vérification des mises à jour en cours..."
+        etats.append((o, "installé · " + bilan if bilan else "installé"))
+    return etats, en_retard
+
+
+def annoncer_plus_tard(gestionnaire, en_retard):
+    """Affiche le bilan des vérifications qui ont dépassé DELAI_BILAN_MAJ."""
+    def tache():
+        for o in en_retard:
+            bilan = gestionnaire.bilan_maj(o["id"], 120)
+            print("  Mise à jour %s : %s" % (o["nom"], bilan or "toujours sans réponse."),
+                  flush=True)
+    threading.Thread(target=tache, daemon=True).start()
+
+
+def redemarrer(bilan):
     # Chemin absolu reconstruit : sous Python 3.8, __file__ peut être relatif
     # et le dossier courant a déjà changé (os.chdir(ICI)).
-    env = dict(os.environ, WEB_SUITE_DEJA_MAJ="1")
+    # Le bilan passe au nouveau lanceur, qui l'affiche avec celui des outils.
+    env = dict(os.environ, WEB_SUITE_DEJA_MAJ="1", WEB_SUITE_BILAN_MAJ=bilan)
     script = os.path.join(ICI, "web_suite.py")
     cmd = [sys.executable, script] + sys.argv[1:]
     sys.stdout.flush()
@@ -468,9 +510,14 @@ def main(argv=None):
     if args.installer:
         return installer.main(["--racine", racine])
 
-    if args.verifier_maj and os.environ.get("WEB_SUITE_DEJA_MAJ") != "1":
-        if verifier_et_appliquer_maj():
-            redemarrer()
+    bilan_suite = os.environ.pop("WEB_SUITE_BILAN_MAJ", "") or (
+        "mis à jour, redémarré." if os.environ.get("WEB_SUITE_DEJA_MAJ") == "1" else "")
+    if not args.verifier_maj:
+        bilan_suite = "mises à jour non vérifiées (--sans-maj)"
+    elif os.environ.get("WEB_SUITE_DEJA_MAJ") != "1":
+        a_relancer, bilan_suite = verifier_et_appliquer_maj()
+        if a_relancer:
+            redemarrer(bilan_suite)
 
     # Premier démarrage sans aucun outil : autant demander tout de suite, en
     # console, lequel télécharger. La page le propose aussi, pour les autres cas.
@@ -498,6 +545,7 @@ def main(argv=None):
         print("  [X] %s" % exc)
         return 1
     url = "http://127.0.0.1:%d/" % serveur.server_address[1]
+    etats_outils, en_retard = bilans_outils(Lanceur.gestionnaire, racine, args.verifier_maj)
     Lanceur.gestionnaire.lanceur = url.rstrip("/")
     Lanceur.gestionnaire.jeton = Lanceur.jeton
     if outils.git_disponible():
@@ -524,9 +572,9 @@ def main(argv=None):
         print("  Réseau    désactivé (--reseau pour y accéder depuis un autre appareil)")
     print("  Outils    %s" % racine)
     print("  Projets   %s" % projets.dossier(racine))
-    for o in outils.CATALOGUE:
-        print("            %-12s %s" % (o["nom"], "installé" if outils.est_installe(o, racine)
-                                         else "non installé"))
+    print("            %-12s %s" % ("WEB_SUITE", bilan_suite))
+    for o, etat in etats_outils:
+        print("            %-12s %s" % (o["nom"], etat))
     print()
     print("  Fermer cette fenêtre (ou Ctrl+C) arrête aussi les outils lancés.")
     print()
@@ -559,6 +607,8 @@ def main(argv=None):
             raise KeyboardInterrupt
         for sig in signaux:
             signal.signal(sig, arreter)
+    if en_retard:
+        annoncer_plus_tard(Lanceur.gestionnaire, en_retard)
     try:
         serveur.serve_forever()
     except KeyboardInterrupt:
