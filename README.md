@@ -16,7 +16,7 @@ Lanceur de trois outils web, utilisables depuis n'importe quel appareil avec un 
 | [**WEB_3D**](https://github.com/pilou33620/WEB_3D) | Visionneuse 3D (STEP, IGES, STL…) avec mesure |
 
 Une carte par outil : **Télécharger** s'il manque, **Lancer** s'il est là. Les projets sont
-dans `PROJETS/`, synchronisé avec GitHub.
+dans `PROJETS/`, synchronisé avec GitHub. Détails complets : [lanceur/docs/DETAILS.md](lanceur/docs/DETAILS.md).
 
 ## Installation
 
