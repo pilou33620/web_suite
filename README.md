@@ -4,187 +4,85 @@
   <img src="lanceur/docs/intro.webp" alt="Animation d'intro WEB·SUITE : WEB_CAO, WEB_ANTENNA, WEB_3D" width="800">
 </p>
 
-<p align="center"><sub>Intro du lanceur (<code>lanceur/websuite-intro.html</code>) —
-<a href="https://raw.githack.com/pilou33620/web_suite/main/lanceur/websuite-intro.html">voir la version interactive</a></sub></p>
+<p align="center"><sub><a href="https://raw.githack.com/pilou33620/web_suite/main/lanceur/websuite-intro.html">Voir l'intro interactive</a></sub></p>
 
-Lanceur des trois outils web :
+Lanceur de trois outils web, utilisables depuis n'importe quel appareil avec un navigateur
+(PC, tablette, téléphone) :
 
-| Outil | Rôle | Dépôt |
-|---|---|---|
-| **WEB_CAO** | Schéma & routage PCB, Gestion LIB, visionneuse IPC-2581, simulation SI / PI / RF, vérification de la carte | https://github.com/pilou33620/WEB_CAO |
-| **WEB_ANTENNA** | Simulation d'antennes RF (openEMS) : import de carte, mode conception, balayage, champs | https://github.com/pilou33620/WEB_ANTENNA |
-| **WEB_3D** | Visionneuse 3D (STEP / IGES / BREP / 3MF / OBJ / STL), mesure façon Fusion 360 | https://github.com/pilou33620/WEB_3D |
+| Outil | Rôle |
+|---|---|
+| [**WEB_CAO**](https://github.com/pilou33620/WEB_CAO) | Schéma & routage PCB, bibliothèque, IPC-2581, simulation SI / PI / RF |
+| [**WEB_ANTENNA**](https://github.com/pilou33620/WEB_ANTENNA) | Simulation d'antennes RF (openEMS) |
+| [**WEB_3D**](https://github.com/pilou33620/WEB_3D) | Visionneuse 3D (STEP, IGES, STL…) avec mesure |
 
-Le détail de chaque outil est dans son propre README.
-
-Au démarrage, le lanceur joue l'animation d'intro (`websuite-intro.html`) pendant qu'il cherche
-les mises à jour des outils, puis affiche une carte par outil : **Télécharger** s'il manque,
-**Lancer** s'il est là. Lancer démarre le serveur de l'outil en arrière-plan et ouvre sa page
-dans un nouvel onglet. Les projets de tous les outils vivent dans `PROJETS/`, synchronisé
-avec GitHub (voir [Projets](#projets)).
+Une carte par outil : **Télécharger** s'il manque, **Lancer** s'il est là. Les projets sont
+dans `PROJETS/`, synchronisé avec GitHub.
 
 ## Installation
 
-Python 3.8+ suffit pour WEB_SUITE : bibliothèque standard seule (voir `lanceur/requirements.txt`).
+Prérequis : Python 3.8+ et git (sans git, pas de mises à jour ni de synchronisation).
 
 ```
-WEB_TOOLS/                  <- ce dépôt
-├── installer.cmd / .sh     <- télécharge les outils (Windows / Linux, Raspberry Pi)
-├── demarrer_WEB_SUITE.cmd / .sh  <- lance WEB·SUITE
-├── maj_git.py              <- état git de WEB_SUITE, des outils et de PROJETS (voir plus bas)
-├── lanceur/                <- code du lanceur : web_suite.py, installer.py, outils.py, projets.py, pages
-├── WEB_CAO/                <- clonés ici par l'installateur, chacun avec son dépôt git,
-├── WEB_ANTENNA/               ignorés par le .gitignore de WEB_SUITE
-├── WEB_3D/
-└── PROJETS/                <- projets + LIB_CAO, dépôt WEB_SUITE_PROJETS (cloné au démarrage)
+git clone https://github.com/pilou33620/WEB_SUITE.git WEB_TOOLS
 ```
 
-1. Cloner ce dépôt : `git clone https://github.com/pilou33620/WEB_SUITE.git WEB_TOOLS`.
-2. Télécharger les outils : double-clic sur **`installer.cmd`** (ou `python lanceur/installer.py`).
-   Le menu demande lequel installer : `1`, `2`, `3`, plusieurs (`1 3`) ou `4` pour les trois.
-   Sans menu : `python lanceur/installer.py cao 3d`, `python lanceur/installer.py tous`.
-3. Lancer : double-clic sur **`demarrer_WEB_SUITE.cmd`** (ou `python lanceur/web_suite.py`).
+| Système | Installer les outils | Démarrer |
+|---|---|---|
+| Windows | `installer.cmd` | `demarrer_WEB_SUITE.cmd` |
+| Linux, Raspberry Pi | `./installer.sh` | `./demarrer_WEB_SUITE.sh` |
+| Android (Termux) | `pkg install python git` puis `./installer.sh` | `./demarrer_WEB_SUITE.sh` |
 
-Sous Linux / Raspberry Pi, mêmes étapes avec `./installer.sh` et `./demarrer_WEB_SUITE.sh`
-(`python3` et `git` : `sudo apt install python3 git`). Sur Raspberry Pi, le lanceur
-n'ouvre pas le navigateur et écoute sur le réseau local : ouvrir depuis n'importe quel appareil
-l'adresse **Réseau** affichée (`http://<ip-du-pi>:8100/`), ou lancer avec `--navigateur` ;
-l'installation automatique d'openEMS reste réservée à Windows.
+L'installateur demande quels outils télécharger (`1`, `1 3`, `4` = tous), ou directement :
+`python lanceur/installer.py cao 3d`.
 
-Sous **Termux** (Android) : `pkg install python git`, puis `./installer.sh`. L'installateur
-détecte Termux et installe `numpy` / `scipy` de WEB_CAO par `pkg install python-numpy
-python-scipy` (paquets précompilés) au lieu de pip, qui n'a pas de roue Android et
-échouerait en tentant de les compiler (cmake, ninja). Lancer WEB_SUITE avec la `python` de
-Termux, hors venv, pour qu'elle voie ces paquets. Comme sur Raspberry Pi, `./demarrer_WEB_SUITE.sh`
-y démarre directement en mode réseau, sans ouvrir de navigateur : ouvrir l'adresse **Réseau**
-affichée depuis l'autre appareil (garder `termux-wake-lock` actif).
+Dépendances des outils, proposées par l'installateur :
 
-Au premier démarrage sans aucun outil, `web_suite.py` pose la même question en
-console. La page propose aussi **Télécharger** sur chaque carte et un bouton
-pour tout télécharger d'un coup.
-
-git est recommandé (https://git-scm.com) : sans lui, les outils sont téléchargés en zip,
-ne se mettent plus à jour, et les projets ne sont pas synchronisés.
-
-Dépendances propres aux outils :
-
-- **WEB_CAO** : `numpy`, `scipy` facultatifs (solveurs SI/PI). L'installateur propose de les installer
-  (par pip, ou par `pkg` sous Termux).
-- **WEB_ANTENNA** : openEMS pour lancer les simulations. L'installateur propose de
-  l'installer (ou `python lanceur/installer.py antenna`, ou le bouton **Installer openEMS** de
-  la carte) : il télécharge l'archive openEMS v0.0.36 (~50 Mo) dans `WEB_ANTENNA/openEMS/`,
-  crée `WEB_ANTENNA/env/` et y installe les paquets. Seul prérequis à installer soi-même :
-  **Python 3.10 ou 3.11 en 64 bits** (les roues openEMS n'existent que pour ces versions),
-  par exemple `winget install Python.Python.3.11`. Windows seulement ; ailleurs, voir le
-  guide en tête de `WEB_ANTENNA/requirements.txt`.
+- **WEB_CAO** : `numpy`, `scipy` (facultatifs). Sous Termux, installés par `pkg`.
+- **WEB_ANTENNA** : openEMS, installé automatiquement sous Windows seulement
+  (nécessite Python 3.10 ou 3.11 64 bits). Ailleurs, voir `WEB_ANTENNA/requirements.txt`.
 - **WEB_3D** : aucune.
 
-## Mises à jour
+## Utiliser depuis un autre appareil
 
-Chaque dépôt garde son propre git et se met à jour par `git pull --ff-only`, jamais
-par-dessus des fichiers modifiés (« des fichiers sont modifiés » s'affiche alors et rien
-n'est touché) :
+Sur Raspberry Pi et Termux, le lanceur écoute sur le réseau local et n'ouvre pas de
+navigateur (ailleurs : `--reseau`). Depuis la tablette, le téléphone ou le PC :
 
-- **WEB_SUITE** se vérifie avant d'ouvrir son serveur et redémarre seul s'il vient d'être mis à jour.
-- **Les outils installés** se vérifient tous en parallèle pendant l'animation d'intro :
-  la carte affiche « Mise à jour… » et le bandeau de l'intro « Mises à jour · WEB_CAO ✓ … ».
-  L'intro attend la fin (30 s au plus) avant de rendre la main. Un outil lancé dans les
-  10 minutes qui suivent reçoit `--sans-maj` et démarre sans refaire la vérification ;
-  au-delà, il revérifie lui-même.
-- Le bilan s'affiche aussi dans le terminal, sous l'adresse (utile sur Termux et Pi, où
-  la page s'ouvre ailleurs) : une ligne pour WEB_SUITE et une par outil, par exemple
-  `WEB_CAO  installé · Mis à jour (2 commit(s)).`, `installé · À jour.`, ou
-  `GitHub injoignable : mise à jour ignorée.`. Le lanceur attend les outils 30 s au plus ;
-  un retardataire s'affiche plus bas dès qu'il a fini.
-- `--sans-maj` coupe les deux.
+1. ouvrir l'adresse **Réseau** affichée dans le terminal (`http://<adresse>:8100/`) ;
+2. saisir le **code d'appairage** à 6 chiffres affiché juste en dessous (une fois par
+   appareil et par adresse du serveur).
 
-## Projets
+Sous Termux, garder `termux-wake-lock` actif.
 
-Les projets et la bibliothèque de composants de WEB_CAO sont dans `PROJETS/`, un dépôt git
-à part (https://github.com/pilou33620/WEB_SUITE_PROJETS), ignoré par WEB_SUITE :
+## Projets et GitHub
+
+`PROJETS/` est un dépôt git à part
+([WEB_SUITE_PROJETS](https://github.com/pilou33620/WEB_SUITE_PROJETS)) :
 
 ```
 PROJETS/
-├── projets.txt       <- liste des projets par outil, réécrite à chaque envoi
-├── CAO/<projet>/     <- WEB_CAO --projets
-├── LIB_CAO/          <- WEB_CAO --lib (catalogue, empreintes, symboles, modèles)
-├── ANTENNA/<projet>/ <- WEB_ANTENNA --projets (les calculs/ openEMS ne sont pas envoyés)
-└── 3D/               <- WEB_3D --projets (modèles ouverts et rangés depuis la visionneuse)
+├── CAO/<projet>/
+├── LIB_CAO/
+├── ANTENNA/<projet>/
+└── 3D/
 ```
 
-- **Au démarrage**, le lanceur le clone (ou le crée en local si GitHub est vide ou
-  injoignable), puis le met à jour (`pull --rebase`). Un `PROJETS/` déjà rempli mais sans
-  git est cloné à côté : ses fichiers absents de GitHub y sont ajoutés, et l'ancien dossier
-  reste en sauvegarde (`PROJETS.avant-git-<date>`).
-- **Fins de ligne et zip** : `.gitattributes` (`* text=auto`) normalise le dépôt entre
-  Windows et le Pi ; les `.zip` de `LIB_CAO` ne sont pas envoyés (leur contenu déballé, si).
-- **Avant chaque lancement d'outil**, il tire à nouveau : un projet ou la LIB modifiés sur
-  un autre poste sont donc à jour. L'outil est lancé pointé sur ses dossiers de `PROJETS/`.
-- **À l'arrêt d'un outil**, s'il a des modifications, la page demande un message de commit
-  puis envoie (commit + pull + push) ses seuls dossiers. Annuler remet à plus tard : le bouton
-  **⇧ Envoyer sur GitHub** reste sur la carte tant que quelque chose attend, modification
-  à commiter ou commit pas encore poussé.
-- **Poste neuf** (Raspberry Pi…) : si git ne connaît ni nom ni e-mail, la page les demande
-  au premier envoi et les enregistre dans la config du dépôt `PROJETS` seulement (pas en global).
-  Au premier push, Git Credential Manager ouvre sa fenêtre de connexion GitHub.
-- **Conflit** : rien n'est fusionné automatiquement ; le lanceur annule le rebase et indique
-  le dossier où régler la situation à la main (git y tourne en `LC_ALL=C` : un git traduit
-  ne trompe pas la détection, et PROJETS n'est jamais laissé en plein rebase).
-- **Hors ligne** : l'envoi enregistre quand même (le commit est fait sur le poste) et rien
-  n'est perdu. Le lanceur renvoie ensuite **tout seul** ce qui attend : un essai dès son
-  démarrage, puis toutes les minutes tant qu'un enregistrement n'est pas sur GitHub (en
-  espaçant jusqu'à 5 minutes si la connexion tarde). La page l'affiche (« ⏳ n
-  enregistrement(s) pas encore sur GitHub »), puis le confirme une fois parti. Seul ce qui a
-  été enregistré par un envoi part ainsi, avec son message : des modifications jamais
-  envoyées (Annuler au message de commit) attendent le prochain envoi.
+- Il est récupéré au démarrage et avant chaque lancement d'outil.
+- À l'arrêt d'un outil, la page propose d'envoyer les modifications sur GitHub (message de
+  commit demandé). Le bouton **⇧ Envoyer sur GitHub** reste tant que quelque chose attend.
+- Dans WEB_CAO, **Fichier → Enregistrer + GitHub** (ou **💾 Sauver**) enregistre et envoie
+  directement, depuis n'importe quel appareil connecté.
+- **Hors ligne**, l'envoi est enregistré localement et repart tout seul au retour de la connexion.
+- **Conflit** : rien n'est fusionné automatiquement, le lanceur indique le dossier à régler.
 
-### Sauvegarder depuis une tablette
+**Connexion à GitHub** : sous Windows, Git Credential Manager s'en charge au premier envoi.
+Sur Pi et Termux, le lanceur propose au démarrage de se connecter via `gh` : un code est à
+saisir sur https://github.com/login/device, depuis n'importe quel appareil.
 
-Cas typique : WEB_SUITE tourne sur un téléphone (Termux) ou un Raspberry Pi, et l'on
-dessine sur l'iPad.
+## Mises à jour
 
-**Une seule fois, sur le serveur** (téléphone ou Pi), connecter git à votre compte GitHub.
-Sous Windows, Git Credential Manager s'en charge au premier envoi ; ni Termux ni le Pi
-n'en ont. Le lanceur s'en occupe donc au démarrage, dans son terminal : s'il voit que git
-n'a pas encore d'identifiants pour github.com, il demande
-
-```
-  GitHub : ce serveur n'est pas encore connecté à votre compte.
-  Se connecter maintenant ? [O/n, j = ne plus demander] :
-```
-
-Entrée (oui) : il installe `gh` s'il manque (`pkg install gh` sous Termux,
-`sudo apt-get install gh` sur le Pi), lance `gh auth login`, qui affiche un code à
-8 caractères à saisir sur https://github.com/login/device (depuis le téléphone, l'iPad ou
-un PC), puis `gh auth setup-git`. Le nom et l'e-mail des commits sont pris au compte
-GitHub : l'iPad n'a plus à les demander. La connexion reste valable d'un démarrage à
-l'autre, la question ne revient pas. `n` la remet au prochain démarrage, `j` ne la pose
-plus (supprimer `PROJETS/.git/websuite-sans-github` pour la retrouver). Sur le Pi, le
-terminal peut être une session SSH depuis l'iPad. À la main, c'est `gh auth login`
-puis `gh auth setup-git`.
-
-**Ensuite, à chaque fois, depuis l'iPad** :
-
-1. ouvrir l'adresse **Réseau** du lanceur (`http://<adresse>:8100/`, affichée en bas du
-   terminal du serveur) ; la première fois, et à chaque changement d'adresse du serveur,
-   saisir le **code d'appairage** à 6 chiffres affiché juste en dessous. Puis lancer WEB_CAO ;
-2. sur la page d'accueil de WEB_CAO, ouvrir ou créer le projet : il vit sur le serveur,
-   dans `PROJETS/CAO/<projet>/` ;
-3. dans l'éditeur (schéma ou PCB), **Fichier → Enregistrer + GitHub**, ou le bouton
-   **💾 Sauver** de la barre tactile. Le document est écrit sur le serveur, puis envoyé :
-   un message de commit est demandé (Annuler = enregistrer sans envoyer), et au tout
-   premier envoi, votre nom et votre e-mail pour git.
-
-C'est le lanceur qui envoie (commit + pull + push de `CAO/` et `LIB_CAO/`), exactement comme
-le bouton **⇧ Envoyer sur GitHub** de sa page : WEB_CAO lui relaie la demande. Le relai
-exige le même jeton que le lanceur — l'iPad le porte déjà, dans le cookie reçu avec le
-code d'appairage — et un autre appareil du réseau ne peut donc pas pousser sur
-GitHub avec les identifiants du serveur. Sans Internet (téléphone hors réseau, box
-coupée), Sauver enregistre quand même sur le serveur et le dit : l'envoi repart tout seul
-dès que la connexion revient, ou au redémarrage du serveur (voir « Hors ligne » plus haut).
-**Enregistrer** seul (Ctrl+S) écrit sur le
-serveur sans rien envoyer ; arrêter l'outil depuis le lanceur propose toujours d'envoyer
-ce qui attend.
+WEB_SUITE et les outils se mettent à jour au démarrage (`git pull --ff-only`), jamais
+par-dessus des fichiers modifiés. Le bilan s'affiche dans la page et dans le terminal.
+`--sans-maj` désactive tout.
 
 ## Options
 
@@ -193,71 +91,22 @@ python lanceur/web_suite.py [--port 8100] [--racine DOSSIER] [--installer]
                     [--navigateur | --sans-navigateur] [--reseau | --local] [--sans-maj]
 ```
 
-- `--reseau` : le lanceur et les outils écoutent sur le réseau local ; l'adresse
-  **Réseau** affichée s'ouvre depuis une tablette, un téléphone ou un autre poste.
-  C'est le défaut sur Raspberry Pi et sous Termux. WEB_CAO y est lancé avec `--projets-reseau` pour que
-  ses projets et la LIB restent ouverts depuis l'autre appareil (confinés à `PROJETS/`).
-  Le lanceur exige un jeton de tout autre appareil. Pour ne pas avoir à le taper, l'appareil
-  ouvre simplement `http://<adresse>:8100/` et saisit le **code d'appairage** à 6 chiffres
-  affiché dans le terminal du serveur : le bon code lui donne le jeton, rangé dans un cookie
-  (un an). Le code sert une fois, vit 10 minutes, et 5 erreurs l'annulent avec une minute
-  d'attente ; chaque nouveau code s'affiche dans le terminal, une série d'essais s'y voit.
-  Le cookie vaut pour une adresse : si celle du serveur change (partage de connexion, 4G,
-  autre Wi-Fi), on ressaisit un code. L'adresse complète `?jeton=…`, toujours affichée,
-  marche aussi sans code. Le jeton est conservé dans `lanceur/jeton-reseau.txt` ;
-  supprimer ce fichier en crée un neuf (les appareils déjà appairés le sont alors à refaire).
-  Les outils, eux, restent sans authentification : réseau de confiance uniquement.
-  `--local` force l'écoute sur `127.0.0.1` seulement (défaut ailleurs).
+- `--reseau` / `--local` : écouter sur le réseau local ou seulement sur ce poste.
+- `--navigateur` / `--sans-navigateur` : forcer ou empêcher l'ouverture du navigateur.
+- `--racine` : dossier des outils. `--installer` : menu de téléchargement seul.
+- `?sans-intro` dans l'adresse saute l'animation.
 
-- Le navigateur s'ouvre automatiquement, sauf sur Raspberry Pi et sous Termux.
-  `--navigateur` force l'ouverture, `--sans-navigateur` l'empêche partout.
+## Sécurité
 
-- `--racine` : dossier contenant les outils (défaut : la racine du dépôt, parent de `lanceur/`).
-- `--installer` : ouvre seulement le menu de téléchargement.
-- `--sans-maj` : ne vérifier les mises à jour ni de WEB_SUITE ni des outils.
-- La page accepte `?sans-intro` pour sauter l'animation. Elle ne la rejoue pas
-  non plus quand on recharge l'onglet ; le bouton **↻ Intro** la relance.
+- En mode réseau, tout autre appareil doit être appairé (jeton stocké dans un cookie).
+  Supprimer `lanceur/jeton-reseau.txt` révoque tous les appareils.
+- Les outils eux-mêmes n'ont pas d'authentification : **réseau de confiance uniquement**.
+- Le lanceur refuse les requêtes venant d'autres pages (en-tête `X-WebSuite`, contrôle du `Host`).
 
-## Fonctionnement
+## Divers
 
-- Le lanceur n'écoute que sur `127.0.0.1` (sauf `--reseau`) et refuse les requêtes d'action sans
-  l'en-tête `X-WebSuite` : aucune page tierce ne peut lancer ou télécharger un outil.
-  Il refuse aussi tout en-tête `Host` qui n'est ni une adresse IP, ni `localhost`, ni le nom
-  du poste : une page piégée par DNS rebinding ne peut pas se faire passer pour lui.
-- Les outils sont démarrés avec `--local --sans-navigateur` (sans `--local` en mode réseau) sur leur port habituel
-  (CAO 8000, ANTENNA 8732, 3D 8139) ou le suivant s'il est pris, avec `--projets` / `--lib`
-  vers `PROJETS/`, et `--sans-maj` si le lanceur vient de les vérifier.
-- Leur sortie console va dans `lanceur/journaux/<outil>.log`, lisible depuis le bouton
-  **Journal** de chaque carte.
-- Fermer la fenêtre de WEB_SUITE (ou Ctrl+C) arrête les outils lancés depuis elle. Sous Linux,
-  fermer le terminal (SIGHUP) ou `kill` (SIGTERM) aussi.
-
-## maj_git.py
-
-`python maj_git.py` fait le tour de WEB_SUITE, des trois outils et de `PROJETS/` :
-modifications locales, commits à pousser ou à récupérer. Pour chaque dépôt en retard, il
-propose de commiter, de tirer (`pull --rebase`) puis de pousser, en demandant à chaque étape.
-
-## Vérifications
-
-```
-python lanceur/projets.py
-```
-
-Joue deux postes et un faux GitHub (dépôt nu) : création, identité git manquante, envoi,
-clonage sur l'autre poste, `projets.txt`. Affiche `OK` si tout passe.
-
-```
-python lanceur/banc_serveur.py
-```
-
-Serveur du lanceur avec un gestionnaire factice : `Host` étranger, `X-WebSuite`, taille
-des requêtes, jeton du mode réseau (refus, cookie, ce poste exempté), code d'appairage
-(usage unique, expiration, cinq erreurs puis pause). Affiche `OK`.
-
-```
-python lanceur/banc_termux.py
-```
-
-Joue Termux avec un faux `pkg` : `numpy` / `scipy` partent à `pkg install`, rien à pip, et un
-paquet toujours introuvable après coup est signalé. Affiche `OK`.
+- Journaux des outils : `lanceur/journaux/<outil>.log` (bouton **Journal**).
+- `python maj_git.py` : état git de WEB_SUITE, des outils et de `PROJETS/`, avec
+  commit / pull / push guidés.
+- Tests : `python lanceur/projets.py`, `python lanceur/banc_serveur.py`,
+  `python lanceur/banc_termux.py` (affichent `OK`).
