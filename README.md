@@ -69,8 +69,10 @@ PROJETS/
 - Il est récupéré au démarrage et avant chaque lancement d'outil.
 - À l'arrêt d'un outil, la page propose d'envoyer les modifications sur GitHub (message de
   commit demandé). Le bouton **⇧ Envoyer sur GitHub** reste tant que quelque chose attend.
-- Dans WEB_CAO, **Fichier → Enregistrer + GitHub** (ou **💾 Sauver**) enregistre et envoie
-  directement, depuis n'importe quel appareil connecté.
+- Dans WEB_CAO, **Enregistrer** (`Ctrl+S`) et **⇉ PCB** (exporter le schéma vers le PCB)
+  écrivent seulement en local, dans `PROJETS/CAO/<projet>`. **Fichier → ☁ Sauvegarder le
+  projet → GitHub** (`Ctrl+Maj+S`) enregistre puis envoie tout le projet en un seul commit,
+  depuis n'importe quel appareil connecté.
 - **Hors ligne**, l'envoi est enregistré localement et repart tout seul au retour de la connexion.
 - **Conflit** : rien n'est fusionné automatiquement, le lanceur indique le dossier à régler.
 

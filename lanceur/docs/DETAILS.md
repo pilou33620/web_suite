@@ -120,13 +120,15 @@ plus (supprimer `PROJETS/.git/websuite-sans-github` pour la retrouver). Le termi
 1. ouvrir l'adresse **Réseau** du lanceur et, si besoin, saisir le code d'appairage ;
    lancer WEB_CAO ;
 2. ouvrir ou créer le projet : il vit sur le serveur, dans `PROJETS/CAO/<projet>/` ;
-3. dans l'éditeur, **Fichier → Enregistrer + GitHub**, ou **💾 Sauver** dans la barre
-   tactile. Un message de commit est demandé (Annuler = enregistrer sans envoyer).
+3. dans l'éditeur, **Fichier → ☁ Sauvegarder le projet → GitHub** (`Ctrl+Maj+S`, ou
+   « Projet → GitHub » ajouté à la roulette tactile) : le document ouvert est enregistré,
+   puis tout le projet part en un seul commit.
 
 C'est le lanceur qui envoie (`CAO/` et `LIB_CAO/`) : WEB_CAO lui relaie la demande. Le
 relai exige le même jeton que le lanceur (porté par le cookie d'appairage) ; un appareil
 non appairé ne peut donc pas pousser avec les identifiants du serveur. **Enregistrer**
-seul (Ctrl+S) écrit sur le serveur sans rien envoyer.
+seul (Ctrl+S, ou 💾 de la roulette) et l'export du schéma vers le PCB (**⇉ PCB**) écrivent
+sur le serveur sans rien envoyer : une retouche de dernière minute ne fait pas de commit.
 
 ## Fonctionnement du lanceur
 
