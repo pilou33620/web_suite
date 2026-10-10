@@ -129,8 +129,10 @@ def proposer(racine, demander=input, lancer=subprocess.call, ecrire=print,
     ecrire("  saisissez ce code sur https://github.com/login/device (sur ce téléphone, la")
     ecrire("  tablette ou un PC), validez, et revenez ici.")
     ecrire("")
+    # Pas de --skip-ssh-key : le gh de Raspberry Pi OS / Debian (2.23) ne le connaît
+    # pas et s'arrête aussitôt ; en HTTPS, gh ne propose de toute façon aucune clé SSH.
     lancer(["gh", "auth", "login", "--hostname", "github.com", "--git-protocol", "https",
-            "--web", "--skip-ssh-key"])
+            "--web"])
     lancer(["gh", "auth", "setup-git", "--hostname", "github.com"])
     if not identifie():
         ecrire("  [X] Connexion à GitHub non aboutie. Nouvel essai au prochain démarrage.")
