@@ -57,7 +57,7 @@ jobs:
       # dans chaque outil, qui doit tourner seul : les copies restent la même.
       - name: Outils — appairage.py est le même partout
         run: |
-          for o in WEB_ANTENNA WEB_3D; do
+          for o in WEB_CAO WEB_ANTENNA WEB_3D; do
             diff <(tr -d '\r' < lanceur/appairage.py) <(tr -d '\r' < ../$o/appairage.py) > /dev/null \
               || { echo "appairage.py diffère entre WEB_SUITE et $o"; exit 1; }
           done

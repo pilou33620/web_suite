@@ -51,7 +51,7 @@ En mode réseau, le lanceur exige un jeton de tout appareil autre que le serveur
   autre Wi-Fi), on ressaisit un code.
 - L'adresse complète `?jeton=…`, toujours affichée, marche aussi sans code.
 - Le jeton est **partagé par tous les web tools du poste** (`~/.web_tools/jeton-reseau.txt`,
-  module `lanceur/appairage.py`, copie identique dans WEB_ANTENNA, WEB_3D, web_ferme) et le
+  module `lanceur/appairage.py`, copie identique dans WEB_CAO, WEB_ANTENNA, WEB_3D, web_ferme) et le
   cookie porte le même nom partout : un appareil appairé au lanceur l'est aussi pour les
   outils (un navigateur envoie le cookie à tous les ports de l'adresse), et inversement.
   L'ancien `lanceur/jeton-reseau.txt` est repris une fois. Supprimer le fichier partagé en

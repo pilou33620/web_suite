@@ -12,8 +12,9 @@ Bibliothèque standard seule. Par défaut le serveur n'écoute que sur 127.0.0.1
 il lance des programmes. Avec --reseau (défaut sur Raspberry Pi et Termux), le lanceur et
 les outils écoutent sur le réseau local ; le lanceur exige alors des autres
 appareils un jeton, qu'ils reçoivent en saisissant le code d'appairage affiché en
-console (ou avec l'adresse « Réseau » complète, ?jeton=...). Les outils, eux,
-restent sans authentification : à réserver à un réseau de confiance. --local
+console (ou avec l'adresse « Réseau » complète, ?jeton=...). Les outils exigent
+le même code, avec le même jeton et le même cookie (appairage.py) : un appareil
+appairé une fois l'est pour le lanceur et pour tous les outils. --local
 force l'écoute locale.
 """
 
@@ -58,7 +59,7 @@ PAGES_APPAIRAGE = ("/", "/index.html", PAGE_APPAIRAGE)
 # Host contrôlé (DNS rebinding), code d'appairage et jeton : appairage.py, commun
 # à tous les web tools. Le jeton est partagé par les outils de ce poste
 # (~/.web_tools/jeton-reseau.txt) et le cookie porte le même nom partout : une
-# tablette appairée ici l'est aussi pour WEB_ANTENNA, WEB_3D, web_ferme, web_launcher…
+# tablette appairée ici l'est aussi pour WEB_CAO, WEB_ANTENNA, WEB_3D, web_ferme, web_launcher…
 # (Appairage et hote_permis viennent d'appairage.py : voir les imports.)
 
 
