@@ -1,6 +1,8 @@
 """Connexion à GitHub, une fois, dans le terminal du serveur (Termux, Raspberry Pi).
 
-    python lanceur/connexion_github.py          vérification (banc d'essai, sans réseau)
+    python lanceur/connexion_github.py              vérification (banc d'essai, sans réseau)
+    python lanceur/connexion_github.py --connecter  se connecter puis récupérer PROJETS
+                                                    (action proposée par web_launcher)
 
 Sous Windows, Git Credential Manager ouvre sa fenêtre de connexion au premier
 push. Sur un téléphone ou un Pi, il n'y en a pas : le push échouait, et l'on
@@ -11,6 +13,10 @@ de s'y connecter avec gh (installé au besoin), puis de brancher git dessus.
 
 Au passage, le nom et l'e-mail des commits viennent du compte GitHub : la
 tablette n'a plus à les demander au premier envoi.
+
+WEB_SUITE_PROJETS est privé : sans cette connexion, PROJETS n'est même pas
+récupéré. Lancé par web_launcher, le lanceur n'a pas de terminal où poser la
+question : web_launcher propose alors l'action --connecter.
 """
 
 import os
@@ -31,8 +37,12 @@ def _marque(racine):
 
 def depot_github_https(racine):
     """PROJETS pousse-t-il vers github.com en HTTPS ? (en SSH, la clé s'en charge)"""
+    p = projets.dossier(racine)
+    if not os.path.isdir(os.path.join(p, ".git")):
+        # Pas encore cloné (dépôt privé, poste pas connecté) : l'adresse par défaut.
+        return projets.DEPOT.lower().startswith("https://github.com/")
     # l'adresse telle qu'écrite dans la config du dépôt (get-url appliquerait les insteadOf)
-    code, url = projets._git(projets.dossier(racine), "config", "--get", "remote.origin.url", timeout=10)
+    code, url = projets._git(p, "config", "--get", "remote.origin.url", timeout=10)
     return code == 0 and url.strip().lower().startswith("https://github.com/")
 
 
@@ -88,12 +98,16 @@ def proposer(racine, demander=input, lancer=subprocess.call, ecrire=print,
         return "deja"
     ecrire("")
     ecrire("  GitHub : ce serveur n'est pas encore connecté à votre compte.")
-    ecrire("  Sans cela, les projets s'enregistrent ici mais ne partent pas sur GitHub.")
+    ecrire("  Le dépôt des projets (WEB_SUITE_PROJETS) est privé : sans cela, ils ne sont")
+    ecrire("  ni récupérés ni envoyés sur GitHub.")
     try:
         rep = demander("  Se connecter maintenant ? [O/n, j = ne plus demander] : ").strip().lower()
     except EOFError:
         return "plus-tard"
     if rep in ("j", "jamais"):
+        if not os.path.isdir(os.path.dirname(_marque(racine))):
+            ecrire("  PROJETS n'est pas encore récupéré : la question reviendra au prochain démarrage.")
+            return "plus-tard"
         open(_marque(racine), "w").close()
         ecrire("  D'accord, plus de question. (Supprimer %s pour la retrouver.)" % _marque(racine))
         return "jamais"
@@ -126,6 +140,20 @@ def proposer(racine, demander=input, lancer=subprocess.call, ecrire=print,
     return "connecte"
 
 
+def connecter(racine):
+    """Action « Connecter ce serveur à GitHub » de web_launcher : se connecter
+    (même après « ne plus demander »), puis récupérer ou mettre à jour PROJETS."""
+    if os.path.exists(_marque(racine)):
+        os.remove(_marque(racine))
+    r = proposer(racine)
+    print("  Projets : %s" % projets.preparer(racine), flush=True)
+    return r
+
+
+if __name__ == "__main__" and "--connecter" in sys.argv:
+    connecter(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+    sys.exit(0)
+
 if __name__ == "__main__":
     # Vérification sans réseau ni vrai gh : un dépôt PROJETS factice, des réponses
     # et des commandes simulées.
@@ -136,6 +164,11 @@ if __name__ == "__main__":
         os.environ.update(GIT_CONFIG_GLOBAL=vide, GIT_CONFIG_NOSYSTEM="1")
         p = projets.dossier(tmp)
         os.makedirs(p)
+        # PROJETS pas encore cloné (dépôt privé) : la question est posée quand même,
+        # et « ne plus demander » n'a nulle part où s'écrire.
+        assert depot_github_https(tmp)
+        assert proposer(tmp, demander=lambda q: "j", ecrire=lambda *a: None,
+                        identifie=lambda: False) == "plus-tard"
         projets._git(p, "init")
         projets._git(p, "remote", "add", "origin", "https://github.com/x/WEB_SUITE_PROJETS.git")
         muet = lambda *a: None                                   # noqa: E731

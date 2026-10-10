@@ -10,6 +10,11 @@
 Le lanceur tire (pull) au démarrage et avant chaque lancement d'outil, et
 envoie (commit + push) quand on arrête un outil. Un seul utilisateur : en cas
 de conflit on s'arrête et on prévient, sans rien fusionner tout seul.
+
+WEB_SUITE_PROJETS est privé : sans compte GitHub connecté sur le poste, git
+ne peut ni le cloner ni le tirer. On ne crée alors pas de dépôt local (son
+historique serait sans lien avec GitHub) : PROJETS reste un simple dossier,
+cloné dès que le poste est connecté (connexion_github.py).
 """
 
 import os
@@ -81,17 +86,22 @@ def preparer(racine, depot=DEPOT):
     note = ""
     with _verrou:
         if not os.path.isdir(os.path.join(p, ".git")):
-            vide = not os.path.isdir(p) or not os.listdir(p)
-            if not vide:
+            if not _vide(p):
                 ok, note = _adopter(racine, p, depot)
                 if not ok:
                     return note
-            elif _git(racine, "clone", depot, p, timeout=600)[0] != 0:
-                # Dépôt pas encore créé sur GitHub, ou hors ligne : on part en
-                # local, le premier envoi réussi le remplira.
-                os.makedirs(p, exist_ok=True)
-                _git(p, "init")
-                _git(p, "remote", "add", "origin", depot)
+            else:
+                shutil.rmtree(p, ignore_errors=True)   # squelette laissé par un essai précédent
+                code, sortie = _git(racine, "clone", depot, p, timeout=600)
+                if code != 0 and refus_auth(sortie):
+                    _squelette(p)
+                    return ACCES_REFUSE
+                if code != 0:
+                    # Dépôt pas encore créé sur GitHub, ou hors ligne : on part en
+                    # local, le premier envoi réussi le remplira.
+                    os.makedirs(p, exist_ok=True)
+                    _git(p, "init")
+                    _git(p, "remote", "add", "origin", depot)
             if _git(p, "rev-parse", "--verify", "HEAD")[0] != 0:
                 # Branche encore vide (init, ou clone d'un dépôt vide) : on la
                 # nomme main quel que soit le réglage init.defaultBranch du poste.
@@ -99,15 +109,26 @@ def preparer(racine, depot=DEPOT):
         # Tirer avant de créer le squelette : un .gitkeep local non suivi
         # bloquerait le pull du même fichier venu de GitHub.
         etat = _tirer(p)
-        for nom in ("CAO", "3D", "ANTENNA", "LIB_CAO"):
-            os.makedirs(os.path.join(p, nom), exist_ok=True)
-            if not os.listdir(os.path.join(p, nom)):
-                open(os.path.join(p, nom, ".gitkeep"), "w").close()   # git ignore les dossiers vides
+        _squelette(p, gitkeep=True)
         for nom, texte in ((".gitignore", GITIGNORE), (".gitattributes", GITATTRIBUTES)):
             if not os.path.isfile(os.path.join(p, nom)):
                 with open(os.path.join(p, nom), "w", encoding="utf-8", newline="\n") as f:
                     f.write(texte)
         return (note + " " + etat).strip()
+
+
+def _squelette(p, gitkeep=False):
+    """Les dossiers des outils. .gitkeep : git ignore les dossiers vides."""
+    for nom in ("CAO", "3D", "ANTENNA", "LIB_CAO"):
+        os.makedirs(os.path.join(p, nom), exist_ok=True)
+        if gitkeep and not os.listdir(os.path.join(p, nom)):
+            open(os.path.join(p, nom, ".gitkeep"), "w").close()
+
+
+def _vide(p):
+    """Rien d'autre que des dossiers vides et des .gitkeep : le squelette d'un
+    démarrage où GitHub a refusé le clone. On peut cloner à sa place."""
+    return all(f == ".gitkeep" for _, _, fichiers in os.walk(p) for f in fichiers)
 
 
 def _adopter(racine, p, depot):
@@ -119,8 +140,11 @@ def _adopter(racine, p, depot):
     et l'ancien dossier reste intact à côté, en sauvegarde. Renvoie (ok, message)."""
     neuf = p + ".clone"
     shutil.rmtree(neuf, ignore_errors=True)
-    if _git(racine, "clone", depot, neuf, timeout=600)[0] != 0:
+    code, sortie = _git(racine, "clone", depot, neuf, timeout=600)
+    if code != 0:
         shutil.rmtree(neuf, ignore_errors=True)
+        if refus_auth(sortie):
+            return False, ACCES_REFUSE + " Vos fichiers locaux restent dans %s." % p
         return False, ("[!] %s existe sans git et GitHub est injoignable : rien n'est "
                        "synchronisé, nouvel essai au prochain démarrage." % p)
     shutil.copytree(p, neuf, dirs_exist_ok=True,
@@ -141,11 +165,16 @@ def tirer(racine):
 
 
 def _tirer(p):
+    if not os.path.isdir(os.path.join(p, ".git")):
+        # Sans ce test, git remonterait au dépôt parent (WEB_SUITE cloné avec git).
+        return ACCES_REFUSE
     code, sortie = _git(p, "pull", "--rebase", "--autostash", "origin", BRANCHE, timeout=120)
     if code == 0:
         return "Projets à jour."
-    if "couldn't find remote ref" in sortie or "Repository not found" in sortie:
-        return "Dépôt GitHub vide ou pas encore créé : projets gardés en local."
+    if "couldn't find remote ref" in sortie:
+        return "Dépôt GitHub vide : projets gardés en local."
+    if refus_auth(sortie):
+        return ACCES_REFUSE
     # Le dossier de rebase plutôt que le texte : il reste aussi quand git a été
     # coupé par le délai, et ne laisse jamais PROJETS en plein rebase.
     en_rebase = any(os.path.isdir(os.path.join(p, ".git", d)) for d in ("rebase-merge", "rebase-apply"))
@@ -213,20 +242,30 @@ def definir_identite(racine, nom, email):
 # Ce que git répond quand GitHub ne sait pas qui pousse. Sous Windows, Git
 # Credential Manager ouvre sa fenêtre ; sur un Raspberry Pi ou sous Termux, il
 # n'y en a pas, et GIT_TERMINAL_PROMPT=0 interdit la question en console.
+# Dépôt privé : sans compte autorisé, GitHub répond « Repository not found ».
 REFUS_AUTH = ("could not read username", "could not read password",
               "terminal prompts disabled", "authentication failed",
               "invalid username or password", "permission denied",
-              "the requested url returned error: 403", "error: 403")
+              "the requested url returned error: 403", "error: 403",
+              "repository not found")
+CONNEXION = ("relancez le lanceur dans son terminal : il propose de s'y connecter, une "
+             "seule fois (depuis web_launcher : action « Connecter ce serveur à GitHub » ; "
+             "à la main : « gh auth login » puis « gh auth setup-git »).")
+ACCES_REFUSE = ("[!] GitHub refuse l'accès à WEB_SUITE_PROJETS (dépôt privé) : ce poste n'est "
+                "pas encore connecté à votre compte GitHub, les projets ne sont pas "
+                "synchronisés. Pour le connecter, " + CONNEXION)
+
+
+def refus_auth(sortie):
+    return any(m in sortie.lower() for m in REFUS_AUTH)
 
 
 def echec_push(sortie):
     """Le message d'un push refusé : si c'est l'authentification, dire quoi faire."""
-    if any(m in sortie.lower() for m in REFUS_AUTH):
+    if refus_auth(sortie):
         return ("[!] Enregistré sur ce serveur, mais GitHub refuse l'envoi : le serveur "
-                "n'est pas encore connecté à votre compte GitHub. Relancez le lanceur dans "
-                "son terminal : il propose de s'y connecter, une seule fois (ou, à la main : "
-                "« gh auth login » puis « gh auth setup-git »). Rien n'est perdu : l'envoi "
-                "repartira tout seul une fois connecté.")
+                "n'est pas encore connecté à votre compte GitHub. Pour le connecter, "
+                + CONNEXION + " Rien n'est perdu : l'envoi repartira tout seul une fois connecté.")
     return ("[!] Enregistré sur ce poste ; GitHub injoignable pour l'instant (pas "
             "d'Internet ?). Rien n'est perdu : l'envoi repart tout seul dès que la "
             "connexion revient, et au prochain démarrage. (%s)" % _cause(sortie))
@@ -378,11 +417,37 @@ if __name__ == "__main__":
         assert commits_a_pousser(c) == 0 and not en_attente(c, "web_cao")
         assert "dans le train" in _git(nu, "log", "-1", "--format=%s", BRANCHE)[1]
         assert pousser_en_attente(c) is None
+        # Dépôt privé, poste pas connecté à GitHub : pas de dépôt local sans lien
+        # avec GitHub, juste les dossiers ; le clone se fait une fois connecté.
+        vrai_git = _git
+
+        def git_refuse(cwd, *args, **kw):
+            if args[0] in ("clone", "pull", "push"):
+                return 128, "fatal: could not read Username for 'https://github.com': terminal prompts disabled"
+            return vrai_git(cwd, *args, **kw)
+        globals()["_git"] = git_refuse
+        d = os.path.join(tmp, "pc_d")
+        assert preparer(d, nu) == ACCES_REFUSE
+        assert not os.path.isdir(os.path.join(dossier(d), ".git"))
+        assert os.path.isdir(os.path.join(dossier(d), "CAO")) and _vide(dossier(d))
+        assert tirer(d) == ACCES_REFUSE                      # et pas un pull dans un dépôt parent
+        assert not en_attente(d, "web_cao") and commits_a_pousser(d) == 0
+        assert not envoyer(d, "web_cao", "x")[0]
+        assert preparer(d, nu) == ACCES_REFUSE               # redémarrage, toujours pas connecté
+        assert tirer(a) == ACCES_REFUSE                      # PROJETS déjà cloné avant le passage en privé
+        ok, msg = envoyer(a, "web_cao", "refusé")
+        assert not ok and "gh auth login" in msg, msg
+        globals()["_git"] = vrai_git                         # le poste est connecté
+        print(preparer(d, nu))
+        assert os.path.isfile(os.path.join(dossier(d), "CAO", "carte_alim", "projet.cao.json"))
+        assert not any(n.startswith("PROJETS.avant-git-") for n in os.listdir(d))
     # Push refusé faute d'identifiants (Pi, Termux) : le message dit quoi faire.
     assert "gh auth login" in echec_push(
         "fatal: could not read Username for 'https://github.com': terminal prompts disabled")
     assert "gh auth login" in echec_push("remote: Permission to x.git denied.\n"
                                          "fatal: unable to access '...': The requested URL returned error: 403")
+    assert "gh auth login" in echec_push("remote: Repository not found.\n"
+                                         "fatal: repository 'https://github.com/x/y.git/' not found")
     assert "gh auth" not in echec_push("fatal: unable to access '...': Could not resolve host: github.com")
     assert "Could not resolve host" in echec_push(
         "fatal: unable to access 'https://github.com/x.git/': Could not resolve host: github.com\n")

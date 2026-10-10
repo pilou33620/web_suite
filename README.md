@@ -66,6 +66,10 @@ PROJETS/
 └── 3D/
 ```
 
+- Le dépôt est **privé** : chaque poste doit être connecté une fois à votre compte GitHub.
+  Sous Windows, une fenêtre de connexion s'ouvre toute seule. Sur Termux ou un Raspberry Pi,
+  le lanceur le propose dans son terminal au démarrage ; depuis web_launcher, choisir l'action
+  **Connecter ce serveur à GitHub (projets privés)**.
 - Il est récupéré au démarrage et avant chaque lancement d'outil.
 - À l'arrêt d'un outil, la page propose d'envoyer les modifications sur GitHub (message de
   commit demandé). Le bouton **⇧ Envoyer sur GitHub** reste tant que quelque chose attend.
