@@ -249,7 +249,7 @@ REFUS_AUTH = ("could not read username", "could not read password",
               "the requested url returned error: 403", "error: 403",
               "repository not found")
 CONNEXION = ("relancez le lanceur dans son terminal : il propose de s'y connecter, une "
-             "seule fois (depuis web_launcher : action « Connecter ce serveur à GitHub » ; "
+             "seule fois (ou « python lanceur/connexion_github.py --connecter » ; "
              "à la main : « gh auth login » puis « gh auth setup-git »).")
 ACCES_REFUSE = ("[!] GitHub refuse l'accès à WEB_SUITE_PROJETS (dépôt privé) : ce poste n'est "
                 "pas encore connecté à votre compte GitHub, les projets ne sont pas "

@@ -84,8 +84,8 @@ fichiers sont modifiés, « des fichiers sont modifiés » s'affiche et rien n'e
 - **Dépôt privé** : WEB_SUITE_PROJETS est privé, git doit donc être connecté au compte
   GitHub pour le cloner, le tirer et l'envoyer. Sous Windows, Git Credential Manager ouvre
   sa fenêtre de connexion. Sur Termux ou un Pi, le lanceur le propose dans son terminal au
-  démarrage (`gh auth login` + `gh auth setup-git`) ; lancé depuis web_launcher, c'est
-  l'action **Connecter ce serveur à GitHub (projets privés)**. Tant que le poste n'est pas
+  démarrage (`gh auth login` + `gh auth setup-git`), ou à tout moment avec
+  `python lanceur/connexion_github.py --connecter`. Tant que le poste n'est pas
   connecté, `PROJETS/` reste un simple dossier (pas de dépôt local sans lien avec GitHub) et
   la page l'indique ; il est cloné dès la connexion, ce qui a été créé entre-temps est gardé.
 - **Avant chaque lancement d'outil**, il tire à nouveau. L'outil est lancé pointé sur ses

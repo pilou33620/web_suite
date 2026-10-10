@@ -59,7 +59,7 @@ PAGES_APPAIRAGE = ("/", "/index.html", PAGE_APPAIRAGE)
 # Host contrôlé (DNS rebinding), code d'appairage et jeton : appairage.py, commun
 # à tous les web tools. Le jeton est partagé par les outils de ce poste
 # (~/.web_tools/jeton-reseau.txt) et le cookie porte le même nom partout : une
-# tablette appairée ici l'est aussi pour WEB_CAO, WEB_ANTENNA, WEB_3D, web_ferme, web_launcher…
+# tablette appairée ici l'est aussi pour WEB_CAO, WEB_ANTENNA, WEB_3D, web_ferme…
 # (Appairage et hote_permis viennent d'appairage.py : voir les imports.)
 
 

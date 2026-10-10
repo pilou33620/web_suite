@@ -2,7 +2,6 @@
 
     python lanceur/connexion_github.py              vérification (banc d'essai, sans réseau)
     python lanceur/connexion_github.py --connecter  se connecter puis récupérer PROJETS
-                                                    (action proposée par web_launcher)
 
 Sous Windows, Git Credential Manager ouvre sa fenêtre de connexion au premier
 push. Sur un téléphone ou un Pi, il n'y en a pas : le push échouait, et l'on
@@ -15,8 +14,8 @@ Au passage, le nom et l'e-mail des commits viennent du compte GitHub : la
 tablette n'a plus à les demander au premier envoi.
 
 WEB_SUITE_PROJETS est privé : sans cette connexion, PROJETS n'est même pas
-récupéré. Lancé par web_launcher, le lanceur n'a pas de terminal où poser la
-question : web_launcher propose alors l'action --connecter.
+récupéré. Lancé sans terminal (service, démarrage automatique), le lanceur ne
+peut pas poser la question : --connecter la pose à la demande.
 """
 
 import os
@@ -141,8 +140,8 @@ def proposer(racine, demander=input, lancer=subprocess.call, ecrire=print,
 
 
 def connecter(racine):
-    """Action « Connecter ce serveur à GitHub » de web_launcher : se connecter
-    (même après « ne plus demander »), puis récupérer ou mettre à jour PROJETS."""
+    """--connecter : se connecter (même après « ne plus demander »), puis
+    récupérer ou mettre à jour PROJETS."""
     if os.path.exists(_marque(racine)):
         os.remove(_marque(racine))
     r = proposer(racine)
