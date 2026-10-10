@@ -124,14 +124,22 @@ def proposer(racine, demander=input, lancer=subprocess.call, ecrire=print,
             ecrire("  [X] gh n'a pas pu être installé (pas d'Internet ?). Nouvel essai au prochain démarrage.")
             return "echec"
     ecrire("")
-    ecrire("  gh va afficher un code à 8 caractères, puis proposer d'ouvrir le navigateur :")
-    ecrire("  saisissez ce code sur https://github.com/login/device (sur ce téléphone, la")
-    ecrire("  tablette ou un PC), validez, et revenez ici.")
+    ecrire("  gh va afficher un code à 8 caractères : saisissez-le sur")
+    ecrire("  https://github.com/login/device (sur ce téléphone, la tablette ou un PC),")
+    ecrire("  validez, et revenez ici.")
+    env = None
+    if not outils.TERMUX:
+        # Sur un Pi sans bureau, gh ouvrirait un navigateur texte (lynx, w3m) dans ce
+        # terminal et bloquerait tout : on lui donne un navigateur qui ne fait rien.
+        # Sous Termux, il ouvre celui du téléphone, qui est justement le bon appareil.
+        env = dict(os.environ, GH_BROWSER="true", BROWSER="true")
+        ecrire("  Quand gh dit « Press Enter », appuyez sur Entrée : aucun navigateur ne")
+        ecrire("  s'ouvre ici, gh attend simplement que le code soit validé.")
     ecrire("")
     # Pas de --skip-ssh-key : le gh de Raspberry Pi OS / Debian (2.23) ne le connaît
     # pas et s'arrête aussitôt ; en HTTPS, gh ne propose de toute façon aucune clé SSH.
     lancer(["gh", "auth", "login", "--hostname", "github.com", "--git-protocol", "https",
-            "--web"])
+            "--web"], env=env)
     lancer(["gh", "auth", "setup-git", "--hostname", "github.com"])
     if not identifie():
         ecrire("  [X] Connexion à GitHub non aboutie. Nouvel essai au prochain démarrage.")
@@ -174,15 +182,18 @@ if __name__ == "__main__":
         projets._git(p, "remote", "add", "origin", "https://github.com/x/WEB_SUITE_PROJETS.git")
         muet = lambda *a: None                                   # noqa: E731
 
+        derniere_env = {}
+
         def essai(reponses, identifie_avant, identifie_apres=True, gh=True, gh_apres=True):
             etat = {"gh": gh, "connecte": False, "cmds": []}
 
-            def lancer(cmd):
+            def lancer(cmd, env=None):
                 etat["cmds"].append(cmd)
                 if cmd[:3] in (["pkg", "install", "-y"], ["sudo", "apt-get", "install"]):
                     etat["gh"] = gh_apres
                 if cmd[:3] == ["gh", "auth", "login"]:
                     etat["connecte"] = identifie_apres
+                    derniere_env["env"] = env
                 return 0
             r = proposer(tmp, demander=lambda q: reponses.pop(0), lancer=lancer, ecrire=muet,
                          identifie=lambda: identifie_avant or etat["connecte"],
@@ -196,6 +207,7 @@ if __name__ == "__main__":
         assert r == "connecte", r
         assert ["gh", "auth", "setup-git", "--hostname", "github.com"] in cmds
         assert any(c[:3] == ["gh", "auth", "login"] and "--web" in c for c in cmds)
+        assert outils.TERMUX or derniere_env["env"]["GH_BROWSER"] == "true"   # pas de lynx qui bloque
         assert essai(["n"], False)[0] == "plus-tard"
         r, cmds = essai(["o"], False, gh=False)                 # gh absent : installé d'abord
         assert r == "connecte" and cmds[0][-1] == "gh", cmds
