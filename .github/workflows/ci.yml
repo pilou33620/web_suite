@@ -26,6 +26,9 @@ jobs:
       - name: Termux — numpy/scipy par pkg, pas par pip
         run: python lanceur/banc_termux.py
 
+      - name: Appairage — code, jeton et cookie partagés par les web tools
+        run: python lanceur/appairage.py
+
       # La mise à jour au démarrage est recopiée dans chaque outil, qui doit
       # tourner seul, sans le lanceur : on ne peut pas la partager. On vérifie
       # donc que les trois copies restent la même.
@@ -49,6 +52,16 @@ jobs:
               assert corps(f) == ref, f + " : verifier_et_appliquer_maj diverge de WEB_CAO"
           print("les trois copies sont identiques")
           EOF
+
+      # L'appairage (code à 6 chiffres, jeton et cookie partagés) est recopié
+      # dans chaque outil, qui doit tourner seul : les copies restent la même.
+      - name: Outils — appairage.py est le même partout
+        run: |
+          for o in WEB_ANTENNA WEB_3D; do
+            diff <(tr -d '\r' < lanceur/appairage.py) <(tr -d '\r' < ../$o/appairage.py) > /dev/null \
+              || { echo "appairage.py diffère entre WEB_SUITE et $o"; exit 1; }
+          done
+          echo "appairage.py identique"
 
       # Même raison pour le lecteur IPC-2581 : WEB_CAO et WEB_ANTENNA en ont
       # chacun une copie, qui avait divergé (chacune avait une correction que

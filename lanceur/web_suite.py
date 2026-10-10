@@ -20,7 +20,6 @@ force l'écoute locale.
 import argparse
 import hmac
 import ipaddress
-import secrets
 import socket
 import json
 import os
@@ -34,7 +33,9 @@ from http.cookies import CookieError, SimpleCookie
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from urllib.parse import parse_qs, urlparse
 
+import appairage as appairage_commun
 import connexion_github
+from appairage import Appairage, hote_permis  # noqa: F401  (aussi utilisés par banc_serveur.py)
 import installer
 import outils
 import projets
@@ -44,8 +45,8 @@ DEPOT = os.path.dirname(ICI)                           # racine du dépôt git W
 PORT_DEFAUT = 8100
 FICHIERS_SERVIS = {"/": "index.html", "/index.html": "index.html", "/websuite-intro.html": "websuite-intro.html"}
 CORPS_MAX = 64 * 1024                                  # les actions ne portent qu'un id et un message
-FICHIER_JETON = os.path.join(ICI, "jeton-reseau.txt")  # ignoré par git
-BISCUIT = "websuite_jeton"
+FICHIER_JETON = os.path.join(ICI, "jeton-reseau.txt")  # ancien emplacement, repris une fois
+BISCUIT = "websuite_jeton"                             # = appairage.BISCUIT, commun aux web tools
 # Pages ouvertes à un appareil qui n'a pas encore le jeton : l'accueil (qui le
 # renvoie vers la page du code), la page du code, et la route qui le vérifie.
 # La page du code a SA propre adresse : servie à « / » comme le lanceur, Safari
@@ -54,112 +55,19 @@ PAGE_APPAIRAGE = "/appairage"
 PAGES_APPAIRAGE = ("/", "/index.html", PAGE_APPAIRAGE)
 
 
-def hote_permis(entete):
-    """L'en-tête Host désigne-t-il ce poste ? (parade au DNS rebinding)
-
-    Une page piégée qui fait résoudre son nom vers 127.0.0.1 devient « de même
-    origine », ajoute X-WebSuite sans pré-vol et pilote le lanceur ; elle envoie
-    alors SON nom dans Host. Une IP littérale ne se rebranche pas : on accepte
-    toutes les IP (la tablette tape celle du poste), localhost et le nom du poste.
-    """
-    h = (entete or "").strip().lower().rstrip(".")
-    if h.startswith("["):
-        h = h[1:].split("]")[0]
-    elif h.count(":") == 1:
-        h = h.split(":")[0]
-    nom = socket.gethostname().lower()
-    if h in ("", "localhost", nom, nom + ".local"):
-        return True
-    try:
-        ipaddress.ip_address(h.split("%")[0])
-        return True
-    except ValueError:
-        return False
-
-
-class Appairage:
-    """Code court affiché dans le terminal, à saisir sur la tablette.
-
-    Taper le jeton (22 caractères) à chaque changement d'adresse du téléphone
-    était pénible : l'iPad ne le garde que pour l'adresse où il l'a reçu. Le
-    code à 6 chiffres ne remplace pas le jeton, il le DONNE : bon code, la
-    tablette reçoit le cookie du jeton, comme avec l'adresse ?jeton=...
-    Seul un appareil qui voit l'écran du serveur peut donc entrer.
-
-    Deviner : un code ne vit que DUREE secondes, sert une fois, et ESSAIS
-    erreurs le brûlent, avec PAUSE secondes avant le suivant. Chaque nouveau
-    code s'affiche dans le terminal : une série d'essais ne passe pas inaperçue.
-    """
-    DUREE, ESSAIS, PAUSE = 600, 5, 60
-
-    def __init__(self, afficher=None):
-        self.afficher = afficher or (lambda texte: print(texte, flush=True))
-        self.verrou = threading.Lock()
-        self.code = None
-        self.expire = 0.0
-        self.echecs = 0
-        self.bloque = 0.0
-
-    @staticmethod
-    def lisible(code):
-        return code[:3] + " " + code[3:]
-
-    def _neuf(self, maintenant):
-        self.code = "%06d" % secrets.randbelow(10 ** 6)
-        self.expire = maintenant + self.DUREE
-        self.echecs = 0
-        self.afficher("  Code d'appairage : %s   (à saisir sur la tablette, valable %d min)"
-                      % (self.lisible(self.code), self.DUREE // 60))
-
-    def preparer(self):
-        """Un code valable existe (en créer un, et l'afficher, s'il le faut).
-        Renvoie les secondes d'attente si les essais sont suspendus, sinon 0."""
-        with self.verrou:
-            maintenant = time.monotonic()
-            if maintenant < self.bloque:
-                return int(self.bloque - maintenant) + 1
-            if not self.code or maintenant >= self.expire:
-                self._neuf(maintenant)
-            return 0
-
-    def essayer(self, saisi):
-        """Renvoie (ok, message)."""
-        saisi = "".join(c for c in str(saisi or "") if c.isdigit())
-        with self.verrou:
-            maintenant = time.monotonic()
-            if maintenant < self.bloque:
-                return False, ("Trop d'essais : attendez %d s, un nouveau code s'affichera "
-                               "sur le serveur." % (int(self.bloque - maintenant) + 1))
-            if not self.code or maintenant >= self.expire:
-                self._neuf(maintenant)
-                return False, "Code expiré : un nouveau code est affiché sur le serveur."
-            if len(saisi) == 6 and hmac.compare_digest(saisi, self.code):
-                self.code = None                   # usage unique
-                return True, "Appareil autorisé."
-            self.echecs += 1
-            if self.echecs >= self.ESSAIS:
-                self.code = None
-                self.bloque = maintenant + self.PAUSE
-                return False, ("Trop d'essais : code annulé. Dans %d s, rechargez la page : "
-                               "un nouveau code s'affichera sur le serveur." % self.PAUSE)
-            return False, "Code incorrect (%d essai(s) restant(s))." % (self.ESSAIS - self.echecs)
+# Host contrôlé (DNS rebinding), code d'appairage et jeton : appairage.py, commun
+# à tous les web tools. Le jeton est partagé par les outils de ce poste
+# (~/.web_tools/jeton-reseau.txt) et le cookie porte le même nom partout : une
+# tablette appairée ici l'est aussi pour WEB_ANTENNA, WEB_3D, web_ferme, web_launcher…
+# (Appairage et hote_permis viennent d'appairage.py : voir les imports.)
 
 
 def jeton_reseau():
-    """Le jeton du mode réseau, gardé d'un démarrage à l'autre : les favoris
-    de la tablette restent bons. Supprimer le fichier en crée un neuf."""
-    try:
-        with open(FICHIER_JETON, encoding="utf-8") as f:
-            jeton = f.read().strip()
-        if len(jeton) >= 16:
-            return jeton
-    except OSError:
-        pass
-    jeton = secrets.token_urlsafe(16)
-    fd = os.open(FICHIER_JETON, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
-    with os.fdopen(fd, "w", encoding="utf-8") as f:
-        f.write(jeton + "\n")
-    return jeton
+    """Le jeton du mode réseau, partagé avec les autres web tools du poste et
+    gardé d'un démarrage à l'autre : les favoris de la tablette restent bons.
+    L'ancien lanceur/jeton-reseau.txt est repris : les appareils déjà appairés
+    le restent."""
+    return appairage_commun.jeton(ancien=FICHIER_JETON)
 
 
 # ---------------------------------------------------------------------------
@@ -566,7 +474,7 @@ def main(argv=None):
         print("            tablette, téléphone, autre poste : ouvrir cette adresse,")
         print("            puis saisir le code d'appairage affiché ci-dessous")
         print("            (ou directement, sans code : %s ;" % url_reseau)
-        print("             supprimer lanceur/jeton-reseau.txt pour changer de jeton)")
+        print("             supprimer %s pour changer de jeton)" % appairage_commun.fichier_jeton())
     elif reseau:
         print("  Réseau    écoute sur le réseau, adresse IP du poste introuvable")
         print("            jeton à ajouter à l'adresse : ?jeton=%s" % Lanceur.jeton)

@@ -105,8 +105,10 @@ python lanceur/web_suite.py [--port 8100] [--racine DOSSIER] [--installer]
 ## Sécurité
 
 - En mode réseau, tout autre appareil doit être appairé (jeton stocké dans un cookie).
-  Supprimer `lanceur/jeton-reseau.txt` révoque tous les appareils.
-- Les outils eux-mêmes n'ont pas d'authentification : **réseau de confiance uniquement**.
+  Le même appairage vaut pour les outils (WEB_ANTENNA, WEB_3D…) : jeton et cookie sont
+  partagés par les web tools du poste. Supprimer `~/.web_tools/jeton-reseau.txt` révoque
+  tous les appareils.
+- WEB_CAO n'exige pas encore l'appairage : **réseau de confiance uniquement**.
 - Le lanceur refuse les requêtes venant d'autres pages (en-tête `X-WebSuite`, contrôle du `Host`).
 
 ## Divers

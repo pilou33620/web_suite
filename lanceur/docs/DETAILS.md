@@ -50,8 +50,12 @@ En mode réseau, le lanceur exige un jeton de tout appareil autre que le serveur
 - Le cookie vaut pour une adresse : si celle du serveur change (partage de connexion, 4G,
   autre Wi-Fi), on ressaisit un code.
 - L'adresse complète `?jeton=…`, toujours affichée, marche aussi sans code.
-- Le jeton est conservé dans `lanceur/jeton-reseau.txt` ; le supprimer en crée un neuf
-  et oblige à réappairer tous les appareils.
+- Le jeton est **partagé par tous les web tools du poste** (`~/.web_tools/jeton-reseau.txt`,
+  module `lanceur/appairage.py`, copie identique dans WEB_ANTENNA, WEB_3D, web_ferme) et le
+  cookie porte le même nom partout : un appareil appairé au lanceur l'est aussi pour les
+  outils (un navigateur envoie le cookie à tous les ports de l'adresse), et inversement.
+  L'ancien `lanceur/jeton-reseau.txt` est repris une fois. Supprimer le fichier partagé en
+  crée un neuf au prochain démarrage et oblige à réappairer tous les appareils.
 - WEB_CAO y est lancé avec `--projets-reseau` pour que ses projets et la LIB restent
   accessibles depuis l'autre appareil (confinés à `PROJETS/`).
 
