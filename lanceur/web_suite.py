@@ -150,6 +150,33 @@ def redemarrer(bilan):
     os._exit(code)
 
 
+def relayer_connexions(g):
+    """Recopie dans ce terminal les lignes [connexion] des journaux des outils
+    (leur sortie va dans journaux/, pas ici) : qui utilise quel outil, depuis quelle IP."""
+    lus = {}
+    for o in outils.CATALOGUE:                         # ce qui précède ce démarrage est déjà vu
+        try:
+            lus[o["id"]] = os.path.getsize(g.journal(o["id"]))
+        except OSError:
+            lus[o["id"]] = 0
+    while True:
+        time.sleep(1)
+        for oid in lus:
+            try:
+                with open(g.journal(oid), "rb") as f:
+                    if f.seek(0, 2) < lus[oid]:
+                        lus[oid] = 0                   # journal tourné en .log.1 au lancement
+                    f.seek(lus[oid])
+                    bloc = f.read()
+            except OSError:
+                continue
+            fin = bloc.rfind(b"\n") + 1               # les lignes complètes seulement
+            lus[oid] += fin
+            for ligne in bloc[:fin].decode("utf-8", "replace").splitlines():
+                if appairage_commun.MARQUE in ligne:
+                    print(ligne.rstrip(), flush=True)
+
+
 # ---------------------------------------------------------------------------
 # Serveur HTTP
 # ---------------------------------------------------------------------------
@@ -158,6 +185,7 @@ class Lanceur(SimpleHTTPRequestHandler):
     jeton = None                                       # en --reseau : exigé des autres appareils
     appairage = None                                   # en --reseau : le code court (Appairage)
     autorise = True                                    # par requête, fixé dans parse_request
+    visites = appairage_commun.Visites("WEB·SUITE")    # les appareils connectés, dans ce terminal
 
     def log_message(self, fmt, *args):                 # la console reste lisible
         pass
@@ -181,6 +209,7 @@ class Lanceur(SimpleHTTPRequestHandler):
                             "Ouvrir l'adresse Reseau affichee dans la console du lanceur "
                             "(elle se termine par ?jeton=...).")
             return False
+        self.visites.noter(self.client_address[0])
         return True
 
     def _de_ce_poste(self):
@@ -332,6 +361,11 @@ class Lanceur(SimpleHTTPRequestHandler):
         for i in ids:
             if url.path == "/api/installer" and outils.est_installe(outils.PAR_ID[i], g.racine):
                 continue
+            if url.path in ("/api/lancer", "/api/arreter"):
+                print("  %s %s  %-11s %s  ->  %s %s" % (
+                    appairage_commun.MARQUE, time.strftime("%H:%M:%S"), "WEB·SUITE",
+                    self.client_address[0], "ouvre" if url.path == "/api/lancer" else "arrête",
+                    outils.PAR_ID[i]["nom"]), flush=True)
             actions[url.path](i)
         return self._json({"ok": True, "outils": g.etat()})
 
@@ -520,6 +554,7 @@ def main(argv=None):
             signal.signal(sig, arreter)
     if en_retard:
         annoncer_plus_tard(Lanceur.gestionnaire, en_retard)
+    threading.Thread(target=relayer_connexions, args=(Lanceur.gestionnaire,), daemon=True).start()
     try:
         serveur.serve_forever()
     except KeyboardInterrupt:
