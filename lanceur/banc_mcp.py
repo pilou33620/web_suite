@@ -144,7 +144,9 @@ FauxOutil.recues.clear()
 for route in ("/api/github/envoyer", "/api/ia/cle", "/API/GitHub/envoyer", "/api/./github/envoyer",
               "/api//ia/cle", "/x/../api/github/identite", "@evil.example/", "api/projets",
               "/api/github", "/api/%67ithub/envoyer", "/api/ia/cle?x=1",
-              "/api/envoyer", "/api/identite", "/api/appairer"):
+              "/api/envoyer", "/api/identite", "/api/appairer",
+              # urlparse du lanceur coupe « ;… » : /api/envoyer;x y devient /api/envoyer
+              "/api/envoyer;x", "/api/github/envoyer;x", "/api/projets x", "/api/projets\tx"):
     try:
         mcp.appeler_outil_web("web_cao", route, {})
         raise AssertionError("route permise à tort : " + route)
@@ -192,6 +194,64 @@ verifier("outil arrêté : port du catalogue", vus["web_antenna"], (PORTS["web_a
 verifier("port illisible : port du catalogue", vus["web_cao"][0], PORTS["web_cao"])
 verifier("appel vers le port décalé", mcp.appeler_outil_web("web_3d", "/api/projets")["route"], "/api/projets")
 lanceur.shutdown()
+os.environ["WEB_SUITE_MCP_PORTS"] = json.dumps(PORTS)
+
+
+# Pannes de l'autre côté : jamais d'exception qui casse etat ou un appel
+class Reponse(FauxOutil):
+    corps, type_ = b"", "application/json"
+
+    def _repondre(self):
+        self.send_response(200)
+        self.send_header("Content-Type", self.type_)
+        self.send_header("Content-Length", str(len(self.corps)))
+        self.end_headers()
+        self.wfile.write(self.corps)
+
+
+class JsonIllisible(Reponse):
+    corps = b"{pas du json"
+
+
+class LanceurBizarre(Reponse):
+    corps = json.dumps({"outils": ["texte", None, {"id": "web_3d", "phase": "actif", "port": True}]}).encode()
+
+
+def servir(classe):
+    srv = http.server.ThreadingHTTPServer(("127.0.0.1", 0), classe)
+    threading.Thread(target=srv.serve_forever, daemon=True).start()
+    return srv
+
+
+pas_http = socket.socket()
+pas_http.bind(("127.0.0.1", 0))
+pas_http.listen(5)
+
+
+def repondre_ssh():
+    while True:
+        c, _ = pas_http.accept()
+        c.sendall(b"SSH-2.0-OpenSSH\r\n")
+        c.close()
+
+
+threading.Thread(target=repondre_ssh, daemon=True).start()
+illisible, bizarre = servir(JsonIllisible), servir(LanceurBizarre)
+os.environ["WEB_SUITE_MCP_PORTS"] = json.dumps(dict(PORTS, web_suite=bizarre.server_address[1],
+                                                    web_cao=pas_http.getsockname()[1],
+                                                    web_antenna=illisible.server_address[1]))
+vus = {e["outil"]: (e["port"], e["lance"]) for e in mcp.etat_outils()}
+verifier("entrées illisibles du lanceur ignorées", vus["web_3d"], (PORTS["web_3d"], False))
+verifier("port pris par un service non HTTP : pas WEB_CAO", vus["web_cao"][1], False)
+for outil, attendu in (("web_cao", mcp.OutilArrete), ("web_antenna", mcp.ErreurOutil)):
+    try:
+        mcp.appeler_outil_web(outil, "/api/projets")
+        raise AssertionError("aurait dû échouer : " + outil)
+    except attendu:
+        pass
+os.environ["WEB_SUITE_MCP_PORTS"] = json.dumps(dict(PORTS, web_suite=illisible.server_address[1]))
+mcp._cache_ports = (0.0, None, None)
+verifier("lanceur au JSON illisible : ports du catalogue", mcp.ports(), dict(PORTS, web_suite=illisible.server_address[1]))
 os.environ["WEB_SUITE_MCP_PORTS"] = json.dumps(PORTS)
 
 try:

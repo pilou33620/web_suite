@@ -8,6 +8,7 @@ ligne sur stdout. Claude Code lance ce script lui-même ; stdout ne doit donc
 porter QUE le protocole (journaux sur stderr). Bibliothèque standard seulement.
 Spec : lanceur/docs/SPEC-mcp-noyau.md.
 """
+import http.client
 import json
 import os
 import posixpath
@@ -85,9 +86,11 @@ def ports():
     except ErreurOutil:
         etat = None   # lanceur arrêté : ports du catalogue
     for o in (etat.get("outils") if isinstance(etat, dict) else None) or []:
-        port = o.get("port") if isinstance(o, dict) else None
+        if not isinstance(o, dict):
+            continue
+        port = o.get("port")
         if (o.get("id") in resultat and o["id"] != "web_suite" and o.get("phase") in ("demarrage", "actif")
-                and isinstance(port, int) and 0 < port < 65536):
+                and type(port) is int and 0 < port < 65536):   # type() : True n'est pas un port
             resultat[o["id"]] = port
     _cache_ports = (time.monotonic(), base, resultat)
     return dict(resultat)
@@ -99,9 +102,13 @@ def nom_outil(id_outil):
 
 def route_permise(route):
     """Route absolue, canonique, hors des routes interdites. Décodée avant contrôle :
-    « /api/%67ithub » ou « /api/./github » ne passent pas."""
+    « /api/%67ithub » ou « /api/./github » ne passent pas. Ni « ; » (urlparse du lanceur
+    réduit « /api/envoyer;x » à « /api/envoyer »), ni espace ou caractère de contrôle
+    (ligne de requête HTTP faussée)."""
+    if any(c <= " " or c == "\x7f" for c in route):
+        return False
     chemin = urllib.parse.unquote(route.split("?", 1)[0].split("#", 1)[0])
-    if not chemin.startswith("/") or "//" in chemin or "\\" in chemin:
+    if not chemin.startswith("/") or "//" in chemin or "\\" in chemin or ";" in chemin:
         return False
     if chemin != "/" and posixpath.normpath(chemin) != chemin.rstrip("/"):
         return False
@@ -133,10 +140,10 @@ def _requete(port, nom, route, corps, delai):
                                      method="GET" if donnees is None else "POST")
     try:
         with OUVREUR.open(requete, timeout=delai) as rep:
-            brut = rep.read()
-            if "json" in (rep.headers.get("Content-Type") or ""):
-                return json.loads(brut.decode("utf-8"))
-            return brut.decode("utf-8", "replace")
+            brut, type_contenu = rep.read(), rep.headers.get("Content-Type") or ""
+    except http.client.HTTPException:
+        # Réponse qui n'est pas du HTTP : un autre service occupe le port, pas notre outil
+        raise OutilArrete("%s ne tourne pas : le port %d est occupé par un autre service." % (nom, port))
     except urllib.error.HTTPError as exc:
         raise ErreurOutil("%s a répondu %d : %s" % (nom, exc.code, exc.read()[:300].decode("utf-8", "replace")))
     except urllib.error.URLError as exc:
@@ -147,6 +154,12 @@ def _requete(port, nom, route, corps, delai):
         raise ErreurOutil("%s ne répond pas en %d s." % (nom, delai))
     except ConnectionError:
         raise OutilArrete("%s ne tourne pas : lance-le depuis WEB·SUITE" % nom)
+    if "json" not in type_contenu:
+        return brut.decode("utf-8", "replace")
+    try:
+        return json.loads(brut.decode("utf-8"))
+    except ValueError:   # UnicodeDecodeError en est une
+        raise ErreurOutil("%s a rendu un JSON illisible pour %s." % (nom, route))
 
 
 def lance(id_outil):
@@ -241,6 +254,7 @@ def traiter(ligne):
 def main():
     # Octets UTF-8 et « \n » seul : sous Windows, le mode texte écrirait \r\n et l'encodage local
     sortie = sys.stdout.buffer
+    sys.stdout = sys.stderr   # un print() égaré, ici ou dans un module importé, ne casse pas le protocole
     for brute in sys.stdin.buffer:
         ligne = brute.strip()
         if not ligne:
