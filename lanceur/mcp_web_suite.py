@@ -13,6 +13,7 @@ import os
 import posixpath
 import socket
 import sys
+import time
 import urllib.error
 import urllib.parse
 import urllib.request
@@ -30,6 +31,7 @@ PROTOCOLES = ("2025-06-18", "2025-03-26", "2024-11-05")
 ROUTES_INTERDITES = ("/api/github", "/api/ia", "/api/envoyer", "/api/identite", "/api/appairer")
 DELAI = 30         # s, appel ordinaire
 DELAI_SONDE = 1    # s, etat : rester rapide même quand tout est arrêté
+DELAI_LANCEUR = 3  # s, /api/etat du lanceur (un git status par outil, lent sur un Pi)
 # Boucle locale seulement : un http_proxy du poste ne doit pas détourner les appels
 OUVREUR = urllib.request.build_opener(urllib.request.ProxyHandler({}))
 
@@ -54,7 +56,7 @@ def journal(texte):
     sys.stderr.flush()
 
 
-def ports():
+def ports_catalogue():
     """id -> port : le lanceur et les outils du catalogue. Le banc les remplace par
     WEB_SUITE_MCP_PORTS (JSON), comme WEB_TOOLS_JETON_FICHIER pour le jeton."""
     remplaces = os.environ.get("WEB_SUITE_MCP_PORTS")
@@ -63,6 +65,32 @@ def ports():
     p = {"web_suite": web_suite.PORT_DEFAUT}
     p.update((o["id"], o["port"]) for o in outils.CATALOGUE)
     return p
+
+
+_cache_ports = (0.0, None, None)   # (instant, catalogue, ports)
+
+
+def ports():
+    """Ports du catalogue, corrigés par le lanceur s'il tourne : il démarre un outil sur
+    le port suivant quand le sien est pris (outils.port_libre), et le dit dans /api/etat."""
+    global _cache_ports
+    base = ports_catalogue()
+    instant, base_cache, resultat = _cache_ports
+    # /api/etat lance un git status par outil : 5 s de cache, pour les appels en rafale
+    if base_cache == base and time.monotonic() - instant < 5:
+        return dict(resultat)
+    resultat = dict(base)
+    try:
+        etat = _requete(base["web_suite"], "WEB·SUITE", "/api/etat", None, DELAI_LANCEUR)
+    except ErreurOutil:
+        etat = None   # lanceur arrêté : ports du catalogue
+    for o in (etat.get("outils") if isinstance(etat, dict) else None) or []:
+        port = o.get("port") if isinstance(o, dict) else None
+        if (o.get("id") in resultat and o["id"] != "web_suite" and o.get("phase") in ("demarrage", "actif")
+                and isinstance(port, int) and 0 < port < 65536):
+            resultat[o["id"]] = port
+    _cache_ports = (time.monotonic(), base, resultat)
+    return dict(resultat)
 
 
 def nom_outil(id_outil):
@@ -82,17 +110,23 @@ def route_permise(route):
 
 
 def appeler_outil_web(id_outil, route, corps=None, delai=DELAI):
-    """Seule porte vers les outils : boucle locale, port du catalogue, routes filtrées.
-    GET sans corps, POST JSON avec. Rend le JSON décodé, ou le texte."""
-    port = ports().get(id_outil)
-    if port is None:
-        raise ErreurOutil("Outil inconnu : %s. Outils : %s." % (id_outil, ", ".join(ports())))
+    """Seule porte vers les outils : boucle locale, port du catalogue (corrigé par le
+    lanceur), routes filtrées. GET sans corps, POST JSON avec. Rend le JSON décodé, ou le
+    texte. Tous les refus passent AVANT la moindre requête."""
+    base = ports_catalogue()
+    if id_outil not in base:
+        raise ErreurOutil("Outil inconnu : %s. Outils : %s." % (id_outil, ", ".join(base)))
     if not route_permise(route):
         raise ErreurOutil("Route refusée au MCP : " + route)
     if id_outil == "web_suite" and corps is not None:
         # Les POST du lanceur installent, lancent, arrêtent ou publient : le MCP ne fait que lire
         raise ErreurOutil("Le lanceur est en lecture seule pour le MCP : " + route)
-    nom = nom_outil(id_outil)
+    port = base[id_outil] if id_outil == "web_suite" else ports()[id_outil]
+    return _requete(port, nom_outil(id_outil), route, corps, delai)
+
+
+def _requete(port, nom, route, corps, delai):
+    """Requête HTTP en boucle locale, sans contrôle : passer par appeler_outil_web()."""
     donnees = None if corps is None else json.dumps(corps).encode("utf-8")
     requete = urllib.request.Request("http://127.0.0.1:%d%s" % (port, route), data=donnees,
                                      headers={"Content-Type": "application/json"},

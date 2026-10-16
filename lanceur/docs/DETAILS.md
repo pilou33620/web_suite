@@ -159,7 +159,8 @@ sur le serveur sans rien envoyer : une retouche de dernière minute ne fait pas 
 
 `lanceur/mcp_web_suite.py` est un serveur MCP stdio (Python standard, sans dépendance) :
 Claude Code le lance lui-même et lui parle sur stdin/stdout. Il appelle les outils sur
-`127.0.0.1`, à leur port du catalogue (CAO 8000, ANTENNA 8732, 3D 8139, lanceur 8100) ;
+`127.0.0.1`, à leur port du catalogue (CAO 8000, ANTENNA 8732, 3D 8139, lanceur 8100),
+ou au port décalé que le lanceur annonce dans `/api/etat` quand le premier était pris ;
 depuis la boucle locale, aucun jeton n'est demandé. Outil disponible : `etat` (qui tourne,
 sur quel port). La suite est décrite dans [SPEC-mcp.md](SPEC-mcp.md).
 

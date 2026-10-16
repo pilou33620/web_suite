@@ -168,6 +168,32 @@ verifier("aucun POST n'atteint le lanceur", FauxOutil.recues, [])
 verifier("GET permis au lanceur", mcp.appeler_outil_web("web_suite", "/api/etat")["route"], "/api/etat")
 os.environ["WEB_SUITE_MCP_PORTS"] = json.dumps(PORTS)
 
+# Le lanceur tourne et a lancé WEB_3D sur un port décalé (le sien était pris) : on le suit
+class FauxLanceur(FauxOutil):
+    def _repondre(self):
+        corps = json.dumps({"outils": [
+            {"id": "web_3d", "phase": "actif", "port": PORTS["web_cao"]},       # port décalé
+            {"id": "web_antenna", "phase": "arret", "port": 1},                 # arrêté : ignoré
+            {"id": "web_cao", "phase": "actif", "port": "pas un port"},         # illisible : ignoré
+        ]}).encode("utf-8")
+        self.send_response(200)
+        self.send_header("Content-Type", "application/json")
+        self.send_header("Content-Length", str(len(corps)))
+        self.end_headers()
+        self.wfile.write(corps)
+
+
+lanceur = http.server.ThreadingHTTPServer(("127.0.0.1", 0), FauxLanceur)
+threading.Thread(target=lanceur.serve_forever, daemon=True).start()
+os.environ["WEB_SUITE_MCP_PORTS"] = json.dumps(dict(PORTS, web_suite=lanceur.server_address[1]))
+vus = {e["outil"]: (e["port"], e["lance"]) for e in mcp.etat_outils()}
+verifier("WEB_3D suivi sur son port décalé", vus["web_3d"], (PORTS["web_cao"], True))
+verifier("outil arrêté : port du catalogue", vus["web_antenna"], (PORTS["web_antenna"], False))
+verifier("port illisible : port du catalogue", vus["web_cao"][0], PORTS["web_cao"])
+verifier("appel vers le port décalé", mcp.appeler_outil_web("web_3d", "/api/projets")["route"], "/api/projets")
+lanceur.shutdown()
+os.environ["WEB_SUITE_MCP_PORTS"] = json.dumps(PORTS)
+
 try:
     mcp.appeler_outil_web("web_3d", "/api/projets")
     raise AssertionError("un outil arrêté devrait échouer")

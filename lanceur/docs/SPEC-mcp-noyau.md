@@ -20,7 +20,8 @@ depuis une autre machine par SSH.
    donne le même résultat, sans aucun port ouvert en plus de SSH.
 3. L'outil MCP `etat` rend, pour le lanceur WEB·SUITE, WEB_CAO, WEB_ANTENNA et WEB_3D :
    lancé ou non, port, adresse.
-   Les ports viennent de `lanceur/outils.py` (`CATALOGUE`), jamais recopiés.
+   Les ports viennent de `lanceur/outils.py` (`CATALOGUE`), jamais recopiés, corrigés par le
+   `/api/etat` du lanceur s'il tourne (il décale un outil dont le port est pris).
 4. Un outil qui ne tourne pas donne un résultat d'erreur lisible (« WEB_CAO ne tourne pas :
    lance-le depuis WEB·SUITE »), jamais une exception ni une coupure du serveur.
 5. Le noyau fournit aux autres modules **un seul point d'appel HTTP** vers les outils, limité à
@@ -131,8 +132,10 @@ Vérification à la main, une fois : `/mcp` dans Claude Code, sur le Pi puis par
 
 ## Questions tranchées (2026-10-16)
 
-1. Ports du catalogue **seulement** : un outil lancé à la main sur un autre port n'est pas
-   trouvé.
+1. Ports du catalogue, **corrigés par le lanceur** s'il tourne : il démarre un outil sur le
+   port suivant quand le sien est pris (`outils.port_libre`) et le dit dans `/api/etat`
+   (décision revue le 2026-10-16). Un outil lancé à la main sur un autre port, hors
+   lanceur, n'est pas trouvé.
 2. `etat` dit aussi si le **lanceur WEB·SUITE** tourne (port `PORT_DEFAUT` de
    `lanceur/web_suite.py`, lu et non recopié).
 3. SSH **depuis Windows** est utilisé : vérifier qu'OpenSSH (client) est présent sur le PC,
