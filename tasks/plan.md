@@ -63,7 +63,7 @@ Tâche 4 : essai réel (Pi, puis SSH depuis Windows)
 
 ### Checkpoint : terminé
 - [ ] Tous les critères de réussite de la spec sont remplis
-- [ ] `/review` fait avant de déclarer terminé (règle CLAUDE.md)
+- [x] `/review` fait avant de déclarer terminé (règle CLAUDE.md)
 
 ## Risques et parades
 

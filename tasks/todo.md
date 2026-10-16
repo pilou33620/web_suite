@@ -102,4 +102,4 @@ tournent ? », avec un outil arrêté et deux lancés.
 
 ## Checkpoint : terminé
 - [ ] Critères de réussite de la spec remplis
-- [ ] `/review` fait
+- [x] `/review` fait
