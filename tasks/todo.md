@@ -59,7 +59,7 @@ compte les requêtes reçues.
 - [ ] Tous les bancs du lanceur verts
 - [ ] Revue avec toi avant la phase 2
 
-## Tâche 3 : CI et documentation
+## Tâche 3 : ✅ CI et documentation
 
 **Description :** ajouter l'étape `python lanceur/banc_mcp.py` à `.github/workflows/ci.yml`.
 Écrire la section « Claude Code (MCP) » : commandes `claude mcp add` pour le poste (Linux,
@@ -67,13 +67,13 @@ Pi), pour Windows en local (`py -3`) et pour Windows vers le Pi par SSH (`ssh -T
 obligatoire, vérifier qu'OpenSSH client est installé). Mettre la carte `SPEC-mcp.md` à jour.
 
 **Critères d'acceptation :**
-- [ ] La CI exécute le banc MCP
-- [ ] `README.md` donne la commande courte et renvoie à `lanceur/docs/DETAILS.md` pour le
+- [x] La CI exécute le banc MCP
+- [x] `README.md` donne la commande courte et renvoie à `lanceur/docs/DETAILS.md` pour le
       détail (SSH, clé, Windows)
 
 **Vérification :**
 - [ ] CI verte après le push
-- [ ] Relecture des commandes copiées-collées telles quelles
+- [x] Relecture des commandes copiées-collées telles quelles
 
 **Dépendances :** tâche 2
 

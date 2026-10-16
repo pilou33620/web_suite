@@ -29,6 +29,9 @@ jobs:
       - name: Appairage — code, jeton et cookie partagés par les web tools
         run: python lanceur/appairage.py
 
+      - name: Serveur MCP — protocole, outil etat, routes github/ia refusées
+        run: python lanceur/banc_mcp.py
+
       # La mise à jour au démarrage est recopiée dans chaque outil, qui doit
       # tourner seul, sans le lanceur : on ne peut pas la partager. On vérifie
       # donc que les trois copies restent la même.

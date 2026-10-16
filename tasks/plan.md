@@ -58,7 +58,7 @@ Tâche 4 : essai réel (Pi, puis SSH depuis Windows)
 - [ ] Les bancs existants restent verts (`banc_serveur.py`, `appairage.py`)
 
 ### Phase 2 : livraison
-- [ ] Tâche 3 : étape CI et section « Claude Code (MCP) » dans la documentation
+- [x] Tâche 3 : étape CI et section « Claude Code (MCP) » dans la documentation
 - [ ] Tâche 4 : essai réel avec Claude Code, sur le Pi puis par SSH depuis Windows
 
 ### Checkpoint : terminé

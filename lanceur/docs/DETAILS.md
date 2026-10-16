@@ -9,7 +9,8 @@ WEB_TOOLS/                  <- ce dépôt
 ├── installer.cmd / .sh     <- télécharge les outils
 ├── demarrer_WEB_SUITE.cmd / .sh  <- lance WEB·SUITE
 ├── maj_git.py              <- état git de WEB_SUITE, des outils et de PROJETS
-├── lanceur/                <- web_suite.py, installer.py, outils.py, projets.py, pages
+├── lanceur/                <- web_suite.py, installer.py, outils.py, projets.py, pages,
+│                              mcp_web_suite.py (Claude Code)
 ├── WEB_CAO/                <- clonés par l'installateur, chacun avec son dépôt git,
 ├── WEB_ANTENNA/               ignorés par le .gitignore de WEB_SUITE
 ├── WEB_3D/
@@ -154,6 +155,41 @@ sur le serveur sans rien envoyer : une retouche de dernière minute ne fait pas 
 - Fermer la fenêtre de WEB_SUITE (ou Ctrl+C) arrête les outils lancés depuis elle. Sous
   Linux, fermer le terminal (SIGHUP) ou `kill` (SIGTERM) aussi.
 
+## Claude Code (MCP)
+
+`lanceur/mcp_web_suite.py` est un serveur MCP stdio (Python standard, sans dépendance) :
+Claude Code le lance lui-même et lui parle sur stdin/stdout. Il appelle les outils sur
+`127.0.0.1`, à leur port du catalogue (CAO 8000, ANTENNA 8732, 3D 8139, lanceur 8100) ;
+depuis la boucle locale, aucun jeton n'est demandé. Outil disponible : `etat` (qui tourne,
+sur quel port). La suite est décrite dans [SPEC-mcp.md](SPEC-mcp.md).
+
+**Sur le poste des outils** (Linux, Pi) :
+
+```
+claude mcp add -s user web_suite -- python3 /home/pilou/Documents/web_suite/lanceur/mcp_web_suite.py
+```
+
+Windows, outils sur le même PC : `claude mcp add -s user web_suite -- py -3 C:\chemin\WEB_TOOLS\lanceur\mcp_web_suite.py`.
+
+**Depuis Windows vers le Pi, par SSH** : le MCP tourne sur le Pi, SSH ne fait que
+transporter stdin/stdout. Aucun port à ouvrir, et le trafic est chiffré.
+
+1. Client OpenSSH présent ? `ssh -V` dans PowerShell. Sinon : Paramètres → Applications →
+   Fonctionnalités facultatives → **Client OpenSSH**.
+2. Clé SSH (une fois) : `ssh-keygen -t ed25519`, puis copier la clé publique sur le Pi :
+   `type $env:USERPROFILE\.ssh\id_ed25519.pub | ssh pilou@<pi> "mkdir -p ~/.ssh && cat >> ~/.ssh/authorized_keys"`.
+3. Vérifier : `ssh -T -o BatchMode=yes pilou@<pi> echo ok` doit afficher `ok` **sans
+   demander de mot de passe**. Le MCP passe par stdin : une invite de mot de passe le
+   bloquerait, `BatchMode=yes` le fait échouer net à la place.
+4. Ajouter :
+   `claude mcp add -s user web_suite -- ssh -T -o BatchMode=yes pilou@<pi> python3 /home/pilou/Documents/web_suite/lanceur/mcp_web_suite.py`
+
+**Dépannage** : `/mcp` affiche l'état de la connexion. Si elle échoue par SSH, un
+`.bashrc` du Pi qui écrit quelque chose (un `echo`) pollue stdout : le déplacer dans
+`.profile` ou le limiter aux shells interactifs. Essai à la main :
+`printf '{"jsonrpc":"2.0","id":1,"method":"ping"}\n' | python3 lanceur/mcp_web_suite.py`
+doit rendre `{"jsonrpc": "2.0", "id": 1, "result": {}}`.
+
 ## Tests
 
 - `python lanceur/projets.py` : deux postes et un faux GitHub (dépôt nu) — création,
@@ -163,5 +199,8 @@ sur le serveur sans rien envoyer : une retouche de dernière minute ne fait pas 
   unique, expiration, cinq erreurs puis pause).
 - `python lanceur/banc_termux.py` : faux `pkg` — `numpy` / `scipy` partent à
   `pkg install`, rien à pip, un paquet introuvable après coup est signalé.
+- `python lanceur/banc_mcp.py` : serveur MCP en sous-processus — protocole (initialize,
+  ping, erreurs), outil `etat` face à un faux WEB_CAO, routes `/api/github` et `/api/ia`
+  refusées sans qu'aucune requête n'atteigne l'outil, outil arrêté signalé.
 
 Chacun affiche `OK` si tout passe.

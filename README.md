@@ -102,6 +102,23 @@ python lanceur/web_suite.py [--port 8100] [--racine DOSSIER] [--installer]
 - `--racine` : dossier des outils. `--installer` : menu de téléchargement seul.
 - `?sans-intro` dans l'adresse saute l'animation.
 
+## Claude Code (MCP)
+
+`lanceur/mcp_web_suite.py` branche Claude Code sur les outils du poste (serveur MCP, sans
+dépendance). Les outils doivent déjà tourner. Sur le poste des outils :
+
+```
+claude mcp add -s user web_suite -- python3 /chemin/vers/WEB_TOOLS/lanceur/mcp_web_suite.py
+```
+
+Depuis une autre machine, par SSH (clé SSH obligatoire, aucun port ouvert en plus) :
+
+```
+claude mcp add -s user web_suite -- ssh -T -o BatchMode=yes <utilisateur>@<poste> python3 /chemin/vers/WEB_TOOLS/lanceur/mcp_web_suite.py
+```
+
+Puis `/mcp` dans Claude Code. Windows, clé SSH, dépannage : [DETAILS](lanceur/docs/DETAILS.md#claude-code-mcp).
+
 ## Sécurité
 
 - En mode réseau, tout autre appareil doit être appairé (jeton stocké dans un cookie).
@@ -109,6 +126,8 @@ python lanceur/web_suite.py [--port 8100] [--racine DOSSIER] [--installer]
   sont partagés par les web tools du poste. Supprimer `~/.web_tools/jeton-reseau.txt`
   révoque tous les appareils.
 - Le lanceur refuse les requêtes venant d'autres pages (en-tête `X-WebSuite`, contrôle du `Host`).
+- Le serveur MCP n'appelle que `127.0.0.1` et refuse `/api/github` et `/api/ia` : Claude ne
+  publie rien sur GitHub et ne touche pas à la clé d'IA.
 
 ## Divers
 
