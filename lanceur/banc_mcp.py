@@ -143,7 +143,8 @@ import mcp_web_suite as mcp  # noqa: E402
 FauxOutil.recues.clear()
 for route in ("/api/github/envoyer", "/api/ia/cle", "/API/GitHub/envoyer", "/api/./github/envoyer",
               "/api//ia/cle", "/x/../api/github/identite", "@evil.example/", "api/projets",
-              "/api/github", "/api/%67ithub/envoyer", "/api/ia/cle?x=1"):
+              "/api/github", "/api/%67ithub/envoyer", "/api/ia/cle?x=1",
+              "/api/envoyer", "/api/identite", "/api/appairer"):
     try:
         mcp.appeler_outil_web("web_cao", route, {})
         raise AssertionError("route permise à tort : " + route)
@@ -153,6 +154,19 @@ verifier("aucune requête refusée n'atteint l'outil", FauxOutil.recues, [])
 verifier("route permise, en GET", mcp.appeler_outil_web("web_cao", "/api/projets"), {"route": "/api/projets"})
 verifier("route permise, en POST", mcp.appeler_outil_web("web_cao", "/api/oeil", {"a": 1})["route"], "/api/oeil")
 verifier("requêtes reçues", FauxOutil.recues, [("GET", "/api/projets"), ("POST", "/api/oeil")])
+
+# Le lanceur est en lecture seule : ses POST installent, lancent, arrêtent, publient
+os.environ["WEB_SUITE_MCP_PORTS"] = json.dumps(dict(PORTS, web_suite=PORTS["web_cao"]))
+FauxOutil.recues.clear()
+for route in ("/api/lancer", "/api/arreter", "/api/installer"):
+    try:
+        mcp.appeler_outil_web("web_suite", route, {"id": "web_3d"})
+        raise AssertionError("POST permis au lanceur : " + route)
+    except mcp.ErreurOutil:
+        pass
+verifier("aucun POST n'atteint le lanceur", FauxOutil.recues, [])
+verifier("GET permis au lanceur", mcp.appeler_outil_web("web_suite", "/api/etat")["route"], "/api/etat")
+os.environ["WEB_SUITE_MCP_PORTS"] = json.dumps(PORTS)
 
 try:
     mcp.appeler_outil_web("web_3d", "/api/projets")

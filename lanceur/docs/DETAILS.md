@@ -200,7 +200,8 @@ doit rendre `{"jsonrpc": "2.0", "id": 1, "result": {}}`.
 - `python lanceur/banc_termux.py` : faux `pkg` — `numpy` / `scipy` partent à
   `pkg install`, rien à pip, un paquet introuvable après coup est signalé.
 - `python lanceur/banc_mcp.py` : serveur MCP en sous-processus — protocole (initialize,
-  ping, erreurs), outil `etat` face à un faux WEB_CAO, routes `/api/github` et `/api/ia`
-  refusées sans qu'aucune requête n'atteigne l'outil, outil arrêté signalé.
+  ping, erreurs), outil `etat` face à un faux WEB_CAO, routes `/api/github`, `/api/envoyer`,
+  `/api/identite`, `/api/ia`, `/api/appairer` refusées et lanceur en lecture seule, sans
+  qu'aucune requête n'atteigne l'outil, outil arrêté signalé.
 
 Chacun affiche `OK` si tout passe.

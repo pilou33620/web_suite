@@ -126,8 +126,9 @@ Puis `/mcp` dans Claude Code. Windows, clé SSH, dépannage : [DETAILS](lanceur/
   sont partagés par les web tools du poste. Supprimer `~/.web_tools/jeton-reseau.txt`
   révoque tous les appareils.
 - Le lanceur refuse les requêtes venant d'autres pages (en-tête `X-WebSuite`, contrôle du `Host`).
-- Le serveur MCP n'appelle que `127.0.0.1` et refuse `/api/github` et `/api/ia` : Claude ne
-  publie rien sur GitHub et ne touche pas à la clé d'IA.
+- Le serveur MCP n'appelle que `127.0.0.1` et refuse `/api/github`, `/api/envoyer`,
+  `/api/identite`, `/api/ia` et `/api/appairer`, et ne fait que lire le lanceur : Claude ne
+  publie rien sur GitHub, ne touche pas à la clé d'IA et ne lance ni n'arrête rien.
 
 ## Divers
 

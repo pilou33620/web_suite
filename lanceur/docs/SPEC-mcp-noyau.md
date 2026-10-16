@@ -24,7 +24,9 @@ depuis une autre machine par SSH.
 4. Un outil qui ne tourne pas donne un résultat d'erreur lisible (« WEB_CAO ne tourne pas :
    lance-le depuis WEB·SUITE »), jamais une exception ni une coupure du serveur.
 5. Le noyau fournit aux autres modules **un seul point d'appel HTTP** vers les outils, limité à
-   `127.0.0.1` et aux ports du catalogue, qui **refuse** `/api/github/*` et `/api/ia/*`.
+   `127.0.0.1` et aux ports du catalogue, qui **refuse** `/api/github/*`, `/api/ia/*` et, partout, `/api/envoyer`, `/api/identite`,
+   `/api/appairer` (le lanceur publie sur GitHub par `/api/envoyer`). Le lanceur est en
+   **lecture seule** (GET) : ses POST installent, lancent, arrêtent ou publient.
 6. Ligne JSON illisible : erreur JSON-RPC `-32700`, le serveur continue. Méthode inconnue :
    `-32601`. Outil MCP inconnu ou arguments invalides : résultat `isError`.
 7. Rien d'autre que le protocole sur stdout ; les journaux vont sur stderr.
@@ -115,7 +117,8 @@ Vérification à la main, une fois : `/mcp` dans Claude Code, sur le Pi puis par
   passer par `appeler_outil_web()` ; journaux sur stderr ; banc vert avant chaque commit.
 - **Demander d'abord** : ajouter une dépendance ou un port ; changer `outils.py` ou
   `appairage.py` ; changer la CI au-delà de l'étape du banc.
-- **Jamais** : exposer `/api/github/*` ou `/api/ia/*` ; lire ou afficher le jeton ; appeler
+- **Jamais** : exposer `/api/github/*`, `/api/ia/*`, `/api/envoyer`, `/api/identite`,
+  `/api/appairer`, ni un POST du lanceur ; lire ou afficher le jeton ; appeler
   une autre adresse que `127.0.0.1` ; écrire autre chose que du JSON-RPC sur stdout.
 
 ## Critères de réussite

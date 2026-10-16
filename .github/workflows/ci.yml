@@ -29,7 +29,7 @@ jobs:
       - name: Appairage — code, jeton et cookie partagés par les web tools
         run: python lanceur/appairage.py
 
-      - name: Serveur MCP — protocole, outil etat, routes github/ia refusées
+      - name: Serveur MCP — protocole, outil etat, publication GitHub et lanceur refusés
         run: python lanceur/banc_mcp.py
 
       # La mise à jour au démarrage est recopiée dans chaque outil, qui doit

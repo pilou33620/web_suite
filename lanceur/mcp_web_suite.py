@@ -25,7 +25,9 @@ VERSION = "0.2.0"
 PROTOCOLE_DEFAUT = "2025-06-18"   # celle de WEB_CAO/python/passerelle_mcp.py
 PROTOCOLES = ("2025-06-18", "2025-03-26", "2024-11-05")
 
-ROUTES_INTERDITES = ("/api/github", "/api/ia")   # publier sur GitHub, clé d'IA : jamais par Claude
+# Jamais par Claude : publier sur GitHub (/api/github des outils, /api/envoyer et
+# /api/identite du lanceur, vers lesquels elles relaient), clé d'IA, appairage.
+ROUTES_INTERDITES = ("/api/github", "/api/ia", "/api/envoyer", "/api/identite", "/api/appairer")
 DELAI = 30         # s, appel ordinaire
 DELAI_SONDE = 1    # s, etat : rester rapide même quand tout est arrêté
 # Boucle locale seulement : un http_proxy du poste ne doit pas détourner les appels
@@ -87,6 +89,9 @@ def appeler_outil_web(id_outil, route, corps=None, delai=DELAI):
         raise ErreurOutil("Outil inconnu : %s. Outils : %s." % (id_outil, ", ".join(ports())))
     if not route_permise(route):
         raise ErreurOutil("Route refusée au MCP : " + route)
+    if id_outil == "web_suite" and corps is not None:
+        # Les POST du lanceur installent, lancent, arrêtent ou publient : le MCP ne fait que lire
+        raise ErreurOutil("Le lanceur est en lecture seule pour le MCP : " + route)
     nom = nom_outil(id_outil)
     donnees = None if corps is None else json.dumps(corps).encode("utf-8")
     requete = urllib.request.Request("http://127.0.0.1:%d%s" % (port, route), data=donnees,

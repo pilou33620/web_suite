@@ -17,7 +17,8 @@ dans ce dossier. Les ids ne changent plus.
   servent de base.
 - Fichiers communs aux outils recopiés dans chaque dépôt, copies identiques vérifiées
   par la CI (même règle que `appairage.py`).
-- Jamais exposés : `/api/github/envoyer`, `/api/ia/cle` ; aucune suppression sans
+- Jamais exposés : `/api/github/*`, `/api/ia/*`, `/api/envoyer` et `/api/identite` (le lanceur
+  publie sur GitHub par là), `/api/appairer` ; le lanceur est en lecture seule ; aucune suppression sans
   confirmation.
 
 ## Modules
