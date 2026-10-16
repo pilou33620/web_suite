@@ -2,7 +2,7 @@
 
 Plan : [plan.md](plan.md) · Spec : [lanceur/docs/SPEC-mcp-noyau.md](../lanceur/docs/SPEC-mcp-noyau.md)
 
-## Tâche 1 : le MCP répond au protocole
+## Tâche 1 : ✅ le MCP répond au protocole
 
 **Description :** `lanceur/mcp_web_suite.py` lit des messages JSON-RPC 2.0 sur stdin (une
 ligne par message) et répond sur stdout. Il traite `initialize` (version du client si
@@ -12,16 +12,16 @@ inconnu : résultat `isError`). Le banc `lanceur/banc_mcp.py` lance le script en
 sous-processus et vérifie tout ça.
 
 **Critères d'acceptation :**
-- [ ] `initialize` puis `tools/list` répondent avec le bon `id` ; une notification ne reçoit
+- [x] `initialize` puis `tools/list` répondent avec le bon `id` ; une notification ne reçoit
       aucune réponse
-- [ ] Une ligne illisible donne `-32700`, une méthode inconnue `-32601`, et le serveur
+- [x] Une ligne illisible donne `-32700`, une méthode inconnue `-32601`, et le serveur
       répond encore au message suivant
-- [ ] stdout ne contient que des lignes JSON-RPC (journaux sur stderr) ; fin de stdin =
+- [x] stdout ne contient que des lignes JSON-RPC (journaux sur stderr) ; fin de stdin =
       sortie propre, code 0
 
 **Vérification :**
-- [ ] `python lanceur/banc_mcp.py` affiche OK
-- [ ] À la main : `printf '{"jsonrpc":"2.0","id":1,"method":"ping"}\n' | python3 lanceur/mcp_web_suite.py`
+- [x] `python lanceur/banc_mcp.py` affiche OK
+- [x] À la main : `printf '{"jsonrpc":"2.0","id":1,"method":"ping"}\n' | python3 lanceur/mcp_web_suite.py`
 
 **Dépendances :** aucune
 
