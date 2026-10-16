@@ -39,6 +39,13 @@ dans ce dossier. Les ids ne changent plus.
 
 0. **Essai sans souris du PNS** (première tâche de `routage`, faite en tête : elle décide
    si le routage par Claude est possible tel quel).
+   *Étude du 2026-10-16 : pilotable avec un adaptateur mince (~80-150 lignes). Le banc
+   `WEB_CAO/editeur-pcb/test/harness.js` route déjà sans souris (`startRoute(x,y,true)`,
+   `routeToPoint`, `stepRoute`, `commitRoute`, `dpStart…dpCommit`, `placeVia`, `runDrc`) ;
+   une route = une étape d'undo. Limites : routeur local seulement (pas de recherche de
+   chemin globale, il faut fournir des points intermédiaires) ; séquence synchrone
+   obligatoire ; fixer `S.avoid`, `S.rule.route`, `S.rule.corner` ; la paire différentielle
+   accroche à la grille (pas de point exact).*
 1. `mcp-noyau`
 2. `api-outils`, `canal-pilote`
 3. `registre-3d`
