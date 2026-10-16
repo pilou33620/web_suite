@@ -56,8 +56,8 @@ compte les requêtes reçues.
 **Taille :** S
 
 ## Checkpoint : socle
-- [ ] Tous les bancs du lanceur verts
-- [ ] Revue avec toi avant la phase 2
+- [x] Tous les bancs du lanceur verts
+- [x] Revue avec toi avant la phase 2
 
 ## Tâche 3 : ✅ CI et documentation
 
@@ -72,7 +72,7 @@ obligatoire, vérifier qu'OpenSSH client est installé). Mettre la carte `SPEC-m
       détail (SSH, clé, Windows)
 
 **Vérification :**
-- [ ] CI verte après le push
+- [x] CI verte après le push
 - [x] Relecture des commandes copiées-collées telles quelles
 
 **Dépendances :** tâche 2

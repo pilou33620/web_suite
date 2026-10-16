@@ -54,8 +54,8 @@ Tâche 4 : essai réel (Pi, puis SSH depuis Windows)
 - [x] Tâche 2 : l'outil `etat` et la porte `appeler_outil_web()`
 
 ### Checkpoint : socle
-- [ ] `python lanceur/banc_mcp.py` vert
-- [ ] Les bancs existants restent verts (`banc_serveur.py`, `appairage.py`)
+- [x] `python lanceur/banc_mcp.py` vert
+- [x] Les bancs existants restent verts (`banc_serveur.py`, `appairage.py`)
 
 ### Phase 2 : livraison
 - [x] Tâche 3 : étape CI et section « Claude Code (MCP) » dans la documentation
