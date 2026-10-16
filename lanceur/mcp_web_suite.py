@@ -9,15 +9,35 @@ porter QUE le protocole (journaux sur stderr). Bibliothèque standard seulement.
 Spec : lanceur/docs/SPEC-mcp-noyau.md.
 """
 import json
+import os
+import posixpath
+import socket
 import sys
+import urllib.error
+import urllib.parse
+import urllib.request
 
-VERSION = "0.1.0"
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))   # Claude Code lance depuis n'importe où
+import outils      # noqa: E402  (ports des outils : CATALOGUE)
+import web_suite   # noqa: E402  (port du lanceur : PORT_DEFAUT)
+
+VERSION = "0.2.0"
 PROTOCOLE_DEFAUT = "2025-06-18"   # celle de WEB_CAO/python/passerelle_mcp.py
 PROTOCOLES = ("2025-06-18", "2025-03-26", "2024-11-05")
 
-# Outils MCP : nom -> description, schéma d'entrée, fonction. Les modules suivants
-# ajoutent leurs entrées ici ; le protocole ne change pas.
-OUTILS_MCP = {}
+ROUTES_INTERDITES = ("/api/github", "/api/ia")   # publier sur GitHub, clé d'IA : jamais par Claude
+DELAI = 30         # s, appel ordinaire
+DELAI_SONDE = 1    # s, etat : rester rapide même quand tout est arrêté
+# Boucle locale seulement : un http_proxy du poste ne doit pas détourner les appels
+OUVREUR = urllib.request.build_opener(urllib.request.ProxyHandler({}))
+
+
+class ErreurOutil(Exception):
+    """Refus ou panne d'un appel à un outil : message lisible, rendu tel quel à Claude."""
+
+
+class OutilArrete(ErreurOutil):
+    pass
 
 
 class ErreurRpc(Exception):
@@ -30,6 +50,91 @@ class ErreurRpc(Exception):
 def journal(texte):
     sys.stderr.write(texte + "\n")
     sys.stderr.flush()
+
+
+def ports():
+    """id -> port : le lanceur et les outils du catalogue. Le banc les remplace par
+    WEB_SUITE_MCP_PORTS (JSON), comme WEB_TOOLS_JETON_FICHIER pour le jeton."""
+    remplaces = os.environ.get("WEB_SUITE_MCP_PORTS")
+    if remplaces:
+        return {k: int(v) for k, v in json.loads(remplaces).items()}
+    p = {"web_suite": web_suite.PORT_DEFAUT}
+    p.update((o["id"], o["port"]) for o in outils.CATALOGUE)
+    return p
+
+
+def nom_outil(id_outil):
+    return "WEB·SUITE" if id_outil == "web_suite" else outils.PAR_ID.get(id_outil, {}).get("nom", id_outil)
+
+
+def route_permise(route):
+    """Route absolue, canonique, hors des routes interdites. Décodée avant contrôle :
+    « /api/%67ithub » ou « /api/./github » ne passent pas."""
+    chemin = urllib.parse.unquote(route.split("?", 1)[0].split("#", 1)[0])
+    if not chemin.startswith("/") or "//" in chemin or "\\" in chemin:
+        return False
+    if chemin != "/" and posixpath.normpath(chemin) != chemin.rstrip("/"):
+        return False
+    bas = chemin.lower().rstrip("/")
+    return not any(bas == r or bas.startswith(r + "/") for r in ROUTES_INTERDITES)
+
+
+def appeler_outil_web(id_outil, route, corps=None, delai=DELAI):
+    """Seule porte vers les outils : boucle locale, port du catalogue, routes filtrées.
+    GET sans corps, POST JSON avec. Rend le JSON décodé, ou le texte."""
+    port = ports().get(id_outil)
+    if port is None:
+        raise ErreurOutil("Outil inconnu : %s. Outils : %s." % (id_outil, ", ".join(ports())))
+    if not route_permise(route):
+        raise ErreurOutil("Route refusée au MCP : " + route)
+    nom = nom_outil(id_outil)
+    donnees = None if corps is None else json.dumps(corps).encode("utf-8")
+    requete = urllib.request.Request("http://127.0.0.1:%d%s" % (port, route), data=donnees,
+                                     headers={"Content-Type": "application/json"},
+                                     method="GET" if donnees is None else "POST")
+    try:
+        with OUVREUR.open(requete, timeout=delai) as rep:
+            brut = rep.read()
+            if "json" in (rep.headers.get("Content-Type") or ""):
+                return json.loads(brut.decode("utf-8"))
+            return brut.decode("utf-8", "replace")
+    except urllib.error.HTTPError as exc:
+        raise ErreurOutil("%s a répondu %d : %s" % (nom, exc.code, exc.read()[:300].decode("utf-8", "replace")))
+    except urllib.error.URLError as exc:
+        if isinstance(exc.reason, (socket.timeout, TimeoutError)):
+            raise ErreurOutil("%s ne répond pas en %d s." % (nom, delai))
+        raise OutilArrete("%s ne tourne pas : lance-le depuis WEB·SUITE" % nom)
+    except (socket.timeout, TimeoutError):
+        raise ErreurOutil("%s ne répond pas en %d s." % (nom, delai))
+    except ConnectionError:
+        raise OutilArrete("%s ne tourne pas : lance-le depuis WEB·SUITE" % nom)
+
+
+def lance(id_outil):
+    try:
+        appeler_outil_web(id_outil, "/", delai=DELAI_SONDE)
+    except OutilArrete:
+        return False
+    except ErreurOutil:
+        return True   # il a répondu, même mal, ou il écoute sans répondre à temps : il tourne
+    return True
+
+
+def etat_outils():
+    return [{"outil": i, "nom": nom_outil(i), "port": p, "adresse": "http://127.0.0.1:%d/" % p, "lance": lance(i)}
+            for i, p in ports().items()]
+
+
+# Outils MCP : nom -> description, schéma d'entrée, fonction. Les modules suivants
+# ajoutent leurs entrées ici ; le protocole ne change pas.
+OUTILS_MCP = {
+    "etat": {
+        "description": "Quels outils de WEB·SUITE tournent sur ce poste (lanceur, WEB_CAO, WEB_ANTENNA, "
+                       "WEB_3D), sur quel port et à quelle adresse.",
+        "inputSchema": {"type": "object", "properties": {}},
+        "fn": lambda _args: etat_outils(),
+    },
+}
 
 
 def initialiser(params):

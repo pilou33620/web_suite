@@ -51,7 +51,7 @@ Tâche 4 : essai réel (Pi, puis SSH depuis Windows)
 
 ### Phase 1 : socle
 - [x] Tâche 1 : le MCP répond au protocole (initialize, ping, tools/list, erreurs)
-- [ ] Tâche 2 : l'outil `etat` et la porte `appeler_outil_web()`
+- [x] Tâche 2 : l'outil `etat` et la porte `appeler_outil_web()`
 
 ### Checkpoint : socle
 - [ ] `python lanceur/banc_mcp.py` vert

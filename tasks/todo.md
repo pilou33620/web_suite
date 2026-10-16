@@ -29,7 +29,7 @@ sous-processus et vérifie tout ça.
 
 **Taille :** S
 
-## Tâche 2 : l'outil `etat` et la porte `appeler_outil_web()`
+## Tâche 2 : ✅ l'outil `etat` et la porte `appeler_outil_web()`
 
 **Description :** ajouter `appeler_outil_web(id_outil, route, corps=None)` : boucle locale
 seulement, port lu dans `outils.CATALOGUE` ou `web_suite.PORT_DEFAUT` (remplaçables par
@@ -39,15 +39,15 @@ WEB_CAO, WEB_ANTENNA, WEB_3D : lancé, port, adresse). Le banc démarre un faux 
 compte les requêtes reçues.
 
 **Critères d'acceptation :**
-- [ ] `etat` montre le faux outil lancé et les trois autres arrêtés, avec leurs ports
-- [ ] `/api/github/envoyer` et `/api/ia/cle` sont refusés et le faux outil reçoit **zéro**
+- [x] `etat` montre le faux outil lancé et les trois autres arrêtés, avec leurs ports
+- [x] `/api/github/envoyer` et `/api/ia/cle` sont refusés et le faux outil reçoit **zéro**
       requête ; une route permise l'atteint bien
-- [ ] Un outil arrêté donne un message clair (« WEB_CAO ne tourne pas : lance-le depuis
+- [x] Un outil arrêté donne un message clair (« WEB_CAO ne tourne pas : lance-le depuis
       WEB·SUITE »), pas de trace Python
 
 **Vérification :**
-- [ ] `python lanceur/banc_mcp.py` affiche OK
-- [ ] `python lanceur/banc_serveur.py` et `python lanceur/appairage.py` toujours OK
+- [x] `python lanceur/banc_mcp.py` affiche OK
+- [x] `python lanceur/banc_serveur.py` et `python lanceur/appairage.py` toujours OK
 
 **Dépendances :** tâche 1
 
