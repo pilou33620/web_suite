@@ -506,6 +506,8 @@ def main(argv=None):
                   if ip else None)
     if url_reseau:
         print("  Réseau    http://%s:%d/" % (ip, serveur.server_address[1]))
+        if appairage_commun.ip_tailscale():
+            print("  Tailscale http://%s:%d/" % (appairage_commun.ip_tailscale(), serveur.server_address[1]))
         print("            tablette, téléphone, autre poste : ouvrir cette adresse,")
         print("            puis saisir le code d'appairage affiché ci-dessous")
         print("            (ou directement, sans code : %s ;" % url_reseau)
