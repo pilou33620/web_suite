@@ -340,6 +340,18 @@ function onglet(serveur, stockage, page, nomCanal) {
   await attendreQue(() => serveur.finale(id), 2000, "réussite asynchrone");
   assert.deepStrictEqual([serveur.finale(id).etat, appels], ["appliquee", 1], "appliquée une seule fois");
 
+  // proposer peut être asynchrone aussi (lire une liste avant de montrer la carte)
+  D.commande("lister", { ecriture: true, historique: true,
+                         proposer: async a => { await pause(30); if (!a.ok) throw new Error("liste illisible"); return { titre: "liste lue" }; },
+                         appliquer() {} });
+  id = serveur.deposer(D.id, "lister", { ok: true }, true);
+  await attendreQue(() => serveur.reponsesDe(id).includes("proposee"), 2000, "carte après proposer async");
+  assert.ok(/liste lue/.test(texteDe(doc.body)));
+  boutons().filter(b => b.textContent === "Refuser").pop().click();
+  id = serveur.deposer(D.id, "lister", { ok: false }, true);
+  await attendreQue(() => serveur.finale(id), 2000, "proposer async qui rejette");
+  assert.deepStrictEqual([serveur.finale(id).etat, serveur.finale(id).resultat], ["echouee", "liste illisible"]);
+
   // Écriture irréversible (ranger un fichier) : déclarée sans annuler, la carte prévient
   // avant le clic, n'offre pas Annuler, et rend le résultat à Claude
   assert.throws(() => D.commande("sans", { ecriture: true, proposer: () => ({}), appliquer() {} }), /annuler|irreversible/);

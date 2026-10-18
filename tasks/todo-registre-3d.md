@@ -142,7 +142,7 @@ appelle `POST /api/projets` (`X-Web3D: 1`) depuis la page, puis rend le chemin c
 - [ ] `banc-pilote-3d.mjs` et `banc-exemples.mjs` verts
 - [ ] Revue avec toi
 
-## Tâche 8 : les 9 commandes dans la page
+## Tâche 8 : ✅ les 9 commandes dans la page
 
 **Description :** `brancherPilote3d(W3D, Pilote)`, appelé par `09-demarrage.js` :
 - lectures : `web3d_scene`, `web3d_mesurer`, `web3d_collisions` ;
@@ -152,9 +152,9 @@ appelle `POST /api/projets` (`X-Web3D: 1`) depuis la page, puis rend le chemin c
 - la capture déjà déclarée reste.
 
 **Critères d'acceptation :**
-- [ ] Chaque commande est déclarée avec le bon type (lecture, directe ou carte) ; aucune
+- [x] Chaque commande est déclarée avec le bon type (lecture, directe ou carte) ; aucune
       n'écrit dans `localStorage`
-- [ ] Banc Node : un faux `Pilote` reçoit les 9 déclarations, et les cartes ont
+- [x] Banc Node : un faux `Pilote` reçoit les 9 déclarations, et les cartes ont
       `annuler` + `etat` ou `irreversible`
 
 **Vérification :** `node test/banc-pilote-3d.mjs` ; l'essai réel en T11
