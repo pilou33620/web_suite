@@ -2,7 +2,7 @@
 
 Plan : [plan-registre-3d.md](plan-registre-3d.md) · Spec : [lanceur/docs/SPEC-mcp-registre-3d.md](../lanceur/docs/SPEC-mcp-registre-3d.md)
 
-## Tâche 1 : canal, `appliquer` asynchrone et écriture irréversible
+## Tâche 1 : ✅ canal, `appliquer` asynchrone et écriture irréversible
 
 **Description :** dans `lanceur/pilote.js` :
 - `appliquer` et `annuler` sont attendus (`await`), et une exception asynchrone remonte en
@@ -12,11 +12,11 @@ Plan : [plan-registre-3d.md](plan-registre-3d.md) · Spec : [lanceur/docs/SPEC-m
 - recopier dans WEB_CAO, WEB_ANTENNA et WEB_3D.
 
 **Critères d'acceptation :**
-- [ ] Une écriture dont `appliquer` est une promesse qui rejette rend « echouee » avec son
+- [x] Une écriture dont `appliquer` est une promesse qui rejette rend « echouee » avec son
       message ; une qui se résout rend « appliquee » avec son résultat
-- [ ] Une écriture `irreversible` se déclare sans `annuler` et affiche son message ; une
+- [x] Une écriture `irreversible` se déclare sans `annuler` et affiche son message ; une
       écriture sans `historique`, `annuler` ni `irreversible` reste refusée
-- [ ] Les copies sont identiques dans les trois outils
+- [x] Les copies sont identiques dans les trois outils
 
 **Vérification :** `node lanceur/banc_pilote.js` ; les bancs des trois outils (pages qui chargent `pilote.js`)
 

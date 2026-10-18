@@ -322,6 +322,38 @@ function onglet(serveur, stockage, page, nomCanal) {
   await attendreQue(() => serveur.finale(id), 2000, "vérifiée appliquée");
   assert.deepStrictEqual([vuParAppliquer.apres, vuParAppliquer.cle], ["7", 42]);
 
+  // appliquer peut être asynchrone (ouvrir un fichier) : un rejet remonte en « echouee »,
+  // une réussite en « appliquee » ; un double clic pendant l'attente ne rejoue rien
+  let appels = 0;
+  D.commande("lent", { ecriture: true, historique: true, proposer: a => ({ titre: "lent " + a.ok }),
+                       appliquer: async a => { appels++; await pause(60); if (!a.ok) throw new Error("fichier illisible"); } });
+  id = serveur.deposer(D.id, "lent", { ok: false }, true);
+  await attendreQue(() => serveur.reponsesDe(id).includes("proposee"), 2000, "carte lente");
+  boutons().filter(b => b.textContent === "Appliquer").pop().click();
+  await attendreQue(() => serveur.finale(id), 2000, "rejet asynchrone");
+  assert.deepStrictEqual([serveur.finale(id).etat, serveur.finale(id).resultat], ["echouee", "fichier illisible"]);
+  appels = 0;
+  id = serveur.deposer(D.id, "lent", { ok: true }, true);
+  await attendreQue(() => serveur.reponsesDe(id).includes("proposee"), 2000, "carte lente 2");
+  const bLent = boutons().filter(b => b.textContent === "Appliquer").pop();
+  bLent.click(); bLent.click();
+  await attendreQue(() => serveur.finale(id), 2000, "réussite asynchrone");
+  assert.deepStrictEqual([serveur.finale(id).etat, appels], ["appliquee", 1], "appliquée une seule fois");
+
+  // Écriture irréversible (ranger un fichier) : déclarée sans annuler, la carte prévient
+  // avant le clic, n'offre pas Annuler, et rend le résultat à Claude
+  assert.throws(() => D.commande("sans", { ecriture: true, proposer: () => ({}), appliquer() {} }), /annuler|irreversible/);
+  D.commande("ranger", { ecriture: true, irreversible: "Crée un nouveau fichier ; non annulable ici.",
+                         proposer: a => ({ titre: "Ranger " + a.nom }), appliquer: async a => ({ chemin: a.nom + " (2).stp" }) });
+  id = serveur.deposer(D.id, "ranger", { nom: "bolt" }, true);
+  await attendreQue(() => serveur.reponsesDe(id).includes("proposee"), 2000, "carte irréversible");
+  assert.ok(/non annulable/.test(texteDe(doc.body)), "avertissement affiché avant le clic");
+  const avantAnnuler = boutons().filter(b => b.textContent === "Annuler").length;
+  boutons().filter(b => b.textContent === "Appliquer").pop().click();
+  await attendreQue(() => serveur.finale(id), 2000, "irréversible appliquée");
+  assert.deepStrictEqual(serveur.finale(id).resultat.retour, { chemin: "bolt (2).stp" });
+  assert.strictEqual(boutons().filter(b => b.textContent === "Annuler").length, avantAnnuler, "pas d'Annuler");
+
   // La capture se voit dans le panneau, et le panneau ne grossit pas sans fin
   D.capture(() => ({ width: 10, height: 10, toDataURL: () => "data:image/png;base64,QQ" }));
   id = serveur.deposer(D.id, "capture");
