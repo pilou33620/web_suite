@@ -12,6 +12,8 @@ import mcp_web_suite as noyau
 PLAFOND = 100 * 1024   # octets de JSON rendus à Claude ; au-delà, un résumé
 DOCS_CAO = ("schema", "pcb", "ipc2581")
 TYPES_LIB = ("pcb", "schematique", "simulation")
+# En-tête d'un projet WEB_ANTENNA : absent, le serveur le remet à vide (projet.py:438-446)
+TETE_ANTENNA = ("titre", "outil", "source", "fichier", "dessin", "antenne", "affichage")
 SOLVEURS = {"simulation": "/api/simulation", "simulation_dc": "/api/simulation-dc",
             "crosstalk": "/api/crosstalk", "simulation_rf": "/api/simulation-rf", "oeil": "/api/oeil",
             "analyse_carte": "/api/analyse-carte", "ipc2581": "/api/ipc2581"}
@@ -79,23 +81,32 @@ def cao_projet_lire(args):
 def cao_doc_lire(args):
     chemin, doc = exiger(args, chemin=str, doc=str)
     racine = facultatif(args, "racine", str, None)
-    parties = facultatif(args, "parties", list, None)
+    parties = lire_parties(args)
     if doc not in DOCS_CAO:
         raise noyau.ErreurOutil("Argument « doc » invalide : %s attendu." % ", ".join(DOCS_CAO))
-    if parties is not None and not all(isinstance(p, str) for p in parties):
-        raise noyau.ErreurOutil("Argument « parties » invalide : liste de noms de clés attendue.")
     rep = noyau.appeler_outil_web("web_cao", route("/api/projet/doc", chemin=chemin, racine=racine, doc=doc))
     document = rep.get("document") if isinstance(rep, dict) else None
     if not isinstance(document, dict):
         return resumer(rep, "Document trop gros.")
+    rep["document"] = garder_parties(document, parties, rep)
+    return rep
+
+
+def lire_parties(args):
+    parties = facultatif(args, "parties", list, None)
+    if parties is not None and not all(isinstance(p, str) for p in parties):
+        raise noyau.ErreurOutil("Argument « parties » invalide : liste de noms de clés attendue.")
+    return parties
+
+
+def garder_parties(objet, parties, rep):
+    """Les seules clés demandées (les absentes notées dans rep), puis le résumé si c'est encore gros."""
     if parties is not None:
-        absentes = [p for p in parties if p not in document]
-        document = {p: document[p] for p in parties if p in document}
+        absentes = [p for p in parties if p not in objet]
+        objet = {p: objet[p] for p in parties if p in objet}
         if absentes:
             rep["parties_absentes"] = absentes
-    rep["document"] = resumer(document, "Document trop gros : redemande avec « parties » (clés de premier "
-                                        "niveau listées dans « forme »).")
-    return rep
+    return resumer(objet, "Trop gros : redemande avec « parties » (clés de premier niveau listées dans « forme »).")
 
 
 def cao_solveurs(_args):
@@ -207,6 +218,42 @@ def pcbparts_appeler(args):
         raise noyau.ErreurOutil("Outil pcbparts non permis : %s. Permis : %s." % (nom, ", ".join(map(str, permis))))
     return resumer(noyau.appeler_outil_web("web_cao", "/api/tool", {"name": nom, "arguments": arguments}),
                    "Réponse pcbparts trop grosse : affine la recherche.")
+
+
+def antenna_ouvert():
+    """Nom du projet ouvert dans WEB_ANTENNA ; refus s'il n'y en a pas."""
+    ouvert = noyau.appeler_outil_web("web_antenna", "/api/projet").get("ouvert")
+    if not isinstance(ouvert, dict) or not ouvert.get("nom"):
+        raise noyau.ErreurOutil("Aucun projet ouvert dans WEB_ANTENNA : ouvre-le depuis la page. "
+                                "Le MCP ne change pas le projet courant.")
+    return ouvert["nom"]
+
+
+def antenna_charge(nom):
+    # Rouvrir le projet déjà ouvert ne change rien côté serveur (même nom, même dossier)
+    return noyau.appeler_outil_web("web_antenna", route("/api/projet/ouvrir", nom=nom))
+
+
+def antenna_projet_lire(args):
+    parties = lire_parties(args)
+    notes = {}
+    return dict(garder_parties(antenna_charge(antenna_ouvert()), parties, notes), **notes)
+
+
+def antenna_projet_enregistrer(args):
+    projet = dict(exiger(args, projet=dict))
+    nuls = sorted(k for k, v in projet.items() if v is None)
+    if nuls:
+        # null supprime carte.json ou resultats.json côté serveur : jamais par Claude
+        raise noyau.ErreurOutil("Valeur null refusée pour : %s. Omets la clé pour la laisser inchangée." % ", ".join(nuls))
+    nom = antenna_ouvert()
+    if projet.setdefault("nom", nom) != nom:
+        raise noyau.ErreurOutil("Seul le projet ouvert (« %s ») peut être enregistré par le MCP." % nom)
+    absents = [k for k in TETE_ANTENNA if k not in projet]
+    if absents:
+        actuel = antenna_charge(nom)
+        projet.update((k, actuel[k]) for k in absents if k in actuel)
+    return noyau.appeler_outil_web("web_antenna", "/api/projet/enregistrer", projet)
 
 
 CHEMIN = {"type": "string", "description": "Chemin du projet, tel que rendu par cao_projets."}
@@ -331,5 +378,31 @@ OUTILS_API = {
         "inputSchema": {"type": "object", "properties": {
             "name": {"type": "string"}, "arguments": {"type": "object"}}, "required": ["name"]},
         "fn": pcbparts_appeler,
+    },
+    "antenna_projets": {
+        "description": "État des projets WEB_ANTENNA : racine, liste des projets, projet ouvert.",
+        "inputSchema": {"type": "object", "properties": {}},
+        "fn": lambda _a: lire("web_antenna", "/api/projet"),
+    },
+    "antenna_projet_lire": {
+        "description": "Lit le projet ouvert dans WEB_ANTENNA (en-tête, dessin, antenne, carte, "
+                       "résultats). Seulement celui-là : le MCP ne change pas le projet courant. "
+                       "Au-delà de 100 Ko, résumé : redemande avec « parties ».",
+        "inputSchema": {"type": "object", "properties": {
+            "parties": {"type": "array", "items": {"type": "string"},
+                        "description": "Clés de premier niveau à rendre ; facultatif."}}},
+        "fn": antenna_projet_lire,
+    },
+    "antenna_projet_enregistrer": {
+        "description": "Enregistre le projet ouvert de WEB_ANTENNA. Ne donne que ce qui change : "
+                       "l'en-tête absent est repris du projet ouvert, une « carte » ou des "
+                       "« resultats » absents restent inchangés. null refusé (il supprimerait).",
+        "inputSchema": {"type": "object", "properties": {"projet": {"type": "object"}}, "required": ["projet"]},
+        "fn": antenna_projet_enregistrer,
+    },
+    "antenna_calculs": {
+        "description": "Liste les calculs openEMS rangés dans le projet ouvert de WEB_ANTENNA.",
+        "inputSchema": {"type": "object", "properties": {}},
+        "fn": lambda _a: lire("web_antenna", "/api/projet/calculs"),
     },
 }

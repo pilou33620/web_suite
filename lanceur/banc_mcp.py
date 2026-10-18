@@ -457,5 +457,34 @@ verifier("outil hors liste refusé", outil("pcbparts_appeler", name="autre", arg
 verifier("arguments non objet refusés", outil("pcbparts_appeler", name="jlc_search", arguments="x")[0], True)
 verifier("seulement la lecture de la liste", ecritures(), [])
 FauxApi.table.clear()
+
+# Projets WEB_ANTENNA : seulement le projet ouvert ; jamais de null ; en-tête absent repris
+os.environ["WEB_SUITE_MCP_PORTS"] = json.dumps(dict(PORTS, web_antenna=api.server_address[1]))
+TETE = {"titre": "T", "outil": "o", "source": "s", "fichier": "f", "dessin": {"d": 1}, "antenne": {"a": 1},
+        "affichage": {"z": 1}}
+FauxApi.table[("GET", "/api/projet")] = (200, {"ouvert": {"nom": "dipole", "dossier": "/x"}, "projets": []})
+FauxApi.table[("GET", "/api/projet/ouvrir")] = (200, dict(TETE, nom="dipole", dossier="/x", carte={"c": 1},
+                                                          resultats={"r": 1}))
+FauxApi.recues.clear()
+verifier("antenna_projet_lire", outil("antenna_projet_lire")[1]["nom"], "dipole")
+verifier("lecture du projet ouvert", [r[1] for r in FauxApi.recues], ["/api/projet", "/api/projet/ouvrir" + q(nom="dipole")])
+FauxApi.recues.clear()
+verifier("enregistrer partiel", outil("antenna_projet_enregistrer", projet={"antenne": {"a": 2}})[0], False)
+verifier("en-tête repris, ni carte ni résultats", ecritures(), [
+    ("POST", "/api/projet/enregistrer", dict(TETE, nom="dipole", antenne={"a": 2}))])
+FauxApi.recues.clear()
+for args in ({"projet": {"carte": None}}, {"projet": {"nom": "autre", "antenne": {}}}, {"projet": "x"}):
+    verifier("enregistrer refuse %r" % args, outil("antenna_projet_enregistrer", **args)[0], True)
+verifier("aucun enregistrement refusé envoyé", ecritures(), [])
+FauxApi.table[("GET", "/api/projet")] = (200, {"ouvert": None, "projets": []})
+FauxApi.recues.clear()
+verifier("aucun projet ouvert : lecture refusée", outil("antenna_projet_lire")[0], True)
+verifier("aucun projet ouvert : enregistrement refusé", outil("antenna_projet_enregistrer", projet=TETE)[0], True)
+verifier("jamais d'ouverture ni d'écriture", [r[1] for r in FauxApi.recues], ["/api/projet", "/api/projet"])
+FauxApi.recues.clear()
+outil("antenna_projets")
+outil("antenna_calculs")
+verifier("antenna_projets, antenna_calculs", [r[1] for r in FauxApi.recues], ["/api/projet", "/api/projet/calculs"])
+FauxApi.table.clear()
 os.environ["WEB_SUITE_MCP_PORTS"] = json.dumps(PORTS)
 print("OK")

@@ -125,7 +125,7 @@ existe).
 - [ ] Bancs verts
 - [ ] Revue avec toi
 
-## Tâche 6 : projets WEB_ANTENNA
+## Tâche 6 : ✅ projets WEB_ANTENNA
 
 **Description :** ajouter `antenna_projets`, `antenna_projet_lire` (seulement le projet
 ouvert, vérifié par `/api/projet`), `antenna_projet_enregistrer` (POST, toute valeur `null`
@@ -134,15 +134,15 @@ champs d'en-tête absents repris du projet ouvert, car le serveur les remet à v
 `antenna_calculs`.
 
 **Critères d'acceptation :**
-- [ ] Lire un projet qui n'est pas ouvert : refusé, et aucun GET `/api/projet/ouvrir` envoyé
-- [ ] Un enregistrement qui contient `"carte": null`, ou qui vise un autre projet que
+- [x] Lire un projet qui n'est pas ouvert : refusé, et aucun GET `/api/projet/ouvrir` envoyé
+- [x] Un enregistrement qui contient `"carte": null`, ou qui vise un autre projet que
       l'ouvert, est refusé sans POST
-- [ ] Un enregistrement partiel (seulement `antenne`) arrive avec `titre`, `dessin`, etc.
+- [x] Un enregistrement partiel (seulement `antenne`) arrive avec `titre`, `dessin`, etc.
       repris du projet ouvert, et sans `carte` ni `resultats`
-- [ ] `antenna_projets` et `antenna_calculs` atteignent leur route
+- [x] `antenna_projets` et `antenna_calculs` atteignent leur route
 
 **Vérification :**
-- [ ] `python lanceur/banc_mcp.py` OK
+- [x] `python lanceur/banc_mcp.py` OK
 
 **Dépendances :** tâches 1 et 2
 
