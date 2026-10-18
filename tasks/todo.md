@@ -196,14 +196,14 @@ Chromium
 
 **Dépendances :** T3, T5 · **Fichiers :** WEB_ANTENNA : `pilote.py`, `js/pilote.js`, `css/pilote.css`, `web_antenna.py`, `index.html`, `js/30-ia.js` · **Taille :** M
 
-## Tâche 10 : WEB_3D : branchement, capture
+## Tâche 10 : ✅ WEB_3D : branchement, capture
 
 **Description :** copier les trois fichiers, brancher `web_3D.py` (dans `do_GET` et
 `do_POST`, avant les fichiers statiques), et faire déclarer `Pilote.capture` par
 `09-demarrage.js` à partir de `Vue3D.capture()`.
 
 **Critères d'acceptation :**
-- [ ] `pilote_capture` rend la vue 3D ; WEB_3D apparaît dans `pilote_onglets`
+- [x] `pilote_capture` rend la vue 3D ; WEB_3D apparaît dans `pilote_onglets`
 
 **Vérification :** essai avec Chromium
 
