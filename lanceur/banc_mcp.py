@@ -649,5 +649,59 @@ for image in ("data:text/html;base64," + png, "data:image/png;base64,!!!", "data
     FauxApi.table[("POST", "/api/pilote/commande")] = fin({"image": image})
     verifier("capture refusée : %s…" % image[:24], outil("pilote_capture", outil="web_cao")[0], True)
 FauxApi.table.clear()
+
+# ---------------------------------------------------------------------------
+# registre-3d (lanceur/docs/SPEC-mcp-registre-3d.md) : commandes de la page WEB_3D
+os.environ["WEB_SUITE_MCP_PORTS"] = json.dumps(dict(PORTS, web_3d=api.server_address[1]))
+O3 = ["web3d_scene", "web3d_vue", "web3d_visibilite", "web3d_coupe", "web3d_mesurer", "web3d_collisions",
+      "web3d_ouvrir", "web3d_deplacer", "web3d_ranger_step"]
+verifier("outils de registre-3d listés", set(O3) <= set(noms), True)
+FauxApi.table[("POST", "/api/pilote/commande")] = fin({"ok": 1})
+FauxApi.recues.clear()
+UU = "5e2d8418-4e83-48cb-804a-d5f34f62ae1f"
+for nom, args, ecriture in (
+        ("web3d_scene", {"filtre": "bolt", "nombre": 20}, False),
+        ("web3d_vue", {"vue": "iso", "projection": "ortho", "cadrer": {"piece": "0/3/1"}}, False),
+        ("web3d_visibilite", {"action": "isoler", "pieces": [UU]}, False),
+        ("web3d_coupe", {"actif": True, "axe": "z", "decalage_mm": -2.5, "inverse": False}, False),
+        ("web3d_mesurer", {"quoi": "distance", "pieces": ["0/1", UU], "afficher": True}, False),
+        ("web3d_collisions", {"tolerance": 0.2}, False),
+        ("web3d_ouvrir", {"chemins": ["cartes/boitier.stp"], "ajout": True}, True),
+        ("web3d_deplacer", {"fichier": 1, "translation": [10, 0, 0], "rotation_deg": [0, 0, 90]}, True),
+        ("web3d_ranger_step", {"piece": UU, "nom": "boulon"}, True)):
+    verifier(nom + " accepté", outil(nom, **args)[0], False)
+deposees = [r[2] for r in FauxApi.recues]
+verifier("commandes déposées à la page 3d, avec leurs arguments", [(d["nom"], d["page"], d["ecriture"]) for d in deposees],
+         [(n, ["3d"], e) for n, e in zip(O3, [False] * 6 + [True] * 3)])
+verifier("arguments transmis tels quels", deposees[7]["args"], {"fichier": 1, "translation": [10, 0, 0], "rotation_deg": [0, 0, 90]})
+
+FauxApi.recues.clear()
+for nom, args in (("web3d_vue", {"vue": "plongee"}), ("web3d_vue", {"projection": "fisheye"}),
+                  ("web3d_visibilite", {"action": "exploser"}), ("web3d_visibilite", {"action": "masquer", "pieces": "x"}),
+                  ("web3d_coupe", {"axe": "w"}), ("web3d_coupe", {"decalage_mm": float("nan")}),
+                  ("web3d_mesurer", {"quoi": "masse"}), ("web3d_mesurer", {"quoi": "distance", "pieces": [UU]}),
+                  ("web3d_collisions", {"tolerance": -1}),
+                  ("web3d_ouvrir", {"chemins": ["../web_3D.py"]}), ("web3d_ouvrir", {"chemins": []}),
+                  ("web3d_ouvrir", {"chemins": ["/etc/x.stp"]}),
+                  ("web3d_deplacer", {"fichier": -1, "translation": [1, 0, 0]}),
+                  ("web3d_deplacer", {"fichier": 0, "translation": [1, 0]}),
+                  ("web3d_deplacer", {"fichier": 0, "rotation_deg": [0, 0, "90"]}),
+                  ("web3d_ranger_step", {"piece": ""}), ("web3d_ranger_step", {"piece": UU, "nom": "a/b"})):
+    verifier("%s refuse %r" % (nom, args), outil(nom, **args)[0], True)
+verifier("aucun argument invalide n'atteint la page", FauxApi.recues, [])
+
+# web3d_vue + capturer : la vue, puis la capture du même onglet, en image
+FauxApi.table[("POST", "/api/pilote/commande")] = fin({"vue": "iso"})
+FauxApi.recues.clear()
+reponses = iter([fin({"vue": "iso", "cadre": "scène"}), fin({"image": "data:image/png;base64," + png, "largeur": 10, "hauteur": 10})])
+
+
+_table = FauxApi.table
+FauxApi.table = type("T", (dict,), {"get": lambda self, k, d=None: next(reponses) if k == ("POST", "/api/pilote/commande") else d})()
+r = mcp.appeler({"name": "web3d_vue", "arguments": {"vue": "iso", "capturer": True}})
+FauxApi.table = _table
+verifier("web3d_vue + capturer : image puis texte", [c["type"] for c in r["content"]], ["image", "text"])
+verifier("la capture vise l'onglet de la vue", FauxApi.recues[1][2], {"page": ["3d"], "nom": "capture", "args": {}, "ecriture": False, "onglet": "A"})
+FauxApi.table.clear()
 os.environ["WEB_SUITE_MCP_PORTS"] = json.dumps(PORTS)
 print("OK")

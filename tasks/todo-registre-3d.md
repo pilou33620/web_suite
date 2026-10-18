@@ -161,16 +161,16 @@ appelle `POST /api/projets` (`X-Web3D: 1`) depuis la page, puis rend le chemin c
 
 **Dépendances :** T3 à T7 · **Fichiers :** `js/14-pilote-3d.js`, `js/09-demarrage.js`, `test/banc-pilote-3d.mjs` · **Taille :** M
 
-## Tâche 9 : outils MCP
+## Tâche 9 : ✅ outils MCP
 
 **Description :** `lanceur/mcp_registre_3d.py` : les 9 outils, arguments validés
 (références, axes, vues, nombres finis, chemins PROJETS relatifs), envoyés sur
 `/api/pilote/commande` de WEB_3D. Importé par le noyau.
 
 **Critères d'acceptation :**
-- [ ] Chaque outil dépose la bonne commande (page `3d`, nom, arguments, écriture) ;
+- [x] Chaque outil dépose la bonne commande (page `3d`, nom, arguments, écriture) ;
       `web3d_vue` avec `capturer` rend une image
-- [ ] Les arguments invalides sont refusés sans requête
+- [x] Les arguments invalides sont refusés sans requête
 
 **Vérification :** `python lanceur/banc_mcp.py`
 

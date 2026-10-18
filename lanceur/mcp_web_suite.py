@@ -210,8 +210,10 @@ OUTILS_MCP = {
 sys.modules.setdefault("mcp_web_suite", sys.modules[__name__])
 import mcp_api_outils  # noqa: E402
 import mcp_pilote  # noqa: E402
+import mcp_registre_3d  # noqa: E402
 OUTILS_MCP.update(mcp_api_outils.OUTILS_API)
 OUTILS_MCP.update(mcp_pilote.OUTILS_PILOTE)
+OUTILS_MCP.update(mcp_registre_3d.OUTILS_3D)
 
 
 def initialiser(params):
