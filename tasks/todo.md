@@ -27,7 +27,7 @@ Plan : [plan.md](plan.md) · Spec : [lanceur/docs/SPEC-mcp-api-outils.md](../lan
 
 **Taille :** XS
 
-## Tâche 2 : le socle, puis lire un projet CAO
+## Tâche 2 : ✅ le socle, puis lire un projet CAO
 
 **Description :**
 - `appeler_outil_web()` reçoit `methode` (PUT possible, DELETE refusé, le lanceur en GET
@@ -38,15 +38,15 @@ Plan : [plan.md](plan.md) · Spec : [lanceur/docs/SPEC-mcp-api-outils.md](../lan
 - Le banc reçoit `FauxApi`, un faux outil piloté par une table qui note les requêtes reçues.
 
 **Critères d'acceptation :**
-- [ ] `tools/list` montre `etat` et les trois outils ; chaque outil atteint sa route en GET
-- [ ] Un argument manquant (`chemin`) donne un `isError` qui le nomme, sans requête ; un
+- [x] `tools/list` montre `etat` et les trois outils ; chaque outil atteint sa route en GET
+- [x] Un argument manquant (`chemin`) donne un `isError` qui le nomme, sans requête ; un
       `DELETE` est refusé avant toute requête ; un PUT vers le lanceur est refusé
-- [ ] Un document de 300 Ko donne un résumé de moins de 100 Ko, et `parties` rend
+- [x] Un document de 300 Ko donne un résumé de moins de 100 Ko, et `parties` rend
       seulement les clés demandées
 
 **Vérification :**
-- [ ] `python lanceur/banc_mcp.py` OK
-- [ ] `python lanceur/banc_serveur.py` et `python lanceur/appairage.py` toujours OK
+- [x] `python lanceur/banc_mcp.py` OK
+- [x] `python lanceur/banc_serveur.py` et `python lanceur/appairage.py` toujours OK
 
 **Dépendances :** tâche 1
 

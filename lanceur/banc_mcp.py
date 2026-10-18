@@ -15,6 +15,7 @@ import socket
 import subprocess
 import sys
 import threading
+import urllib.parse
 
 ICI = os.path.dirname(os.path.abspath(__file__))
 SERVEUR = os.path.join(ICI, "mcp_web_suite.py")
@@ -268,4 +269,98 @@ except mcp.ErreurOutil:
 # Un outil MCP qui plante : résultat en erreur, pas d'exception
 mcp.OUTILS_MCP["boum"] = {"description": "", "inputSchema": {}, "fn": lambda a: 1 / 0}
 verifier("panne d'outil", mcp.appeler({"name": "boum"})["isError"], True)
+del mcp.OUTILS_MCP["boum"]
+
+
+# ---------------------------------------------------------------------------
+# api-outils (lanceur/docs/SPEC-mcp-api-outils.md)
+class FauxApi(FauxOutil):
+    """Faux outil piloté par une table : (méthode, chemin sans requête) -> (statut, JSON).
+    Note (méthode, chemin complet, corps) de chaque requête reçue."""
+    table, recues = {}, []
+
+    def _repondre(self):
+        n = int(self.headers.get("Content-Length") or 0)
+        FauxApi.recues.append((self.command, self.path, json.loads(self.rfile.read(n)) if n else None))
+        statut, rep = FauxApi.table.get((self.command, self.path.split("?")[0]), (200, {"route": self.path}))
+        corps = json.dumps(rep).encode("utf-8")
+        self.send_response(statut)
+        self.send_header("Content-Type", "application/json")
+        self.send_header("Content-Length", str(len(corps)))
+        self.end_headers()
+        self.wfile.write(corps)
+
+    do_GET = do_POST = do_PUT = do_DELETE = _repondre
+
+
+def outil(nom, **args):
+    """Appelle un outil MCP comme le fait Claude : (isError, contenu décodé, ou texte)."""
+    r = mcp.appeler({"name": nom, "arguments": args})
+    texte = r["content"][0]["text"]
+    try:
+        return r["isError"], json.loads(texte)
+    except ValueError:
+        return r["isError"], texte
+
+
+def q(**params):
+    return "?" + urllib.parse.urlencode(params)
+
+
+api = servir(FauxApi)
+os.environ["WEB_SUITE_MCP_PORTS"] = json.dumps(dict(PORTS, web_cao=api.server_address[1]))
+noms = [o["name"] for o in outils]   # tools/list du tout premier échange, par le protocole
+verifier("outils du socle listés", {"etat", "cao_projets", "cao_projet_lire", "cao_doc_lire"} <= set(noms), True)
+
+# Méthodes : PUT permis aux outils, DELETE jamais, le lanceur en GET seulement
+FauxApi.recues.clear()
+for id_, route, corps, methode in (("web_cao", "/api/lib/fichier", None, "DELETE"),
+                                   ("web_suite", "/api/etat", {}, "PUT"), ("web_suite", "/api/etat", None, "PUT")):
+    try:
+        mcp.appeler_outil_web(id_, route, corps, methode=methode)
+        raise AssertionError("méthode permise à tort : %s %s" % (methode, id_))
+    except mcp.ErreurOutil:
+        pass
+verifier("aucune méthode refusée n'atteint l'outil", FauxApi.recues, [])
+mcp.appeler_outil_web("web_cao", "/api/profil", {"a": 1}, methode="PUT")
+verifier("PUT avec son corps", FauxApi.recues, [("PUT", "/api/profil", {"a": 1})])
+
+# Lectures de projets CAO
+FauxApi.recues.clear()
+verifier("cao_projets", outil("cao_projets"), (False, {"route": "/api/projets"}))
+outil("cao_projet_lire", chemin="a b/c", racine="/r")
+outil("cao_projet_lire", chemin="seul")
+outil("cao_doc_lire", chemin="p", doc="pcb")
+verifier("routes et méthodes", FauxApi.recues, [
+    ("GET", "/api/projets", None),
+    ("GET", "/api/projet" + q(chemin="a b/c", racine="/r"), None),
+    ("GET", "/api/projet" + q(chemin="seul"), None),
+    ("GET", "/api/projet/doc" + q(chemin="p", doc="pcb"), None)])
+
+# Arguments invalides : erreur qui nomme l'argument, aucune requête
+FauxApi.recues.clear()
+for nom, args, fautif in (("cao_projet_lire", {}, "chemin"), ("cao_projet_lire", {"chemin": 5}, "chemin"),
+                          ("cao_doc_lire", {"chemin": "p", "doc": "autre"}, "doc"),
+                          ("cao_doc_lire", {"chemin": "p", "doc": "pcb", "parties": "nom"}, "parties")):
+    erreur, texte = outil(nom, **args)
+    verifier("refus de %s %r" % (nom, args), (erreur, fautif in texte), (True, True))
+verifier("aucun argument invalide n'atteint l'outil", FauxApi.recues, [])
+
+# Grosse réponse : résumé sous le plafond, « modifie » toujours là ; « parties » pour le détail
+gros = {"document": {"pistes": [[i, i] for i in range(30000)], "nom": "carte"}, "fichier": "x-PCB.json",
+        "modifie": 123}
+FauxApi.table[("GET", "/api/projet/doc")] = (200, gros)
+r = mcp.appeler({"name": "cao_doc_lire", "arguments": {"chemin": "p", "doc": "pcb"}})
+verifier("réponse de plus de 300 Ko", len(json.dumps(gros)) > 300 * 1024, True)
+verifier("résumé sous 100 Ko", len(r["content"][0]["text"].encode("utf-8")) < 100 * 1024, True)
+_, rendu = outil("cao_doc_lire", chemin="p", doc="pcb")
+verifier("modifie gardé", (rendu["modifie"], rendu["fichier"]), (123, "x-PCB.json"))
+verifier("document résumé", (rendu["document"]["resume"], rendu["document"]["forme"]["pistes"]["longueur"]),
+         (True, 30000))
+verifier("parties", outil("cao_doc_lire", chemin="p", doc="pcb", parties=["nom", "absente"])[1]["document"],
+         {"nom": "carte"})
+verifier("parties absentes signalées",
+         outil("cao_doc_lire", chemin="p", doc="pcb", parties=["absente"])[1].get("parties_absentes"), ["absente"])
+FauxApi.table.clear()
+os.environ["WEB_SUITE_MCP_PORTS"] = json.dumps(PORTS)
 print("OK")

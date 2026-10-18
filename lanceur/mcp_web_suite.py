@@ -116,28 +116,31 @@ def route_permise(route):
     return not any(bas == r or bas.startswith(r + "/") for r in ROUTES_INTERDITES)
 
 
-def appeler_outil_web(id_outil, route, corps=None, delai=DELAI):
+def appeler_outil_web(id_outil, route, corps=None, delai=DELAI, methode=None):
     """Seule porte vers les outils : boucle locale, port du catalogue (corrigé par le
-    lanceur), routes filtrées. GET sans corps, POST JSON avec. Rend le JSON décodé, ou le
-    texte. Tous les refus passent AVANT la moindre requête."""
+    lanceur), routes filtrées. GET sans corps, POST JSON avec, PUT sur demande (WEB_CAO
+    écrit ses projets en PUT) ; DELETE jamais. Rend le JSON décodé, ou le texte. Tous les
+    refus passent AVANT la moindre requête."""
+    methode = methode or ("GET" if corps is None else "POST")
     base = ports_catalogue()
     if id_outil not in base:
         raise ErreurOutil("Outil inconnu : %s. Outils : %s." % (id_outil, ", ".join(base)))
     if not route_permise(route):
         raise ErreurOutil("Route refusée au MCP : " + route)
-    if id_outil == "web_suite" and corps is not None:
+    if methode not in ("GET", "POST", "PUT"):
+        raise ErreurOutil("Méthode refusée au MCP : %s %s" % (methode, route))
+    if id_outil == "web_suite" and methode != "GET":
         # Les POST du lanceur installent, lancent, arrêtent ou publient : le MCP ne fait que lire
         raise ErreurOutil("Le lanceur est en lecture seule pour le MCP : " + route)
     port = base[id_outil] if id_outil == "web_suite" else ports()[id_outil]
-    return _requete(port, nom_outil(id_outil), route, corps, delai)
+    return _requete(port, nom_outil(id_outil), route, corps, delai, methode)
 
 
-def _requete(port, nom, route, corps, delai):
+def _requete(port, nom, route, corps, delai, methode="GET"):
     """Requête HTTP en boucle locale, sans contrôle : passer par appeler_outil_web()."""
     donnees = None if corps is None else json.dumps(corps).encode("utf-8")
     requete = urllib.request.Request("http://127.0.0.1:%d%s" % (port, route), data=donnees,
-                                     headers={"Content-Type": "application/json"},
-                                     method="GET" if donnees is None else "POST")
+                                     headers={"Content-Type": "application/json"}, method=methode)
     try:
         with OUVREUR.open(requete, timeout=delai) as rep:
             brut, type_contenu = rep.read(), rep.headers.get("Content-Type") or ""
@@ -187,6 +190,12 @@ OUTILS_MCP = {
         "fn": lambda _args: etat_outils(),
     },
 }
+
+# Lancé en script, ce module s'appelle __main__ : sans cet alias, « import mcp_web_suite »
+# dans mcp_api_outils en chargerait une seconde copie.
+sys.modules.setdefault("mcp_web_suite", sys.modules[__name__])
+import mcp_api_outils  # noqa: E402
+OUTILS_MCP.update(mcp_api_outils.OUTILS_API)
 
 
 def initialiser(params):
