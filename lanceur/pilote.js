@@ -126,6 +126,7 @@
         const def = P.commandes[c.nom];
         if (!def) throw new Error("Commande « " + c.nom + " » inconnue de cette page (" + P.page + ").");
         if (def.ecriture) return ecrire(c, def, args);
+        tracer("Claude a lancé : " + c.nom);
         repondre(c.id, "finie", await def.executer(args));
       } catch (e) {
         repondre(c.id, "echouee", String((e && e.message) || e));
@@ -146,9 +147,132 @@
       return { image: toile.toDataURL("image/png"), largeur: toile.width, hauteur: toile.height };
     }
 
-    function ecrire(c) {
-      // Cartes, interrupteur et annulation : tâche 5 du plan
-      repondre(c.id, "echouee", "Les cartes de proposition ne sont pas encore branchées dans cette page.");
+    // -- écritures : carte, interrupteur, annulation ------------------------
+    function texte(v) { return typeof v === "string" ? v : JSON.stringify(v); }
+
+    function ecrire(c, def, args) {
+      const prop = def.proposer(args) || {};          // une exception remonte en « echouee »
+      const carte = { id: c.id, nom: c.nom, def, args, prop, etat: "proposee", jeton: undefined, apres: null };
+      if (P.interrupteur) {
+        appliquer(carte, true);
+      } else {
+        dessinerCarte(carte);
+        ouvrir(true);
+        repondre(c.id, "proposee");
+      }
+    }
+
+    function appliquer(carte, direct) {
+      try {
+        carte.jeton = carte.def.appliquer(carte.args);
+        if (carte.def.etat) carte.apres = texte(carte.def.etat());   // instantané : l'Annuler compare
+        carte.etat = "appliquee";
+        repondre(carte.id, "appliquee", { titre: texte(carte.prop.titre || carte.nom), avant: carte.prop.avant,
+                                          apres: carte.prop.apres, direct: !!direct });
+      } catch (e) {
+        carte.etat = "echouee";
+        carte.message = String((e && e.message) || e);
+        repondre(carte.id, "echouee", carte.message);
+      }
+      if (direct) carte.message = carte.message || "Appliquée directement (interrupteur allumé).";
+      dessinerCarte(carte);
+      replierPlusTard();
+    }
+
+    function refuser(carte) {
+      carte.etat = "refusee";
+      repondre(carte.id, "refusee");
+      dessinerCarte(carte);
+      replierPlusTard();
+    }
+
+    function annuler(carte) {
+      // Seulement si rien n'a bougé depuis : sinon on écraserait le travail fait entre-temps
+      if (texte(carte.def.etat()) !== carte.apres) {
+        carte.message = "L'état a changé depuis : annule plutôt avec Ctrl+Z dans l'éditeur.";
+      } else {
+        try { carte.def.annuler(carte.args, carte.jeton); carte.etat = "annulee"; carte.message = "Annulée."; }
+        catch (e) { carte.message = "Annulation impossible : " + ((e && e.message) || e); }
+      }
+      dessinerCarte(carte);
+    }
+
+    // -- panneau « Claude » (texte par textContent seulement : jamais d'innerHTML) --
+    let panneau = null, liste = null, minuteurRepli = null;
+    const cartesDom = new Map();
+
+    function el(tag, classe, contenu) {
+      const e = env.document.createElement(tag);
+      if (classe) e.className = classe;
+      if (contenu !== undefined) e.textContent = contenu;
+      return e;
+    }
+
+    function construire() {
+      if (panneau || !env.document || !env.document.body) return panneau;
+      panneau = el("aside", "pilote");
+      const tete = el("button", "pilote-tete", "Claude");
+      tete.type = "button";
+      tete.addEventListener("click", () => ouvrir(!panneau.classList.contains("ouvert")));
+      liste = el("div", "pilote-liste");
+      const pied = el("label", "pilote-pied");
+      const inter = el("input");
+      inter.type = "checkbox";
+      inter.checked = false;                          // éteint à chaque chargement (spec, décision 6)
+      inter.addEventListener("change", () => { P.interrupteur = !!inter.checked; if (P.relais) battre(false); });
+      pied.appendChild(inter);
+      pied.appendChild(el("span", "", "Appliquer directement (cet onglet)"));
+      panneau.appendChild(tete);
+      panneau.appendChild(liste);
+      panneau.appendChild(pied);
+      env.document.body.appendChild(panneau);
+      return panneau;
+    }
+
+    function ouvrir(oui) {
+      if (!construire()) return;
+      clearTimeout(minuteurRepli);
+      panneau.classList.toggle("ouvert", !!oui);
+    }
+
+    function replierPlusTard() {
+      if (!panneau) return;
+      clearTimeout(minuteurRepli);
+      const enAttente = [...cartesDom.values()].some(d => d.carte.etat === "proposee");
+      if (!enAttente) minuteurRepli = setTimeout(() => panneau.classList.remove("ouvert"), 4000);
+    }
+
+    function tracer(message) {
+      if (!construire()) return;
+      liste.appendChild(el("div", "pilote-trace", message));
+    }
+
+    function bouton(libelle, action) {
+      const b = el("button", "pilote-bouton", libelle);
+      b.type = "button";
+      b.addEventListener("click", action);
+      return b;
+    }
+
+    function dessinerCarte(carte) {
+      if (!construire()) return;
+      let d = cartesDom.get(carte.id);
+      if (!d) { d = { carte, noeud: el("div", "pilote-carte") }; cartesDom.set(carte.id, d); liste.appendChild(d.noeud); }
+      const n = d.noeud;
+      n.replaceChildren();
+      n.className = "pilote-carte " + carte.etat;
+      n.appendChild(el("div", "pilote-titre", texte(carte.prop.titre || carte.nom)));
+      if (carte.prop.avant !== undefined || carte.prop.apres !== undefined)
+        n.appendChild(el("div", "pilote-diff", texte(carte.prop.avant) + " → " + texte(carte.prop.apres)));
+      if (carte.prop.details) n.appendChild(el("div", "pilote-details", texte(carte.prop.details)));
+      if (carte.etat === "proposee") {
+        n.appendChild(bouton("Appliquer", () => appliquer(carte, false)));
+        n.appendChild(bouton("Refuser", () => refuser(carte)));
+      } else if (carte.etat === "appliquee") {
+        if (carte.def.annuler) n.appendChild(bouton("Annuler", () => annuler(carte)));
+        else n.appendChild(el("div", "pilote-aide", "Pour défaire : Ctrl+Z dans l'éditeur."));
+      }
+      if (carte.message) n.appendChild(el("div", "pilote-message", carte.message));
     }
 
     // -- API de la page ----------------------------------------------------
@@ -191,6 +315,7 @@
     };
 
     P.capture = function (fn) { P.capturer = fn; return P; };
+    P.replier = function () { ouvrir(false); };
     P.focaliser = function () { P.focus = Date.now(); if (P.relais) battre(false); };
 
     P.arreter = function () {

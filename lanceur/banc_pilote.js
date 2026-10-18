@@ -58,6 +58,33 @@ function stockagePartage() {
   return { getItem: k => (m.has(k) ? m.get(k) : null), setItem: (k, v) => m.set(k, String(v)) };
 }
 
+/* DOM factice : juste ce que pilote.js utilise. innerHTML lève une erreur : un texte venu
+   de Claude ne doit jamais être interprété comme du HTML. */
+function domFactice() {
+  class El {
+    constructor(tag) { this.tagName = tag; this.enfants = []; this.ecoutes = {}; this.texte = ""; this.classes = new Set();
+                       this.attributs = {}; this.style = {}; this.type = ""; this.checked = false; this.parent = null; }
+    set innerHTML(_) { throw new Error("innerHTML interdit"); }
+    set textContent(v) { this.texte = String(v); this.enfants = []; }
+    get textContent() { return this.texte + this.enfants.map(e => e.textContent).join(""); }
+    get className() { return [...this.classes].join(" "); }
+    set className(v) { this.classes = new Set(String(v).split(/\s+/).filter(Boolean)); }
+    get classList() { const c = this.classes; return { add: k => c.add(k), remove: k => c.delete(k), contains: k => c.has(k),
+                                                       toggle: (k, f) => ((f === undefined ? !c.has(k) : f) ? c.add(k) : c.delete(k)) }; }
+    appendChild(e) { if (e.parent) e.parent.enfants = e.parent.enfants.filter(x => x !== e); this.enfants.push(e); e.parent = this; return e; }
+    replaceChildren(...e) { this.enfants = []; e.forEach(x => this.appendChild(x)); }
+    remove() { if (this.parent) this.parent.enfants = this.parent.enfants.filter(x => x !== this); this.parent = null; }
+    setAttribute(k, v) { this.attributs[k] = String(v); }
+    addEventListener(t, f) { (this.ecoutes[t] = this.ecoutes[t] || []).push(f); }
+    dispatch(t) { (this.ecoutes[t] || []).forEach(f => f({ target: this })); }
+    click() { if (!this.disabled) this.dispatch("click"); }
+  }
+  return { body: new El("body"), createElement: t => new El(t) };
+}
+function trouver(el, test, acc = []) { if (test(el)) acc.push(el); el.enfants.forEach(e => trouver(e, test, acc)); return acc; }
+function texteDe(el) { return el.textContent; }
+function panneauOuvert(doc) { const p = trouver(doc.body, e => e.classes.has("pilote"))[0]; return !!p && p.classes.has("ouvert"); }
+
 function onglet(serveur, stockage, page, nomCanal) {
   return creer({ fetch: serveur.fetch, BroadcastChannel, stockage, canal: nomCanal }, REGLAGES).declarer({
     page, projet: () => "carte PIR" });
@@ -152,7 +179,91 @@ function onglet(serveur, stockage, page, nomCanal) {
     return b && b.onglets.length === 2 && !b.onglets.some(o => o.id === ancien.id);
   }, 2000, "battement sans l'onglet fermé");
 
-  restants.forEach(o => o.arreter());
+  // ---- Tâche 5 : panneau « Claude », cartes, interrupteur, annuler -----------------
+  const D = creer({ fetch: serveur.fetch, BroadcastChannel, stockage, canal, document: domFactice() }, REGLAGES)
+    .declarer({ page: "antenna", projet: () => "dipole" });
+  const etat = { v: "1" };
+  let annule = 0;
+  D.commande("regler", {
+    ecriture: true,
+    proposer: a => ({ titre: "<img src=x onerror=alert(1)>", avant: etat.v, apres: a.v }),
+    appliquer: a => { const avant = etat.v; etat.v = a.v; return avant; },
+    annuler: (a, avant) => { etat.v = avant; annule++; },
+    etat: () => etat.v,
+  });
+  const doc = D._env.document;
+  const boutons = () => trouver(doc.body, e => e.tagName === "button");
+  const bouton = texte => boutons().find(b => b.textContent === texte);
+  await attendreQue(() => restants.concat(D).some(o => o.relais), 2000, "relais avec D");
+
+  // Proposée : rien n'est appliqué avant le clic ; la carte montre le texte tel quel
+  id = serveur.deposer(D.id, "regler", { v: "2" }, true);
+  await attendreQue(() => serveur.reponsesDe(id).includes("proposee"), 2000, "carte proposée");
+  assert.strictEqual(etat.v, "1", "rien appliqué avant le clic");
+  assert.ok(texteDe(doc.body).includes("<img src=x onerror=alert(1)>"), "titre affiché tel quel");
+  assert.ok(texteDe(doc.body).includes("1") && texteDe(doc.body).includes("2"), "avant et après affichés");
+  assert.ok(panneauOuvert(doc), "le panneau s'ouvre à l'arrivée d'une carte");
+  bouton("Appliquer").click();
+  await attendreQue(() => serveur.finale(id), 2000, "appliquée");
+  assert.deepStrictEqual([serveur.finale(id).etat, etat.v], ["appliquee", "2"]);
+
+  // Annuler : refusé si l'état a bougé depuis ; accepté s'il est revenu tel qu'appliqué
+  etat.v = "3";
+  bouton("Annuler").click();
+  assert.deepStrictEqual([etat.v, annule], ["3", 0], "l'état a bougé : pas d'annulation");
+  assert.ok(/Ctrl\+Z|changé/.test(texteDe(doc.body)), "la carte dit pourquoi");
+  etat.v = "2";
+  bouton("Annuler").click();
+  assert.deepStrictEqual([etat.v, annule], ["1", 1], "annulé");
+
+  // Refusée : rien d'appliqué, « refusee » rendu
+  id = serveur.deposer(D.id, "regler", { v: "9" }, true);
+  await attendreQue(() => serveur.reponsesDe(id).includes("proposee"), 2000, "deuxième carte");
+  bouton("Refuser").click();
+  await attendreQue(() => serveur.finale(id), 2000, "refusée");
+  assert.deepStrictEqual([serveur.finale(id).etat, etat.v], ["refusee", "1"]);
+
+  // Interrupteur allumé : appliquée sans clic, la trace reste ; il est éteint au départ
+  const inter = trouver(doc.body, e => e.tagName === "input" && e.type === "checkbox")[0];
+  assert.ok(inter && inter.checked === false && D.interrupteur === false, "interrupteur éteint au chargement");
+  inter.checked = true;
+  inter.dispatch("change");
+  assert.strictEqual(D.interrupteur, true);
+  id = serveur.deposer(D.id, "regler", { v: "5" }, true);
+  await attendreQue(() => serveur.finale(id), 2000, "appliquée directement");
+  assert.deepStrictEqual([serveur.finale(id).etat, etat.v], ["appliquee", "5"]);
+  assert.ok(!serveur.reponsesDe(id).includes("proposee"), "pas de carte à valider");
+  assert.ok(/directement/.test(texteDe(doc.body)), "trace de l'application directe");
+  inter.checked = false;
+  inter.dispatch("change");
+
+  // Écriture par l'historique de l'éditeur : pas de bouton Annuler, renvoi au Ctrl+Z
+  let pousse = 0;
+  D.commande("valeur", { ecriture: true, historique: true, proposer: a => ({ titre: a.ref, avant: "1k", apres: a.v }),
+                         appliquer: () => { pousse++; } });
+  id = serveur.deposer(D.id, "valeur", { ref: "R1", v: "4k7" }, true);
+  await attendreQue(() => serveur.reponsesDe(id).includes("proposee"), 2000, "carte historique");
+  const avantClic = boutons().filter(b => b.textContent === "Annuler").length;
+  boutons().filter(b => b.textContent === "Appliquer").pop().click();
+  await attendreQue(() => serveur.finale(id), 2000, "historique appliquée");
+  assert.strictEqual(pousse, 1);
+  assert.strictEqual(boutons().filter(b => b.textContent === "Annuler").length, avantClic, "pas d'Annuler de carte");
+  assert.ok(/Ctrl\+Z/.test(texteDe(doc.body)), "renvoi au Ctrl+Z");
+
+  // Une proposition qui plante : échouée ; une lecture : trace, sans ouvrir le panneau
+  D.commande("casse", { ecriture: true, historique: true, proposer: () => { throw new Error("R99 introuvable"); },
+                        appliquer() {} });
+  id = serveur.deposer(D.id, "casse", {}, true);
+  await attendreQue(() => serveur.finale(id), 2000, "proposition qui plante");
+  assert.deepStrictEqual([serveur.finale(id).etat, serveur.finale(id).resultat], ["echouee", "R99 introuvable"]);
+  D.replier();
+  D.commande("lire", { executer: () => "ok" });
+  id = serveur.deposer(D.id, "lire");
+  await attendreQue(() => serveur.finale(id), 2000, "lecture");
+  assert.ok(/Claude a lancé : lire/.test(texteDe(doc.body)), "trace de la lecture");
+  assert.ok(!panneauOuvert(doc), "une lecture n'ouvre pas le panneau");
+
+  restants.concat(D).forEach(o => o.arreter());
   await pause(REGLAGES.attenteServeur + 50);
   console.log("OK");
   process.exit(0);

@@ -97,7 +97,7 @@ vrai BroadcastChannel de Node.
 
 **Dépendances :** T2 · **Fichiers :** `lanceur/pilote.js`, `lanceur/banc_pilote.js` · **Taille :** M
 
-## Tâche 5 : panneau « Claude », cartes, interrupteur, annuler
+## Tâche 5 : ✅ panneau « Claude », cartes, interrupteur, annuler
 
 **Description :**
 - `pilote.css` et le panneau, replié par défaut, qui s'ouvre à l'arrivée d'une carte ;
@@ -108,10 +108,10 @@ vrai BroadcastChannel de Node.
 - tout le texte passe par `textContent`.
 
 **Critères d'acceptation :**
-- [ ] Rien n'est appliqué avant le clic, et la réponse rendue est « refusée » sur un refus
-- [ ] Interrupteur allumé : la commande s'applique sans carte, mais la trace reste dans le
+- [x] Rien n'est appliqué avant le clic, et la réponse rendue est « refusée » sur un refus
+- [x] Interrupteur allumé : la commande s'applique sans carte, mais la trace reste dans le
       panneau
-- [ ] Un texte `<img onerror=…>` envoyé par Claude s'affiche tel quel, et rien n'est
+- [x] Un texte `<img onerror=…>` envoyé par Claude s'affiche tel quel, et rien n'est
       exécuté
 
 **Vérification :** `node lanceur/banc_pilote.js` OK
