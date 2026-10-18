@@ -6,7 +6,7 @@ Module précédent : [plan-mcp-noyau.md](plan-mcp-noyau.md) (sa tâche 4, l'essa
 
 ## Vue d'ensemble
 
-On ajoute 23 outils MCP nommés au serveur `lanceur/mcp_web_suite.py`. Ils lisent les
+On ajoute 24 outils MCP nommés au serveur `lanceur/mcp_web_suite.py`. Ils lisent les
 projets, la LIB, les profils, pcbparts et openEMS, et écrivent projets, LIB et profils avec
 des garde-fous. Tous passent par `appeler_outil_web()`. Le code est dans un fichier voisin,
 `lanceur/mcp_api_outils.py`, et les tests vont dans `lanceur/banc_mcp.py`.

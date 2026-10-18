@@ -486,5 +486,30 @@ outil("antenna_projets")
 outil("antenna_calculs")
 verifier("antenna_projets, antenna_calculs", [r[1] for r in FauxApi.recues], ["/api/projet", "/api/projet/calculs"])
 FauxApi.table.clear()
+
+# openEMS : chiffrer et suivre, jamais lancer ni arrêter
+FauxApi.recues.clear()
+modele = {"unite": "mm", "cuivre": []}
+for quoi in ("modele", "balayage", "tableau_s", "script"):
+    verifier("chiffrer %s" % quoi, outil("antenna_openems_chiffrer", quoi=quoi, document=modele)[0], False)
+verifier("routes de chiffrage", FauxApi.recues, [
+    ("POST", "/api/openems", modele), ("POST", "/api/openems/balayage", modele),
+    ("POST", "/api/openems/tableau-s", modele), ("POST", "/api/openems/script", modele)])
+FauxApi.recues.clear()
+for args in ({"quoi": "lancer", "document": modele}, {"quoi": "balayage/lancer", "document": modele},
+             {"quoi": "modele"}, {"quoi": "modele", "document": []}):
+    verifier("chiffrer refuse %r" % args, outil("antenna_openems_chiffrer", **args)[0], True)
+verifier("rien d'envoyé", FauxApi.recues, [])
+outil("antenna_openems_etat")
+outil("antenna_openems_suivre", id="a1b2 c3", depuis=3)
+outil("antenna_openems_suivre", id="a1b2c3")
+outil("antenna_openems_champs", id="a1b2c3")
+verifier("état, suivi, champs", [r[1] for r in FauxApi.recues], [
+    "/api/openems", "/api/openems/journal" + q(id="a1b2 c3", depuis=3), "/api/openems/journal" + q(id="a1b2c3"),
+    "/api/openems/champs" + q(id="a1b2c3")])
+verifier("suivre sans id refusé", outil("antenna_openems_suivre")[0], True)
+verifier("jamais lancer ni arrêter", [r for r in FauxApi.recues
+                                       if "lancer" in r[1] or "arreter" in r[1]], [])
+FauxApi.table.clear()
 os.environ["WEB_SUITE_MCP_PORTS"] = json.dumps(PORTS)
 print("OK")

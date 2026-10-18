@@ -150,21 +150,21 @@ champs d'en-tête absents repris du projet ouvert, car le serveur les remet à v
 
 **Taille :** S
 
-## Tâche 7 : openEMS, chiffrer et suivre
+## Tâche 7 : ✅ openEMS, chiffrer et suivre
 
 **Description :** ajouter `antenna_openems_etat`, `antenna_openems_chiffrer` (`quoi` ∈
 `modele` → `/api/openems`, `balayage`, `tableau_s` → `/api/openems/tableau-s`, `script`),
 `antenna_openems_suivre` (`id`, `depuis`) et `antenna_openems_champs`.
 
 **Critères d'acceptation :**
-- [ ] Chaque valeur de `quoi` atteint la bonne route en POST ; une autre valeur (dont
+- [x] Chaque valeur de `quoi` atteint la bonne route en POST ; une autre valeur (dont
       `lancer`) est refusée sans requête
-- [ ] Aucune route en `…/lancer` ou `…/arreter` n'est jamais atteinte (le banc parcourt
+- [x] Aucune route en `…/lancer` ou `…/arreter` n'est jamais atteinte (le banc parcourt
       les requêtes notées)
-- [ ] `suivre` passe `id` et `depuis` dans l'URL, encodés
+- [x] `suivre` passe `id` et `depuis` dans l'URL, encodés
 
 **Vérification :**
-- [ ] `python lanceur/banc_mcp.py` OK
+- [x] `python lanceur/banc_mcp.py` OK
 
 **Dépendances :** tâche 2
 

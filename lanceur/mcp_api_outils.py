@@ -13,6 +13,9 @@ PLAFOND = 100 * 1024   # octets de JSON rendus à Claude ; au-delà, un résumé
 DOCS_CAO = ("schema", "pcb", "ipc2581")
 TYPES_LIB = ("pcb", "schematique", "simulation")
 # En-tête d'un projet WEB_ANTENNA : absent, le serveur le remet à vide (projet.py:438-446)
+# Chiffrer sans lancer : jamais les routes « …/lancer » (le Pi calcule des heures)
+CHIFFRAGES = {"modele": "/api/openems", "balayage": "/api/openems/balayage",
+              "tableau_s": "/api/openems/tableau-s", "script": "/api/openems/script"}
 TETE_ANTENNA = ("titre", "outil", "source", "fichier", "dessin", "antenne", "affichage")
 SOLVEURS = {"simulation": "/api/simulation", "simulation_dc": "/api/simulation-dc",
             "crosstalk": "/api/crosstalk", "simulation_rf": "/api/simulation-rf", "oeil": "/api/oeil",
@@ -256,6 +259,20 @@ def antenna_projet_enregistrer(args):
     return noyau.appeler_outil_web("web_antenna", "/api/projet/enregistrer", projet)
 
 
+def antenna_openems_chiffrer(args):
+    quoi, document = exiger(args, quoi=str, document=dict)
+    if quoi not in CHIFFRAGES:
+        raise noyau.ErreurOutil("Argument « quoi » invalide : %s attendu. Le MCP ne lance pas de calcul."
+                                % ", ".join(CHIFFRAGES))
+    return resumer(noyau.appeler_outil_web("web_antenna", CHIFFRAGES[quoi], document), "Réponse trop grosse.")
+
+
+def antenna_openems_suivre(args):
+    id_ = exiger(args, id=str)
+    depuis = facultatif(args, "depuis", int, None)
+    return lire("web_antenna", "/api/openems/journal", "Journal trop gros : passe « depuis ».", id=id_, depuis=depuis)
+
+
 CHEMIN = {"type": "string", "description": "Chemin du projet, tel que rendu par cao_projets."}
 RACINE = {"type": "string", "description": "Racine du projet (champ « racine » de cao_projets) ; facultatif."}
 
@@ -404,5 +421,38 @@ OUTILS_API = {
         "description": "Liste les calculs openEMS rangés dans le projet ouvert de WEB_ANTENNA.",
         "inputSchema": {"type": "object", "properties": {}},
         "fn": lambda _a: lire("web_antenna", "/api/projet/calculs"),
+    },
+    "antenna_openems_etat": {
+        "description": "État d'openEMS dans WEB_ANTENNA : préparer, lancer, script, visionneuse "
+                       "disponibles ou non, fils de calcul, solveur.",
+        "inputSchema": {"type": "object", "properties": {}},
+        "fn": lambda _a: lire("web_antenna", "/api/openems"),
+    },
+    "antenna_openems_chiffrer": {
+        "description": "Vérifie et chiffre un modèle d'antenne openEMS sans rien lancer : « modele » "
+                       "(modèle complété, estimation, avis), « balayage » (points d'un balayage "
+                       "paramétrique), « tableau_s » (matrice S complète), « script » (script Python "
+                       "autonome). Lancer reste à faire depuis la page.",
+        "inputSchema": {"type": "object", "properties": {
+            "quoi": {"type": "string", "enum": list(CHIFFRAGES)},
+            "document": {"type": "object", "description": "Document antenne (unite, empilage, cuivre, "
+                                                          "ports, bande…), tel que dans le projet."}},
+            "required": ["quoi", "document"]},
+        "fn": antenna_openems_chiffrer,
+    },
+    "antenna_openems_suivre": {
+        "description": "Suit un calcul openEMS lancé depuis la page : état (prepare, calcule, fini, "
+                       "echoue, arrete), avancement, nouvelles lignes du journal depuis « depuis », "
+                       "et le résultat quand il est fini.",
+        "inputSchema": {"type": "object", "properties": {
+            "id": {"type": "string", "description": "Identifiant de la tâche."},
+            "depuis": {"type": "integer", "minimum": 0, "description": "Lignes déjà lues (« n »)."}},
+            "required": ["id"]},
+        "fn": antenna_openems_suivre,
+    },
+    "antenna_openems_champs": {
+        "description": "Inventaire des champs (.vtr) d'un calcul openEMS fini : séries disponibles.",
+        "inputSchema": {"type": "object", "properties": {"id": {"type": "string"}}, "required": ["id"]},
+        "fn": lambda a: lire("web_antenna", "/api/openems/champs", id=exiger(a, id=str)),
     },
 }
