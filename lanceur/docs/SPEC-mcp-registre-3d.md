@@ -89,7 +89,7 @@ importé par `09-demarrage.js`. Côté MCP, elles vivent dans `lanceur/mcp_regis
    Une erreur de lecture du fichier remonte en échec lisible.
 8. Les valeurs suivantes viennent du banc (exemple `assemblage-as1.stp`) :
    - 18 pièces ;
-   - 2 collisions bolt ↔ l-bracket ;
+   - les collisions exactement celles de `chercherCollisions` (22 sur l'exemple : vis et tiges serrées dans leurs perçages, 1,8 s sur le Pi) ;
    - une distance pièce-pièce identique à `mesurerEntites` ;
    - un déplacement puis Annuler qui redonne les matrices d'origine au bit près ;
    - un STEP de pièce relu par OpenCascade, qui donne une pièce.

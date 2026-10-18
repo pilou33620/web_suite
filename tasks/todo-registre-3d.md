@@ -35,7 +35,7 @@ OCCT, en fonction pure exportée.
 **Critères d'acceptation :**
 - [x] 18 pièces décrites (uuid, chemin, nom, parent, visible, triangles), et un fichier
       avec position et rotation
-- [x] Le chemin et l'uuid retrouvent la même pièce ; « nut » est refusé avec la liste des 7
+- [x] Le chemin et l'uuid retrouvent la même pièce ; « nut » est refusé avec la liste des 8
       candidates ; une référence inconnue est refusée
 - [x] La sortie est du JSON pur (aller-retour `JSON.parse(JSON.stringify(x))` identique) ;
       `filtre` et pagination marchent
@@ -48,7 +48,7 @@ OCCT, en fonction pure exportée.
 - [ ] Bancs verts (lanceur, WEB_3D)
 - [ ] Revue avec toi
 
-## Tâche 3 : mesures et cote
+## Tâche 3 : ✅ mesures et cote
 
 **Description :**
 - `dimensions(objet)` : boîte, volume, surface, nombre de pièces ;
@@ -58,26 +58,26 @@ OCCT, en fonction pure exportée.
 - `coteClaude(p1, p2, texte)` : un groupe three.js à poser dans `vue.annotations`.
 
 **Critères d'acceptation :**
-- [ ] Dimensions de l'assemblage = boîte attendue par `banc-exemples` (200 × 150 × 84) ;
+- [x] Dimensions de l'assemblage = boîte attendue par `banc-exemples` (200 × 150 × 84) ;
       volume et surface positifs pour une pièce
-- [ ] La distance entre deux pièces vaut celle de `mesurerEntites` ; elle est nulle pour
+- [x] La distance entre deux pièces vaut celle de `mesurerEntites` ; elle est nulle pour
       deux pièces en contact
-- [ ] `faces` d'une vis rend au moins un cylindre, avec son rayon ; un index se retrouve
+- [x] `faces` d'une vis rend au moins un cylindre, avec son rayon ; un index se retrouve
       d'un appel à l'autre
 
 **Vérification :** `node test/banc-pilote-3d.mjs`
 
 **Dépendances :** T2 · **Fichiers :** `js/14-pilote-3d.js`, `test/banc-pilote-3d.mjs` · **Taille :** S
 
-## Tâche 4 : collisions
+## Tâche 4 : ✅ collisions
 
 **Description :** `collisions(modele, {tolerance})` sur `chercherCollisions`, résultat
 sérialisé : couples (uuid, nom), longueur des courbes, durée. Les préférences ne sont pas
 touchées.
 
 **Critères d'acceptation :**
-- [ ] L'exemple donne 2 collisions bolt ↔ l-bracket (comme `banc-exemples`)
-- [ ] Les pièces masquées sont ignorées
+- [x] L'exemple donne les collisions de `chercherCollisions` (22 : vis et tiges dans leurs perçages ; le « 2 » de l'exploration n'était pas mesuré sur la vraie scène)
+- [x] Les pièces masquées sont ignorées
 
 **Vérification :** `node test/banc-pilote-3d.mjs`
 
