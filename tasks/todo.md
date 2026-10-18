@@ -222,7 +222,7 @@ Chromium
 - la carte `SPEC-mcp.md`.
 
 **Critères d'acceptation :**
-- [ ] CI de web_suite verte après le push des quatre dépôts
+- [x] CI de web_suite verte après le push des quatre dépôts (et celles des trois outils)
 - [x] Documentation à jour
 
 **Dépendances :** T6 à T10 · **Fichiers :** `.github/workflows/ci.yml`, `lanceur/docs/DETAILS.md`, `README.md`, `lanceur/docs/SPEC-mcp.md` · **Taille :** S
