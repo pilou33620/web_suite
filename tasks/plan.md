@@ -113,7 +113,7 @@ T1 vérifications ──▶ T2 pilote.py (serveur + auto-test)
 | `innerHTML` avec un texte venu de Claude dans les cartes | Élevé : XSS | Cartes construites par `textContent` et `createElement` seulement ; vérifié par le banc Node |
 | Quatre dépôts touchés, commits croisés | Moyen | Un commit par dépôt et par tâche ; le lanceur d'abord, les outils ensuite ; la CI des copies en dernier (T11) pour ne pas rester rouge entre deux tâches |
 | Deux origines différentes pour un même outil (`localhost` et l'adresse IP) | Faible | Chacune a son relais : deux navigateurs logiques. C'est accepté |
-| Chromium headless se bloque sur le Pi (vu à la tâche 1), et Playwright n'y est pas installé | Élevé pour T12 | Avant T6, trouver un navigateur pilotable : réglages de Chromium, ou Playwright par npm avec son propre Chromium arm64 (te demander avant d'installer). Sinon, l'essai réel se fait à la main, avec toi |
+| Chromium headless se bloquait sur le Pi | Résolu | La cause est D-Bus : lancer Chromium avec `DBUS_SESSION_BUS_ADDRESS=disabled:`. Pour T12, piloter Chromium par `--remote-debugging-port` (CDP) depuis Node 20 (`node --experimental-websocket`) ; Playwright n'est pas nécessaire |
 
 ## Questions ouvertes
 

@@ -265,7 +265,8 @@ Pilote.commande("cao_valeur_composant", {
    repère sans tenir compte de la casse dans `S.comps` puis dans `S.pages[].comps`, passe
    par `reshapeComp` quand la définition a des broches calculées, puis appelle
    `buildList`, `refreshPanels` et `draw`.
-5. **Contexte non sécurisé** : `navigator.locks` et `crypto.randomUUID` n'existent qu'en
-   HTTPS ou sur localhost (documentation MDN), et `BroadcastChannel` partout. Ce n'est
-   pas vérifié en vrai : Chromium headless se bloque sur le Pi. D'où l'élection par
-   BroadcastChannel (décision 8).
+5. **Contexte non sécurisé** (vérifié le 2026-10-18, Chromium 155 sur le Pi). Sur
+   `http://192.168.1.31`, la page n'est pas en contexte sécurisé : `navigator.locks` et
+   `crypto.randomUUID` valent `undefined`. `BroadcastChannel`, `crypto.getRandomValues` et
+   `localStorage` sont présents. Sur `http://127.0.0.1`, tout est présent. D'où
+   l'élection par BroadcastChannel (décision 8).
