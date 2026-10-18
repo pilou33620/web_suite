@@ -60,3 +60,4 @@ dans ce dossier. Les ids ne changent plus.
 - [x] `mcp-noyau` : [SPEC-mcp-noyau.md](SPEC-mcp-noyau.md)
 - [x] `api-outils` : [SPEC-mcp-api-outils.md](SPEC-mcp-api-outils.md)
 - [x] `canal-pilote` : [SPEC-mcp-canal-pilote.md](SPEC-mcp-canal-pilote.md)
+- [x] `registre-3d` : [SPEC-mcp-registre-3d.md](SPEC-mcp-registre-3d.md)

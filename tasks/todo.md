@@ -69,8 +69,8 @@ rapide, puis corriger la spec.
 **Dépendances :** T2 · **Fichiers :** `lanceur/mcp_pilote.py`, `lanceur/mcp_web_suite.py`, `lanceur/banc_mcp.py` · **Taille :** M
 
 ## Checkpoint : socle
-- [ ] Bancs du lanceur verts
-- [ ] Revue avec toi (avec les réponses de la tâche 1)
+- [x] Bancs du lanceur verts
+- [x] Revue avec toi (avec les réponses de la tâche 1)
 
 ## Tâche 4 : ✅ `lanceur/pilote.js` : relais, long-poll, registre
 
@@ -119,8 +119,8 @@ vrai BroadcastChannel de Node.
 **Dépendances :** T4 · **Fichiers :** `lanceur/pilote.js`, `lanceur/pilote.css`, `lanceur/banc_pilote.js` · **Taille :** M
 
 ## Checkpoint : canal complet
-- [ ] `banc_pilote.js` et `banc_mcp.py` verts
-- [ ] Revue avec toi
+- [x] `banc_pilote.js` et `banc_mcp.py` verts
+- [x] Revue avec toi
 
 ## Tâche 6 : ✅ WEB_CAO : branchement, pages, captures
 
@@ -210,8 +210,8 @@ Chromium
 **Dépendances :** T3, T5 · **Fichiers :** WEB_3D : `pilote.py`, `js/pilote.js`, `css/pilote.css`, `web_3D.py`, `index.html`, `js/09-demarrage.js` · **Taille :** S
 
 ## Checkpoint : outils branchés
-- [ ] Bancs de chaque dépôt verts
-- [ ] Revue avec toi
+- [x] Bancs de chaque dépôt verts
+- [x] Revue avec toi
 
 ## Tâche 11 : ✅ CI des copies et documentation
 
