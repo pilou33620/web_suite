@@ -46,7 +46,7 @@ def etat_rendu(id_outil, vue):
     if etat == "refusee":
         vue["detail"] = "Refusée par l'utilisateur dans la page : rien n'a été modifié."
     elif etat not in ("appliquee", "finie"):
-        vue["detail"] = ("Pas encore de réponse de la page (une carte attend peut-être un clic) : "
+        vue["detail"] = ("Pas encore de réponse de la page (calcul en cours, ou carte qui attend un clic) : "
                          "suis-la avec pilote_suivre(outil=%s, id=%s)." % (id_outil, vue.get("id")))
         vue["etat_page"], vue["etat"] = etat, "en_attente"
     return vue

@@ -182,7 +182,7 @@ appelle `POST /api/projets` (`X-Web3D: 1`) depuis la page, puis rend le chemin c
 web3d_*) ; la carte `SPEC-mcp.md`.
 
 **Critères d'acceptation :**
-- [ ] CI verte dans les dépôts touchés (web_suite, WEB_CAO, WEB_ANTENNA, WEB_3D)
+- [x] CI verte dans les dépôts touchés (web_suite, WEB_CAO, WEB_ANTENNA, WEB_3D)
 - [x] Documentation à jour
 
 **Dépendances :** T9 · **Fichiers :** `WEB_3D/.github/workflows/ci.yml`, `lanceur/docs/DETAILS.md`, `lanceur/docs/SPEC-mcp.md` · **Taille :** XS
@@ -203,8 +203,8 @@ dans Chromium (SwiftShader) sur le Pi. Dérouler, par le MCP :
 Puis `/review` et l'audit de sécurité.
 
 **Critères d'acceptation :**
-- [ ] Tous les essais passent ; PROJETS reste intact ; le ralentissement en onglet caché
-      est mesuré et, s'il le faut, signalé
+- [x] Tous les essais passent ; PROJETS reste intact ; le ralentissement en onglet caché
+      est mesuré (collisions 127 s → 4,5 s une fois calculées d'un bloc ; ouverture 10,9 s, non ralentie)
 - [ ] `/review` fait, corrections appliquées
 
 **Dépendances :** T10 · **Taille :** M

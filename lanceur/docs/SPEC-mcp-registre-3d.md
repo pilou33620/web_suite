@@ -95,7 +95,7 @@ importé par `09-demarrage.js`. Côté MCP, elles vivent dans `lanceur/mcp_regis
    Une erreur de lecture du fichier remonte en échec lisible.
 8. Les valeurs suivantes viennent du banc (exemple `assemblage-as1.stp`) :
    - 18 pièces ;
-   - les collisions exactement celles de `chercherCollisions` (22 sur l'exemple : vis et tiges serrées dans leurs perçages, 1,8 s sur le Pi) ;
+   - les collisions exactement celles de `chercherCollisions` (2 vis ↔ équerre sur l'exemple, lu avec les réglages de maillage de la page) ;
    - une distance pièce-pièce identique à `mesurerEntites` ;
    - un déplacement puis Annuler qui redonne les matrices d'origine au bit près ;
    - un STEP de pièce relu par OpenCascade, qui donne une pièce.
@@ -186,9 +186,10 @@ export function trouverPiece(modele, ref){
 
 ## Questions tranchées (2026-10-18)
 
-1. **Onglet caché** : le ralentissement est mesuré à l'essai réel. S'il est lent, le
-   résultat le dit (« onglet caché, calcul ralenti »), et l'appel bascule en « en_attente »
-   au-delà de 2 min.
+1. **Onglet caché** : mesuré à l'essai réel (tâche 11). Les collisions passaient de 3,4 s
+   (visible) à 127 s (caché), parce que Chrome retarde chaque pause d'au moins une seconde.
+   Choix fait : dans un onglet caché, le calcul se fait **d'un bloc** (4,5 s), et le résultat
+   le dit. L'ouverture d'un STEP n'est pas ralentie (10,9 s, cachée comme visible).
 2. **Cote affichée** : l'adaptateur pose **sa propre cote** (ligne et étiquette dans
    `vue.annotations`), effacée au prochain `web3d_mesurer` ou par `effacer: true`. L'outil
    Mesure de la page n'est pas touché.

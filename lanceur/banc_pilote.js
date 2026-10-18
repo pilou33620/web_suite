@@ -340,6 +340,14 @@ function onglet(serveur, stockage, page, nomCanal) {
   await attendreQue(() => serveur.finale(id), 2000, "réussite asynchrone");
   assert.deepStrictEqual([serveur.finale(id).etat, appels], ["appliquee", 1], "appliquée une seule fois");
 
+  // Un seul côté donné (avant sans après) : pas de « → undefined » sur la carte
+  D.commande("un_seul", { ecriture: true, historique: true, proposer: () => ({ titre: "un côté", avant: "position 0 ; 0 ; 0" }),
+                         appliquer() {} });
+  id = serveur.deposer(D.id, "un_seul", {}, true);
+  await attendreQue(() => serveur.reponsesDe(id).includes("proposee"), 2000, "carte à un côté");
+  assert.ok(!/undefined/.test(texteDe(doc.body)) && /position 0 ; 0 ; 0/.test(texteDe(doc.body)));
+  boutons().filter(b => b.textContent === "Refuser").pop().click();
+
   // proposer peut être asynchrone aussi (lire une liste avant de montrer la carte)
   D.commande("lister", { ecriture: true, historique: true,
                          proposer: async a => { await pause(30); if (!a.ok) throw new Error("liste illisible"); return { titre: "liste lue" }; },
