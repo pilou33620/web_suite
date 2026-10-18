@@ -176,14 +176,14 @@ appelle `POST /api/projets` (`X-Web3D: 1`) depuis la page, puis rend le chemin c
 
 **Dépendances :** T8 (noms des commandes) · **Fichiers :** `lanceur/mcp_registre_3d.py`, `lanceur/mcp_web_suite.py`, `lanceur/banc_mcp.py` · **Taille :** S
 
-## Tâche 10 : CI et documentation
+## Tâche 10 : ✅ CI et documentation
 
 **Description :** `node test/banc-pilote-3d.mjs` dans la CI de WEB_3D ; DETAILS.md (outils
 web3d_*) ; la carte `SPEC-mcp.md`.
 
 **Critères d'acceptation :**
 - [ ] CI verte dans les dépôts touchés (web_suite, WEB_CAO, WEB_ANTENNA, WEB_3D)
-- [ ] Documentation à jour
+- [x] Documentation à jour
 
 **Dépendances :** T9 · **Fichiers :** `WEB_3D/.github/workflows/ci.yml`, `lanceur/docs/DETAILS.md`, `lanceur/docs/SPEC-mcp.md` · **Taille :** XS
 

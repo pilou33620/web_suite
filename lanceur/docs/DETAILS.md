@@ -188,6 +188,12 @@ Outils MCP (`etat` dans `mcp_web_suite.py`, les autres dans `mcp_api_outils.py`,
   ce poste et les appareils appairés), `pilote_capture` (image du canevas), `pilote_suivre`,
   `cao_calcul` (lance une analyse dans la page PCB ou la visionneuse et rend son rapport),
   `cao_valeur_composant` (schéma), `antenna_proposer` (cartes de l'assistant ANTENNA).
+- Page WEB_3D (`mcp_registre_3d.py`, voir [SPEC-mcp-registre-3d.md](SPEC-mcp-registre-3d.md)) :
+  `web3d_scene` (fichiers et pièces : uuid, chemin, nom), `web3d_vue` (vue standard, cadrage,
+  capture), `web3d_visibilite`, `web3d_coupe`, `web3d_mesurer` (dimensions, distance avec cote,
+  faces), `web3d_collisions` ; en carte : `web3d_ouvrir` (fichiers de PROJETS/3D, annulable),
+  `web3d_deplacer` (translation, rotation, contraintes, annulable), `web3d_ranger_step` (STEP
+  d'une pièce rangé dans PROJETS/3D, jamais d'écrasement, non annulable).
 
 **Le panneau « Claude ».** Chaque page des outils a, en bas à droite, un bouton « Claude ».
 Une écriture proposée par Claude s'y affiche en carte, avant → après, avec Appliquer et
