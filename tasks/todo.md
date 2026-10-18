@@ -81,7 +81,7 @@ réduits à leurs noms), `cao_profils`, `cao_profil_lire`, `lib_fichiers`, `lib_
 
 **Taille :** S
 
-## Tâche 4 : écritures CAO gardées
+## Tâche 4 : ✅ écritures CAO gardées
 
 **Description :** ajouter `cao_doc_ecrire` (PUT, `modifie` obligatoire, un 409 rendu en
 « le fichier a changé, relis-le » ; seulement si la tâche 1 le garde), `cao_profil_ecrire`
@@ -89,13 +89,13 @@ réduits à leurs noms), `cao_profils`, `cao_profil_lire`, `lib_fichiers`, `lib_
 existe).
 
 **Critères d'acceptation :**
-- [ ] Une écriture permise atteint sa route avec la bonne méthode et le bon corps
-- [ ] Un `modifie` absent, un profil existant ou un fichier LIB existant donnent `isError`,
+- [x] Une écriture permise atteint sa route avec la bonne méthode et le bon corps
+- [x] Un `modifie` absent, un profil existant ou un fichier LIB existant donnent `isError`,
       et **aucune** écriture n'arrive au faux outil (au plus la lecture de contrôle)
-- [ ] Un 409 du faux outil revient sous forme de message lisible
+- [x] Un 409 du faux outil revient sous forme de message lisible
 
 **Vérification :**
-- [ ] `python lanceur/banc_mcp.py` OK
+- [x] `python lanceur/banc_mcp.py` OK
 
 **Dépendances :** tâches 1 et 3
 

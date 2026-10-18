@@ -40,6 +40,10 @@ OUVREUR = urllib.request.build_opener(urllib.request.ProxyHandler({}))
 class ErreurOutil(Exception):
     """Refus ou panne d'un appel à un outil : message lisible, rendu tel quel à Claude."""
 
+    def __init__(self, message, code=None):
+        super().__init__(message)
+        self.code = code   # statut HTTP, quand l'outil a répondu (409 : conflit d'écriture)
+
 
 class OutilArrete(ErreurOutil):
     pass
@@ -148,7 +152,8 @@ def _requete(port, nom, route, corps, delai, methode="GET"):
         # Réponse qui n'est pas du HTTP : un autre service occupe le port, pas notre outil
         raise OutilArrete("%s ne tourne pas : le port %d est occupé par un autre service." % (nom, port))
     except urllib.error.HTTPError as exc:
-        raise ErreurOutil("%s a répondu %d : %s" % (nom, exc.code, exc.read()[:300].decode("utf-8", "replace")))
+        raise ErreurOutil("%s a répondu %d : %s" % (nom, exc.code, exc.read()[:300].decode("utf-8", "replace")),
+                          exc.code)
     except urllib.error.URLError as exc:
         if isinstance(exc.reason, (socket.timeout, TimeoutError)):
             raise ErreurOutil("%s ne répond pas en %d s." % (nom, delai))

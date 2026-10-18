@@ -404,5 +404,45 @@ verifier("trouvés après filtre", page["trouves"], 60)
 for args in ({"nombre": 0}, {"debut": -1}, {"colonnes": "ref"}):
     verifier("lib_composants refuse %r" % args, outil("lib_composants", **args)[0], True)
 FauxApi.table.clear()
+
+# Écritures CAO gardées : aucune écriture n'atteint l'outil quand un garde-fou refuse
+ecritures = lambda: [r for r in FauxApi.recues if r[0] != "GET"]   # noqa: E731
+FauxApi.recues.clear()
+doc = {"pistes": [[0, 0]]}
+verifier("cao_doc_ecrire", outil("cao_doc_ecrire", chemin="p", doc="pcb", document=doc, modifie=123)[0], False)
+verifier("PUT du document avec modifie", FauxApi.recues,
+         [("PUT", "/api/projet/doc" + q(chemin="p", doc="pcb", modifie=123), doc)])
+FauxApi.recues.clear()
+for args in ({"chemin": "p", "doc": "pcb", "document": doc},                     # pas de modifie
+             {"chemin": "p", "doc": "autre", "document": doc, "modifie": 1},
+             {"chemin": "p", "doc": "pcb", "document": "texte", "modifie": 1}):
+    verifier("cao_doc_ecrire refuse %r" % sorted(args), outil("cao_doc_ecrire", **args)[0], True)
+verifier("aucune écriture refusée envoyée", FauxApi.recues, [])
+FauxApi.table[("PUT", "/api/projet/doc")] = (409, {"detail": "modifié ailleurs"})
+erreur, texte = outil("cao_doc_ecrire", chemin="p", doc="pcb", document=doc, modifie=1)
+verifier("409 lisible", (erreur, "relis" in texte), (True, True))
+
+FauxApi.table[("GET", "/api/profils")] = (200, {"profils": [{"nom": "JLC 4c", "t": 1}]})
+FauxApi.table[("GET", "/api/lib/fichiers")] = (200, {"pcb": ["R0603.json"], "schematique": [], "simulation": []})
+FauxApi.recues.clear()
+profil = {"format": "cao-profil-1", "couches": 4}
+for nom, args in (("cao_profil_ecrire", {"nom": "jlc   4C", "profil": profil}),      # même nom, normalisé
+                  ("cao_profil_ecrire", {"nom": "neuf", "profil": "texte"}),
+                  ("lib_fichier_ecrire", {"type": "pcb", "nom": "r0603.json", "data": {}}),
+                  ("lib_fichier_ecrire", {"type": "pcb", "nom": "x\\R0603.json", "data": {}}),
+                  ("lib_fichier_ecrire", {"type": "pcb", "nom": "neuf.json"}),           # ni data ni contenu
+                  ("lib_fichier_ecrire", {"type": "pcb", "nom": "neuf.json", "data": {}, "contenu": "x"}),
+                  ("lib_fichier_ecrire", {"type": "autre", "nom": "neuf.json", "data": {}})):
+    verifier("%s refuse %r" % (nom, args), outil(nom, **args)[0], True)
+verifier("aucune écriture refusée envoyée (bis)", ecritures(), [])
+FauxApi.recues.clear()
+verifier("profil neuf", outil("cao_profil_ecrire", nom="neuf", profil=profil)[0], False)
+verifier("fichier LIB neuf", outil("lib_fichier_ecrire", type="pcb", nom="C0402.json", data={"a": 1})[0], False)
+verifier("fichier LIB texte", outil("lib_fichier_ecrire", type="simulation", nom="m.sub", contenu="* x")[0], False)
+verifier("écritures permises", ecritures(), [
+    ("PUT", "/api/profil" + q(nom="neuf"), profil),
+    ("POST", "/api/lib/fichier", {"type": "pcb", "nom": "C0402.json", "data": {"a": 1}}),
+    ("POST", "/api/lib/fichier", {"type": "simulation", "nom": "m.sub", "contenu": "* x"})])
+FauxApi.table.clear()
 os.environ["WEB_SUITE_MCP_PORTS"] = json.dumps(PORTS)
 print("OK")

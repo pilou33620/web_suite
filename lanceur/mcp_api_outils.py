@@ -151,6 +151,53 @@ def lib_composants(args):
                    "Page trop grosse : baisse « nombre » ou choisis des « colonnes ».")
 
 
+def deja_la(nom, existants):
+    """Le nom figure-t-il déjà parmi les existants ? Sans casse : sous Windows, R0603 et
+    r0603 sont le même fichier ; mieux vaut refuser un nom de trop qu'écraser."""
+    return nom.lower() in {str(e).lower() for e in existants}
+
+
+def cao_doc_ecrire(args):
+    chemin, doc, document, modifie = exiger(args, chemin=str, doc=str, document=dict, modifie=int)
+    racine = facultatif(args, "racine", str, None)
+    if doc not in DOCS_CAO:
+        raise noyau.ErreurOutil("Argument « doc » invalide : %s attendu." % ", ".join(DOCS_CAO))
+    # « modifie » obligatoire : sans lui, WEB_CAO écrase sans contrôle de conflit
+    try:
+        return noyau.appeler_outil_web("web_cao", route("/api/projet/doc", chemin=chemin, racine=racine, doc=doc,
+                                                         modifie=modifie), document, methode="PUT")
+    except noyau.ErreurOutil as exc:
+        if exc.code == 409:
+            raise noyau.ErreurOutil("Le fichier a changé depuis ta lecture (la page l'a peut-être "
+                                    "enregistré) : relis-le avec cao_doc_lire avant de réécrire.")
+        raise
+
+
+def cao_profil_ecrire(args):
+    nom, profil = exiger(args, nom=str, profil=dict)
+    nom = " ".join(nom.split())   # comme nom_profil() de WEB_CAO
+    existants = noyau.appeler_outil_web("web_cao", "/api/profils").get("profils") or []
+    if deja_la(nom, [p.get("nom") for p in existants if isinstance(p, dict)]):
+        raise noyau.ErreurOutil("Le profil « %s » existe déjà : le MCP n'écrase pas. Choisis un autre nom." % nom)
+    return noyau.appeler_outil_web("web_cao", route("/api/profil", nom=nom), profil, methode="PUT")
+
+
+def lib_fichier_ecrire(args):
+    type_, nom = exiger(args, type=str, nom=str)
+    if type_ not in TYPES_LIB:
+        raise noyau.ErreurOutil("Argument « type » invalide : %s attendu." % ", ".join(TYPES_LIB))
+    data, contenu = args.get("data"), facultatif(args, "contenu", str, None)
+    if (data is None) == (contenu is None) or not isinstance(data, (dict, list, type(None))):
+        raise noyau.ErreurOutil("Donne soit « data » (objet ou liste JSON), soit « contenu » (texte), pas les deux.")
+    base = nom.strip().replace("\\", "/").rsplit("/", 1)[-1]   # WEB_CAO ne garde que le nom de base
+    existants = noyau.appeler_outil_web("web_cao", "/api/lib/fichiers").get(type_) or []
+    if deja_la(base, existants):
+        raise noyau.ErreurOutil("« %s » existe déjà dans la LIB (%s) : le MCP n'écrase pas." % (base, type_))
+    corps = {"type": type_, "nom": nom}
+    corps.update({"data": data} if data is not None else {"contenu": contenu})
+    return noyau.appeler_outil_web("web_cao", "/api/lib/fichier", corps)
+
+
 CHEMIN = {"type": "string", "description": "Chemin du projet, tel que rendu par cao_projets."}
 RACINE = {"type": "string", "description": "Racine du projet (champ « racine » de cao_projets) ; facultatif."}
 
@@ -230,5 +277,34 @@ OUTILS_API = {
         "description": "Liste les fichiers 3D (STEP, STL…) rangés dans les projets WEB_3D.",
         "inputSchema": {"type": "object", "properties": {}},
         "fn": lambda _a: lire("web_3d", "/api/projets"),
+    },
+    "cao_doc_ecrire": {
+        "description": "Écrit un document d'un projet WEB_CAO (schema, pcb ou ipc2581). Exige le "
+                       "« modifie » rendu par cao_doc_lire : si le fichier a changé depuis, refus. "
+                       "Si la page a ce document ouvert, elle demandera avant d'écraser ta version.",
+        "inputSchema": {"type": "object", "properties": {
+            "chemin": CHEMIN, "racine": RACINE,
+            "doc": {"type": "string", "enum": list(DOCS_CAO)},
+            "document": {"type": "object", "description": "Le document entier."},
+            "modifie": {"type": "integer", "description": "« modifie » rendu par cao_doc_lire."}},
+            "required": ["chemin", "doc", "document", "modifie"]},
+        "fn": cao_doc_ecrire,
+    },
+    "cao_profil_ecrire": {
+        "description": "Crée un profil WEB_CAO (format cao-profil-1). Refusé si le nom existe déjà : "
+                       "jamais d'écrasement.",
+        "inputSchema": {"type": "object", "properties": {
+            "nom": {"type": "string"}, "profil": {"type": "object"}}, "required": ["nom", "profil"]},
+        "fn": cao_profil_ecrire,
+    },
+    "lib_fichier_ecrire": {
+        "description": "Ajoute un fichier à la LIB (empreinte pcb, symbole schematique, modèle "
+                       "simulation) : « data » pour du JSON, « contenu » pour du texte (.sub, .lib…). "
+                       "Refusé si le fichier existe déjà : jamais d'écrasement.",
+        "inputSchema": {"type": "object", "properties": {
+            "type": {"type": "string", "enum": list(TYPES_LIB)}, "nom": {"type": "string"},
+            "data": {"type": ["object", "array"]}, "contenu": {"type": "string"}},
+            "required": ["type", "nom"]},
+        "fn": lib_fichier_ecrire,
     },
 }
