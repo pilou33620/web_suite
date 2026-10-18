@@ -19,7 +19,7 @@ Plan : [plan.md](plan.md) · Spec : [lanceur/docs/SPEC-mcp-api-outils.md](../lan
       au projet ouvert dans la spec et dans la tâche 6
 
 **Vérification :**
-- [ ] Relecture des passages cités, avec toi (au checkpoint)
+- [ ] Relecture des passages cités, avec toi (pas encore faite)
 
 **Dépendances :** aucune
 
@@ -197,5 +197,5 @@ openEMS.
 **Taille :** XS
 
 ## Checkpoint : terminé
-- [ ] Critères de réussite de la spec remplis
-- [ ] `/review` fait
+- [x] Critères de réussite de la spec remplis
+- [x] `/review` fait (revue 5 axes + audit sécurité, corrections appliquées et réessayées sur le Pi)

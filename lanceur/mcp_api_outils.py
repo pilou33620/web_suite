@@ -3,6 +3,9 @@
 Spec : lanceur/docs/SPEC-mcp-api-outils.md. Chaque outil valide ses arguments, puis passe
 par appeler_outil_web() du noyau : il n'y a pas d'outil « appeler une route », la table
 OUTILS_API est la liste blanche.
+
+Ne s'importe que par mcp_web_suite (qui ajoute OUTILS_API à OUTILS_MCP) : importé seul en
+premier, il trouverait un noyau à moitié chargé.
 """
 import json
 import urllib.parse
@@ -12,11 +15,13 @@ import mcp_web_suite as noyau
 PLAFOND = 100 * 1024   # octets de JSON rendus à Claude ; au-delà, un résumé
 DOCS_CAO = ("schema", "pcb", "ipc2581")
 TYPES_LIB = ("pcb", "schematique", "simulation")
-# En-tête d'un projet WEB_ANTENNA : absent, le serveur le remet à vide (projet.py:438-446)
 # Chiffrer sans lancer : jamais les routes « …/lancer » (le Pi calcule des heures)
 CHIFFRAGES = {"modele": "/api/openems", "balayage": "/api/openems/balayage",
               "tableau_s": "/api/openems/tableau-s", "script": "/api/openems/script"}
+# En-tête d'un projet WEB_ANTENNA : absent, le serveur le remet à vide (projet.py:438-446)
 TETE_ANTENNA = ("titre", "outil", "source", "fichier", "dessin", "antenne", "affichage")
+# Présents dans un enregistrement ANTENNA, ils remplacent le fichier : un objet non vide, ou rien
+OBJETS_ANTENNA = ("carte", "resultats", "dessin", "antenne", "affichage")
 SOLVEURS = {"simulation": "/api/simulation", "simulation_dc": "/api/simulation-dc",
             "crosstalk": "/api/crosstalk", "simulation_rf": "/api/simulation-rf", "oeil": "/api/oeil",
             "analyse_carte": "/api/analyse-carte", "ipc2581": "/api/ipc2581"}
@@ -57,7 +62,15 @@ def resumer(valeur, conseil):
     resume = {"resume": True, "taille_octets": len(brut.encode("utf-8")), "conseil": conseil}
     if isinstance(valeur, dict):
         resume["cles_total"] = len(valeur)
-        resume["forme"] = {k: decrire(valeur[k]) for k in list(valeur)[:200]}   # 200 x 200 o au plus
+        forme, cumul = {}, 0
+        for k, v in valeur.items():
+            d = decrire(v)
+            cumul += len(json.dumps([k[:100], d], ensure_ascii=False).encode("utf-8"))
+            if cumul > PLAFOND // 2:   # clés longues ou nombreuses : la forme reste sous la moitié du plafond
+                resume["forme_tronquee"] = True
+                break
+            forme[k[:100]] = d
+        resume["forme"] = forme
     else:
         resume["forme"] = decrire(valeur)
     resume["extrait"] = brut[:2000]
@@ -70,20 +83,38 @@ def route(base, **params):
     return base + ("?" + urllib.parse.urlencode(params) if params else "")
 
 
+def refuser_resume(objet, quoi):
+    """Un résumé ou une « forme » recopiés tels quels écraseraient le vrai contenu."""
+    valeurs = [objet] + (list(objet.values()) if isinstance(objet, dict) else [])
+    if any(isinstance(v, dict) and (("resume" in v and "taille_octets" in v) or set(v) == {"type", "longueur"})
+           for v in valeurs):
+        raise noyau.ErreurOutil("« %s » contient un résumé du MCP, pas le vrai contenu : relis la partie "
+                                "voulue avec « parties » et renvoie-la entière." % quoi)
+
+
+def chemin_projet(args):
+    """Chemin relatif à une racine de projets, comme le rend cao_projets. Un WEB_CAO lancé à la
+    main avec --local accepterait un chemin absolu, hors des racines (web_CAO.py:1231-1242)."""
+    chemin = exiger(args, chemin=str)
+    morceaux = chemin.replace("\\", "/").split("/")
+    if chemin.startswith(("/", "\\")) or ":" in chemin or ".." in morceaux:
+        raise noyau.ErreurOutil("Argument « chemin » invalide : chemin relatif rendu par cao_projets attendu.")
+    return chemin, facultatif(args, "racine", str, None)
+
+
 def cao_projets(_args):
-    return resumer(noyau.appeler_outil_web("web_cao", "/api/projets"), "Trop de projets : demande-les par racine.")
+    return resumer(noyau.appeler_outil_web("web_cao", "/api/projets"), "Trop de projets.")
 
 
 def cao_projet_lire(args):
-    chemin = exiger(args, chemin=str)
-    racine = facultatif(args, "racine", str, None)
+    chemin, racine = chemin_projet(args)
     return resumer(noyau.appeler_outil_web("web_cao", route("/api/projet", chemin=chemin, racine=racine)),
                    "Projet trop gros : lis ses documents avec cao_doc_lire.")
 
 
 def cao_doc_lire(args):
-    chemin, doc = exiger(args, chemin=str, doc=str)
-    racine = facultatif(args, "racine", str, None)
+    chemin, racine = chemin_projet(args)
+    doc = exiger(args, doc=str)
     parties = lire_parties(args)
     if doc not in DOCS_CAO:
         raise noyau.ErreurOutil("Argument « doc » invalide : %s attendu." % ", ".join(DOCS_CAO))
@@ -117,7 +148,7 @@ def cao_solveurs(_args):
     etat = {}
     for nom, chemin in SOLVEURS.items():
         try:
-            etat[nom] = noyau.appeler_outil_web("web_cao", chemin)
+            etat[nom] = noyau.appeler_outil_web("web_cao", chemin, delai=10)   # pas 7 x 30 s s'il ne répond plus
         except noyau.OutilArrete:
             raise                        # WEB_CAO arrêté : un seul message, pas sept
         except noyau.ErreurOutil as exc:
@@ -165,18 +196,41 @@ def lib_composants(args):
                    "Page trop grosse : baisse « nombre » ou choisis des « colonnes ».")
 
 
-def deja_la(nom, existants):
-    """Le nom figure-t-il déjà parmi les existants ? Sans casse : sous Windows, R0603 et
-    r0603 sont le même fichier ; mieux vaut refuser un nom de trop qu'écraser."""
-    return nom.lower() in {str(e).lower() for e in existants}
+def absent(route_):
+    """Vrai si WEB_CAO répond 404 : il normalise lui-même le nom (casse, lecteur Windows,
+    Unicode, noms courts), ce qu'aucune copie côté MCP ne reproduirait exactement. Tout autre
+    échec remonte : sans réponse sûre, on n'écrit pas."""
+    try:
+        noyau.appeler_outil_web("web_cao", route_)
+    except noyau.ErreurOutil as exc:
+        if exc.code == 404:
+            return True
+        raise
+    return False
 
 
 def cao_doc_ecrire(args):
-    chemin, doc, document, modifie = exiger(args, chemin=str, doc=str, document=dict, modifie=int)
-    racine = facultatif(args, "racine", str, None)
+    """Les clés données remplacent celles du document relu : symétrique de « parties », et un
+    morceau renvoyé seul n'efface pas le reste du PCB."""
+    chemin, racine = chemin_projet(args)
+    doc, cles, modifie = exiger(args, doc=str, document=dict, modifie=int)
     if doc not in DOCS_CAO:
         raise noyau.ErreurOutil("Argument « doc » invalide : %s attendu." % ", ".join(DOCS_CAO))
-    # « modifie » obligatoire : sans lui, WEB_CAO écrase sans contrôle de conflit
+    # « modifie » obligatoire et positif : WEB_CAO ne contrôle le conflit que si c'est un entier
+    # positif (vu.isdigit()) ; sinon il écrase sans rien dire
+    if modifie < 0:
+        raise noyau.ErreurOutil("Argument « modifie » invalide : celui rendu par cao_doc_lire (0 ou plus).")
+    if not cles:
+        raise noyau.ErreurOutil("Argument « document » vide : rien à écrire.")
+    refuser_resume(cles, "document")
+    try:
+        actuel = noyau.appeler_outil_web("web_cao", route("/api/projet/doc", chemin=chemin, racine=racine, doc=doc))
+        document = dict(actuel["document"])
+    except noyau.ErreurOutil as exc:
+        if exc.code != 404:
+            raise
+        document = {}   # pas encore de document : il naît des clés données
+    document.update(cles)
     try:
         return noyau.appeler_outil_web("web_cao", route("/api/projet/doc", chemin=chemin, racine=racine, doc=doc,
                                                          modifie=modifie), document, methode="PUT")
@@ -189,9 +243,7 @@ def cao_doc_ecrire(args):
 
 def cao_profil_ecrire(args):
     nom, profil = exiger(args, nom=str, profil=dict)
-    nom = " ".join(nom.split())   # comme nom_profil() de WEB_CAO
-    existants = noyau.appeler_outil_web("web_cao", "/api/profils").get("profils") or []
-    if deja_la(nom, [p.get("nom") for p in existants if isinstance(p, dict)]):
+    if not absent(route("/api/profil", nom=nom)):
         raise noyau.ErreurOutil("Le profil « %s » existe déjà : le MCP n'écrase pas. Choisis un autre nom." % nom)
     return noyau.appeler_outil_web("web_cao", route("/api/profil", nom=nom), profil, methode="PUT")
 
@@ -202,11 +254,9 @@ def lib_fichier_ecrire(args):
         raise noyau.ErreurOutil("Argument « type » invalide : %s attendu." % ", ".join(TYPES_LIB))
     data, contenu = args.get("data"), facultatif(args, "contenu", str, None)
     if (data is None) == (contenu is None) or not isinstance(data, (dict, list, type(None))):
-        raise noyau.ErreurOutil("Donne soit « data » (objet ou liste JSON), soit « contenu » (texte), pas les deux.")
-    base = nom.strip().replace("\\", "/").rsplit("/", 1)[-1]   # WEB_CAO ne garde que le nom de base
-    existants = noyau.appeler_outil_web("web_cao", "/api/lib/fichiers").get(type_) or []
-    if deja_la(base, existants):
-        raise noyau.ErreurOutil("« %s » existe déjà dans la LIB (%s) : le MCP n'écrase pas." % (base, type_))
+        raise noyau.ErreurOutil("Donne exactement un de « data » (objet ou liste JSON) et « contenu » (texte).")
+    if not absent(route("/api/lib/fichier", type=type_, nom=nom)):
+        raise noyau.ErreurOutil("« %s » existe déjà dans la LIB (%s) : le MCP n'écrase pas." % (nom, type_))
     corps = {"type": type_, "nom": nom}
     corps.update({"data": data} if data is not None else {"contenu": contenu})
     return noyau.appeler_outil_web("web_cao", "/api/lib/fichier", corps)
@@ -215,6 +265,9 @@ def lib_fichier_ecrire(args):
 def pcbparts_appeler(args):
     nom = exiger(args, name=str)
     arguments = facultatif(args, "arguments", dict, {})
+    # Une recherche tient en quelques mots : au-delà, ce serait des données du poste envoyées sur Internet
+    if len(json.dumps(arguments, ensure_ascii=False).encode("utf-8")) > 2048:
+        raise noyau.ErreurOutil("Arguments pcbparts trop longs (2 Ko au plus) : une recherche tient en quelques mots.")
     # La liste blanche est celle de WEB_CAO (passerelle_mcp.ALLOWED_TOOLS), relue à chaque appel
     permis = noyau.appeler_outil_web("web_cao", "/api/tools").get("allowed") or []
     if nom not in permis:
@@ -245,10 +298,13 @@ def antenna_projet_lire(args):
 
 def antenna_projet_enregistrer(args):
     projet = dict(exiger(args, projet=dict))
-    nuls = sorted(k for k, v in projet.items() if v is None)
-    if nuls:
-        # null supprime carte.json ou resultats.json côté serveur : jamais par Claude
-        raise noyau.ErreurOutil("Valeur null refusée pour : %s. Omets la clé pour la laisser inchangée." % ", ".join(nuls))
+    # null supprime carte.json ou resultats.json ; false, "" ou {} les remplacent par du vide
+    mauvais = sorted(k for k, v in projet.items()
+                     if v is None or (k in OBJETS_ANTENNA and not (isinstance(v, dict) and v)))
+    if mauvais:
+        raise noyau.ErreurOutil("Valeur refusée pour : %s (null, vide ou pas un objet). Omets la clé pour la "
+                                "laisser inchangée." % ", ".join(mauvais))
+    refuser_resume(projet, "projet")
     nom = antenna_ouvert()
     if projet.setdefault("nom", nom) != nom:
         raise noyau.ErreurOutil("Seul le projet ouvert (« %s ») peut être enregistré par le MCP." % nom)
@@ -256,6 +312,8 @@ def antenna_projet_enregistrer(args):
     if absents:
         actuel = antenna_charge(nom)
         projet.update((k, actuel[k]) for k in absents if k in actuel)
+        if antenna_ouvert() != nom:   # la page a changé de projet pendant la relecture
+            raise noyau.ErreurOutil("Le projet ouvert a changé pendant l'enregistrement : rien n'est écrit.")
     return noyau.appeler_outil_web("web_antenna", "/api/projet/enregistrer", projet)
 
 
@@ -354,14 +412,16 @@ OUTILS_API = {
         "fn": lambda _a: lire("web_3d", "/api/projets"),
     },
     "cao_doc_ecrire": {
-        "description": "Écrit un document d'un projet WEB_CAO (schema, pcb ou ipc2581). Exige le "
-                       "« modifie » rendu par cao_doc_lire : si le fichier a changé depuis, refus. "
+        "description": "Modifie un document d'un projet WEB_CAO (schema, pcb ou ipc2581) : les clés de "
+                       "premier niveau données dans « document » remplacent les mêmes clés du document "
+                       "actuel, les autres restent (renvoie donc une partie entière, lue avec « parties »). "
+                       "Exige le « modifie » rendu par cao_doc_lire : si le fichier a changé depuis, refus. "
                        "Si la page a ce document ouvert, elle demandera avant d'écraser ta version.",
         "inputSchema": {"type": "object", "properties": {
             "chemin": CHEMIN, "racine": RACINE,
             "doc": {"type": "string", "enum": list(DOCS_CAO)},
-            "document": {"type": "object", "description": "Le document entier."},
-            "modifie": {"type": "integer", "description": "« modifie » rendu par cao_doc_lire."}},
+            "document": {"type": "object", "description": "Les clés de premier niveau à remplacer, entières."},
+            "modifie": {"type": "integer", "minimum": 0, "description": "« modifie » rendu par cao_doc_lire."}},
             "required": ["chemin", "doc", "document", "modifie"]},
         "fn": cao_doc_ecrire,
     },
@@ -456,3 +516,7 @@ OUTILS_API = {
         "fn": lambda a: lire("web_antenna", "/api/openems/champs", id=exiger(a, id=str)),
     },
 }
+
+# Plafond garanti pour tous les outils, écritures comprises (resumer ne change rien en dessous)
+for _outil in OUTILS_API.values():
+    _outil["fn"] = (lambda fn: lambda a: resumer(fn(a), "Réponse trop grosse."))(_outil["fn"])

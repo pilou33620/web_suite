@@ -173,8 +173,9 @@ Outils MCP (`etat` dans `mcp_web_suite.py`, les autres dans `mcp_api_outils.py`,
   `cao_profils`, `cao_profil_lire`.
 - LIB, lecture : `lib_composants` (recherche et pagination dans le catalogue),
   `lib_fichiers`, `lib_fichier_lire`, `lib_parasites`.
-- Écriture gardée : `cao_doc_ecrire` (exige le `modifie` lu : refus si le fichier a changé
-  depuis), `cao_profil_ecrire` et `lib_fichier_ecrire` (jamais d'écrasement).
+- Écriture gardée : `cao_doc_ecrire` (remplace seulement les clés données ; exige le
+  `modifie` lu : refus si le fichier a changé depuis), `cao_profil_ecrire` et
+  `lib_fichier_ecrire` (refus si le nom existe déjà : jamais d'écrasement).
 - pcbparts.dev, par le relais de WEB_CAO : `pcbparts_outils`, `pcbparts_appeler` (liste
   blanche de WEB_CAO).
 - WEB_ANTENNA : `antenna_projets`, `antenna_calculs`, `antenna_projet_lire` et

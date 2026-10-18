@@ -129,8 +129,9 @@ Puis `/mcp` dans Claude Code. Windows, clé SSH, dépannage : [DETAILS](lanceur/
 - Le serveur MCP n'appelle que `127.0.0.1` et refuse `/api/github`, `/api/envoyer`,
   `/api/identite`, `/api/ia` et `/api/appairer`, et ne fait que lire le lanceur : Claude ne
   publie rien sur GitHub, ne touche pas à la clé d'IA et ne lance ni n'arrête rien.
-  Il n'écrit dans les projets et la LIB qu'avec garde-fous (contrôle de conflit, jamais
-  d'écrasement ni de suppression) et ne lance aucun calcul openEMS.
+  Il n'écrit dans les projets et la LIB qu'avec garde-fous : un document n'est modifié
+  qu'avec contrôle de conflit, un profil ou un fichier de LIB existant n'est jamais écrasé,
+  rien n'est supprimé ; il ne lance aucun calcul openEMS.
 
 ## Divers
 

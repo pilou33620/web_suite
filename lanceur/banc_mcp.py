@@ -407,31 +407,52 @@ FauxApi.table.clear()
 
 # Écritures CAO gardées : aucune écriture n'atteint l'outil quand un garde-fou refuse
 ecritures = lambda: [r for r in FauxApi.recues if r[0] != "GET"]   # noqa: E731
+DOC = "/api/projet/doc" + q(chemin="p", doc="pcb")
+FauxApi.table[("GET", "/api/projet/doc")] = (200, {"document": {"a": 1, "b": 2}, "modifie": 123})
 FauxApi.recues.clear()
-doc = {"pistes": [[0, 0]]}
-verifier("cao_doc_ecrire", outil("cao_doc_ecrire", chemin="p", doc="pcb", document=doc, modifie=123)[0], False)
-verifier("PUT du document avec modifie", FauxApi.recues,
-         [("PUT", "/api/projet/doc" + q(chemin="p", doc="pcb", modifie=123), doc)])
+verifier("cao_doc_ecrire", outil("cao_doc_ecrire", chemin="p", doc="pcb", document={"b": 3}, modifie=123)[0], False)
+verifier("fusion des clés dans le document relu, PUT avec modifie", FauxApi.recues,
+         [("GET", DOC, None), ("PUT", "/api/projet/doc" + q(chemin="p", doc="pcb", modifie=123), {"a": 1, "b": 3})])
+FauxApi.table[("GET", "/api/projet/doc")] = (404, {"detail": "absent"})
 FauxApi.recues.clear()
-for args in ({"chemin": "p", "doc": "pcb", "document": doc},                     # pas de modifie
-             {"chemin": "p", "doc": "autre", "document": doc, "modifie": 1},
-             {"chemin": "p", "doc": "pcb", "document": "texte", "modifie": 1}):
-    verifier("cao_doc_ecrire refuse %r" % sorted(args), outil("cao_doc_ecrire", **args)[0], True)
-verifier("aucune écriture refusée envoyée", FauxApi.recues, [])
+outil("cao_doc_ecrire", chemin="p", doc="pcb", document={"b": 3}, modifie=0)
+verifier("document absent : créé avec les clés données", ecritures(),
+         [("PUT", "/api/projet/doc" + q(chemin="p", doc="pcb", modifie=0), {"b": 3})])
+FauxApi.table[("GET", "/api/projet/doc")] = (200, {"document": {"a": 1}, "modifie": 123})
+FauxApi.recues.clear()
+for args in ({"document": {"b": 3}},                                                  # pas de modifie
+             {"document": {"b": 3}, "modifie": -1},                                   # -1 : pas de contrôle côté serveur
+             {"document": {"b": 3}, "modifie": 1, "doc": "autre"},
+             {"document": "texte", "modifie": 1},
+             {"document": {}, "modifie": 1},
+             {"document": {"resume": True, "taille_octets": 9, "forme": {}}, "modifie": 1},   # un résumé renvoyé
+             {"document": {"pistes": {"type": "list", "longueur": 3}}, "modifie": 1},        # une forme renvoyée
+             {"document": {"b": 3}, "modifie": 1, "chemin": "/etc"},
+             {"document": {"b": 3}, "modifie": 1, "chemin": "a/../../b"},
+             {"document": {"b": 3}, "modifie": 1, "chemin": "C:\\x"}):
+    args = dict({"chemin": "p", "doc": "pcb"}, **args)
+    verifier("cao_doc_ecrire refuse %r" % sorted(args.items()), outil("cao_doc_ecrire", **args)[0], True)
+verifier("aucune écriture refusée envoyée", ecritures(), [])
 FauxApi.table[("PUT", "/api/projet/doc")] = (409, {"detail": "modifié ailleurs"})
-erreur, texte = outil("cao_doc_ecrire", chemin="p", doc="pcb", document=doc, modifie=1)
+erreur, texte = outil("cao_doc_ecrire", chemin="p", doc="pcb", document={"b": 3}, modifie=1)
 verifier("409 lisible", (erreur, "relis" in texte), (True, True))
+verifier("chemin absolu refusé en lecture aussi", outil("cao_projet_lire", chemin="/etc")[0], True)
 
-FauxApi.table[("GET", "/api/profils")] = (200, {"profils": [{"nom": "JLC 4c", "t": 1}]})
-FauxApi.table[("GET", "/api/lib/fichiers")] = (200, {"pcb": ["R0603.json"], "schematique": [], "simulation": []})
-FauxApi.recues.clear()
+# Profils et fichiers LIB : « existe déjà » demandé au serveur (GET, 404 attendu), qui
+# applique sa propre normalisation du nom (casse, lecteur Windows, Unicode)
 profil = {"format": "cao-profil-1", "couches": 4}
-for nom, args in (("cao_profil_ecrire", {"nom": "jlc   4C", "profil": profil}),      # même nom, normalisé
-                  ("cao_profil_ecrire", {"nom": "neuf", "profil": "texte"}),
-                  ("lib_fichier_ecrire", {"type": "pcb", "nom": "r0603.json", "data": {}}),
-                  ("lib_fichier_ecrire", {"type": "pcb", "nom": "x\\R0603.json", "data": {}}),
+FauxApi.recues.clear()
+for statut in (200, 500):   # existe, ou contrôle impossible : jamais d'écriture
+    FauxApi.table[("GET", "/api/profil")] = (statut, {})
+    FauxApi.table[("GET", "/api/lib/fichier")] = (statut, {})
+    verifier("profil refusé (%d)" % statut, outil("cao_profil_ecrire", nom="JLC 4c", profil=profil)[0], True)
+    verifier("LIB refusé (%d)" % statut, outil("lib_fichier_ecrire", type="pcb", nom="C:R0603.json", data={})[0], True)
+FauxApi.table[("GET", "/api/profil")] = (404, {})
+FauxApi.table[("GET", "/api/lib/fichier")] = (404, {})
+for nom, args in (("cao_profil_ecrire", {"nom": "neuf", "profil": "texte"}),
                   ("lib_fichier_ecrire", {"type": "pcb", "nom": "neuf.json"}),           # ni data ni contenu
                   ("lib_fichier_ecrire", {"type": "pcb", "nom": "neuf.json", "data": {}, "contenu": "x"}),
+                  ("lib_fichier_ecrire", {"type": "pcb", "nom": "neuf.json", "data": 5}),
                   ("lib_fichier_ecrire", {"type": "autre", "nom": "neuf.json", "data": {}})):
     verifier("%s refuse %r" % (nom, args), outil(nom, **args)[0], True)
 verifier("aucune écriture refusée envoyée (bis)", ecritures(), [])
@@ -439,10 +460,44 @@ FauxApi.recues.clear()
 verifier("profil neuf", outil("cao_profil_ecrire", nom="neuf", profil=profil)[0], False)
 verifier("fichier LIB neuf", outil("lib_fichier_ecrire", type="pcb", nom="C0402.json", data={"a": 1})[0], False)
 verifier("fichier LIB texte", outil("lib_fichier_ecrire", type="simulation", nom="m.sub", contenu="* x")[0], False)
-verifier("écritures permises", ecritures(), [
-    ("PUT", "/api/profil" + q(nom="neuf"), profil),
+verifier("contrôles puis écritures", FauxApi.recues, [
+    ("GET", "/api/profil" + q(nom="neuf"), None), ("PUT", "/api/profil" + q(nom="neuf"), profil),
+    ("GET", "/api/lib/fichier" + q(type="pcb", nom="C0402.json"), None),
     ("POST", "/api/lib/fichier", {"type": "pcb", "nom": "C0402.json", "data": {"a": 1}}),
+    ("GET", "/api/lib/fichier" + q(type="simulation", nom="m.sub"), None),
     ("POST", "/api/lib/fichier", {"type": "simulation", "nom": "m.sub", "contenu": "* x"})])
+FauxApi.table.clear()
+
+# Plafond tenu sur le texte rendu à Claude, pas seulement sur le JSON compact
+for nom_cas, document in (("coordonnées imbriquées de 91 Ko", {"pts": [[[i, i + 1]] for i in range(9000)]}),
+                          ("100 clés de 5 Ko", {("k%03d" % i) + "x" * 5000: i for i in range(100)})):
+    FauxApi.table[("GET", "/api/projet/doc")] = (200, {"document": document, "modifie": 1})
+    r = mcp.appeler({"name": "cao_doc_lire", "arguments": {"chemin": "p", "doc": "pcb"}})
+    verifier("sous 100 Ko : " + nom_cas, len(r["content"][0]["text"].encode("utf-8")) < 100 * 1024, True)
+FauxApi.table.clear()
+
+# Défense en profondeur : routes « Jamais » refusées par le noyau, quelle que soit la méthode
+FauxApi.recues.clear()
+for id_, route_ in (("web_antenna", "/api/openems/lancer"), ("web_antenna", "/api/openems/balayage/lancer"),
+                    ("web_antenna", "/api/openems/arreter"), ("web_antenna", "/api/projet/racine"),
+                    ("web_antenna", "/api/projet/dossier"), ("web_cao", "/api/lib/config"),
+                    ("web_cao", "/api/datasheet/telecharger")):
+    try:
+        mcp.appeler_outil_web(id_, route_, {})
+        raise AssertionError("route « Jamais » permise : " + route_)
+    except mcp.ErreurOutil:
+        pass
+verifier("aucune route « Jamais » n'atteint l'outil", FauxApi.recues, [])
+
+# Lecture plafonnée : une réponse énorme ne remplit pas la mémoire du Pi
+FauxApi.table[("GET", "/api/projets")] = (200, {"x": "y" * 5000})
+plafond, mcp.MAX_LECTURE = mcp.MAX_LECTURE, 1000
+try:
+    mcp.appeler_outil_web("web_cao", "/api/projets")
+    raise AssertionError("réponse trop grosse acceptée")
+except mcp.ErreurOutil:
+    pass
+mcp.MAX_LECTURE = plafond
 FauxApi.table.clear()
 
 # pcbparts par le relais de WEB_CAO : seulement les outils de sa liste blanche
@@ -455,6 +510,8 @@ verifier("appel relayé", FauxApi.recues[-1], ("POST", "/api/tool", {"name": "jl
 FauxApi.recues.clear()
 verifier("outil hors liste refusé", outil("pcbparts_appeler", name="autre", arguments={})[0], True)
 verifier("arguments non objet refusés", outil("pcbparts_appeler", name="jlc_search", arguments="x")[0], True)
+verifier("arguments de plus de 2 Ko refusés", outil("pcbparts_appeler", name="jlc_search",
+                                                    arguments={"q": "x" * 3000})[0], True)
 verifier("seulement la lecture de la liste", ecritures(), [])
 FauxApi.table.clear()
 
@@ -473,7 +530,9 @@ verifier("enregistrer partiel", outil("antenna_projet_enregistrer", projet={"ant
 verifier("en-tête repris, ni carte ni résultats", ecritures(), [
     ("POST", "/api/projet/enregistrer", dict(TETE, nom="dipole", antenne={"a": 2}))])
 FauxApi.recues.clear()
-for args in ({"projet": {"carte": None}}, {"projet": {"nom": "autre", "antenne": {}}}, {"projet": "x"}):
+for args in ({"projet": {"carte": None}}, {"projet": {"nom": "autre", "antenne": {"a": 1}}}, {"projet": "x"},
+             {"projet": {"carte": False}}, {"projet": {"resultats": ""}}, {"projet": {"dessin": 0}},
+             {"projet": {"antenne": {}}}, {"projet": {"carte": {"type": "dict", "longueur": 3}}}):
     verifier("enregistrer refuse %r" % args, outil("antenna_projet_enregistrer", **args)[0], True)
 verifier("aucun enregistrement refusé envoyé", ecritures(), [])
 FauxApi.table[("GET", "/api/projet")] = (200, {"ouvert": None, "projets": []})

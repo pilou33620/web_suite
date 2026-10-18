@@ -29,10 +29,17 @@ PROTOCOLES = ("2025-06-18", "2025-03-26", "2024-11-05")
 
 # Jamais par Claude : publier sur GitHub (/api/github des outils, /api/envoyer et
 # /api/identite du lanceur, vers lesquels elles relaient), clé d'IA, appairage.
-ROUTES_INTERDITES = ("/api/github", "/api/ia", "/api/envoyer", "/api/identite", "/api/appairer")
+ROUTES_INTERDITES = ("/api/github", "/api/ia", "/api/envoyer", "/api/identite", "/api/appairer",
+                     # Les « Jamais » d'api-outils (SPEC-mcp-api-outils.md) : aucun outil ne les
+                     # appelle, et un module futur ne les ouvrira pas par oubli
+                     "/api/openems/lancer", "/api/openems/balayage/lancer", "/api/openems/tableau-s/lancer",
+                     "/api/openems/arreter", "/api/openems/banc", "/api/openems/fils", "/api/openems/dossier",
+                     "/api/projet/racine", "/api/projet/dossier", "/api/projet/importer", "/api/projet/archiver",
+                     "/api/projet/fermer", "/api/lib/config", "/api/datasheet")
 DELAI = 30         # s, appel ordinaire
 DELAI_SONDE = 1    # s, etat : rester rapide même quand tout est arrêté
 DELAI_LANCEUR = 3  # s, /api/etat du lanceur (un git status par outil, lent sur un Pi)
+MAX_LECTURE = 64 * 1024 * 1024   # octets : un projet ANTENNA peut peser 192 Mo, trop pour la mémoire du Pi
 # Boucle locale seulement : un http_proxy du poste ne doit pas détourner les appels
 OUVREUR = urllib.request.build_opener(urllib.request.ProxyHandler({}))
 
@@ -147,7 +154,7 @@ def _requete(port, nom, route, corps, delai, methode="GET"):
                                      headers={"Content-Type": "application/json"}, method=methode)
     try:
         with OUVREUR.open(requete, timeout=delai) as rep:
-            brut, type_contenu = rep.read(), rep.headers.get("Content-Type") or ""
+            brut, type_contenu = rep.read(MAX_LECTURE + 1), rep.headers.get("Content-Type") or ""
     except http.client.HTTPException:
         # Réponse qui n'est pas du HTTP : un autre service occupe le port, pas notre outil
         raise OutilArrete("%s ne tourne pas : le port %d est occupé par un autre service." % (nom, port))
@@ -162,6 +169,8 @@ def _requete(port, nom, route, corps, delai, methode="GET"):
         raise ErreurOutil("%s ne répond pas en %d s." % (nom, delai))
     except ConnectionError:
         raise OutilArrete("%s ne tourne pas : lance-le depuis WEB·SUITE" % nom)
+    if len(brut) > MAX_LECTURE:
+        raise ErreurOutil("%s a rendu plus de %d Mo pour %s : trop pour le MCP." % (nom, MAX_LECTURE >> 20, route))
     if "json" not in type_contenu:
         return brut.decode("utf-8", "replace")
     try:
@@ -232,7 +241,8 @@ def appeler(params):
     except Exception as exc:  # noqa: BLE001 : toute panne revient à Claude, le serveur continue
         journal("Échec de %s : %r" % (nom, exc))
         return resultat_texte("Échec de %s : %s" % (nom, exc), True)
-    return resultat_texte(rendu if isinstance(rendu, str) else json.dumps(rendu, ensure_ascii=False, indent=1))
+    # Sans indentation : c'est ce texte que resumer() mesure contre le plafond de 100 Ko
+    return resultat_texte(rendu if isinstance(rendu, str) else json.dumps(rendu, ensure_ascii=False))
 
 
 METHODES = {

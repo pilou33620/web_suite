@@ -31,19 +31,19 @@ Un outil par action, chacun avec un schéma d'entrée précis. Il n'y a pas d'ou
 | `cao_projets` | WEB_CAO | GET `/api/projets` | — |
 | `cao_projet_lire` | WEB_CAO | GET `/api/projet?chemin=` | — |
 | `cao_doc_lire` | WEB_CAO | GET `/api/projet/doc?chemin=&doc=` | `doc` ∈ `schema`, `pcb`, `ipc2581` ; `parties` (clés de premier niveau) au choix |
-| `cao_doc_ecrire` | WEB_CAO | PUT `/api/projet/doc?chemin=&doc=&modifie=` | `modifie` **obligatoire** (celui rendu par `cao_doc_lire`) ; un 409 revient à Claude sous la forme « le fichier a changé, relis-le » |
+| `cao_doc_ecrire` | WEB_CAO | GET puis PUT `/api/projet/doc?chemin=&doc=&modifie=` | **fusion** : les clés de premier niveau données remplacent celles du document relu, le reste demeure ; `modifie` **obligatoire et ≥ 0** (WEB_CAO ne contrôle le conflit que pour un entier positif) ; résumé recopié refusé ; un 409 revient sous la forme « le fichier a changé, relis-le » |
 | `cao_profils` / `cao_profil_lire` | WEB_CAO | GET `/api/profils`, `/api/profil?nom=` | — |
-| `cao_profil_ecrire` | WEB_CAO | PUT `/api/profil?nom=` | **refus si le profil existe déjà**, vérifié par `/api/profils` |
+| `cao_profil_ecrire` | WEB_CAO | PUT `/api/profil?nom=` | **refus si le profil existe déjà** : `GET /api/profil?nom=` doit rendre 404 |
 | `lib_composants` | WEB_CAO | GET `/api/lib/composants` | filtré et paginé **par le MCP** : `filtre` (texte), `colonnes`, `debut`, `nombre` (50 par défaut) |
 | `lib_fichiers` | WEB_CAO | GET `/api/lib/fichiers` | — |
 | `lib_fichier_lire` | WEB_CAO | GET `/api/lib/fichier?type=&nom=` | `type` ∈ `pcb`, `schematique`, `simulation` |
-| `lib_fichier_ecrire` | WEB_CAO | POST `/api/lib/fichier` | **refus si le fichier existe déjà**, vérifié par `/api/lib/fichiers` avant l'écriture |
+| `lib_fichier_ecrire` | WEB_CAO | POST `/api/lib/fichier` | **refus si le fichier existe déjà** : `GET /api/lib/fichier?type=&nom=` doit rendre 404 (le serveur applique sa propre normalisation du nom) |
 | `lib_parasites` | WEB_CAO | GET `/api/lib/parasites` | — |
 | `pcbparts_outils` | WEB_CAO | GET `/api/tools` | — |
-| `pcbparts_appeler` | WEB_CAO | POST `/api/tool` | `name` doit figurer dans la liste `allowed` rendue par `/api/tools` |
+| `pcbparts_appeler` | WEB_CAO | POST `/api/tool` | `name` doit figurer dans la liste `allowed` rendue par `/api/tools` ; arguments de 2 Ko au plus |
 | `antenna_projets` | WEB_ANTENNA | GET `/api/projet` | — |
 | `antenna_projet_lire` | WEB_ANTENNA | GET `/api/projet/ouvrir?nom=` | **seulement si `nom` est le projet déjà ouvert**, vérifié par `/api/projet` avant l'appel |
-| `antenna_projet_enregistrer` | WEB_ANTENNA | POST `/api/projet/enregistrer` | **seulement le projet ouvert** ; **refus de toute valeur `null`** (elle supprime `carte.json` ou `resultats.json`) ; les champs d'en-tête absents sont repris du projet ouvert |
+| `antenna_projet_enregistrer` | WEB_ANTENNA | POST `/api/projet/enregistrer` | **seulement le projet ouvert** (revérifié avant l'envoi) ; **refus de toute valeur `null`**, et pour `carte`, `resultats`, `dessin`, `antenne`, `affichage` de tout ce qui n'est pas un objet non vide ; les champs d'en-tête absents sont repris du projet ouvert |
 | `antenna_calculs` | WEB_ANTENNA | GET `/api/projet/calculs` | — |
 | `antenna_openems_etat` | WEB_ANTENNA | GET `/api/openems` | — |
 | `antenna_openems_chiffrer` | WEB_ANTENNA | POST `/api/openems`, `/api/openems/balayage`, `/api/openems/tableau-s`, `/api/openems/script` | `quoi` ∈ `modele`, `balayage`, `tableau_s`, `script` ; jamais `…/lancer` |
@@ -51,7 +51,7 @@ Un outil par action, chacun avec un schéma d'entrée précis. Il n'y a pas d'ou
 | `antenna_openems_champs` | WEB_ANTENNA | GET `/api/openems/champs?id=` | inventaire seulement, pas les coupes de champ (plusieurs Mo) |
 | `web3d_projets` | WEB_3D | GET `/api/projets` | — |
 
-**Grosses réponses.** Au-delà de **100 Ko** de JSON, le MCP ne rend pas le contenu brut. Il
+**Grosses réponses.** Au-delà de **100 Ko** de JSON (le texte rendu à Claude, sans indentation, pour tous les outils), le MCP ne rend pas le contenu brut. Il
 rend un **résumé** : la taille, les clés de premier niveau avec leur type et la longueur de
 chaque liste, et un extrait. Il y ajoute l'indication de l'argument à passer pour obtenir une
 partie (`parties` pour un document, `debut`/`nombre` pour le catalogue).
@@ -75,8 +75,9 @@ partie (`parties` pour un document, `debut`/`nombre` pour le catalogue).
 
 `appeler_outil_web()` ne fait que GET et POST. WEB_CAO écrit les projets et les profils en
 **PUT**. Il faut donc ajouter un argument `methode` (`GET`, `POST` ou `PUT` ; `DELETE`
-jamais), toujours refusé pour le lanceur quand il n'est pas en GET. Les règles de route sont
-inchangées.
+jamais), toujours refusé pour le lanceur quand il n'est pas en GET. Après la revue du
+2026-10-18 : les routes « Jamais » ci-dessous sont aussi ajoutées à `ROUTES_INTERDITES`, et
+une réponse de plus de 64 Mo est refusée (mémoire du Pi).
 
 ## Pile technique
 
