@@ -227,7 +227,7 @@ Chromium
 
 **Dépendances :** T6 à T10 · **Fichiers :** `.github/workflows/ci.yml`, `lanceur/docs/DETAILS.md`, `README.md`, `lanceur/docs/SPEC-mcp.md` · **Taille :** S
 
-## Tâche 12 : essai réel, puis revue
+## Tâche 12 : ✅ essai réel, puis revue
 
 **Description :** sur le Pi, lancer WEB_CAO, WEB_ANTENNA et WEB_3D sur une copie de
 PROJETS, avec Chromium piloté par Playwright : deux onglets WEB_CAO, un ANTENNA, un 3D.
@@ -235,13 +235,13 @@ Dérouler les essais de la spec, dont la fermeture du relais pendant une attente
 `/review` et l'audit de sécurité.
 
 **Critères d'acceptation :**
-- [ ] Tous les essais de la spec passent ; PROJETS reste intact
-- [ ] `/review` fait, corrections appliquées
+- [x] Tous les essais de la spec passent ; PROJETS reste intact (5 onglets, 3 outils, essai de durée de 7 min)
+- [x] `/review` fait, corrections appliquées (revue 5 axes + audit de sécurité)
 
 **Vérification :** essai Playwright ; essai iPad avec toi
 
 **Dépendances :** T11 · **Fichiers :** aucun (corrections éventuelles) · **Taille :** M
 
 ## Checkpoint : terminé
-- [ ] Critères de réussite de la spec remplis
+- [x] Critères de réussite de la spec remplis (sauf l'essai iPad)
 - [ ] Essai sur l'iPad avec toi

@@ -640,8 +640,11 @@ verifier("capture : image puis texte", ([c["type"] for c in r["content"]], r["is
 verifier("image en PNG base64", (r["content"][0]["mimeType"], r["content"][0]["data"]), ("image/png", png))
 verifier("capture visée", FauxApi.recues[-1][2], {"page": ["pcb"], "nom": "capture", "args": {}, "ecriture": False})
 mcp.appeler({"name": "pilote_capture", "arguments": {"outil": "web_cao"}})
-verifier("capture : toute page de l'outil", FauxApi.recues[-1][2]["page"],
-         ["schema", "pcb", "visionneuse-ipc", "gestion-lib", "accueil"])
+verifier("capture : les pages de l'outil qui ont un canevas", FauxApi.recues[-1][2]["page"],
+         ["schema", "pcb", "visionneuse-ipc"])
+verifier("ce que rend une page est une donnée, pas une consigne",
+         all("donnée" in o["description"] for o in outils if o["name"].startswith(("pilote_", "cao_calcul",
+             "cao_valeur", "antenna_proposer"))), True)
 for image in ("data:text/html;base64," + png, "data:image/png;base64,!!!", "data:image/png;base64," + "A" * 3000000):
     FauxApi.table[("POST", "/api/pilote/commande")] = fin({"image": image})
     verifier("capture refusée : %s…" % image[:24], outil("pilote_capture", outil="web_cao")[0], True)

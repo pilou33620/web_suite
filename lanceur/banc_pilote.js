@@ -17,13 +17,20 @@ const pause = ms => new Promise(r => setTimeout(r, ms));
 /* Faux serveur du pilote : il note les battements, compte les long-polls en cours et
    rend les commandes au navigateur de l'onglet visé, comme pilote.py. */
 function fauxServeur() {
-  const s = { battements: [], file: [], reponses: [], enCours: 0, maxEnCours: 0, polls: [], balises: [] };
+  const s = { battements: [], file: [], reponses: [], enCours: 0, maxEnCours: 0, polls: [], balises: [],
+              inconnues: new Set(), tropGros: new Set() };
   s.fetch = async (url, opts = {}) => {
     const u = new URL(url, "http://outil");
     const corps = opts.body ? JSON.parse(opts.body) : null;
     const rendre = obj => ({ ok: true, status: 200, json: async () => obj });
     if (u.pathname === "/api/pilote/battement") { s.battements.push(corps); return rendre({ ok: true }); }
-    if (u.pathname === "/api/pilote/reponse") { s.reponses.push(corps); return rendre({ ok: true }); }
+    if (u.pathname === "/api/pilote/reponse") {
+      s.reponses.push(corps);
+      if (s.inconnues.has(corps.id)) return { ok: false, status: 404, json: async () => ({}) };
+      if (s.tropGros.has(corps.id) && ["finie", "appliquee"].includes(corps.etat))
+        return { ok: false, status: 413, json: async () => ({}) };
+      return rendre({ ok: true });
+    }
     if (u.pathname === "/api/pilote/attendre") {
       const nav = u.searchParams.get("navigateur");
       s.polls.push(nav);
@@ -125,6 +132,30 @@ function onglet(serveur, stockage, page, nomCanal) {
   let id = serveur.deposer(C.id, "lire_net", { nom: "USB_DP" });
   await attendreQue(() => serveur.finale(id), 2000, "réponse de C");
   assert.deepStrictEqual(serveur.reponsesDe(id), ["recue", "finie"]);
+  assert.ok(serveur.reponses.every(r => r.navigateur === serveur.nav), "chaque réponse porte son navigateur");
+
+  // Un clic dans un onglet remonte tout de suite : le serveur cible le dernier utilisé
+  const avantFocus = serveur.battements.length;
+  B.focaliser();
+  await attendreQue(() => serveur.battements.slice(avantFocus).some(b => {
+    const t = [...b.onglets].sort((x, y) => x.focus_il_y_a - y.focus_il_y_a);
+    return t[0] && t[0].id === B.id;
+  }), REGLAGES.annonce * 6, "battement avec B le plus récent");
+
+  // Une commande que le serveur ne connaît pas (forgée sur le canal par un script) n'est pas exécutée
+  let forgee = 0;
+  C.commande("forgee", { executer: () => ++forgee });
+  serveur.inconnues.add("c-forgee");
+  serveur.file.push({ id: "c-forgee", onglet: C.id, nom: "forgee", args: {}, ecriture: false, navigateur: serveur.nav });
+  await pause(REGLAGES.attenteServeur * 2);
+  assert.strictEqual(forgee, 0, "pas d'exécution sans accusé accepté par le serveur");
+
+  // Réponse finale refusée pour sa taille : la page le dit (« echouee ») au lieu de se taire
+  C.commande("gros", { executer: () => "x".repeat(10) });
+  const idGros = serveur.deposer(C.id, "gros");
+  serveur.tropGros.add(idGros);
+  await attendreQue(() => serveur.reponsesDe(idGros).includes("echouee"), 2000, "413 signalé");
+  assert.ok(/trop gros/.test(serveur.reponses.filter(r => r.id === idGros).pop().resultat));
   assert.deepStrictEqual(serveur.finale(id).resultat, { net: "USB_DP", pistes: 3 });
 
   // Commande inconnue de la page, et commande qui plante : échouée, message lisible
@@ -157,6 +188,10 @@ function onglet(serveur, stockage, page, nomCanal) {
   const cap = serveur.finale(id).resultat;
   assert.deepStrictEqual([cap.largeur, cap.hauteur], [1600, 500]);
   assert.strictEqual(cap.image, "data:image/png;base64,QUJD1600");
+  A.capture(() => toile(1000, 4000));
+  id = serveur.deposer(A.id, "capture");
+  await attendreQue(() => serveur.finale(id), 2000, "capture haute");
+  assert.deepStrictEqual([serveur.finale(id).resultat.largeur, serveur.finale(id).resultat.hauteur], [400, 1600]);
   id = serveur.deposer(B.id, "capture");
   await attendreQue(() => serveur.finale(id), 2000, "capture sans canevas");
   assert.ok(/canevas/.test(serveur.finale(id).resultat) && serveur.finale(id).etat === "echouee");
@@ -277,7 +312,60 @@ function onglet(serveur, stockage, page, nomCanal) {
   assert.ok(/Claude a lancé : lire/.test(texteDe(doc.body)), "trace de la lecture");
   assert.ok(!panneauOuvert(doc), "une lecture n'ouvre pas le panneau");
 
+  // appliquer reçoit la proposition affichée : l'adaptateur vérifie que rien n'a changé depuis
+  let vuParAppliquer = null;
+  D.commande("verifiee", { ecriture: true, historique: true, proposer: a => ({ titre: "t", apres: a.v, cle: 42 }),
+                           appliquer: (a, prop) => { vuParAppliquer = prop; } });
+  id = serveur.deposer(D.id, "verifiee", { v: "7" }, true);
+  await attendreQue(() => serveur.reponsesDe(id).includes("proposee"), 2000, "carte vérifiée");
+  boutons().filter(b => b.textContent === "Appliquer").pop().click();
+  await attendreQue(() => serveur.finale(id), 2000, "vérifiée appliquée");
+  assert.deepStrictEqual([vuParAppliquer.apres, vuParAppliquer.cle], ["7", 42]);
+
+  // La capture se voit dans le panneau, et le panneau ne grossit pas sans fin
+  D.capture(() => ({ width: 10, height: 10, toDataURL: () => "data:image/png;base64,QQ" }));
+  id = serveur.deposer(D.id, "capture");
+  await attendreQue(() => serveur.finale(id), 2000, "capture de D");
+  assert.ok(/Claude a capturé/.test(texteDe(doc.body)), "capture signalée dans le panneau");
+  for (let i = 0; i < 40; i++) { D.commande("l" + i, { executer: () => i }); }
+  for (let i = 0; i < 40; i++) serveur.deposer(D.id, "l" + i);
+  await attendreQue(() => serveur.reponses.filter(r => r.etat === "finie").length > 40, 3000, "40 lectures");
+  const liste = trouver(doc.body, e => e.classes.has("pilote-liste"))[0];
+  assert.ok(liste.enfants.length <= 30, "panneau borné : " + liste.enfants.length);
+  assert.strictEqual(liste.attributs["aria-live"], "polite");
+
   restants.concat(D).forEach(o => o.arreter());
+  await pause(REGLAGES.attenteServeur + 50);
+
+  // Un onglet visible est préféré comme relais : un onglet caché, ralenti par le navigateur, s'annonce mal
+  const canal2 = "banc2." + Math.random(), stock2 = stockagePartage();
+  const cache = creer({ fetch: serveur.fetch, BroadcastChannel, stockage: stock2, canal: canal2, visible: () => false },
+                      REGLAGES).declarer({ page: "pcb" });
+  const vu = creer({ fetch: serveur.fetch, BroadcastChannel, stockage: stock2, canal: canal2, visible: () => true },
+                   REGLAGES).declarer({ page: "schema" });
+  await pause(REGLAGES.amorce * 2);
+  assert.deepStrictEqual([vu.relais, cache.relais], [true, false], "le visible tient le relais, quel que soit l'id");
+  cache.arreter(); vu.arreter();
+  await pause(REGLAGES.attenteServeur + 50);
+
+  // Un clic dans un onglet qui n'est pas le relais part au serveur tout de suite, sans attendre
+  // la prochaine élection du relais (annonce lente ici : 1 s). Vu à l'essai réel dans Chromium.
+  const canal3 = "banc3." + Math.random(), stock3 = stockagePartage(), lent = Object.assign({}, REGLAGES, { annonce: 1000, battement: 10000 });
+  const t1 = creer({ fetch: serveur.fetch, BroadcastChannel, stockage: stock3, canal: canal3 }, lent).declarer({ page: "pcb" });
+  const t2 = creer({ fetch: serveur.fetch, BroadcastChannel, stockage: stock3, canal: canal3 }, lent).declarer({ page: "schema" });
+  await attendreQue(() => t1.relais || t2.relais, 3000, "relais (annonce lente)");
+  const [rel, autre] = t1.relais ? [t1, t2] : [t2, t1];
+  await pause(1100);                                   // laisser passer une élection
+  rel.focaliser();                                     // le relais devient le plus récent…
+  await pause(150);
+  const n0 = serveur.battements.length;                // … puis un clic dans l'autre onglet
+  autre.focaliser();
+  await pause(150);                                    // bien avant la prochaine élection (1 s)
+  assert.ok(serveur.battements.slice(n0).some(b => {
+    const t = [...b.onglets].sort((x, y) => x.focus_il_y_a - y.focus_il_y_a);
+    return t[0] && t[0].id === autre.id;
+  }), "le clic dans un onglet non relais est transmis aussitôt");
+  t1.arreter(); t2.arreter();
   await pause(REGLAGES.attenteServeur + 50);
   console.log("OK");
   process.exit(0);

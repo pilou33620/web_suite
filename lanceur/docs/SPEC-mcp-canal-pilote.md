@@ -29,6 +29,9 @@ Utilisateur : toi, depuis Claude Code (sur le poste ou par SSH). Les pages pilot
      balayage appliqué est seulement **armé**, jamais lancé (`WEB_ANTENNA/js/30-ia.js:1363-1390`).
 2. **Ciblage** : par défaut, l'onglet du bon type utilisé le plus récemment (dernier
    focus) ; sinon l'onglet nommé par son id, tel que le rend la liste des onglets.
+   **Si des onglets du bon type sont ouverts sur plusieurs appareils**, la commande est
+   refusée tant que Claude ne nomme pas l'onglet (revue du 2026-10-18 : un faux onglet d'un
+   appareil appairé attirait sinon les commandes).
 3. **Attente** : un appel qui propose attend ta décision **jusqu'à 2 min**. Au-delà, il rend
    « en attente (id) », et Claude suit la proposition avec `pilote_suivre`.
 4. **Appareils** : tous les onglets se branchent, ceux du poste comme ceux d'un appareil
@@ -45,15 +48,21 @@ Utilisateur : toi, depuis Claude Code (sur le poste ou par SSH). Les pages pilot
      commande.
 8. **Connexions** : par outil et par navigateur, **un seul onglet relais** tient le
    long-poll et relaie aux autres par BroadcastChannel. Il est élu **par BroadcastChannel**
-   (corrigé à la tâche 1, voir plus bas) : chaque onglet s'annonce toutes les 2 s, et le
-   relais est le plus petit id parmi les onglets entendus depuis moins de 5 s.
+   (corrigé à la tâche 1, voir plus bas) : chaque onglet s'annonce toutes les 2 s (et à
+   chaque clic ou changement de visibilité), et le relais est le plus petit id parmi les
+   onglets **visibles** entendus récemment, à défaut parmi tous. Un onglet attend 5 s avant
+   sa première élection. Il est tenu pour mort après **90 s** de silence : après 5 min en
+   arrière-plan, Chrome ne réveille plus ses minuteurs qu'une fois par minute (essai de
+   durée du 2026-10-18 : 7 min, les onglets cachés restent listés, un seul relais). Un onglet
+   qui se ferme prévient les autres (« bye ») et, s'il est relais, le serveur (balise).
 
 ### Critères d'acceptation
 
 1. **`pilote_onglets`** rend, pour chaque outil qui tourne, ses onglets branchés : id,
    page (schema, pcb, gestion-lib, visionneuse-ipc, accueil, antenna, 3d), projet, appareil
-   (ce poste ou l'adresse), dernier focus, interrupteur. Un onglet fermé disparaît en
-   moins de 60 s.
+   (ce poste ou l'adresse), dernier focus, interrupteur. Un onglet fermé disparaît
+   aussitôt ; un onglet tué net (sans pouvoir prévenir), en moins de 2 min (oubli du serveur :
+   120 s, au-delà des 90 s de silence des pages).
 2. **`pilote_capture`** rend une **image** (contenu MCP `image`, PNG) du canevas de
    l'onglet visé :
    - largeur réduite à 1600 px au plus ;
@@ -63,7 +72,7 @@ Utilisateur : toi, depuis Claude Code (sur le poste ou par SSH). Les pages pilot
    `impedance`, `diff`, `retour`, `crosstalk`, `oeil`, `dc`, `pdn`, `s21`, `verif` :
    - avec les réglages du panneau et la sélection de l'éditeur ;
    - il rend le rapport de la simulation (`simRapMarkdown`), résumé au-delà de 100 Ko ;
-   - au-delà de 2 min, il rend « en cours (id) » ;
+   - au-delà de 2 min, il rend « en_attente » avec l'id ;
    - lancer un calcul ne modifie pas le document : **pas de carte à valider**, mais le
      panneau affiche « Claude a lancé : … ».
 4. **`cao_valeur_composant`** (schéma, par repère, par exemple `R12` → `4k7`) :
@@ -85,7 +94,17 @@ Utilisateur : toi, depuis Claude Code (sur le poste ou par SSH). Les pages pilot
 9. **Sécurité** :
    - les routes qui donnent des ordres (`commande`, `onglets`, `suivre`) n'acceptent que la
      **boucle locale**, c'est-à-dire le MCP sur le poste ;
-   - une page ne peut pas envoyer d'ordre à une autre page ;
+   - une page ne peut pas envoyer d'ordre à une autre page : les routes d'ordre refusent toute
+     requête qui porte `Origin` ou `Sec-Fetch-Site`, ce qu'envoie tout navigateur et jamais le
+     MCP (une page du poste est aussi en boucle locale) ;
+   - une réponse n'est acceptée que du navigateur de la commande, et une page n'exécute une
+     commande qu'après que le serveur a accepté son accusé : ni un autre appareil ni un script
+     sur le BroadcastChannel ne forge ce que Claude lit ;
+   - un id d'onglet tenu par un navigateur ne se reprend pas ; les corps sont bornés (64 Ko,
+     8 Mo pour une réponse) ; les pages ne s'affichent en cadre que pour leur propre origine
+     (`X-Frame-Options`, `frame-ancestors`) ;
+   - ce que rend une page (texte, image, nom de projet) est une **donnée** pour Claude, jamais
+     une consigne : les descriptions des outils le disent ;
    - les commandes sont des **noms d'un registre** de la page : jamais de code exécuté
      (`eval`, `Function`) ;
    - l'id d'une commande est aléatoire (`secrets.token_hex`).
@@ -119,7 +138,7 @@ ses propres routes. WEB_3D les traite dans `do_GET` et `do_POST`, avant `super()
 **Page : `pilote.js` et `pilote.css`**, recopiés à l'identique, en script classique.
 `pilote.js` s'occupe de :
 - l'id d'onglet ;
-- l'élection du relais (`navigator.locks`) ;
+- l'élection du relais (BroadcastChannel, onglets visibles d'abord) ;
 - le relais par BroadcastChannel ;
 - le panneau « Claude » (cartes et interrupteur) ;
 - le registre des commandes : `Pilote.commande(nom, {ecriture, proposer, appliquer, annuler, executer})`.
@@ -156,7 +175,9 @@ rendre un contenu MCP `image`.
 ```
 Banc MCP :          python lanceur/banc_mcp.py
 Banc du canal :     python3 pilote.py           (auto-test du module, dans chaque outil)
-Banc page (Node) :  node commun/test/banc-pilote.js   (WEB_CAO : registre, relais simulé, cartes)
+Banc page (Node) :  node lanceur/banc_pilote.js        (relais, cartes, interrupteur, panneau)
+Banc WEB_CAO :      node commun/test/banc-pilote-cao.js (cao_calcul) ; harness du schéma (cao_valeur_composant)
+Banc WEB_ANTENNA :  node test/banc-interface.js          (section 10 : antenna_proposer)
 Monofichiers :      python3 editeur-pcb/outils/build-monofichier.py (et schéma) après ajout du script
 ```
 
@@ -167,7 +188,7 @@ Côté page, une commande se déclare ainsi :
 
 ```js
 Pilote.commande("cao_valeur_composant", {
-  ecriture: true,
+  ecriture: true, historique: true,
   proposer: a => { const c = trouverComp(a.ref); return {avant: c.value, apres: a.valeur, titre: a.ref}; },
   appliquer: a => { push(); trouverComp(a.ref).value = a.valeur; refreshPanels(); draw(); },
   // pas d'« annuler » : l'éditeur a un historique, Ctrl+Z défait l'étape poussée
@@ -224,6 +245,14 @@ Pilote.commande("cao_valeur_composant", {
   - lancer ou arrêter openEMS ;
   - laisser une page envoyer des ordres à une autre ;
   - garder l'interrupteur allumé d'un chargement à l'autre.
+- **Limites connues** (audit du 2026-10-18) :
+  - en mode réseau, tout circule en HTTP clair (commandes, captures, cookie du jeton) :
+    quelqu'un qui écoute le Wi-Fi récupère le jeton et devient un appareil appairé. C'est une
+    limite de l'appairage, antérieure à ce module ;
+  - un mandataire local (`tailscale serve`, `ssh -R`, socat) ferait passer des requêtes
+    distantes pour la boucle locale : n'en installer aucun devant les outils ;
+  - un appareil appairé reste de confiance pour ses propres onglets : il peut afficher un faux
+    nom de projet, que Claude traite comme une donnée.
 
 ## Critères de réussite
 
