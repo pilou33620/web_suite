@@ -72,7 +72,7 @@ rapide, puis corriger la spec.
 - [ ] Bancs du lanceur verts
 - [ ] Revue avec toi (avec les réponses de la tâche 1)
 
-## Tâche 4 : `lanceur/pilote.js` : relais, long-poll, registre
+## Tâche 4 : ✅ `lanceur/pilote.js` : relais, long-poll, registre
 
 **Description :**
 - id d'onglet et page déclarée ;
@@ -87,11 +87,11 @@ Banc Node : `lanceur/banc_pilote.js`, avec un faux `fetch` et plusieurs « ongle
 vrai BroadcastChannel de Node.
 
 **Critères d'acceptation :**
-- [ ] Trois onglets donnent un seul relais et un seul long-poll ; fermer le relais en fait
+- [x] Trois onglets donnent un seul relais et un seul long-poll ; fermer le relais en fait
       élire un autre en moins de 5 s, et la commande en attente aboutit
-- [ ] Une commande inconnue de la page est rendue en erreur lisible ; une commande de
+- [x] Une commande inconnue de la page est rendue en erreur lisible ; une commande de
       lecture (capture) s'exécute sans carte
-- [ ] La déclaration d'une écriture sans moyen d'annuler est refusée
+- [x] La déclaration d'une écriture sans moyen d'annuler est refusée
 
 **Vérification :** `node lanceur/banc_pilote.js` OK
 
