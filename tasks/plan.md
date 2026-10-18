@@ -1,102 +1,121 @@
-# Plan d'implémentation : api-outils
+# Plan d'implémentation : canal-pilote
 
-Spec : [lanceur/docs/SPEC-mcp-api-outils.md](../lanceur/docs/SPEC-mcp-api-outils.md) · Carte :
+Spec : [lanceur/docs/SPEC-mcp-canal-pilote.md](../lanceur/docs/SPEC-mcp-canal-pilote.md) · Carte :
 [lanceur/docs/SPEC-mcp.md](../lanceur/docs/SPEC-mcp.md) · Tâches : [todo.md](todo.md) ·
-Module précédent : [plan-mcp-noyau.md](plan-mcp-noyau.md) (sa tâche 4, l'essai réel, reste ouverte)
+Modules précédents : [plan-mcp-noyau.md](plan-mcp-noyau.md), [plan-api-outils.md](plan-api-outils.md)
 
 ## Vue d'ensemble
 
-On ajoute 24 outils MCP nommés au serveur `lanceur/mcp_web_suite.py`. Ils lisent les
-projets, la LIB, les profils, pcbparts et openEMS, et écrivent projets, LIB et profils avec
-des garde-fous. Tous passent par `appeler_outil_web()`. Le code est dans un fichier voisin,
-`lanceur/mcp_api_outils.py`, et les tests vont dans `lanceur/banc_mcp.py`.
+Un canal entre le MCP et les pages ouvertes des trois outils, en trois pièces :
+- **`pilote.py`**, côté serveur : file d'attente, long-poll, attente de la réponse ;
+- **`pilote.js` et `pilote.css`**, côté page : onglet relais, registre des commandes,
+  panneau « Claude » avec ses cartes et l'interrupteur ;
+- **`lanceur/mcp_pilote.py`**, côté MCP : les outils nommés.
+
+Il est livré avec ses premières commandes : onglets, capture, calculs WEB_CAO, valeur d'un
+composant du schéma, cartes ANTENNA.
 
 ## Décisions d'architecture
 
-- **Un fichier voisin** : `mcp_api_outils.py` définit `OUTILS_API` (même format que
-  `OUTILS_MCP`), et `mcp_web_suite.py` l'ajoute à `OUTILS_MCP`. L'import se fait dans ce sens
-  seulement : `mcp_api_outils` importe `appeler_outil_web` et `ErreurOutil` du noyau, en
-  import tardif dans les fonctions pour éviter l'import circulaire, ou en recevant le noyau
-  en paramètre. On tranche à la tâche 2 en prenant le plus court.
-- **Deux aides seulement** :
-  - `exiger(args, **types)` : présence et type des arguments, avec une erreur qui nomme
-    l'argument fautif ;
-  - `resumer(valeur)` : au-delà de 100 Ko de JSON, rend la taille, les clés avec leur type
-    et la longueur des listes, un extrait et l'indication pour demander une partie.
-  `appeler()` du noyau transforme déjà toute exception en résultat `isError` : il n'y a pas
-  de nouvelle gestion d'erreur.
-- **`methode` dans `appeler_outil_web()`** : `GET` par défaut, `POST` quand il y a un corps
-  (comme aujourd'hui), `PUT` sur demande, `DELETE` refusé. Le lanceur reste en GET seulement.
-- **Garde-fous dans l'outil MCP, avant l'écriture** : ils lisent d'abord, par
-  `/api/lib/fichiers`, `/api/profils`, `/api/projet` ou `/api/tools`, puis refusent ou
-  écrivent. Il reste une fenêtre de course entre la lecture et l'écriture ; elle est
-  acceptée, car c'est un seul utilisateur sur son poste.
-- **Le banc grandit sans changer de forme** : un faux outil `FauxApi` répond aux routes de
-  la table avec une réponse prévue et note `(méthode, chemin, corps)` dans une liste. Le banc
-  vérifie cette liste après chaque appel.
+- **Originaux dans le lanceur, copies dans les outils**, comme `appairage.py` :
+  `lanceur/pilote.py`, `lanceur/pilote.js` et `lanceur/pilote.css` sont les originaux,
+  recopiés dans WEB_CAO, WEB_ANTENNA et WEB_3D. La CI de web_suite vérifie que les copies
+  sont identiques.
+- **Élection de l'onglet relais par BroadcastChannel**, et non par `navigator.locks` comme
+  l'écrivait la spec. Web Locks et `crypto.randomUUID` n'existent qu'en contexte sécurisé
+  (HTTPS ou localhost), alors que l'iPad ouvre `http://<adresse du Pi>`. La tâche 1 le
+  confirme, puis la spec est corrigée.
+  - Le mécanisme : chaque onglet annonce sa présence toutes les 2 s ; le relais est le plus
+    petit id parmi les onglets entendus depuis moins de 5 s. Un seul mécanisme, qui marche
+    partout, et qui se teste sous Node (BroadcastChannel existe depuis Node 18).
+- **`pilote.py` sans serveur à lui** : une fonction `traiter(handler)` que chaque serveur
+  appelle en tête de son aiguillage. Elle rend True quand la route était à elle.
+  L'auto-test démarre un petit `ThreadingHTTPServer`.
+- **Attente côté serveur** : un `threading.Condition` par commande. `POST /commande` attend
+  la réponse de la page jusqu'à `attente` secondes (120 par défaut, 1 dans l'auto-test),
+  puis rend `{etat: "en_attente", id}`.
+- **Le MCP attend un peu plus que le serveur** : il appelle avec `delai=130`.
+  `appeler_outil_web()` a déjà ce paramètre.
+- **Captures** : chaque page déclare `Pilote.capture(() => canvas)`. `pilote.js` réduit
+  l'image à 1600 px de large, puis fait `toDataURL("image/png")`. Le noyau du MCP apprend à
+  rendre `{"type": "image", "data", "mimeType"}`.
+- **Calculs** : `cao_calcul` choisit l'analyse (`simAllerFamille` / `simAllerAnalyse`),
+  puis fait `await` sur la fonction de lancement (toutes sont `async`, vu à la tâche 1).
+  Le résultat rendu est `simRapMarkdown(simRapCollecter())`, qui contient les erreurs
+  rangées dans l'état.
+- **Annuler** : porté par `pilote.js`. Chaque écriture déclare `etat()`, et la carte
+  compare son instantané avant d'annuler. `iaAnnuler` d'ANTENNA ne vérifie rien (tâche 1).
 
 ## Graphe de dépendances
 
 ```
-appeler_outil_web() du noyau (existe)
-        │
-        ▼
-Tâche 2 : méthode PUT + exiger() + resumer() + 1re lecture CAO   ◀── Tâche 1 : vérifications (lecture)
-        │
-        ├──▶ Tâche 3 : autres lectures CAO, LIB, 3D
-        │         │
-        │         └──▶ Tâche 4 : écritures CAO gardées (doc, profil, LIB)
-        ├──▶ Tâche 5 : pcbparts
-        ├──▶ Tâche 6 : projets ANTENNA
-        └──▶ Tâche 7 : openEMS (chiffrer, suivre)
-                  │
-                  ▼
-        Tâche 8 : doc + essai réel
+T1 vérifications ──▶ T2 pilote.py (serveur + auto-test)
+                          │
+                          ├──▶ T3 MCP : mcp_pilote.py + image dans le noyau + banc_mcp
+                          └──▶ T4 pilote.js : relais, long-poll, registre (+ banc Node)
+                                    │
+                                    └──▶ T5 panneau, cartes, interrupteur, annuler
+                                              │
+             ┌───────────────┬───────────────┼───────────────┐
+             ▼               ▼               ▼               ▼
+      T6 WEB_CAO : branchement, captures   T9 WEB_ANTENNA   T10 WEB_3D
+             │
+       ┌─────┴─────┐
+       ▼           ▼
+   T7 cao_calcul  T8 cao_valeur_composant
+                                     ▼
+                     T11 CI des copies + docs ──▶ T12 essai réel (Playwright) + revue
 ```
-
-Les tâches 3, 5, 6 et 7 sont indépendantes une fois la tâche 2 faite. Elles touchent
-toutes les deux mêmes fichiers : elles restent donc séquentielles.
 
 ## Liste des tâches
 
-### Phase 1 : risques levés, socle
-
-- [ ] Tâche 1 : vérifier comment l'éditeur enregistre et ce que fait `_pr_enregistrer` (lecture seule)
-- [ ] Tâche 2 : `methode`, `exiger()`, `resumer()`, puis `cao_projets`, `cao_projet_lire` et `cao_doc_lire`
+### Phase 1 : risques et socle serveur
+- [ ] T1 : vérifications en lecture seule (fin des calculs, API du schéma, API des cartes
+      ANTENNA, contexte non sécurisé)
+- [ ] T2 : `lanceur/pilote.py` et son auto-test
+- [ ] T3 : `lanceur/mcp_pilote.py`, contenu image dans le noyau, `banc_mcp.py`
 
 ### Checkpoint : socle
-- [ ] Tous les bancs du lanceur verts ; revue avec toi
+- [ ] Bancs du lanceur verts ; revue avec toi
 
-### Phase 2 : outils
+### Phase 2 : la page
+- [ ] T4 : `pilote.js` : id d'onglet, élection du relais, long-poll, registre, réponses
+- [ ] T5 : panneau « Claude », cartes, interrupteur, annuler si rien n'a bougé
 
-- [ ] Tâche 3 : lectures CAO, LIB, WEB_3D
-- [ ] Tâche 4 : écritures CAO gardées
-- [ ] Tâche 5 : pcbparts par le relais WEB_CAO
+### Checkpoint : canal complet
+- [ ] Banc Node vert ; revue avec toi
 
-### Checkpoint : WEB_CAO complet
-- [ ] Bancs verts ; revue avec toi
+### Phase 3 : les outils
+- [ ] T6 : WEB_CAO : copies, route, pages (schéma, PCB, gestion-lib, visionneuse), captures, monofichiers
+- [ ] T7 : WEB_CAO : `cao_calcul`
+- [ ] T8 : WEB_CAO : `cao_valeur_composant`
+- [ ] T9 : WEB_ANTENNA : copies, route, capture 2D, `antenna_proposer`
+- [ ] T10 : WEB_3D : copies, route, capture
 
-- [ ] Tâche 6 : projets WEB_ANTENNA
-- [ ] Tâche 7 : openEMS, chiffrer et suivre
+### Checkpoint : outils branchés
+- [ ] Bancs de chaque dépôt verts ; revue avec toi
 
-### Phase 3 : fin
-
-- [ ] Tâche 8 : documentation, puis essai réel avec Claude Code
+### Phase 4 : fin
+- [ ] T11 : CI de web_suite (copies de `pilote.*`), documentation
+- [ ] T12 : essai réel sur le Pi (Chromium et Playwright), puis `/review`
 
 ### Checkpoint : terminé
-- [ ] Critères de réussite de la spec remplis ; `/review` fait
+- [ ] Critères de réussite de la spec remplis ; essai iPad avec toi
 
 ## Risques et parades
 
 | Risque | Impact | Parade |
 |---|---|---|
-| L'éditeur écrase le fichier si Claude l'a écrit pendant que la page l'avait ouvert | Élevé : perte de travail | Tâche 1 en tête. Si la page écrase, `cao_doc_ecrire` sort du module et attend `canal-pilote`. |
-| `banc_mcp.py` devient long (271 lignes aujourd'hui) | Faible | Un faux outil générique piloté par une table de réponses, pas une classe par route. |
-| Import circulaire noyau ↔ `mcp_api_outils` | Faible | Tranché à la tâche 2 : import tardif, ou dict construit dans le noyau. |
-| Résumé encore trop gros (liste de 60 000 nœuds) | Moyen | Pour une liste, `resumer` ne rend que la longueur et les deux premiers éléments ; il est vérifié sur une réponse de 300 Ko. |
-| Le catalogue LIB entier est relu à chaque `lib_composants` | Faible | Accepté : lecture locale. `shortcut:` à poser si c'est lent sur le Pi. |
+| `navigator.locks` et `crypto.randomUUID` absents sur l'iPad (HTTP non sécurisé) | Élevé : pas de relais | Élection par BroadcastChannel et id par `Math.random`, confirmés à T1 |
+| `sim*Go()` sans promesse : on ne sait pas quand le calcul finit | Moyen | T1 ; sinon, observer `SIM.res` et ses voisins, avec un délai |
+| Les monofichiers `dist/` changent dès qu'on ajoute un script | Moyen : CI WEB_CAO rouge | Reconstruire dans la même tâche (T6) et vérifier la reproductibilité comme la CI |
+| Relais fermé pendant une attente | Moyen | La commande reste dans la file du serveur ; le nouveau relais la reprend. Testé en T4, puis en réel en T12 |
+| `innerHTML` avec un texte venu de Claude dans les cartes | Élevé : XSS | Cartes construites par `textContent` et `createElement` seulement ; vérifié par le banc Node |
+| Quatre dépôts touchés, commits croisés | Moyen | Un commit par dépôt et par tâche ; le lanceur d'abord, les outils ensuite ; la CI des copies en dernier (T11) pour ne pas rester rouge entre deux tâches |
+| Deux origines différentes pour un même outil (`localhost` et l'adresse IP) | Faible | Chacune a son relais : deux navigateurs logiques. C'est accepté |
+| Chromium headless se bloque sur le Pi (vu à la tâche 1), et Playwright n'y est pas installé | Élevé pour T12 | Avant T6, trouver un navigateur pilotable : réglages de Chromium, ou Playwright par npm avec son propre Chromium arm64 (te demander avant d'installer). Sinon, l'essai réel se fait à la main, avec toi |
 
 ## Questions ouvertes
 
-Aucune : les quatre questions de la spec sont tranchées. La tâche 1 peut retirer
-`cao_doc_ecrire` du module, et limiter `antenna_projet_enregistrer` au projet ouvert.
+Aucune pour l'instant. La tâche 1 peut changer le mécanisme d'attente de `cao_calcul`, et
+corrige la spec pour l'élection du relais.

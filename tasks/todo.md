@@ -1,201 +1,247 @@
-# Tâches : api-outils
+# Tâches : canal-pilote
 
-Plan : [plan.md](plan.md) · Spec : [lanceur/docs/SPEC-mcp-api-outils.md](../lanceur/docs/SPEC-mcp-api-outils.md)
+Plan : [plan.md](plan.md) · Spec : [lanceur/docs/SPEC-mcp-canal-pilote.md](../lanceur/docs/SPEC-mcp-canal-pilote.md)
 
-## Tâche 1 : ✅ vérifier l'enregistrement de l'éditeur et d'ANTENNA (lecture seule)
+## Tâche 1 : ✅ vérifications en lecture seule
 
-**Description :** répondre à deux questions par la lecture du code, sans rien modifier.
-1. Quand l'éditeur de WEB_CAO (schéma ou PCB) enregistre un document qu'il avait ouvert,
-   envoie-t-il `modifie` ? Et sur un 409, prévient-il ou écrase-t-il ? Chercher les appels
-   `PUT /api/projet/doc` dans le JS.
-2. Est-ce que `POST /api/projet/enregistrer` de WEB_ANTENNA (`_pr_enregistrer`) change le
-   projet ouvert quand `nom` est un autre projet ?
+**Description :** répondre à quatre questions par la lecture du code et une vérification
+rapide, puis corriger la spec.
+1. `sim*Go()` (`commun/simulation-em.js`) rend-elle une promesse qui se résout à la fin du
+   calcul ? Sinon, quel état observer pour savoir que c'est fini ou en erreur ?
+2. Schéma : comment trouver un composant par son repère ? Quelles fonctions rafraîchissent
+   l'affichage après un changement de valeur ? Ce qu'appelle `schema_values`
+   (`ia-assistant.js:1391-1460`) sert de modèle.
+3. WEB_ANTENNA : signatures exactes de `iaProposition`, `iaAppliquer` et `iaAnnuler`, et
+   leur règle « annuler seulement si rien n'a bougé ».
+4. `navigator.locks` et `crypto.randomUUID` sont-ils absents sur une page HTTP servie par
+   une adresse IP ? Vérification dans Chromium sur le Pi.
 
 **Critères d'acceptation :**
-- [x] Les deux réponses sont écrites dans la spec, avec `fichier:ligne`
-- [x] (sans objet : l'éditeur demande avant d'écraser) Si l'éditeur écrase : `cao_doc_ecrire` passe dans « Ce que ce module ne fait pas »
-      et la tâche 4 est réduite en conséquence
-- [x] Si l'enregistrement change le projet ouvert : `antenna_projet_enregistrer` est limité
-      au projet ouvert dans la spec et dans la tâche 6
+- [x] Les quatre réponses sont dans la spec (`fichier:ligne`)
+- [x] La spec est corrigée pour l'élection du relais (BroadcastChannel) si la réponse 4
+      le confirme
+- [x] La tâche 7 est précisée selon la réponse 1
 
-**Vérification :**
-- [ ] Relecture des passages cités, avec toi (pas encore faite)
+**Vérification :** relecture avec toi au checkpoint socle
 
-**Dépendances :** aucune
+**Dépendances :** aucune · **Fichiers :** `lanceur/docs/SPEC-mcp-canal-pilote.md`, `tasks/todo.md` · **Taille :** XS
 
-**Fichiers :** `lanceur/docs/SPEC-mcp-api-outils.md`, `tasks/todo.md`
-
-**Taille :** XS
-
-## Tâche 2 : ✅ le socle, puis lire un projet CAO
+## Tâche 2 : `lanceur/pilote.py` et son auto-test
 
 **Description :**
-- `appeler_outil_web()` reçoit `methode` (PUT possible, DELETE refusé, le lanceur en GET
-  seulement).
-- Créer `lanceur/mcp_api_outils.py`, avec `exiger()`, `resumer()` (100 Ko) et les trois
-  premiers outils : `cao_projets`, `cao_projet_lire`, et `cao_doc_lire` avec `parties`.
-- Le noyau ajoute `OUTILS_API` à `OUTILS_MCP`.
-- Le banc reçoit `FauxApi`, un faux outil piloté par une table qui note les requêtes reçues.
+- `traiter(handler)` sert les six routes `/api/pilote/*` de la spec ;
+- l'état est en mémoire et protégé par un verrou ;
+- un onglet sans battement depuis plus de 60 s est oublié ;
+- les routes d'ordre n'acceptent que la boucle locale ;
+- `python3 pilote.py` lance l'auto-test.
 
 **Critères d'acceptation :**
-- [x] `tools/list` montre `etat` et les trois outils ; chaque outil atteint sa route en GET
-- [x] Un argument manquant (`chemin`) donne un `isError` qui le nomme, sans requête ; un
-      `DELETE` est refusé avant toute requête ; un PUT vers le lanceur est refusé
-- [x] Un document de 300 Ko donne un résumé de moins de 100 Ko, et `parties` rend
-      seulement les clés demandées
+- [ ] Une commande déposée est rendue au long-poll du navigateur de l'onglet visé ; sa
+      réponse débloque l'appel `commande` qui attendait
+- [ ] Sans réponse dans le délai, `commande` rend `en_attente` avec un id, et `suivre` le
+      rend ensuite fini quand la réponse arrive
+- [ ] Par défaut, la cible est l'onglet du bon type au dernier focus ; un onglet inconnu
+      ou fermé donne une erreur lisible
+- [ ] `commande`, `onglets` et `suivre` répondent 403 hors de la boucle locale ; un corps
+      illisible ou trop gros répond 400 ou 413
 
-**Vérification :**
-- [x] `python lanceur/banc_mcp.py` OK
-- [x] `python lanceur/banc_serveur.py` et `python lanceur/appairage.py` toujours OK
+**Vérification :** `python3 lanceur/pilote.py` affiche OK
 
-**Dépendances :** tâche 1
+**Dépendances :** T1 · **Fichiers :** `lanceur/pilote.py` · **Taille :** M
 
-**Fichiers :** `lanceur/mcp_web_suite.py`, `lanceur/mcp_api_outils.py`, `lanceur/banc_mcp.py`
+## Tâche 3 : MCP : `mcp_pilote.py`, image dans le noyau, banc
 
-**Taille :** M
+**Description :**
+- Les outils MCP `pilote_onglets`, `pilote_suivre`, `pilote_capture`, `cao_calcul`,
+  `cao_valeur_composant` et `antenna_proposer` : arguments validés, appel à
+  `/api/pilote/commande` avec `delai=130`.
+- Le noyau rend un contenu `image` quand un outil rend une capture.
+- `banc_mcp.py` : un faux outil sert `/api/pilote/*`.
+
+**Critères d'acceptation :**
+- [ ] Chaque outil envoie la bonne commande (nom, page, arguments, `ecriture`)
+- [ ] `pilote_capture` rend un contenu MCP `image` (PNG en base64), sous 2 Mo
+- [ ] Arguments refusés sans requête (analyse inconnue, repère vide, type de carte
+      ANTENNA inconnu) ; `en_attente` se suit avec `pilote_suivre`
+
+**Vérification :** `python lanceur/banc_mcp.py` OK, ainsi que les autres bancs du lanceur
+
+**Dépendances :** T2 · **Fichiers :** `lanceur/mcp_pilote.py`, `lanceur/mcp_web_suite.py`, `lanceur/banc_mcp.py` · **Taille :** M
 
 ## Checkpoint : socle
-- [ ] Tous les bancs du lanceur verts
-- [ ] Revue avec toi avant la phase 2
+- [ ] Bancs du lanceur verts
+- [ ] Revue avec toi (avec les réponses de la tâche 1)
 
-## Tâche 3 : ✅ lectures CAO, LIB, WEB_3D
+## Tâche 4 : `lanceur/pilote.js` : relais, long-poll, registre
 
-**Description :** ajouter `cao_solveurs` (7 GET d'état en un appel, gabarits de l'œil
-réduits à leurs noms), `cao_profils`, `cao_profil_lire`, `lib_fichiers`, `lib_fichier_lire`
-(`type` contrôlé), `lib_parasites`, `lib_composants` (filtre, colonnes, `debut`/`nombre`,
-50 par défaut) et `web3d_projets`.
+**Description :**
+- id d'onglet et page déclarée ;
+- élection du relais par BroadcastChannel (annonce toutes les 2 s, le plus petit id
+  parmi les onglets entendus depuis moins de 5 s) ;
+- le relais fait les battements et le long-poll, et transmet les commandes à l'onglet
+  visé ;
+- `Pilote.commande(nom, def)` ;
+- une écriture sans `annuler` ni historique déclaré est refusée.
 
-**Critères d'acceptation :**
-- [x] Chaque outil atteint sa ou ses routes en GET
-- [x] `cao_solveurs` rend un résultat même si un des sept GET échoue (marqué en erreur pour
-      ce solveur)
-- [x] `lib_composants` filtre sans tenir compte de la casse et pagine ; un `type` LIB
-      inconnu est refusé sans requête
-
-**Vérification :**
-- [x] `python lanceur/banc_mcp.py` OK
-
-**Dépendances :** tâche 2
-
-**Fichiers :** `lanceur/mcp_api_outils.py`, `lanceur/banc_mcp.py`
-
-**Taille :** S
-
-## Tâche 4 : ✅ écritures CAO gardées
-
-**Description :** ajouter `cao_doc_ecrire` (PUT, `modifie` obligatoire, un 409 rendu en
-« le fichier a changé, relis-le » ; seulement si la tâche 1 le garde), `cao_profil_ecrire`
-(PUT, refusé si le profil existe) et `lib_fichier_ecrire` (POST, refusé si le fichier
-existe).
+Banc Node : `lanceur/banc_pilote.js`, avec un faux `fetch` et plusieurs « onglets » sur un
+vrai BroadcastChannel de Node.
 
 **Critères d'acceptation :**
-- [x] Une écriture permise atteint sa route avec la bonne méthode et le bon corps
-- [x] Un `modifie` absent, un profil existant ou un fichier LIB existant donnent `isError`,
-      et **aucune** écriture n'arrive au faux outil (au plus la lecture de contrôle)
-- [x] Un 409 du faux outil revient sous forme de message lisible
+- [ ] Trois onglets donnent un seul relais et un seul long-poll ; fermer le relais en fait
+      élire un autre en moins de 5 s, et la commande en attente aboutit
+- [ ] Une commande inconnue de la page est rendue en erreur lisible ; une commande de
+      lecture (capture) s'exécute sans carte
+- [ ] La déclaration d'une écriture sans moyen d'annuler est refusée
 
-**Vérification :**
-- [x] `python lanceur/banc_mcp.py` OK
+**Vérification :** `node lanceur/banc_pilote.js` OK
 
-**Dépendances :** tâches 1 et 3
+**Dépendances :** T2 · **Fichiers :** `lanceur/pilote.js`, `lanceur/banc_pilote.js` · **Taille :** M
 
-**Fichiers :** `lanceur/mcp_api_outils.py`, `lanceur/banc_mcp.py`
+## Tâche 5 : panneau « Claude », cartes, interrupteur, annuler
 
-**Taille :** S
-
-## Tâche 5 : ✅ pcbparts par le relais WEB_CAO
-
-**Description :** ajouter `pcbparts_outils` (GET `/api/tools`) et `pcbparts_appeler` (POST
-`/api/tool`, `name` contrôlé contre `allowed`).
+**Description :**
+- `pilote.css` et le panneau, replié par défaut, qui s'ouvre à l'arrivée d'une carte ;
+- la carte affiche avant → après, avec Appliquer / Refuser ;
+- après application, « Annuler » n'agit que si l'état n'a pas bougé (comparaison par
+  instantané) ; sinon, la carte renvoie au Ctrl+Z ;
+- l'interrupteur est propre à l'onglet, éteint au chargement ;
+- tout le texte passe par `textContent`.
 
 **Critères d'acceptation :**
-- [x] Un outil de la liste `allowed` est appelé avec `{name, arguments}`
-- [x] Un outil hors liste est refusé, et le faux outil ne reçoit que le GET `/api/tools`
+- [ ] Rien n'est appliqué avant le clic, et la réponse rendue est « refusée » sur un refus
+- [ ] Interrupteur allumé : la commande s'applique sans carte, mais la trace reste dans le
+      panneau
+- [ ] Un texte `<img onerror=…>` envoyé par Claude s'affiche tel quel, et rien n'est
+      exécuté
 
-**Vérification :**
-- [x] `python lanceur/banc_mcp.py` OK
+**Vérification :** `node lanceur/banc_pilote.js` OK
 
-**Dépendances :** tâche 2
+**Dépendances :** T4 · **Fichiers :** `lanceur/pilote.js`, `lanceur/pilote.css`, `lanceur/banc_pilote.js` · **Taille :** M
 
-**Fichiers :** `lanceur/mcp_api_outils.py`, `lanceur/banc_mcp.py`
-
-**Taille :** XS
-
-## Checkpoint : WEB_CAO complet
-- [ ] Bancs verts
+## Checkpoint : canal complet
+- [ ] `banc_pilote.js` et `banc_mcp.py` verts
 - [ ] Revue avec toi
 
-## Tâche 6 : ✅ projets WEB_ANTENNA
+## Tâche 6 : WEB_CAO : branchement, pages, captures
 
-**Description :** ajouter `antenna_projets`, `antenna_projet_lire` (seulement le projet
-ouvert, vérifié par `/api/projet`), `antenna_projet_enregistrer` (POST, toute valeur `null`
-au premier niveau du corps refusée ; limité au projet ouvert ;
-champs d'en-tête absents repris du projet ouvert, car le serveur les remet à vide) et
-`antenna_calculs`.
-
-**Critères d'acceptation :**
-- [x] Lire un projet qui n'est pas ouvert : refusé, et aucun GET `/api/projet/ouvrir` envoyé
-- [x] Un enregistrement qui contient `"carte": null`, ou qui vise un autre projet que
-      l'ouvert, est refusé sans POST
-- [x] Un enregistrement partiel (seulement `antenne`) arrive avec `titre`, `dessin`, etc.
-      repris du projet ouvert, et sans `carte` ni `resultats`
-- [x] `antenna_projets` et `antenna_calculs` atteignent leur route
-
-**Vérification :**
-- [x] `python lanceur/banc_mcp.py` OK
-
-**Dépendances :** tâches 1 et 2
-
-**Fichiers :** `lanceur/mcp_api_outils.py`, `lanceur/banc_mcp.py`
-
-**Taille :** S
-
-## Tâche 7 : ✅ openEMS, chiffrer et suivre
-
-**Description :** ajouter `antenna_openems_etat`, `antenna_openems_chiffrer` (`quoi` ∈
-`modele` → `/api/openems`, `balayage`, `tableau_s` → `/api/openems/tableau-s`, `script`),
-`antenna_openems_suivre` (`id`, `depuis`) et `antenna_openems_champs`.
+**Description :**
+- copier `pilote.py`, `commun/pilote.js` et `commun/pilote.css` ;
+- `pilote.traiter(self)` dans l'aiguillage de `web_CAO.py` ;
+- balises dans les pages schéma, PCB, gestion-lib et visionneuse IPC ;
+- `Pilote.capture` sur les canevas `#sheet`, `#board` et `#carte` (rendu hors écran,
+  comme `exportPng`) ;
+- reconstruire les monofichiers.
 
 **Critères d'acceptation :**
-- [x] Chaque valeur de `quoi` atteint la bonne route en POST ; une autre valeur (dont
-      `lancer`) est refusée sans requête
-- [x] Aucune route en `…/lancer` ou `…/arreter` n'est jamais atteinte (le banc parcourt
-      les requêtes notées)
-- [x] `suivre` passe `id` et `depuis` dans l'URL, encodés
+- [ ] `pilote_onglets` voit les quatre pages, avec leur projet
+- [ ] `pilote_capture` rend le schéma, le PCB et la visionneuse ; gestion-lib répond
+      « pas de canevas »
+- [ ] Les bancs WEB_CAO restent verts (`harness.js` PCB et schéma, routes du serveur) et
+      les monofichiers sont reproductibles
 
-**Vérification :**
-- [x] `python lanceur/banc_mcp.py` OK
+**Vérification :** bancs WEB_CAO, plus un essai rapide avec Chromium
 
-**Dépendances :** tâche 2
+**Dépendances :** T3, T5 · **Fichiers :** WEB_CAO : `pilote.py`, `commun/pilote.*`, `web_CAO.py`, 4 pages, `dist/` · **Taille :** M
 
-**Fichiers :** `lanceur/mcp_api_outils.py`, `lanceur/banc_mcp.py`
+## Tâche 7 : WEB_CAO : `cao_calcul`
 
-**Taille :** S
-
-## Tâche 8 : ✅ documentation, puis essai réel
-
-**Description :** lister les outils MCP dans `lanceur/docs/DETAILS.md` (section « Claude
-Code (MCP) »), en une ligne chacun, et dire ce qui reste exclu. Puis faire l'essai réel avec
-les trois outils lancés depuis WEB·SUITE : lister les projets CAO, lire un PCB (le résumé,
-puis une partie), chercher un composant dans la LIB et sur pcbparts, chiffrer un modèle
-openEMS.
+**Description :** commande `cao_calcul` dans les pages PCB et visionneuse IPC :
+- choisir l'analyse (`simAllerFamille` / `simAllerAnalyse`), puis faire `await` sur son
+  lanceur, selon la correspondance de la spec (question tranchée 1) ;
+- signaler `SIM.occupe` et `!simCalculable()` au lieu de ne rien faire ;
+- rendre `simRapMarkdown()` ;
+- afficher la trace « Claude a lancé : … » dans le panneau.
 
 **Critères d'acceptation :**
-- [x] DETAILS.md à jour, ainsi que la carte `SPEC-mcp.md` si besoin
-- [x] L'essai réel donne des réponses justes ; aucune réponse ne dépasse 100 Ko (2026-10-18, sur
-      le Pi : WEB_CAO et WEB_ANTENNA lancés sur une copie de PROJETS dans /tmp, 25 outils sur 25
-      appelés, plus grosse réponse 58 Ko (pcbparts), garde-fous vérifiés, PROJETS intact)
+- [ ] Les 9 analyses de la spec sont acceptées ; une analyse impossible (rien de
+      sélectionné) rend le message de la page
+- [ ] Un calcul qui finit après 2 min se suit avec `pilote_suivre`
 
-**Vérification :**
-- [ ] CI verte après le push
-- [x] Essai réel sur le Pi (fait par Claude ; reste l'essai par Claude Code redémarré, avec toi)
+**Vérification :** banc Node avec un faux `SIM`, puis un vrai calcul d'impédance avec
+Chromium
 
-**Dépendances :** tâches 1 à 7
+**Dépendances :** T6 · **Fichiers :** WEB_CAO : `commun/simulation-em.js` ou un fichier voisin, `dist/` · **Taille :** S
 
-**Fichiers :** `lanceur/docs/DETAILS.md`, `lanceur/docs/SPEC-mcp.md`
+## Tâche 8 : WEB_CAO : `cao_valeur_composant`
 
-**Taille :** XS
+**Description :** commande d'écriture dans la page schéma :
+- proposer : avant et après, par repère ;
+- appliquer : `push()`, puis la valeur, puis rafraîchir l'affichage ;
+- l'undo passe par l'historique de l'éditeur.
+
+**Critères d'acceptation :**
+- [ ] Carte puis clic : la valeur change, et un seul Ctrl+Z la défait
+- [ ] Repère inconnu : erreur lisible, rien n'est poussé dans l'historique
+
+**Vérification :** `editeur-schematique/test/harness.js`, enrichi de ce cas
+
+**Dépendances :** T6 · **Fichiers :** WEB_CAO : un fichier de l'éditeur schématique, `harness.js`, `dist/` · **Taille :** S
+
+## Tâche 9 : WEB_ANTENNA : branchement, capture, `antenna_proposer`
+
+**Description :**
+- copier les trois fichiers et brancher `web_antenna.py` ;
+- capture du canevas `#carte` ;
+- `antenna_proposer`, qui passe par `iaProposition`, `iaAppliquer` et `iaAnnuler` ;
+- `etat()` déclaré pour la règle « annuler seulement si rien n'a bougé », et annulation
+  du balayage par l'adaptateur, qui garde et remet `ANT.balayage`.
+
+**Critères d'acceptation :**
+- [ ] Les cartes `reglages`, `cotes`, `balayage` et `formes` passent par le panneau ;
+      Annuler défait l'application
+- [ ] Un balayage appliqué est armé, jamais lancé
+- [ ] `python/test/banc-serveur.py` reste vert
+
+**Vérification :** banc serveur, plus un essai avec Chromium
+
+**Dépendances :** T3, T5 · **Fichiers :** WEB_ANTENNA : `pilote.py`, `js/pilote.js`, `css/pilote.css`, `web_antenna.py`, `index.html`, `js/30-ia.js` · **Taille :** M
+
+## Tâche 10 : WEB_3D : branchement, capture
+
+**Description :** copier les trois fichiers, brancher `web_3D.py` (dans `do_GET` et
+`do_POST`, avant les fichiers statiques), et faire déclarer `Pilote.capture` par
+`09-demarrage.js` à partir de `Vue3D.capture()`.
+
+**Critères d'acceptation :**
+- [ ] `pilote_capture` rend la vue 3D ; WEB_3D apparaît dans `pilote_onglets`
+
+**Vérification :** essai avec Chromium
+
+**Dépendances :** T3, T5 · **Fichiers :** WEB_3D : `pilote.py`, `js/pilote.js`, `css/pilote.css`, `web_3D.py`, `index.html`, `js/09-demarrage.js` · **Taille :** S
+
+## Checkpoint : outils branchés
+- [ ] Bancs de chaque dépôt verts
+- [ ] Revue avec toi
+
+## Tâche 11 : CI des copies et documentation
+
+**Description :**
+- la CI de web_suite vérifie que `pilote.py`, `pilote.js` et `pilote.css` sont identiques
+  dans les trois outils, et lance `banc_pilote.js` et l'auto-test ;
+- DETAILS.md : le panneau, l'interrupteur, les nouveaux outils MCP ;
+- la carte `SPEC-mcp.md`.
+
+**Critères d'acceptation :**
+- [ ] CI de web_suite verte après le push des quatre dépôts
+- [ ] Documentation à jour
+
+**Dépendances :** T6 à T10 · **Fichiers :** `.github/workflows/ci.yml`, `lanceur/docs/DETAILS.md`, `README.md`, `lanceur/docs/SPEC-mcp.md` · **Taille :** S
+
+## Tâche 12 : essai réel, puis revue
+
+**Description :** sur le Pi, lancer WEB_CAO, WEB_ANTENNA et WEB_3D sur une copie de
+PROJETS, avec Chromium piloté par Playwright : deux onglets WEB_CAO, un ANTENNA, un 3D.
+Dérouler les essais de la spec, dont la fermeture du relais pendant une attente. Puis
+`/review` et l'audit de sécurité.
+
+**Critères d'acceptation :**
+- [ ] Tous les essais de la spec passent ; PROJETS reste intact
+- [ ] `/review` fait, corrections appliquées
+
+**Vérification :** essai Playwright ; essai iPad avec toi
+
+**Dépendances :** T11 · **Fichiers :** aucun (corrections éventuelles) · **Taille :** M
 
 ## Checkpoint : terminé
-- [x] Critères de réussite de la spec remplis
-- [x] `/review` fait (revue 5 axes + audit sécurité, corrections appliquées et réessayées sur le Pi)
+- [ ] Critères de réussite de la spec remplis
+- [ ] Essai sur l'iPad avec toi
