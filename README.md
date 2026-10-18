@@ -132,6 +132,10 @@ Puis `/mcp` dans Claude Code. Windows, clé SSH, dépannage : [DETAILS](lanceur/
   Il n'écrit dans les projets et la LIB qu'avec garde-fous : un document n'est modifié
   qu'avec contrôle de conflit, un profil ou un fichier de LIB existant n'est jamais écrasé,
   rien n'est supprimé ; il ne lance aucun calcul openEMS.
+- Dans les pages ouvertes, une écriture de Claude s'affiche en carte dans le panneau
+  « Claude » et n'est appliquée qu'à ton clic (sauf case « Appliquer directement » cochée
+  dans l'onglet, décochée à chaque chargement). Seul le MCP de ce poste peut donner des
+  ordres aux pages ; une page d'un autre site est refusée.
 
 ## Divers
 

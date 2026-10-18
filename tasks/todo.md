@@ -213,7 +213,7 @@ Chromium
 - [ ] Bancs de chaque dépôt verts
 - [ ] Revue avec toi
 
-## Tâche 11 : CI des copies et documentation
+## Tâche 11 : ✅ CI des copies et documentation
 
 **Description :**
 - la CI de web_suite vérifie que `pilote.py`, `pilote.js` et `pilote.css` sont identiques
@@ -223,7 +223,7 @@ Chromium
 
 **Critères d'acceptation :**
 - [ ] CI de web_suite verte après le push des quatre dépôts
-- [ ] Documentation à jour
+- [x] Documentation à jour
 
 **Dépendances :** T6 à T10 · **Fichiers :** `.github/workflows/ci.yml`, `lanceur/docs/DETAILS.md`, `README.md`, `lanceur/docs/SPEC-mcp.md` · **Taille :** S
 

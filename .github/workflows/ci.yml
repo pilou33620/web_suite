@@ -32,6 +32,17 @@ jobs:
       - name: Serveur MCP — protocole, outil etat, publication GitHub et lanceur refusés
         run: python lanceur/banc_mcp.py
 
+      # Node 20 comme sur le Pi : BroadcastChannel et crypto y sont globaux, le banc s'en sert
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Canal de pilotage — serveur (pilote.py)
+        run: python lanceur/pilote.py
+
+      - name: "Canal de pilotage — page (pilote.js : relais, cartes, interrupteur)"
+        run: node lanceur/banc_pilote.js
+
       # La mise à jour au démarrage est recopiée dans chaque outil, qui doit
       # tourner seul, sans le lanceur : on ne peut pas la partager. On vérifie
       # donc que les trois copies restent la même.
@@ -65,6 +76,24 @@ jobs:
               || { echo "appairage.py diffère entre WEB_SUITE et $o"; exit 1; }
           done
           echo "appairage.py identique"
+
+      # Le canal de pilotage du MCP est recopié dans chaque outil, qui doit tourner seul :
+      # même règle que appairage.py, l'original est dans lanceur/
+      - name: Outils — pilote.py, pilote.js et pilote.css sont les mêmes partout
+        run: |
+          verifier() {
+            diff <(tr -d '\r' < "lanceur/$1") <(tr -d '\r' < "../$2") > /dev/null \
+              || { echo "lanceur/$1 diffère de $2"; exit 1; }
+          }
+          verifier pilote.py WEB_CAO/pilote.py
+          verifier pilote.js WEB_CAO/commun/pilote.js
+          verifier pilote.css WEB_CAO/commun/pilote.css
+          for o in WEB_ANTENNA WEB_3D; do
+            verifier pilote.py $o/pilote.py
+            verifier pilote.js $o/js/pilote.js
+            verifier pilote.css $o/css/pilote.css
+          done
+          echo "canal de pilotage identique dans les trois outils"
 
       # Même raison pour le lecteur IPC-2581 : WEB_CAO et WEB_ANTENNA en ont
       # chacun une copie, qui avait divergé (chacune avait une correction que

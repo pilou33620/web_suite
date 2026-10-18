@@ -183,6 +183,19 @@ Outils MCP (`etat` dans `mcp_web_suite.py`, les autres dans `mcp_api_outils.py`,
   repris du projet ouvert), `antenna_openems_etat`, `antenna_openems_chiffrer` (modèle,
   balayage, tableau S, script), `antenna_openems_suivre`, `antenna_openems_champs`.
 - WEB_3D : `web3d_projets`.
+- Pages ouvertes (canal de pilotage, `mcp_pilote.py`, voir
+  [SPEC-mcp-canal-pilote.md](SPEC-mcp-canal-pilote.md)) : `pilote_onglets` (onglets ouverts sur
+  ce poste et les appareils appairés), `pilote_capture` (image du canevas), `pilote_suivre`,
+  `cao_calcul` (lance une analyse dans la page PCB ou la visionneuse et rend son rapport),
+  `cao_valeur_composant` (schéma), `antenna_proposer` (cartes de l'assistant ANTENNA).
+
+**Le panneau « Claude ».** Chaque page des outils a, en bas à droite, un bouton « Claude ».
+Une écriture proposée par Claude s'y affiche en carte, avant → après, avec Appliquer et
+Refuser : rien ne change avant le clic. La case « Appliquer directement (cet onglet) »
+saute la carte ; elle est éteinte à chaque chargement de la page. Une écriture appliquée
+se défait par Ctrl+Z dans l'éditeur qui a un historique (schéma), sinon par le bouton
+Annuler de la carte, qui refuse si quelque chose a changé depuis. Un seul onglet par outil
+et par navigateur tient la connexion au serveur et relaie les autres.
 
 Au-delà de 100 Ko, une réponse devient un résumé (clés, tailles, extrait). Le MCP ne
 supprime rien, ne lance ni n'arrête aucun calcul (les calculs WEB_CAO passeront par la
@@ -230,6 +243,11 @@ doit rendre `{"jsonrpc": "2.0", "id": 1, "result": {}}`.
   `/api/identite`, `/api/ia`, `/api/appairer` refusées et lanceur en lecture seule, sans
   qu'aucune requête n'atteigne l'outil, outil arrêté signalé ; outils d'`api-outils` face
   à un faux outil qui note chaque requête (bonne route et bonne méthode, garde-fous qui
-  refusent sans écrire, résumé sous 100 Ko, jamais `…/lancer`).
+  refusent sans écrire, résumé sous 100 Ko, jamais `…/lancer`) ; outils du canal de pilotage
+  face à un faux outil (commande déposée, en attente, refusée, capture en image).
+- `python lanceur/pilote.py` : le serveur du canal de pilotage (file, long-poll, ciblage par
+  dernier focus, redistribution, ordres réservés à ce poste, autre origine refusée).
+- `node lanceur/banc_pilote.js` : la page (un seul relais, changement de relais sans perte,
+  cartes, interrupteur, Annuler si rien n'a bougé, aucun texte de Claude lu comme du HTML).
 
 Chacun affiche `OK` si tout passe.
