@@ -177,7 +177,7 @@ Chromium
 
 **Dépendances :** T6 · **Fichiers :** WEB_CAO : un fichier de l'éditeur schématique, `harness.js`, `dist/` · **Taille :** S
 
-## Tâche 9 : WEB_ANTENNA : branchement, capture, `antenna_proposer`
+## Tâche 9 : ✅ WEB_ANTENNA : branchement, capture, `antenna_proposer`
 
 **Description :**
 - copier les trois fichiers et brancher `web_antenna.py` ;
@@ -187,10 +187,10 @@ Chromium
   du balayage par l'adaptateur, qui garde et remet `ANT.balayage`.
 
 **Critères d'acceptation :**
-- [ ] Les cartes `reglages`, `cotes`, `balayage` et `formes` passent par le panneau ;
+- [x] Les cartes `reglages`, `cotes`, `balayage` et `formes` passent par le panneau ;
       Annuler défait l'application
-- [ ] Un balayage appliqué est armé, jamais lancé
-- [ ] `python/test/banc-serveur.py` reste vert
+- [x] Un balayage appliqué est armé, jamais lancé
+- [x] `python/test/banc-serveur.py` reste vert
 
 **Vérification :** banc serveur, plus un essai avec Chromium
 

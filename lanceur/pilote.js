@@ -189,7 +189,8 @@
     function annuler(carte) {
       // Seulement si rien n'a bougé depuis : sinon on écraserait le travail fait entre-temps
       if (texte(carte.def.etat()) !== carte.apres) {
-        carte.message = "L'état a changé depuis : annule plutôt avec Ctrl+Z dans l'éditeur.";
+        carte.message = "L'état a changé depuis : annuler écraserait tes modifications. Défais à la main " +
+                        "(ou Ctrl+Z si l'éditeur en a un).";
       } else {
         try { carte.def.annuler(carte.args, carte.jeton); carte.etat = "annulee"; carte.message = "Annulée."; }
         catch (e) { carte.message = "Annulation impossible : " + ((e && e.message) || e); }
