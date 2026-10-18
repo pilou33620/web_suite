@@ -26,7 +26,7 @@ rapide, puis corriger la spec.
 
 **Dépendances :** aucune · **Fichiers :** `lanceur/docs/SPEC-mcp-canal-pilote.md`, `tasks/todo.md` · **Taille :** XS
 
-## Tâche 2 : `lanceur/pilote.py` et son auto-test
+## Tâche 2 : ✅ `lanceur/pilote.py` et son auto-test
 
 **Description :**
 - `traiter(handler)` sert les six routes `/api/pilote/*` de la spec ;
@@ -36,13 +36,13 @@ rapide, puis corriger la spec.
 - `python3 pilote.py` lance l'auto-test.
 
 **Critères d'acceptation :**
-- [ ] Une commande déposée est rendue au long-poll du navigateur de l'onglet visé ; sa
+- [x] Une commande déposée est rendue au long-poll du navigateur de l'onglet visé ; sa
       réponse débloque l'appel `commande` qui attendait
-- [ ] Sans réponse dans le délai, `commande` rend `en_attente` avec un id, et `suivre` le
+- [x] Sans réponse dans le délai, `commande` rend `en_attente` avec un id, et `suivre` le
       rend ensuite fini quand la réponse arrive
-- [ ] Par défaut, la cible est l'onglet du bon type au dernier focus ; un onglet inconnu
+- [x] Par défaut, la cible est l'onglet du bon type au dernier focus ; un onglet inconnu
       ou fermé donne une erreur lisible
-- [ ] `commande`, `onglets` et `suivre` répondent 403 hors de la boucle locale ; un corps
+- [x] `commande`, `onglets` et `suivre` répondent 403 hors de la boucle locale ; un corps
       illisible ou trop gros répond 400 ou 413
 
 **Vérification :** `python3 lanceur/pilote.py` affiche OK
