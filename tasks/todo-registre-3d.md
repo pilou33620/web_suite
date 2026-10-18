@@ -22,7 +22,7 @@ Plan : [plan-registre-3d.md](plan-registre-3d.md) · Spec : [lanceur/docs/SPEC-m
 
 **Dépendances :** aucune · **Fichiers :** `lanceur/pilote.js`, `lanceur/banc_pilote.js`, les 3 copies · **Taille :** S
 
-## Tâche 2 : `14-pilote-3d.js` : identification et scène
+## Tâche 2 : ✅ `14-pilote-3d.js` : identification et scène
 
 **Description :** créer `WEB_3D/js/14-pilote-3d.js` avec `trouverPiece(modele, ref)` (uuid,
 chemin `0/3/1`, nom unique) et `decrireScene(modele, {filtre, debut, nombre})` (fichiers et
@@ -33,11 +33,11 @@ c'est possible, extraire de `02-import.js` la construction de scène à partir d
 OCCT, en fonction pure exportée.
 
 **Critères d'acceptation :**
-- [ ] 18 pièces décrites (uuid, chemin, nom, parent, visible, triangles), et un fichier
+- [x] 18 pièces décrites (uuid, chemin, nom, parent, visible, triangles), et un fichier
       avec position et rotation
-- [ ] Le chemin et l'uuid retrouvent la même pièce ; « nut » est refusé avec la liste des 7
+- [x] Le chemin et l'uuid retrouvent la même pièce ; « nut » est refusé avec la liste des 7
       candidates ; une référence inconnue est refusée
-- [ ] La sortie est du JSON pur (aller-retour `JSON.parse(JSON.stringify(x))` identique) ;
+- [x] La sortie est du JSON pur (aller-retour `JSON.parse(JSON.stringify(x))` identique) ;
       `filtre` et pagination marchent
 
 **Vérification :** `node test/banc-pilote-3d.mjs` ; `node test/banc-exemples.mjs` toujours vert

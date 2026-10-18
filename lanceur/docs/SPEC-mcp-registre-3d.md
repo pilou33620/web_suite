@@ -45,7 +45,7 @@ appareil appairé.
 
 ### Identifier une pièce
 
-Les noms ne sont pas uniques : l'exemple livré contient 7 « nut ». Une pièce est rendue
+Les noms ne sont pas uniques : l'exemple livré contient 8 « nut ». Une pièce est rendue
 avec son **uuid**, stable pour la session, son **chemin d'indices** sous la scène (par
 exemple `0/3/1`) et son **nom**, pour l'affichage. Une commande accepte l'uuid ou le
 chemin ; un nom seul n'est accepté que s'il est unique, sinon le refus liste les pièces
@@ -139,7 +139,7 @@ Canal :              node lanceur/banc_pilote.js ; python lanceur/banc_mcp.py (w
 Celui de WEB_3D : modules ES, noms en français, commentaires sur le *pourquoi*.
 
 ```js
-// Une pièce se désigne par uuid ou par chemin d'indices : les noms se répètent (7 « nut »)
+// Une pièce se désigne par uuid ou par chemin d'indices : les noms se répètent (8 « nut »)
 export function trouverPiece(modele, ref){
   if(/^\d+(\/\d+)*$/.test(ref)) return parChemin(modele, ref.split("/").map(Number));
   return modele.getObjectByProperty("uuid", ref) || refuser(`Pièce « ${ref} » inconnue.`);
