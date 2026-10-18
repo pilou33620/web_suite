@@ -58,3 +58,4 @@ dans ce dossier. Les ids ne changent plus.
 ## Specs écrites
 
 - [x] `mcp-noyau` : [SPEC-mcp-noyau.md](SPEC-mcp-noyau.md)
+- [x] `api-outils` : [SPEC-mcp-api-outils.md](SPEC-mcp-api-outils.md)
