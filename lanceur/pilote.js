@@ -339,7 +339,9 @@
   if (typeof window !== "undefined" && typeof document !== "undefined") {
     let stockage = null;
     try { stockage = window.localStorage; } catch (_) { /* refusé : un relais par onglet */ }
-    window.Pilote = creer({ fetch: (u, o) => window.fetch(u, o), BroadcastChannel: window.BroadcastChannel,
+    // Ouverte sans serveur (monofichier en file://), la page n'a pas de canal : Pilote ne démarre pas
+    const servie = /^https?:$/.test(window.location.protocol);
+    window.Pilote = creer({ fetch: (u, o) => window.fetch(u, o), BroadcastChannel: servie ? window.BroadcastChannel : null,
                             stockage, document, fenetre: window });
   }
 })();

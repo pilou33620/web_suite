@@ -122,7 +122,7 @@ vrai BroadcastChannel de Node.
 - [ ] `banc_pilote.js` et `banc_mcp.py` verts
 - [ ] Revue avec toi
 
-## Tâche 6 : WEB_CAO : branchement, pages, captures
+## Tâche 6 : ✅ WEB_CAO : branchement, pages, captures
 
 **Description :**
 - copier `pilote.py`, `commun/pilote.js` et `commun/pilote.css` ;
@@ -133,10 +133,10 @@ vrai BroadcastChannel de Node.
 - reconstruire les monofichiers.
 
 **Critères d'acceptation :**
-- [ ] `pilote_onglets` voit les quatre pages, avec leur projet
-- [ ] `pilote_capture` rend le schéma, le PCB et la visionneuse ; gestion-lib répond
+- [x] `pilote_onglets` voit les quatre pages, avec leur projet
+- [x] `pilote_capture` rend le schéma, le PCB et la visionneuse ; gestion-lib répond
       « pas de canevas »
-- [ ] Les bancs WEB_CAO restent verts (`harness.js` PCB et schéma, routes du serveur) et
+- [x] Les bancs WEB_CAO restent verts (`harness.js` PCB et schéma, routes du serveur) et
       les monofichiers sont reproductibles
 
 **Vérification :** bancs WEB_CAO, plus un essai rapide avec Chromium
