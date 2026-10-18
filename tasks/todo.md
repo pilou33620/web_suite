@@ -162,7 +162,7 @@ Chromium
 
 **Dépendances :** T6 · **Fichiers :** WEB_CAO : `commun/simulation-em.js` ou un fichier voisin, `dist/` · **Taille :** S
 
-## Tâche 8 : WEB_CAO : `cao_valeur_composant`
+## Tâche 8 : ✅ WEB_CAO : `cao_valeur_composant`
 
 **Description :** commande d'écriture dans la page schéma :
 - proposer : avant et après, par repère ;
@@ -170,8 +170,8 @@ Chromium
 - l'undo passe par l'historique de l'éditeur.
 
 **Critères d'acceptation :**
-- [ ] Carte puis clic : la valeur change, et un seul Ctrl+Z la défait
-- [ ] Repère inconnu : erreur lisible, rien n'est poussé dans l'historique
+- [x] Carte puis clic : la valeur change, et un seul Ctrl+Z la défait
+- [x] Repère inconnu : erreur lisible, rien n'est poussé dans l'historique
 
 **Vérification :** `editeur-schematique/test/harness.js`, enrichi de ce cas
 
