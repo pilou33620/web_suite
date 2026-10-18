@@ -24,8 +24,8 @@ appareil appairé.
    visibilité, isolement et sélection, mesures et cotes affichées, collisions affichées.
 2. **Ouvrir** : seulement des fichiers de **PROJETS/3D** (servis par `/projets/`), en
    remplacement ou en ajout.
-   - Annuler un remplacement **recharge le modèle d'avant** : la carte garde ses fichiers
-     d'origine, mais les déplacements faits entre-temps sont perdus.
+   - Annuler un remplacement **recharge le modèle d'avant** (la carte garde ses fichiers
+     d'origine) **et remet ses positions** (matrices gardées avec eux).
    - Annuler un ajout retire le fichier ajouté.
 3. **Mesures** :
    - dimensions et masse : encombrement, volume, surface, nombre de pièces ;

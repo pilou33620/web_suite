@@ -83,7 +83,7 @@ touchées.
 
 **Dépendances :** T2 · **Fichiers :** `js/14-pilote-3d.js`, `test/banc-pilote-3d.mjs` · **Taille :** S
 
-## Tâche 5 : déplacement, contrainte, matrices
+## Tâche 5 : ✅ déplacement, contrainte, matrices
 
 **Description :**
 - `deplacer(g, {translation, rotation, origine})`, avec la rotation autour du centre de la
@@ -93,17 +93,17 @@ touchées.
 - `apres()` de `13-deplacement.js` exporté (`apresDeplacement`) et utilisé par le panneau.
 
 **Critères d'acceptation :**
-- [ ] Translation, rotation et origine sont exactes au µm près ; une rotation garde le
+- [x] Translation, rotation et origine sont exactes au µm près ; une rotation garde le
       centre de la boîte
-- [ ] Une contrainte plan contre plan plaque les faces (distance nulle) ; des faces
+- [x] Une contrainte plan contre plan plaque les faces (distance nulle) ; des faces
       incompatibles rendent le message de `contraindre`
-- [ ] Déplacer puis remettre l'état redonne les matrices d'origine au bit près
+- [x] Déplacer puis remettre l'état redonne les matrices d'origine au bit près
 
 **Vérification :** `node test/banc-pilote-3d.mjs` ; `node test/banc-exemples.mjs`
 
 **Dépendances :** T2, T3 (faces) · **Fichiers :** `js/14-pilote-3d.js`, `js/13-deplacement.js`, `test/banc-pilote-3d.mjs` · **Taille :** M
 
-## Tâche 6 : ouvrir depuis PROJETS/3D
+## Tâche 6 : ✅ ouvrir depuis PROJETS/3D
 
 **Description :** exporter `ouvrir` et `compagnons` de `11-projets.js`, en leur faisant
 rendre un résultat (succès, ou échec et message). La commande `web3d_ouvrir` :
@@ -113,9 +113,9 @@ rendre un résultat (succès, ou échec et message). La commande `web3d_ouvrir` 
 - `etat` : liste des fichiers et leurs matrices.
 
 **Critères d'acceptation :**
-- [ ] Un `.obj` emmène son `.mtl` ; un chemin hors de PROJETS (`..`, absolu) est refusé
+- [x] Un `.obj` emmène son `.mtl` ; un chemin hors de PROJETS (`..`, absolu) est refusé
       avant tout `fetch`
-- [ ] Un fichier introuvable ou illisible rend « echouee » avec le message de la page
+- [ ] Un fichier introuvable ou illisible rend « echouee » avec le message de la page (ui.charger rend maintenant {ok, erreur} ; à éprouver à l'essai réel, T11)
 
 **Vérification :** banc Node pour `compagnons` et la validation des chemins ; le reste à
 l'essai réel (T11)
