@@ -11,6 +11,10 @@ import mcp_web_suite as noyau
 
 PLAFOND = 100 * 1024   # octets de JSON rendus à Claude ; au-delà, un résumé
 DOCS_CAO = ("schema", "pcb", "ipc2581")
+TYPES_LIB = ("pcb", "schematique", "simulation")
+SOLVEURS = {"simulation": "/api/simulation", "simulation_dc": "/api/simulation-dc",
+            "crosstalk": "/api/crosstalk", "simulation_rf": "/api/simulation-rf", "oeil": "/api/oeil",
+            "analyse_carte": "/api/analyse-carte", "ipc2581": "/api/ipc2581"}
 
 
 def exiger(args, **types):
@@ -94,6 +98,59 @@ def cao_doc_lire(args):
     return rep
 
 
+def cao_solveurs(_args):
+    """Les sept GET d'état en un appel ; un solveur en panne n'empêche pas les autres."""
+    etat = {}
+    for nom, chemin in SOLVEURS.items():
+        try:
+            etat[nom] = noyau.appeler_outil_web("web_cao", chemin)
+        except noyau.OutilArrete:
+            raise                        # WEB_CAO arrêté : un seul message, pas sept
+        except noyau.ErreurOutil as exc:
+            etat[nom] = {"erreur": str(exc)}
+    oeil = etat["oeil"]
+    if isinstance(oeil, dict) and isinstance(oeil.get("gabarits"), list):
+        # Les polygones des masques pèsent des dizaines de Ko : l'id et le nom suffisent pour choisir
+        oeil["gabarits"] = [{"id": g.get("id"), "nom": g.get("nom")} for g in oeil["gabarits"] if isinstance(g, dict)]
+    return resumer(etat, "")
+
+
+def lire(id_outil, chemin, conseil="", **params):
+    return resumer(noyau.appeler_outil_web(id_outil, route(chemin, **params)), conseil)
+
+
+def lib_fichier_lire(args):
+    type_, nom = exiger(args, type=str, nom=str)
+    if type_ not in TYPES_LIB:
+        raise noyau.ErreurOutil("Argument « type » invalide : %s attendu." % ", ".join(TYPES_LIB))
+    return lire("web_cao", "/api/lib/fichier", "Fichier trop gros.", type=type_, nom=nom)
+
+
+def lib_composants(args):
+    """Le catalogue entier est relu, puis filtré et paginé ici : WEB_CAO ne sait pas le faire."""
+    filtre = facultatif(args, "filtre", str, "").lower()
+    colonnes = facultatif(args, "colonnes", list, None)
+    debut = facultatif(args, "debut", int, 0)
+    nombre = facultatif(args, "nombre", int, 50)
+    if debut < 0:
+        raise noyau.ErreurOutil("Argument « debut » invalide : 0 ou plus.")
+    if not 1 <= nombre <= 500:
+        raise noyau.ErreurOutil("Argument « nombre » invalide : de 1 à 500.")
+    if colonnes is not None and not all(isinstance(c, str) for c in colonnes):
+        raise noyau.ErreurOutil("Argument « colonnes » invalide : liste de noms de colonnes attendue.")
+    # shortcut: catalogue entier relu à chaque appel ; mettre en cache si c'est lent sur le Pi
+    rep = noyau.appeler_outil_web("web_cao", "/api/lib/composants")
+    lignes = [c for c in rep.get("composants") or [] if isinstance(c, dict)]
+    if filtre:
+        lignes = [c for c in lignes if any(filtre in str(v).lower() for k, v in c.items() if k != "_id")]
+    page = lignes[debut:debut + nombre]
+    if colonnes is not None:
+        page = [{k: v for k, v in c.items() if k in colonnes or k == "_id"} for c in page]
+    return resumer({"colonnes": rep.get("colonnes"), "total": rep.get("total"), "trouves": len(lignes),
+                    "debut": debut, "composants": page},
+                   "Page trop grosse : baisse « nombre » ou choisis des « colonnes ».")
+
+
 CHEMIN = {"type": "string", "description": "Chemin du projet, tel que rendu par cao_projets."}
 RACINE = {"type": "string", "description": "Racine du projet (champ « racine » de cao_projets) ; facultatif."}
 
@@ -122,5 +179,56 @@ OUTILS_API = {
                         "description": "Clés de premier niveau du document à rendre ; facultatif."}},
             "required": ["chemin", "doc"]},
         "fn": cao_doc_lire,
+    },
+    "cao_solveurs": {
+        "description": "État des solveurs WEB_CAO (EM, DC, crosstalk, RF, œil avec ses gabarits, "
+                       "analyse de carte, import IPC-2581) : disponibles ou non, version, conseil. "
+                       "Lancer un calcul se fait depuis la page, pas d'ici.",
+        "inputSchema": {"type": "object", "properties": {}},
+        "fn": cao_solveurs,
+    },
+    "cao_profils": {
+        "description": "Liste les profils WEB_CAO (empilages et règles de fabricant enregistrés).",
+        "inputSchema": {"type": "object", "properties": {}},
+        "fn": lambda _a: lire("web_cao", "/api/profils"),
+    },
+    "cao_profil_lire": {
+        "description": "Lit un profil WEB_CAO par son nom (rendu par cao_profils).",
+        "inputSchema": {"type": "object", "properties": {"nom": {"type": "string"}}, "required": ["nom"]},
+        "fn": lambda a: lire("web_cao", "/api/profil", nom=exiger(a, nom=str)),
+    },
+    "lib_composants": {
+        "description": "Cherche dans le catalogue de composants de la LIB (LIB_composants.csv) : "
+                       "« filtre » (texte, sans casse, sur toutes les colonnes), « colonnes » à "
+                       "garder, pagination « debut »/« nombre » (50 par défaut, 500 au plus).",
+        "inputSchema": {"type": "object", "properties": {
+            "filtre": {"type": "string"},
+            "colonnes": {"type": "array", "items": {"type": "string"}},
+            "debut": {"type": "integer", "minimum": 0},
+            "nombre": {"type": "integer", "minimum": 1, "maximum": 500}}},
+        "fn": lib_composants,
+    },
+    "lib_fichiers": {
+        "description": "Liste les fichiers de la LIB : empreintes PCB, symboles, modèles de simulation.",
+        "inputSchema": {"type": "object", "properties": {}},
+        "fn": lambda _a: lire("web_cao", "/api/lib/fichiers"),
+    },
+    "lib_fichier_lire": {
+        "description": "Lit un fichier de la LIB (empreinte, symbole ou modèle) par type et nom.",
+        "inputSchema": {"type": "object", "properties": {
+            "type": {"type": "string", "enum": list(TYPES_LIB)}, "nom": {"type": "string"}},
+            "required": ["type", "nom"]},
+        "fn": lib_fichier_lire,
+    },
+    "lib_parasites": {
+        "description": "Parasites des condensateurs et selfs de la LIB (C/ESR/ESL, L/DCR), tirés des "
+                       "modèles fabricant : utiles pour le découplage et le PDN.",
+        "inputSchema": {"type": "object", "properties": {}},
+        "fn": lambda _a: lire("web_cao", "/api/lib/parasites"),
+    },
+    "web3d_projets": {
+        "description": "Liste les fichiers 3D (STEP, STL…) rangés dans les projets WEB_3D.",
+        "inputSchema": {"type": "object", "properties": {}},
+        "fn": lambda _a: lire("web_3d", "/api/projets"),
     },
 }

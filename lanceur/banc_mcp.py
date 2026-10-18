@@ -293,9 +293,9 @@ class FauxApi(FauxOutil):
     do_GET = do_POST = do_PUT = do_DELETE = _repondre
 
 
-def outil(nom, **args):
+def outil(_outil, **args):
     """Appelle un outil MCP comme le fait Claude : (isError, contenu décodé, ou texte)."""
-    r = mcp.appeler({"name": nom, "arguments": args})
+    r = mcp.appeler({"name": _outil, "arguments": args})
     texte = r["content"][0]["text"]
     try:
         return r["isError"], json.loads(texte)
@@ -361,6 +361,48 @@ verifier("parties", outil("cao_doc_lire", chemin="p", doc="pcb", parties=["nom",
          {"nom": "carte"})
 verifier("parties absentes signalées",
          outil("cao_doc_lire", chemin="p", doc="pcb", parties=["absente"])[1].get("parties_absentes"), ["absente"])
+FauxApi.table.clear()
+
+# Lectures CAO, LIB, WEB_3D (le faux outil sert aussi de WEB_3D)
+os.environ["WEB_SUITE_MCP_PORTS"] = json.dumps(dict(PORTS, web_cao=api.server_address[1],
+                                                    web_3d=api.server_address[1]))
+FauxApi.table[("GET", "/api/oeil")] = (200, {"dispo": True, "gabarits": [
+    {"id": "usb2", "nom": "USB 2.0", "polygone": [[0, 0]] * 50, "masque": {}}]})
+FauxApi.table[("GET", "/api/crosstalk")] = (500, {"detail": "en panne"})
+FauxApi.recues.clear()
+erreur, solveurs = outil("cao_solveurs")
+verifier("cao_solveurs malgré une panne", erreur, False)
+verifier("les sept GET", sorted(r[1] for r in FauxApi.recues), sorted(
+    ["/api/simulation", "/api/simulation-dc", "/api/crosstalk", "/api/simulation-rf", "/api/oeil",
+     "/api/analyse-carte", "/api/ipc2581"]))
+verifier("gabarits réduits", solveurs["oeil"]["gabarits"], [{"id": "usb2", "nom": "USB 2.0"}])
+verifier("solveur en panne marqué", "erreur" in solveurs["crosstalk"], True)
+verifier("solveur sain intact", solveurs["simulation"], {"route": "/api/simulation"})
+
+FauxApi.recues.clear()
+for nom, args in (("cao_profils", {}), ("cao_profil_lire", {"nom": "jlc 4c"}), ("lib_fichiers", {}),
+                  ("lib_fichier_lire", {"type": "pcb", "nom": "R0603"}), ("lib_parasites", {}),
+                  ("web3d_projets", {})):
+    verifier("%s sans erreur" % nom, outil(nom, **args)[0], False)
+verifier("routes des lectures", [r[1] for r in FauxApi.recues], [
+    "/api/profils", "/api/profil" + q(nom="jlc 4c"), "/api/lib/fichiers",
+    "/api/lib/fichier" + q(type="pcb", nom="R0603"), "/api/lib/parasites", "/api/projets"])
+FauxApi.recues.clear()
+verifier("type LIB inconnu refusé", outil("lib_fichier_lire", type="autre", nom="x")[0], True)
+verifier("sans requête", FauxApi.recues, [])
+
+FauxApi.table[("GET", "/api/lib/composants")] = (200, {
+    "colonnes": ["ref", "valeur", "boitier"], "total": 120,
+    "composants": [{"ref": "R%d" % i, "valeur": "10k" if i % 2 else "1µF", "boitier": "0603", "_id": i}
+                   for i in range(120)]})
+_, page = outil("lib_composants")
+verifier("50 par défaut", (len(page["composants"]), page["total"], page["trouves"]), (50, 120, 120))
+_, page = outil("lib_composants", filtre="10K", debut=10, nombre=5, colonnes=["ref"])
+verifier("filtre sans casse, page, colonnes", page["composants"],
+         [{"ref": "R%d" % i, "_id": i} for i in range(21, 31, 2)])
+verifier("trouvés après filtre", page["trouves"], 60)
+for args in ({"nombre": 0}, {"debut": -1}, {"colonnes": "ref"}):
+    verifier("lib_composants refuse %r" % args, outil("lib_composants", **args)[0], True)
 FauxApi.table.clear()
 os.environ["WEB_SUITE_MCP_PORTS"] = json.dumps(PORTS)
 print("OK")

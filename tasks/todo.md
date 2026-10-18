@@ -58,7 +58,7 @@ Plan : [plan.md](plan.md) · Spec : [lanceur/docs/SPEC-mcp-api-outils.md](../lan
 - [ ] Tous les bancs du lanceur verts
 - [ ] Revue avec toi avant la phase 2
 
-## Tâche 3 : lectures CAO, LIB, WEB_3D
+## Tâche 3 : ✅ lectures CAO, LIB, WEB_3D
 
 **Description :** ajouter `cao_solveurs` (7 GET d'état en un appel, gabarits de l'œil
 réduits à leurs noms), `cao_profils`, `cao_profil_lire`, `lib_fichiers`, `lib_fichier_lire`
@@ -66,14 +66,14 @@ réduits à leurs noms), `cao_profils`, `cao_profil_lire`, `lib_fichiers`, `lib_
 50 par défaut) et `web3d_projets`.
 
 **Critères d'acceptation :**
-- [ ] Chaque outil atteint sa ou ses routes en GET
-- [ ] `cao_solveurs` rend un résultat même si un des sept GET échoue (marqué en erreur pour
+- [x] Chaque outil atteint sa ou ses routes en GET
+- [x] `cao_solveurs` rend un résultat même si un des sept GET échoue (marqué en erreur pour
       ce solveur)
-- [ ] `lib_composants` filtre sans tenir compte de la casse et pagine ; un `type` LIB
+- [x] `lib_composants` filtre sans tenir compte de la casse et pagine ; un `type` LIB
       inconnu est refusé sans requête
 
 **Vérification :**
-- [ ] `python lanceur/banc_mcp.py` OK
+- [x] `python lanceur/banc_mcp.py` OK
 
 **Dépendances :** tâche 2
 
