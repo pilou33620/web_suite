@@ -143,7 +143,7 @@ vrai BroadcastChannel de Node.
 
 **Dépendances :** T3, T5 · **Fichiers :** WEB_CAO : `pilote.py`, `commun/pilote.*`, `web_CAO.py`, 4 pages, `dist/` · **Taille :** M
 
-## Tâche 7 : WEB_CAO : `cao_calcul`
+## Tâche 7 : ✅ WEB_CAO : `cao_calcul`
 
 **Description :** commande `cao_calcul` dans les pages PCB et visionneuse IPC :
 - choisir l'analyse (`simAllerFamille` / `simAllerAnalyse`), puis faire `await` sur son
@@ -153,9 +153,9 @@ vrai BroadcastChannel de Node.
 - afficher la trace « Claude a lancé : … » dans le panneau.
 
 **Critères d'acceptation :**
-- [ ] Les 9 analyses de la spec sont acceptées ; une analyse impossible (rien de
+- [x] Les 9 analyses de la spec sont acceptées ; une analyse impossible (rien de
       sélectionné) rend le message de la page
-- [ ] Un calcul qui finit après 2 min se suit avec `pilote_suivre`
+- [x] Un calcul qui finit après 2 min se suit avec `pilote_suivre`
 
 **Vérification :** banc Node avec un faux `SIM`, puis un vrai calcul d'impédance avec
 Chromium

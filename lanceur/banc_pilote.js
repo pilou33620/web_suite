@@ -15,7 +15,7 @@ const pause = ms => new Promise(r => setTimeout(r, ms));
 /* Faux serveur du pilote : il note les battements, compte les long-polls en cours et
    rend les commandes au navigateur de l'onglet visé, comme pilote.py. */
 function fauxServeur() {
-  const s = { battements: [], file: [], reponses: [], enCours: 0, maxEnCours: 0, polls: [] };
+  const s = { battements: [], file: [], reponses: [], enCours: 0, maxEnCours: 0, polls: [], balises: [] };
   s.fetch = async (url, opts = {}) => {
     const u = new URL(url, "http://outil");
     const corps = opts.body ? JSON.parse(opts.body) : null;
@@ -86,7 +86,8 @@ function texteDe(el) { return el.textContent; }
 function panneauOuvert(doc) { const p = trouver(doc.body, e => e.classes.has("pilote"))[0]; return !!p && p.classes.has("ouvert"); }
 
 function onglet(serveur, stockage, page, nomCanal) {
-  return creer({ fetch: serveur.fetch, BroadcastChannel, stockage, canal: nomCanal }, REGLAGES).declarer({
+  const balise = (url, corps) => { serveur.balises.push({ url, corps: JSON.parse(corps) }); return true; };
+  return creer({ fetch: serveur.fetch, BroadcastChannel, stockage, canal: nomCanal, balise }, REGLAGES).declarer({
     page, projet: () => "carte PIR" });
 }
 
@@ -168,6 +169,12 @@ function onglet(serveur, stockage, page, nomCanal) {
   const ancien = relais[0];
   const restants = [A, B, C].filter(o => o !== ancien);
   ancien.arreter();
+  // Le relais qui se ferme prévient le serveur tout de suite (balise), sans attendre l'oubli
+  const adieu = serveur.balises.pop();
+  assert.ok(adieu && adieu.url === "/api/pilote/battement", "battement d'adieu envoyé par balise");
+  assert.strictEqual(adieu.corps.navigateur, serveur.nav);
+  assert.ok(!adieu.corps.onglets.some(o => o.id === ancien.id) && adieu.corps.onglets.length === 2,
+            "l'adieu liste les autres onglets, pas celui qui se ferme");
   const cible = restants[restants.length - 1];
   cible.commande("apres", { executer: () => "toujours là" });
   id = serveur.deposer(cible.id, "apres");

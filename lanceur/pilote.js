@@ -321,6 +321,11 @@
     P.arreter = function () {
       if (!actif) return;
       actif = false;
+      if (P.relais && env.balise) {
+        // Seul onglet de son navigateur, personne d'autre ne préviendrait le serveur : il garderait
+        // l'onglet fermé une minute et lui enverrait des commandes. Une balise part même à la fermeture.
+        env.balise("/api/pilote/battement", JSON.stringify({ navigateur: nav, onglets: vivants() }));
+      }
       P.relais = false;
       minuteurs.forEach(m => { clearInterval(m); clearTimeout(m); });
       if (arretPoll) arretPoll.abort();
@@ -341,7 +346,8 @@
     try { stockage = window.localStorage; } catch (_) { /* refusé : un relais par onglet */ }
     // Ouverte sans serveur (monofichier en file://), la page n'a pas de canal : Pilote ne démarre pas
     const servie = /^https?:$/.test(window.location.protocol);
+    const balise = (url, corps) => navigator.sendBeacon(url, new Blob([corps], { type: "application/json" }));
     window.Pilote = creer({ fetch: (u, o) => window.fetch(u, o), BroadcastChannel: servie ? window.BroadcastChannel : null,
-                            stockage, document, fenetre: window });
+                            stockage, document, fenetre: window, balise: navigator.sendBeacon ? balise : null });
   }
 })();
