@@ -177,7 +177,8 @@ export function trouverPiece(modele, ref){
 - **Demander d'abord** :
   - changer le comportement de l'interface pour la souris ;
   - ajouter un format d'export ;
-  - toucher à `web_3D.py` (le ranger y existe déjà : rien à changer côté serveur).
+  - toucher à `web_3D.py` (fait une fois, avec accord, à la revue : le dépôt crée le
+    fichier de façon exclusive, sans fichier `.part`, et ignore les liens symboliques).
 - **Jamais** :
   - écraser un fichier de PROJETS ;
   - ouvrir un fichier hors de PROJETS/3D ;
@@ -193,3 +194,7 @@ export function trouverPiece(modele, ref){
 2. **Cote affichée** : l'adaptateur pose **sa propre cote** (ligne et étiquette dans
    `vue.annotations`), effacée au prochain `web3d_mesurer` ou par `effacer: true`. L'outil
    Mesure de la page n'est pas touché.
+3. **Revue (tâche 11)** : la carte de déplacement montre la position avant et après ;
+   elle est refusée à l'application si la scène a changé depuis. Annuler un ajout rend la
+   page dans l'état d'avant (isolement, sélection, collisions, titre). Les collisions
+   demandées avec `afficher` sont dessinées comme par le bouton de la page.

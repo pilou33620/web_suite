@@ -205,9 +205,11 @@ Puis `/review` et l'audit de sécurité.
 **Critères d'acceptation :**
 - [x] Tous les essais passent ; PROJETS reste intact ; le ralentissement en onglet caché
       est mesuré (collisions 127 s → 4,5 s une fois calculées d'un bloc ; ouverture 10,9 s, non ralentie)
-- [ ] `/review` fait, corrections appliquées
+- [x] `/review` fait, corrections appliquées (rafraîchissement unique après déplacement,
+      scène vérifiée avant d'appliquer, aperçu chiffré sur la carte de déplacement,
+      collisions dessinées, Annuler d'un ajout complet ; `web_3D.py` : création exclusive)
 
 **Dépendances :** T10 · **Taille :** M
 
 ## Checkpoint : terminé
-- [ ] Critères de la spec remplis
+- [x] Critères de la spec remplis

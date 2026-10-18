@@ -15,6 +15,8 @@ VUES = ("avant", "arriere", "gauche", "droite", "dessus", "dessous", "iso")
 ACTIONS = ("masquer", "afficher", "isoler", "tout_afficher", "selectionner")
 QUOI = ("dimensions", "distance", "faces")
 REF = re.compile(r"^[^\x00-\x1f]{1,200}$")      # uuid, chemin « 0/3/1 », ou nom unique
+MM = 1e6                                          # mm : au-delà, la vue casse (positions infinies)
+DEGRES = 3600
 
 
 def refuser(texte):
@@ -35,10 +37,18 @@ def nombre(v, nom, mini=None, maxi=None):
     return v
 
 
-def vecteur(v, nom):
+def vecteur(v, nom, borne=MM):
     if not isinstance(v, list) or len(v) != 3:
         refuser("Argument « %s » invalide : trois nombres [x, y, z]." % nom)
-    return [nombre(x, nom) for x in v]
+    return [nombre(x, nom, -borne, borne) for x in v]
+
+
+def booleen(a, nom):
+    """Un vrai booléen JSON : en Python, bool("false") vaut True."""
+    v = a.get(nom, False)
+    if type(v) is not bool:
+        refuser("Argument « %s » invalide : true ou false." % nom)
+    return v
 
 
 def choix(v, nom, possibles):
@@ -69,8 +79,10 @@ def envoyer(nom, args, ecriture, a):
 
 
 def web3d_scene(a):
-    args = {"filtre": facultatif(a, "filtre", str, ""), "debut": index(a.get("debut", 0), "debut"),
-            "nombre": index(a.get("nombre", 200), "nombre")}
+    nb = index(a.get("nombre", 200), "nombre")
+    if nb > 1000:
+        refuser("Argument « nombre » invalide : 1000 au plus (paginer avec « debut »).")
+    args = {"filtre": facultatif(a, "filtre", str, ""), "debut": index(a.get("debut", 0), "debut"), "nombre": nb}
     return envoyer("web3d_scene", args, False, a)
 
 
@@ -82,8 +94,9 @@ def web3d_vue(a):
         args["projection"] = choix(a["projection"], "projection", ("ortho", "perspective"))
     if a.get("cadrer") is not None:
         args["cadrer"] = cible(a["cadrer"])
+    capturer = booleen(a, "capturer")
     vue = envoyer("web3d_vue", args, False, a)
-    if not a.get("capturer") or vue.get("etat") != "finie":
+    if not capturer or vue.get("etat") != "finie":
         return vue
     # La capture du même onglet, dans la foulée : l'image et la vue en un appel
     image = pilote.pilote_capture({"outil": "web_3d", "onglet": vue["onglet"]["id"]})
@@ -102,7 +115,7 @@ def web3d_visibilite(a):
 def web3d_coupe(a):
     args = {}
     if "actif" in a:
-        args["actif"] = bool(a["actif"])
+        args["actif"] = booleen(a, "actif")
     if a.get("axe") is not None:
         args["axe"] = choix(a["axe"], "axe", ("x", "y", "z"))
     if a.get("face") is not None:
@@ -111,17 +124,17 @@ def web3d_coupe(a):
             refuser("Argument « face » invalide : {\"piece\": …, \"index\": n}.")
         args["face"] = {"piece": ref(f.get("piece")), "index": index(f.get("index"), "face.index")}
     if a.get("decalage_mm") is not None:
-        args["decalage_mm"] = nombre(a["decalage_mm"], "decalage_mm")
+        args["decalage_mm"] = nombre(a["decalage_mm"], "decalage_mm", -MM, MM)
     if "inverse" in a:
-        args["inverse"] = bool(a["inverse"])
+        args["inverse"] = booleen(a, "inverse")
     return envoyer("web3d_coupe", args, False, a)
 
 
 def web3d_mesurer(a):
-    if a.get("effacer"):
+    if booleen(a, "effacer"):
         return envoyer("web3d_mesurer", {"effacer": True}, False, a)
     quoi = choix(a.get("quoi", "dimensions"), "quoi", QUOI)
-    args = {"quoi": quoi, "afficher": bool(a.get("afficher"))}
+    args = {"quoi": quoi, "afficher": booleen(a, "afficher")}
     if quoi == "distance":
         refs = a.get("pieces")
         if not isinstance(refs, list) or len(refs) != 2:
@@ -135,7 +148,7 @@ def web3d_mesurer(a):
 
 
 def web3d_collisions(a):
-    args = {"tolerance": nombre(a.get("tolerance", 0.1), "tolerance", 1e-6, 10), "afficher": bool(a.get("afficher"))}
+    args = {"tolerance": nombre(a.get("tolerance", 0.1), "tolerance", 1e-6, 10), "afficher": booleen(a, "afficher")}
     return envoyer("web3d_collisions", args, False, a)
 
 
@@ -147,15 +160,15 @@ def web3d_ouvrir(a):
         if (not isinstance(c, str) or not c or c.startswith("/") or "\\" in c or ":" in c
                 or any(b in ("", ".", "..") for b in c.split("/"))):
             refuser("Chemin invalide : %r (relatif à PROJETS/3D, tel que le rend web3d_projets)." % (c,))
-    return envoyer("web3d_ouvrir", {"chemins": chemins, "ajout": bool(a.get("ajout"))}, True, a)
+    return envoyer("web3d_ouvrir", {"chemins": chemins, "ajout": booleen(a, "ajout")}, True, a)
 
 
 def web3d_deplacer(a):
     args = {"fichier": index(a.get("fichier"), "fichier")}
     for k in ("position", "translation", "rotation_deg"):
         if a.get(k) is not None:
-            args[k] = vecteur(a[k], k)
-    if a.get("origine"):
+            args[k] = vecteur(a[k], k, DEGRES if k == "rotation_deg" else MM)
+    if booleen(a, "origine"):
         args["origine"] = True
     if a.get("contrainte") is not None:
         c = a["contrainte"]
@@ -163,7 +176,7 @@ def web3d_deplacer(a):
             refuser("contrainte : {\"mobile\": {piece, face}, \"fixe\": {piece, face}, \"decalage\": mm}.")
         args["contrainte"] = {k: {"piece": ref(c[k].get("piece")), "face": index(c[k].get("face"), k + ".face")}
                               for k in ("mobile", "fixe")}
-        args["contrainte"]["decalage"] = nombre(c.get("decalage", 0), "decalage")
+        args["contrainte"]["decalage"] = nombre(c.get("decalage", 0), "decalage", -MM, MM)
     if len(args) == 1:
         refuser("Rien à faire : position, translation, rotation_deg, origine ou contrainte.")
     return envoyer("web3d_deplacer", args, True, a)

@@ -374,6 +374,38 @@ function onglet(serveur, stockage, page, nomCanal) {
   assert.deepStrictEqual(serveur.finale(id).resultat.retour, { chemin: "bolt (2).stp" });
   assert.strictEqual(boutons().filter(b => b.textContent === "Annuler").length, avantAnnuler, "pas d'Annuler");
 
+  // annuler asynchrone : un échec ramène la carte à « appliquée » (message), un double clic n'annule qu'une fois
+  let annulations = 0, echouer = true;
+  const etatA = { v: 0 };
+  D.commande("annulable", { ecriture: true, proposer: () => ({ titre: "annulable" }),
+                            appliquer: () => { etatA.v = 1; return 0; },
+                            annuler: async () => { annulations++; await pause(40); if (echouer) throw new Error("disque plein"); etatA.v = 0; },
+                            etat: () => etatA.v });
+  id = serveur.deposer(D.id, "annulable", {}, true);
+  await attendreQue(() => serveur.reponsesDe(id).includes("proposee"), 2000, "carte annulable");
+  boutons().filter(b => b.textContent === "Appliquer").pop().click();
+  await attendreQue(() => serveur.finale(id), 2000, "annulable appliquée");
+  const carteAnn = () => boutons().filter(b => b.textContent === "Annuler").pop();
+  carteAnn().click();
+  await attendreQue(() => /disque plein/.test(texteDe(doc.body)), 2000, "échec d'annulation affiché");
+  assert.ok(carteAnn(), "après un échec, la carte offre encore Annuler");
+  echouer = false; annulations = 0;
+  const b2 = carteAnn(); b2.click(); b2.click();
+  await attendreQue(() => etatA.v === 0, 2000, "annulée");
+  await pause(80);
+  assert.strictEqual(annulations, 1, "un double clic n'annule qu'une fois");
+
+  // Une carte appliquée annulable reste dans le panneau malgré une série de lectures
+  etatA.v = 1;
+  id = serveur.deposer(D.id, "annulable", {}, true);
+  await attendreQue(() => serveur.reponsesDe(id).includes("proposee"), 2000, "carte annulable 2");
+  boutons().filter(b => b.textContent === "Appliquer").pop().click();
+  await attendreQue(() => serveur.finale(id), 2000, "annulable 2 appliquée");
+  for (let i = 0; i < 40; i++) D.commande("t" + i, { executer: () => i });
+  for (let i = 0; i < 40; i++) serveur.deposer(D.id, "t" + i);
+  await attendreQue(() => serveur.reponses.filter(r => r.etat === "finie" && /^\d+$/.test(String(r.resultat))).length >= 40, 3000, "40 lectures");
+  assert.ok(carteAnn(), "l'Annuler de la carte appliquée est toujours là");
+
   // La capture se voit dans le panneau, et le panneau ne grossit pas sans fin
   D.capture(() => ({ width: 10, height: 10, toDataURL: () => "data:image/png;base64,QQ" }));
   id = serveur.deposer(D.id, "capture");

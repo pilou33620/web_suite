@@ -686,7 +686,13 @@ for nom, args in (("web3d_vue", {"vue": "plongee"}), ("web3d_vue", {"projection"
                   ("web3d_deplacer", {"fichier": -1, "translation": [1, 0, 0]}),
                   ("web3d_deplacer", {"fichier": 0, "translation": [1, 0]}),
                   ("web3d_deplacer", {"fichier": 0, "rotation_deg": [0, 0, "90"]}),
-                  ("web3d_ranger_step", {"piece": ""}), ("web3d_ranger_step", {"piece": UU, "nom": "a/b"})):
+                  ("web3d_ranger_step", {"piece": ""}), ("web3d_ranger_step", {"piece": UU, "nom": "a/b"}),
+                  # bornes et booléens stricts (revue) : « "false" » valait vrai, 1e9 mm cassait la vue
+                  ("web3d_deplacer", {"fichier": 0, "translation": [1e9, 0, 0]}),
+                  ("web3d_deplacer", {"fichier": 0, "rotation_deg": [0, 0, 1e5]}),
+                  ("web3d_coupe", {"actif": "false"}), ("web3d_coupe", {"decalage_mm": 5e6}),
+                  ("web3d_ouvrir", {"chemins": ["a.stp"], "ajout": "oui"}),
+                  ("web3d_scene", {"nombre": 5000}), ("web3d_vue", {"capturer": 1})):
     verifier("%s refuse %r" % (nom, args), outil(nom, **args)[0], True)
 verifier("aucun argument invalide n'atteint la page", FauxApi.recues, [])
 
