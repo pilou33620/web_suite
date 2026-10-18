@@ -444,5 +444,18 @@ verifier("écritures permises", ecritures(), [
     ("POST", "/api/lib/fichier", {"type": "pcb", "nom": "C0402.json", "data": {"a": 1}}),
     ("POST", "/api/lib/fichier", {"type": "simulation", "nom": "m.sub", "contenu": "* x"})])
 FauxApi.table.clear()
+
+# pcbparts par le relais de WEB_CAO : seulement les outils de sa liste blanche
+FauxApi.table[("GET", "/api/tools")] = (200, {"tools": [{"name": "jlc_search"}, {"name": "autre"}],
+                                              "allowed": ["jlc_search"]})
+FauxApi.recues.clear()
+verifier("pcbparts_outils", outil("pcbparts_outils")[1]["allowed"], ["jlc_search"])
+verifier("pcbparts_appeler", outil("pcbparts_appeler", name="jlc_search", arguments={"q": "LM317"})[0], False)
+verifier("appel relayé", FauxApi.recues[-1], ("POST", "/api/tool", {"name": "jlc_search", "arguments": {"q": "LM317"}}))
+FauxApi.recues.clear()
+verifier("outil hors liste refusé", outil("pcbparts_appeler", name="autre", arguments={})[0], True)
+verifier("arguments non objet refusés", outil("pcbparts_appeler", name="jlc_search", arguments="x")[0], True)
+verifier("seulement la lecture de la liste", ecritures(), [])
+FauxApi.table.clear()
 os.environ["WEB_SUITE_MCP_PORTS"] = json.dumps(PORTS)
 print("OK")

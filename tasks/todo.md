@@ -103,17 +103,17 @@ existe).
 
 **Taille :** S
 
-## Tâche 5 : pcbparts par le relais WEB_CAO
+## Tâche 5 : ✅ pcbparts par le relais WEB_CAO
 
 **Description :** ajouter `pcbparts_outils` (GET `/api/tools`) et `pcbparts_appeler` (POST
 `/api/tool`, `name` contrôlé contre `allowed`).
 
 **Critères d'acceptation :**
-- [ ] Un outil de la liste `allowed` est appelé avec `{name, arguments}`
-- [ ] Un outil hors liste est refusé, et le faux outil ne reçoit que le GET `/api/tools`
+- [x] Un outil de la liste `allowed` est appelé avec `{name, arguments}`
+- [x] Un outil hors liste est refusé, et le faux outil ne reçoit que le GET `/api/tools`
 
 **Vérification :**
-- [ ] `python lanceur/banc_mcp.py` OK
+- [x] `python lanceur/banc_mcp.py` OK
 
 **Dépendances :** tâche 2
 

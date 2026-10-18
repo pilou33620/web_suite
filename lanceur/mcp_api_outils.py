@@ -198,6 +198,17 @@ def lib_fichier_ecrire(args):
     return noyau.appeler_outil_web("web_cao", "/api/lib/fichier", corps)
 
 
+def pcbparts_appeler(args):
+    nom = exiger(args, name=str)
+    arguments = facultatif(args, "arguments", dict, {})
+    # La liste blanche est celle de WEB_CAO (passerelle_mcp.ALLOWED_TOOLS), relue à chaque appel
+    permis = noyau.appeler_outil_web("web_cao", "/api/tools").get("allowed") or []
+    if nom not in permis:
+        raise noyau.ErreurOutil("Outil pcbparts non permis : %s. Permis : %s." % (nom, ", ".join(map(str, permis))))
+    return resumer(noyau.appeler_outil_web("web_cao", "/api/tool", {"name": nom, "arguments": arguments}),
+                   "Réponse pcbparts trop grosse : affine la recherche.")
+
+
 CHEMIN = {"type": "string", "description": "Chemin du projet, tel que rendu par cao_projets."}
 RACINE = {"type": "string", "description": "Racine du projet (champ « racine » de cao_projets) ; facultatif."}
 
@@ -306,5 +317,19 @@ OUTILS_API = {
             "data": {"type": ["object", "array"]}, "contenu": {"type": "string"}},
             "required": ["type", "nom"]},
         "fn": lib_fichier_ecrire,
+    },
+    "pcbparts_outils": {
+        "description": "Liste les outils pcbparts.dev (recherche JLCPCB, Mouser, Digi-Key, brochages, "
+                       "règles de fabrication…) que WEB_CAO relaie, avec leurs schémas d'arguments. "
+                       "Passe par Internet.",
+        "inputSchema": {"type": "object", "properties": {}},
+        "fn": lambda _a: lire("web_cao", "/api/tools"),
+    },
+    "pcbparts_appeler": {
+        "description": "Appelle un outil pcbparts.dev par le relais de WEB_CAO (seulement ceux de sa "
+                       "liste « allowed », voir pcbparts_outils). Passe par Internet.",
+        "inputSchema": {"type": "object", "properties": {
+            "name": {"type": "string"}, "arguments": {"type": "object"}}, "required": ["name"]},
+        "fn": pcbparts_appeler,
     },
 }
