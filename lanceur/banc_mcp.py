@@ -570,5 +570,81 @@ verifier("suivre sans id refusé", outil("antenna_openems_suivre")[0], True)
 verifier("jamais lancer ni arrêter", [r for r in FauxApi.recues
                                        if "lancer" in r[1] or "arreter" in r[1]], [])
 FauxApi.table.clear()
+
+# ---------------------------------------------------------------------------
+# canal-pilote (lanceur/docs/SPEC-mcp-canal-pilote.md) : les outils déposent une commande
+# sur /api/pilote/commande de l'outil, qui attend la réponse de la page
+import base64  # noqa: E402
+
+os.environ["WEB_SUITE_MCP_PORTS"] = json.dumps(dict(PORTS, web_cao=api.server_address[1],
+                                                    web_antenna=api.server_address[1]))
+verifier("outils du canal listés", {"pilote_onglets", "pilote_suivre", "pilote_capture", "cao_calcul",
+                                    "cao_valeur_composant", "antenna_proposer"} <= set(noms), True)
+FauxApi.table[("GET", "/api/pilote/onglets")] = (200, {"onglets": [{"id": "A", "page": "pcb"}]})
+erreur, vus = outil("pilote_onglets")
+verifier("onglets des outils lancés, outil arrêté dit", (erreur, vus["web_cao"], vus["web_3d"]),
+         (False, [{"id": "A", "page": "pcb"}], "arrêté"))
+FauxApi.table[("GET", "/api/pilote/onglets")] = (404, {"detail": "inconnue"})
+verifier("outil sans canal (pas à jour)", "canal" in outil("pilote_onglets")[1]["web_cao"], True)
+
+fin = lambda resultat, etat="finie": (200, {"id": "c" * 32, "nom": "x", "etat": etat, "resultat": resultat,  # noqa: E731
+                                            "onglet": {"id": "A", "page": "pcb", "projet": "p", "appareil": "ce poste"}})
+FauxApi.table[("POST", "/api/pilote/commande")] = fin({"rapport": "Z0 = 50 ohms"})
+FauxApi.recues.clear()
+erreur, rendu = outil("cao_calcul", analyse="impedance")
+verifier("cao_calcul", (erreur, rendu["resultat"]), (False, {"rapport": "Z0 = 50 ohms"}))
+outil("cao_calcul", analyse="crosstalk", onglet="B")
+outil("cao_valeur_composant", ref="R12", valeur="4k7")
+outil("antenna_proposer", carte={"type": "cotes", "cotes": {"L": 30}})
+verifier("commandes déposées", [r[2] for r in FauxApi.recues], [
+    {"page": ["pcb", "visionneuse-ipc"], "nom": "cao_calcul", "args": {"analyse": "impedance"}, "ecriture": False},
+    {"page": ["pcb", "visionneuse-ipc"], "nom": "cao_calcul", "args": {"analyse": "crosstalk"}, "ecriture": False,
+     "onglet": "B"},
+    {"page": ["schema"], "nom": "cao_valeur_composant", "args": {"ref": "R12", "valeur": "4k7"}, "ecriture": True},
+    {"page": ["antenna"], "nom": "antenna_proposer", "args": {"carte": {"type": "cotes", "cotes": {"L": 30}}},
+     "ecriture": True}])
+FauxApi.recues.clear()
+for nom, args in (("cao_calcul", {"analyse": "tout"}), ("cao_calcul", {}),
+                  ("cao_valeur_composant", {"ref": "", "valeur": "1k"}), ("cao_valeur_composant", {"ref": "R1"}),
+                  ("antenna_proposer", {"carte": {"type": "lancer"}}), ("antenna_proposer", {"carte": "x"}),
+                  ("pilote_capture", {"outil": "web_ferme"}), ("pilote_suivre", {"outil": "web_cao"})):
+    verifier("%s refuse %r" % (nom, args), outil(nom, **args)[0], True)
+verifier("aucune commande refusée déposée", FauxApi.recues, [])
+
+# États rendus par la page : refusée n'est pas une erreur ; échouée et expirée en sont
+FauxApi.table[("POST", "/api/pilote/commande")] = fin(None, "refusee")
+verifier("refusée", outil("cao_valeur_composant", ref="R1", valeur="1k"), (False, outil("cao_valeur_composant",
+         ref="R1", valeur="1k")[1]))
+verifier("refusée dite", "refus" in json.dumps(outil("cao_valeur_composant", ref="R1", valeur="1k")[1]), True)
+for etat in ("echouee", "expiree"):
+    FauxApi.table[("POST", "/api/pilote/commande")] = fin("Repère R99 introuvable.", etat)
+    erreur, texte = outil("cao_valeur_composant", ref="R99", valeur="1k")
+    verifier("%s en erreur lisible" % etat, (erreur, "R99" in texte or "fermé" in texte or "expir" in texte),
+             (True, True))
+# Pas encore de réponse (ta carte attend) : en attente, avec l'id pour pilote_suivre
+FauxApi.table[("POST", "/api/pilote/commande")] = fin(None, "proposee")
+erreur, att = outil("cao_valeur_composant", ref="R1", valeur="1k")
+verifier("en attente avec id", (erreur, att["etat"], att["id"]), (False, "en_attente", "c" * 32))
+FauxApi.table[("GET", "/api/pilote/suivre")] = fin("R1 = 1k", "appliquee")
+FauxApi.recues.clear()
+verifier("pilote_suivre", outil("pilote_suivre", outil="web_cao", id="c" * 32)[1]["etat"], "appliquee")
+verifier("route de suivi", FauxApi.recues[-1][:2], ("GET", "/api/pilote/suivre" + q(id="c" * 32)))
+
+# Capture : un contenu MCP « image », pas du texte
+png = base64.b64encode(b"\x89PNG\r\n\x1a\n" + b"0" * 100).decode()
+FauxApi.table[("POST", "/api/pilote/commande")] = fin({"image": "data:image/png;base64," + png,
+                                                       "largeur": 10, "hauteur": 10})
+FauxApi.recues.clear()
+r = mcp.appeler({"name": "pilote_capture", "arguments": {"outil": "web_cao", "page": "pcb"}})
+verifier("capture : image puis texte", ([c["type"] for c in r["content"]], r["isError"]), (["image", "text"], False))
+verifier("image en PNG base64", (r["content"][0]["mimeType"], r["content"][0]["data"]), ("image/png", png))
+verifier("capture visée", FauxApi.recues[-1][2], {"page": ["pcb"], "nom": "capture", "args": {}, "ecriture": False})
+mcp.appeler({"name": "pilote_capture", "arguments": {"outil": "web_cao"}})
+verifier("capture : toute page de l'outil", FauxApi.recues[-1][2]["page"],
+         ["schema", "pcb", "visionneuse-ipc", "gestion-lib", "accueil"])
+for image in ("data:text/html;base64," + png, "data:image/png;base64,!!!", "data:image/png;base64," + "A" * 3000000):
+    FauxApi.table[("POST", "/api/pilote/commande")] = fin({"image": image})
+    verifier("capture refusée : %s…" % image[:24], outil("pilote_capture", outil="web_cao")[0], True)
+FauxApi.table.clear()
 os.environ["WEB_SUITE_MCP_PORTS"] = json.dumps(PORTS)
 print("OK")

@@ -209,7 +209,9 @@ OUTILS_MCP = {
 # dans mcp_api_outils en chargerait une seconde copie.
 sys.modules.setdefault("mcp_web_suite", sys.modules[__name__])
 import mcp_api_outils  # noqa: E402
+import mcp_pilote  # noqa: E402
 OUTILS_MCP.update(mcp_api_outils.OUTILS_API)
+OUTILS_MCP.update(mcp_pilote.OUTILS_PILOTE)
 
 
 def initialiser(params):
@@ -241,6 +243,10 @@ def appeler(params):
     except Exception as exc:  # noqa: BLE001 : toute panne revient à Claude, le serveur continue
         journal("Échec de %s : %r" % (nom, exc))
         return resultat_texte("Échec de %s : %s" % (nom, exc), True)
+    if isinstance(rendu, dict) and "_image" in rendu:   # une capture : l'image, puis le reste en texte
+        image = rendu.pop("_image")
+        return {"content": [{"type": "image", "data": image["data"], "mimeType": image["mimeType"]},
+                            {"type": "text", "text": json.dumps(rendu, ensure_ascii=False)}], "isError": False}
     # Sans indentation : c'est ce texte que resumer() mesure contre le plafond de 100 Ko
     return resultat_texte(rendu if isinstance(rendu, str) else json.dumps(rendu, ensure_ascii=False))
 

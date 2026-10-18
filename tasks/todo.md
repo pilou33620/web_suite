@@ -49,7 +49,7 @@ rapide, puis corriger la spec.
 
 **Dépendances :** T1 · **Fichiers :** `lanceur/pilote.py` · **Taille :** M
 
-## Tâche 3 : MCP : `mcp_pilote.py`, image dans le noyau, banc
+## Tâche 3 : ✅ MCP : `mcp_pilote.py`, image dans le noyau, banc
 
 **Description :**
 - Les outils MCP `pilote_onglets`, `pilote_suivre`, `pilote_capture`, `cao_calcul`,
@@ -59,9 +59,9 @@ rapide, puis corriger la spec.
 - `banc_mcp.py` : un faux outil sert `/api/pilote/*`.
 
 **Critères d'acceptation :**
-- [ ] Chaque outil envoie la bonne commande (nom, page, arguments, `ecriture`)
-- [ ] `pilote_capture` rend un contenu MCP `image` (PNG en base64), sous 2 Mo
-- [ ] Arguments refusés sans requête (analyse inconnue, repère vide, type de carte
+- [x] Chaque outil envoie la bonne commande (nom, page, arguments, `ecriture`)
+- [x] `pilote_capture` rend un contenu MCP `image` (PNG en base64), sous 2 Mo
+- [x] Arguments refusés sans requête (analyse inconnue, repère vide, type de carte
       ANTENNA inconnu) ; `en_attente` se suit avec `pilote_suivre`
 
 **Vérification :** `python lanceur/banc_mcp.py` OK, ainsi que les autres bancs du lanceur
