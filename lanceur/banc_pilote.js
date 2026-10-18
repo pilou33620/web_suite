@@ -9,7 +9,9 @@
 const assert = require("assert");
 const { creer } = require("./pilote.js");
 
-const REGLAGES = { annonce: 40, silence: 160, battement: 120, attenteServeur: 80, repos: 30 };
+/* silence bien plus long que l'amorce, comme en vrai (90 s contre 5 s) : l'élection ne doit
+   attendre que l'amorce, et un relais qui se ferme proprement (« bye ») est remplacé aussitôt. */
+const REGLAGES = { annonce: 40, amorce: 160, silence: 3000, battement: 120, attenteServeur: 80, repos: 30 };
 const pause = ms => new Promise(r => setTimeout(r, ms));
 
 /* Faux serveur du pilote : il note les battements, compte les long-polls en cours et
@@ -103,7 +105,7 @@ function onglet(serveur, stockage, page, nomCanal) {
   assert.ok([A, B, C].every(o => /^[0-9a-f]{24}$/.test(o.id)) && new Set([A.id, B.id, C.id]).size === 3);
 
   // Un seul relais (le plus petit id), un seul long-poll à la fois
-  await pause(REGLAGES.silence * 2);
+  await pause(REGLAGES.amorce * 2);
   const relais = [A, B, C].filter(o => o.relais);
   assert.strictEqual(relais.length, 1, "un seul relais");
   assert.strictEqual(relais[0].id, [A.id, B.id, C.id].sort()[0], "le plus petit id");
@@ -178,7 +180,7 @@ function onglet(serveur, stockage, page, nomCanal) {
   const cible = restants[restants.length - 1];
   cible.commande("apres", { executer: () => "toujours là" });
   id = serveur.deposer(cible.id, "apres");
-  await attendreQue(() => restants.some(o => o.relais), REGLAGES.silence + REGLAGES.annonce * 3, "nouveau relais");
+  await attendreQue(() => restants.some(o => o.relais), REGLAGES.amorce + REGLAGES.annonce * 3, "nouveau relais");
   await attendreQue(() => serveur.finale(id), 2000, "commande après changement de relais");
   assert.strictEqual(serveur.finale(id).resultat, "toujours là");
   await attendreQue(() => {
@@ -199,6 +201,11 @@ function onglet(serveur, stockage, page, nomCanal) {
     etat: () => etat.v,
   });
   const doc = D._env.document;
+  // Le bouton « Claude » et l'interrupteur sont là dès le chargement, avant toute carte :
+  // sinon on ne pourrait pas allumer l'interrupteur à l'avance (vu à l'essai réel)
+  assert.strictEqual(trouver(doc.body, e => e.classes.has("pilote")).length, 1, "panneau construit au chargement");
+  assert.ok(trouver(doc.body, e => e.tagName === "input" && e.type === "checkbox").length === 1, "interrupteur présent");
+  assert.ok(!panneauOuvert(doc), "replié au chargement");
   const boutons = () => trouver(doc.body, e => e.tagName === "button");
   const bouton = texte => boutons().find(b => b.textContent === texte);
   await attendreQue(() => restants.concat(D).some(o => o.relais), 2000, "relais avec D");
