@@ -122,17 +122,17 @@ l'essai réel (T11)
 
 **Dépendances :** T1 · **Fichiers :** `js/11-projets.js`, `js/14-pilote-3d.js`, `test/banc-pilote-3d.mjs` · **Taille :** S
 
-## Tâche 7 : extraction STEP
+## Tâche 7 : ✅ extraction STEP
 
 **Description :** `extraireStep(groupe, pieces)` via `StepExtractor`. Les pièces sont
 retrouvées sans ambiguïté ; sinon, refus clair. La carte irréversible de `web3d_ranger_step`
 appelle `POST /api/projets` (`X-Web3D: 1`) depuis la page, puis rend le chemin créé.
 
 **Critères d'acceptation :**
-- [ ] Le STEP extrait d'une pièce de l'exemple est relu par OpenCascade, et donne une
+- [x] Le STEP extrait d'une pièce de l'exemple est relu par OpenCascade, et donne une
       pièce de même boîte
-- [ ] Un nom en double est refusé, ou résolu par l'index de produit, avec un message clair
-- [ ] Aucun déplacement n'est appliqué (positions d'origine, dit sur la carte)
+- [x] Noms exacts seulement ; une pièce à la fois (un sous-ensemble choisi pièce par pièce emporte ses voisines : refusé avec la raison)
+- [x] Aucun déplacement n'est appliqué (positions d'origine, dit sur la carte)
 
 **Vérification :** `node test/banc-pilote-3d.mjs`
 

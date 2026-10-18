@@ -35,8 +35,14 @@ appareil appairé.
 4. **Déplacement** : il porte sur un **fichier** de l'assemblage, c'est-à-dire un groupe :
    translation, rotation, retour à l'origine, et contrainte face plane contre face plane ou
    axe contre axe (faces désignées par leur index). Annuler remet les matrices d'avant.
-5. **Export** : le **STEP d'une pièce** (ou d'un sous-ensemble), extrait du STEP d'origine
-   et rangé dans PROJETS/3D. Le serveur n'écrase jamais : un nom pris devient `x (2).stp`.
+5. **Export** : le **STEP d'une pièce**, extrait du STEP d'origine et rangé dans PROJETS/3D.
+   Le serveur n'écrase jamais : un nom pris devient `x (2).stp`.
+   - **Une pièce à la fois** (revu à la tâche 7). Un sous-ensemble choisi pièce par pièce
+     n'est pas fiable : `exportAssemblageFiltre` remonte au sous-ensemble parent et
+     redescend vers tous ses enfants. Un écrou demandé emporte donc toutes les vis et tous
+     les écrous de « nut-bolt-assembly ».
+   - Seuls les noms de produit **exacts** sont acceptés. Les 8 « nut » sont 8 occurrences
+     d'un même produit, donc l'extraction est sans ambiguïté.
    - C'est une écriture **irréversible** pour la page, qui ne sait pas supprimer : la carte
      le dit.
    - `pilote.js` accepte une écriture déclarée `irreversible` seulement si elle porte ce
@@ -66,7 +72,7 @@ importé par `09-demarrage.js`. Côté MCP, elles vivent dans `lanceur/mcp_regis
 | `web3d_collisions` | non | Interférences entre pièces (tolérance en mm, défaut 0,1) : couples (uuid, nom) et longueur des courbes ; `afficher` les dessine |
 | `web3d_ouvrir` | **oui** | Fichiers de PROJETS/3D (chemins de `web3d_projets`), `ajout` ou remplacement ; un `.obj` emmène son `.mtl` |
 | `web3d_deplacer` | **oui** | Fichier visé, `translation` [mm], `rotation` [deg, autour du centre de sa boîte], `origine`, ou `contrainte` (`plan`/`axe`, face mobile et face fixe, décalage) |
-| `web3d_ranger_step` | **oui, irréversible** | Pièces visées, nom du fichier : STEP extrait, rangé dans PROJETS/3D |
+| `web3d_ranger_step` | **oui, irréversible** | Une pièce, nom du fichier : STEP extrait, rangé dans PROJETS/3D |
 
 ### Critères d'acceptation
 
