@@ -172,7 +172,7 @@ champs d'en-tête absents repris du projet ouvert, car le serveur les remet à v
 
 **Taille :** S
 
-## Tâche 8 : documentation, puis essai réel
+## Tâche 8 : ✅ documentation, puis essai réel
 
 **Description :** lister les outils MCP dans `lanceur/docs/DETAILS.md` (section « Claude
 Code (MCP) »), en une ligne chacun, et dire ce qui reste exclu. Puis faire l'essai réel avec
@@ -181,12 +181,14 @@ puis une partie), chercher un composant dans la LIB et sur pcbparts, chiffrer un
 openEMS.
 
 **Critères d'acceptation :**
-- [ ] DETAILS.md à jour, ainsi que la carte `SPEC-mcp.md` si besoin
-- [ ] L'essai réel donne des réponses justes ; aucune réponse ne dépasse 100 Ko
+- [x] DETAILS.md à jour, ainsi que la carte `SPEC-mcp.md` si besoin
+- [x] L'essai réel donne des réponses justes ; aucune réponse ne dépasse 100 Ko (2026-10-18, sur
+      le Pi : WEB_CAO et WEB_ANTENNA lancés sur une copie de PROJETS dans /tmp, 25 outils sur 25
+      appelés, plus grosse réponse 58 Ko (pcbparts), garde-fous vérifiés, PROJETS intact)
 
 **Vérification :**
 - [ ] CI verte après le push
-- [ ] Essai réel avec toi, sur le Pi
+- [x] Essai réel sur le Pi (fait par Claude ; reste l'essai par Claude Code redémarré, avec toi)
 
 **Dépendances :** tâches 1 à 7
 

@@ -161,8 +161,32 @@ sur le serveur sans rien envoyer : une retouche de dernière minute ne fait pas 
 Claude Code le lance lui-même et lui parle sur stdin/stdout. Il appelle les outils sur
 `127.0.0.1`, à leur port du catalogue (CAO 8000, ANTENNA 8732, 3D 8139, lanceur 8100),
 ou au port décalé que le lanceur annonce dans `/api/etat` quand le premier était pris ;
-depuis la boucle locale, aucun jeton n'est demandé. Outil disponible : `etat` (qui tourne,
-sur quel port). La suite est décrite dans [SPEC-mcp.md](SPEC-mcp.md).
+depuis la boucle locale, aucun jeton n'est demandé. La suite est décrite dans
+[SPEC-mcp.md](SPEC-mcp.md).
+
+Outils MCP (`etat` dans `mcp_web_suite.py`, les autres dans `mcp_api_outils.py`, voir
+[SPEC-mcp-api-outils.md](SPEC-mcp-api-outils.md)) :
+
+- `etat` : qui tourne, sur quel port.
+- WEB_CAO, lecture : `cao_projets`, `cao_projet_lire`, `cao_doc_lire` (schéma, PCB,
+  IPC-2581 ; `parties` pour n'en lire qu'un morceau), `cao_solveurs` (état des solveurs),
+  `cao_profils`, `cao_profil_lire`.
+- LIB, lecture : `lib_composants` (recherche et pagination dans le catalogue),
+  `lib_fichiers`, `lib_fichier_lire`, `lib_parasites`.
+- Écriture gardée : `cao_doc_ecrire` (exige le `modifie` lu : refus si le fichier a changé
+  depuis), `cao_profil_ecrire` et `lib_fichier_ecrire` (jamais d'écrasement).
+- pcbparts.dev, par le relais de WEB_CAO : `pcbparts_outils`, `pcbparts_appeler` (liste
+  blanche de WEB_CAO).
+- WEB_ANTENNA : `antenna_projets`, `antenna_calculs`, `antenna_projet_lire` et
+  `antenna_projet_enregistrer` (le projet ouvert seulement ; `null` refusé, en-tête absent
+  repris du projet ouvert), `antenna_openems_etat`, `antenna_openems_chiffrer` (modèle,
+  balayage, tableau S, script), `antenna_openems_suivre`, `antenna_openems_champs`.
+- WEB_3D : `web3d_projets`.
+
+Au-delà de 100 Ko, une réponse devient un résumé (clés, tailles, extrait). Le MCP ne
+supprime rien, ne lance ni n'arrête aucun calcul (les calculs WEB_CAO passeront par la
+page, avec le module `canal-pilote`), n'ouvre ni ne ferme de projet ANTENNA, ne touche
+ni aux racines de projets ni au catalogue LIB entier.
 
 **Sur le poste des outils** (Linux, Pi) :
 
@@ -203,6 +227,8 @@ doit rendre `{"jsonrpc": "2.0", "id": 1, "result": {}}`.
 - `python lanceur/banc_mcp.py` : serveur MCP en sous-processus — protocole (initialize,
   ping, erreurs), outil `etat` face à un faux WEB_CAO, routes `/api/github`, `/api/envoyer`,
   `/api/identite`, `/api/ia`, `/api/appairer` refusées et lanceur en lecture seule, sans
-  qu'aucune requête n'atteigne l'outil, outil arrêté signalé.
+  qu'aucune requête n'atteigne l'outil, outil arrêté signalé ; outils d'`api-outils` face
+  à un faux outil qui note chaque requête (bonne route et bonne méthode, garde-fous qui
+  refusent sans écrire, résumé sous 100 Ko, jamais `…/lancer`).
 
 Chacun affiche `OK` si tout passe.
