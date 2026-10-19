@@ -35,6 +35,7 @@ dans ce dossier. Les ids ne changent plus.
 | `registre-antenna` | Commandes WEB_ANTENNA : lecture et actions `reglages/cotes/balayage/formes` reprises | `canal-pilote` |
 | `composants` | Symbole, empreinte, brochage, ligne de catalogue (39 colonnes), validés par le code, écrits dans la LIB | `api-outils`, `registre-cao` |
 | `routage` | Le routeur PNS piloté sans souris : placer, router, paire, via ; boucle DRC et score | `registre-cao` |
+| `chemin-auto` | Chercheur de chemin (A*) dans la page PCB : un premier tracé que le routeur affine (spec plus tard) | `routage` |
 | `savoir-metier` | Le savoir des consignes Gemini déplacé dans un skill `web_suite` et dans les descriptions d'outils | `ecriture-cao`, `registre-antenna`, `composants` |
 | `retrait-gemini` | Retrait de l'assistant Gemini/Gemma et de `/api/ia/cle` | `savoir-metier`, `routage` |
 
@@ -55,7 +56,7 @@ dans ce dossier. Les ids ne changent plus.
 4. `registre-cao`, `registre-antenna`
    - puis `ecriture-cao`, puis `dessin-schema` (découpage de `registre-cao` décidé le
      2026-10-19 : le dessin du schéma entre dans le périmètre)
-5. `composants`, `routage`
+5. `composants`, `routage` (puis `chemin-auto`, décidé le 2026-10-19, spec plus tard)
 6. `savoir-metier`
 7. `retrait-gemini`
 
@@ -66,3 +67,10 @@ dans ce dossier. Les ids ne changent plus.
 - [x] `canal-pilote` : [SPEC-mcp-canal-pilote.md](SPEC-mcp-canal-pilote.md)
 - [x] `registre-3d` : [SPEC-mcp-registre-3d.md](SPEC-mcp-registre-3d.md)
 - [x] `registre-cao` : [SPEC-mcp-registre-cao.md](SPEC-mcp-registre-cao.md)
+- [x] `ecriture-cao` : [SPEC-mcp-ecriture-cao.md](SPEC-mcp-ecriture-cao.md)
+- [x] `dessin-schema` : [SPEC-mcp-dessin-schema.md](SPEC-mcp-dessin-schema.md)
+- [x] `registre-antenna` : [SPEC-mcp-registre-antenna.md](SPEC-mcp-registre-antenna.md)
+- [x] `composants` : [SPEC-mcp-composants.md](SPEC-mcp-composants.md)
+- [x] `routage` : [SPEC-mcp-routage.md](SPEC-mcp-routage.md)
+- [x] `savoir-metier` : [SPEC-mcp-savoir-metier.md](SPEC-mcp-savoir-metier.md)
+- [x] `retrait-gemini` : [SPEC-mcp-retrait-gemini.md](SPEC-mcp-retrait-gemini.md)
