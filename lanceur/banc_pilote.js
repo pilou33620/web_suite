@@ -286,6 +286,16 @@ function onglet(serveur, stockage, page, nomCanal) {
   assert.deepStrictEqual([serveur.finale(id).etat, etat.v], ["appliquee", "5"]);
   assert.ok(!serveur.reponsesDe(id).includes("proposee"), "pas de carte à valider");
   assert.ok(/directement/.test(texteDe(doc.body)), "trace de l'application directe");
+  // « clic » : même interrupteur allumé, la carte attend le clic (création dans la LIB partagée)
+  let creees = 0;
+  D.commande("creer", { ecriture: true, clic: true, irreversible: "Écrit dans la LIB.", proposer: a => ({ titre: a.v, apres: a.v }),
+                        appliquer: () => { creees++; return "LIB/x.json"; } });
+  id = serveur.deposer(D.id, "creer", { v: "x" }, true);
+  await attendreQue(() => serveur.reponsesDe(id).includes("proposee"), 2000, "carte à clic malgré l'interrupteur");
+  assert.strictEqual(creees, 0, "rien d'écrit avant le clic, interrupteur allumé");
+  boutons().filter(b => b.textContent === "Appliquer").pop().click();
+  await attendreQue(() => serveur.finale(id), 2000, "carte à clic appliquée");
+  assert.deepStrictEqual([serveur.finale(id).etat, creees, serveur.finale(id).resultat.direct], ["appliquee", 1, false]);
   inter.checked = false;
   inter.dispatch("change");
 

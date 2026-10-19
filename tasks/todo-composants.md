@@ -96,7 +96,7 @@ remarques, puis passe `verifierEmpreinte`. 200 Ko au plus.
 ## Checkpoint : le code métier
 - [x] Bancs verts ; générateurs et conversion contrôlés par `verifierEmpreinte`
 
-## Tâche 5 : commandes de Gestion LIB
+## Tâche 5 : ✅ commandes de Gestion LIB
 
 **Description :** `pilote-cao.js` déclare, pour `gestion-lib`, quatre commandes de calcul :
 `lib_empreinte_generer`, `lib_empreinte_verifier`, `lib_kicad_convertir` et
@@ -105,13 +105,14 @@ remarques, puis passe `verifierEmpreinte`. 200 Ko au plus.
 `ajouter`, et retrait de l'empreinte si la ligne est refusée).
 
 **Critères d'acceptation :**
-- [ ] Les calculs rendent l'empreinte JSON, ses erreurs et ses remarques, sans rien
+- [x] Les calculs rendent l'empreinte JSON, ses erreurs et ses remarques, sans rien
       écrire
-- [ ] `lib_composant_creer` : rien n'est écrit avant le clic, même interrupteur allumé ;
+- [x] `lib_composant_creer` : rien n'est écrit avant le clic, même interrupteur allumé ;
       au clic, empreinte puis ligne ; ligne refusée → empreinte retirée ; fichier
       existant → refus sans rien écrire
-- [ ] `banc-pilote-cao.js` : les commandes de Gestion LIB déclarées, la carte jamais
-      directe
+- [x] `banc-pilote-cao.js` : les commandes de Gestion LIB déclarées, la carte jamais
+      directe (option `clic` ajoutée à pilote.js, copiée dans les trois outils ; la ligne
+      ajoutée entre aussi dans le catalogue de la page, qu'un « Enregistrer » ne l'efface pas)
 
 **Vérification :** `node commun/test/banc-pilote-cao.js`, `node gestion-lib/test/banc-composants.js`
 
