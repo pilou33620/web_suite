@@ -128,7 +128,17 @@ Plan : [plan-retrait-gemini.md](plan-retrait-gemini.md)
 Puis `/review`.
 
 **Critères d'acceptation :**
-- [ ] Cinq pages sans erreur de console ; carte d'antenne proposée, cliquée, annulée
+- [x] Cinq pages sans erreur de console ; carte d'antenne proposée, cliquée, annulée
+      (Chromium headless sur le Pi, copie de PROJETS :
+      - schéma (11 étapes du tutoriel, clic droit), PCB (13 étapes), Gestion LIB (chargée,
+        tutoriel trop lourd pour le Pi), visionneuse (10 étapes), WEB_ANTENNA (14 étapes, une de
+        moins qu'avant : celle de l'assistant) : aucune erreur due au retrait ;
+      - restent deux erreurs ANTÉRIEURES, vues à l'identique sur le code d'avant le retrait :
+        clic droit sans carte ouverte (designer, 04-interaction.js : V.modele null → percages) et
+        un 422 de /api/openems pendant le tutoriel de WEB_ANTENNA ; /api/github en 404 hors
+        lanceur, attendu ;
+      - antenna_lire audit lu ; antenna_proposer boite.pml 8 → 10 cliquée, puis Annuler de la
+        carte : 8 ; clés de session de l'ancien assistant absentes ; PROJETS au même md5.)
 - [ ] `/review` fait, corrections appliquées
 
 **Dépendances :** T6 · **Taille :** M
