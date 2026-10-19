@@ -123,7 +123,14 @@ l'interrupteur est allumé. On mesure la durée d'une carte de 20 routes sur le 
 viennent `/review` et l'audit de sécurité.
 
 **Critères d'acceptation :**
-- [ ] Des liaisons routées pour de vrai ; le score baisse ; Ctrl+Z ; PROJETS n'a pas bougé
+- [x] Des liaisons routées pour de vrai ; le score baisse ; Ctrl+Z ; PROJETS n'a pas bougé
+      (« carte PIR v2 », non routée : 81 liaisons au départ.
+      - 4 routes sur une carte cliquée : carte en 2,3 s, aperçu de 25 segments capturé, une
+        étape ;
+      - 20 routes interrupteur allumé, en 4,4 s sur le Pi : 12 posées, 8 refusées avec leur
+        raison (liaisons tentées en ligne droite, sans point de passage) ;
+      - score : 81 → 65 liaisons, total 1371 → 1243 ;
+      - deux Ctrl+Z remettent la carte vide ; PROJETS au même md5.)
 - [ ] `/review` fait, corrections appliquées
 
 **Dépendances :** T6 · **Taille :** M
