@@ -172,8 +172,8 @@ OUTILS_ECRITURE_CAO = {
     "cao_composants_ecrire": {
         "description": "Change des propriétés de composants. Schéma : ref, valeur, boitier, fabricant, mpn, "
                        "specs (objet clé → texte, null efface), non_monte. PCB : ref, valeur, boitier (doit "
-                       "exister dans les empreintes), face (dessus/dessous), x, y (mm, origine de "
-                       "l'utilisateur), rotation (degrés) ; le cuivre accroché suit selon la préférence de "
+                       "exister dans les empreintes), face (dessus/dessous), x, y (mm, même repère que "
+                       "cao_pcb_lire), rotation (degrés) ; le cuivre accroché suit selon la préférence de "
                        "la page. Un repère est unique dans le document, à chaque étape du lot : pour échanger R1 et R2, "
                        "passe par un repère libre dans deux cartes."
                        + CARTE + DRC + pilote.ATTENTE_DOC + pilote.DONNEES,

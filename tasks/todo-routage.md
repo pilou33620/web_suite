@@ -5,7 +5,7 @@ Plan : [plan-routage.md](plan-routage.md)
 
 Bundle à reconstruire avant le harnais : `python3 editeur-pcb/outils/build-monofichier.py`
 
-## Tâche 1 : lectures `liaisons` et `zone`
+## Tâche 1 : ✅ lectures `liaisons` et `zone`
 
 **Description :** `LECTURE_CAO.pcb` gagne deux lectures :
 - `liaisons` : les liaisons à router, de `REF.pastille` à `REF.pastille`, avec
@@ -14,11 +14,11 @@ Bundle à reconstruire avant le harnais : `python3 editeur-pcb/outils/build-mono
   la fenêtre, 200 objets au plus.
 
 **Critères d'acceptation :**
-- [ ] Sur l'exemple 1, `liaisons` donne autant de lignes que `conn(true).rats` (moins les
+- [x] Sur l'exemple 1, `liaisons` donne autant de lignes que `conn(true).rats` (moins les
       liaisons de zone), chacune avec ses deux pastilles ; `filtre` sur le net
-- [ ] `zone` sur une fenêtre autour de U1 liste ses pastilles et les pistes qui la
+- [x] `zone` sur une fenêtre autour de U1 liste ses pastilles et les pistes qui la
       traversent ; fenêtre vide ou inversée : message clair ; bornes respectées
-- [ ] Le relevé de registre-cao (sorties de Gemini) reste identique
+- [x] Le relevé de registre-cao (sorties de Gemini) reste identique
 
 **Vérification :** `node editeur-pcb/test/harness.js`
 
