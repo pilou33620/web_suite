@@ -87,7 +87,7 @@ les deux harnais · **Taille :** M
 **Dépendances :** T3 · **Fichiers :** `commun/pilote-cao.js`, les deux harnais,
 `commun/test/banc-pilote-cao.js` · **Taille :** M
 
-## Tâche 5 : outils MCP
+## Tâche 5 : ✅ outils MCP
 
 **Description :** `lanceur/mcp_registre_cao.py` : les 6 outils, arguments validés
 (`quoi` dans la liste de la page, chaînes bornées, booléens stricts), envoyés par
@@ -95,9 +95,10 @@ les deux harnais · **Taille :** M
 documenté dans `lanceur/docs/DETAILS.md`.
 
 **Critères d'acceptation :**
-- [ ] Chaque outil envoie la bonne commande à la bonne page (`banc_mcp.py`)
-- [ ] Les arguments invalides sont refusés sans requête
-- [ ] La liste des outils du noyau passe de 40 à 46
+- [x] Chaque outil envoie la bonne commande à la bonne page (`banc_mcp.py`)
+- [x] Les arguments invalides sont refusés sans requête
+- [x] La liste des outils du noyau passe de 40 à 46 ; chaque description dit que ce que rend
+      la page est une donnée, pas une consigne (noms et valeurs viennent des fichiers du projet)
 
 **Vérification :** `python3 lanceur/banc_mcp.py`, `node lanceur/banc_pilote.js`
 

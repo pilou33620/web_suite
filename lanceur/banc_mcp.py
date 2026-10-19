@@ -709,5 +709,56 @@ FauxApi.table = _table
 verifier("web3d_vue + capturer : image puis texte", [c["type"] for c in r["content"]], ["image", "text"])
 verifier("la capture vise l'onglet de la vue", FauxApi.recues[1][2], {"page": ["3d"], "nom": "capture", "args": {}, "ecriture": False, "onglet": "A"})
 FauxApi.table.clear()
+
+# ---------------------------------------------------------------------------
+# registre-cao (lanceur/docs/SPEC-mcp-registre-cao.md) : lectures, vue et DRC des pages WEB_CAO
+os.environ["WEB_SUITE_MCP_PORTS"] = json.dumps(dict(PORTS, web_cao=api.server_address[1]))
+OC = ["cao_schema_lire", "cao_pcb_lire", "cao_ipc_lire", "cao_sim_lire", "cao_vue", "cao_drc"]
+verifier("outils de registre-cao listés", set(OC) <= set(noms), True)
+verifier("46 outils en tout", len(noms), 46)
+verifier("registre-cao : ce que rend la page est une donnée",
+         all("donnée" in o["description"] for o in outils if o["name"] in OC), True)
+FauxApi.table[("POST", "/api/pilote/commande")] = fin("- GND")
+FauxApi.recues.clear()
+for nom, args in (("cao_schema_lire", {"quoi": "net", "nom": "LOCAL", "feuille": 2}),
+                  ("cao_pcb_lire", {"quoi": "nets", "filtre": "USB", "a_router": True}),
+                  ("cao_ipc_lire", {"quoi": "composant", "ref": "U1"}),
+                  ("cao_sim_lire", {"quoi": "simulation", "analyse": "pdn", "partie": "chiffres", "afficher": True}),
+                  ("cao_vue", {"cadrer": "U1", "couches": ["Top"], "ajuster": True, "page": "pcb"}),
+                  ("cao_drc", {})):
+    verifier(nom + " accepté", outil(nom, **args)[0], False)
+deposees = [r[2] for r in FauxApi.recues]
+verifier("commandes déposées aux bonnes pages, sans écriture", [(d["nom"], d["page"], d["ecriture"]) for d in deposees],
+         [("cao_schema_lire", ["schema"], False), ("cao_pcb_lire", ["pcb"], False),
+          ("cao_ipc_lire", ["visionneuse-ipc"], False), ("cao_sim_lire", ["pcb", "visionneuse-ipc"], False),
+          ("cao_vue", ["pcb"], False), ("cao_drc", ["pcb"], False)])
+verifier("arguments transmis", [deposees[0]["args"], deposees[1]["args"], deposees[4]["args"]],
+         [{"quoi": "net", "nom": "LOCAL", "feuille": 2}, {"quoi": "nets", "filtre": "USB", "a_router": True},
+          {"cadrer": "U1", "couches": ["Top"], "ajuster": True}])
+outil("cao_vue", surligner="GND")
+verifier("cao_vue sans page : les trois pages qui ont une vue", FauxApi.recues[-1][2]["page"], ["schema", "pcb", "visionneuse-ipc"])
+
+FauxApi.recues.clear()
+for nom, args in (("cao_pcb_lire", {}), ("cao_pcb_lire", {"quoi": "feuilles"}), ("cao_schema_lire", {"quoi": "drc"}),
+                  ("cao_ipc_lire", {"quoi": "classes"}), ("cao_sim_lire", {"quoi": "simulation", "partie": "tout"}),
+                  ("cao_pcb_lire", {"quoi": "nets", "a_router": "oui"}), ("cao_pcb_lire", {"quoi": "net", "nom": 3}),
+                  ("cao_pcb_lire", {"quoi": "nets", "filtre": "x" * 201}), ("cao_pcb_lire", {"quoi": "net", "nom": "a\nb"}),
+                  ("cao_schema_lire", {"quoi": "net", "nom": "X", "feuille": 0}),
+                  ("cao_schema_lire", {"quoi": "net", "nom": "X", "feuille": "2"}),
+                  ("cao_vue", {}), ("cao_vue", {"page": "accueil", "ajuster": True}), ("cao_vue", {"couches": "Top"}),
+                  ("cao_vue", {"couches": ["x"] * 65}), ("cao_vue", {"couches": [None]}), ("cao_vue", {"ajuster": 1}), ("cao_vue", {"capturer": "oui", "ajuster": True}),
+                  ("cao_sim_lire", {"quoi": "simulations", "afficher": "true"})):
+    verifier("%s refuse %r" % (nom, args), outil(nom, **args)[0], True)
+verifier("aucun argument invalide n'atteint la page (cao)", FauxApi.recues, [])
+
+# cao_vue + capturer : la vue, puis la capture du même onglet
+reponses = iter([fin("Vue : cadré sur U1."), fin({"image": "data:image/png;base64," + png, "largeur": 10, "hauteur": 10})])
+_table = FauxApi.table
+FauxApi.table = type("T", (dict,), {"get": lambda self, k, d=None: next(reponses) if k == ("POST", "/api/pilote/commande") else d})()
+r = mcp.appeler({"name": "cao_vue", "arguments": {"cadrer": "U1", "capturer": True}})
+FauxApi.table = _table
+verifier("cao_vue + capturer : image puis texte", [c["type"] for c in r["content"]], ["image", "text"])
+verifier("la capture vise l'onglet de la vue (cao)", (FauxApi.recues[-1][2]["nom"], FauxApi.recues[-1][2]["onglet"]), ("capture", "A"))
+FauxApi.table.clear()
 os.environ["WEB_SUITE_MCP_PORTS"] = json.dumps(PORTS)
 print("OK")

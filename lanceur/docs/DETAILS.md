@@ -194,6 +194,13 @@ Outils MCP (`etat` dans `mcp_web_suite.py`, les autres dans `mcp_api_outils.py`,
   faces), `web3d_collisions` ; en carte : `web3d_ouvrir` (fichiers de PROJETS/3D, annulable),
   `web3d_deplacer` (translation, rotation, contraintes, annulable), `web3d_ranger_step` (STEP
   d'une pièce rangé dans PROJETS/3D, jamais d'écrasement, non annulable).
+- Pages WEB_CAO (`mcp_registre_cao.py`, voir [SPEC-mcp-registre-cao.md](SPEC-mcp-registre-cao.md)) :
+  `cao_schema_lire` (feuilles, composants, composant, nets, net : tout le document),
+  `cao_pcb_lire` (empilage, classes, composants, composant, nets, net, drc), `cao_ipc_lire`
+  (visionneuse), `cao_sim_lire` (simulations, une partie d'un rapport), `cao_vue` (cadrer,
+  surligner, feuille, couches, ajuster, capture), `cao_drc` (lance le DRC). Lectures et vue
+  seulement : rien n'est écrit dans le projet. Les lectures sont celles de l'assistant de la
+  page (`WEB_CAO/commun/lecture-cao.js`).
 
 **Le panneau « Claude ».** Chaque page des outils a, en bas à droite, un bouton « Claude ».
 Une écriture proposée par Claude s'y affiche en carte, avant → après, avec Appliquer et
