@@ -61,16 +61,16 @@ ou `contourner`. Le DRC avant → après est donné dans la réponse.
 
 **Dépendances :** T2 · **Fichiers :** `37-routage-pilote.js`, harnais · **Taille :** M
 
-## Tâche 4 : `cao_placement_auto`
+## Tâche 4 : ✅ `cao_placement_auto`
 
 **Description :** `methode` vaut `forces` (`autoPlace`), `satellites`
 (`placerSatellites`) ou `blocs` (`calculerAgencement` d'un motif nommé). Il passe par le
 même socle : une carte, une étape.
 
 **Critères d'acceptation :**
-- [ ] Chaque méthode, sur l'exemple : une étape, Ctrl+Z remet les positions ; la carte dit
+- [x] Chaque méthode, sur l'exemple : une étape, Ctrl+Z remet les positions ; la carte dit
       combien d'empreintes bougent
-- [ ] `blocs` sans motif publié : refus clair ; méthode inconnue : refus
+- [x] `blocs` sans motif publié : refus clair ; méthode inconnue : refus
 
 **Vérification :** `node editeur-pcb/test/harness.js`
 
