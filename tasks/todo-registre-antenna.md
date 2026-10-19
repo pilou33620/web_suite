@@ -6,7 +6,7 @@ Plan : [plan-registre-antenna.md](plan-registre-antenna.md)
 Banc principal : `node WEB_ANTENNA/test/banc-interface.js` (la CI passe par
 `python3 WEB_ANTENNA/python/test/banc-openems.py`).
 
-## Tâche 1 : lectures dans `js/29-lecture-antenna.js`
+## Tâche 1 : ✅ lectures dans `js/29-lecture-antenna.js`
 
 **Description :**
 1. Relever d'abord, dans le banc, les sorties de `iaContexte()` et des outils de lecture.
@@ -18,10 +18,10 @@ Banc principal : `node WEB_ANTENNA/test/banc-interface.js` (la CI passe par
    fichier avant `30-ia.js`.
 
 **Critères d'acceptation :**
-- [ ] Le relevé (fixture `test/releve-lecture-antenna.json`) est pris avant le
+- [x] Le relevé (fixture `test/releve-lecture-antenna.json`) est pris avant le
       déplacement ; après, les sorties sont identiques au caractère près, et une mutation
       d'un caractère fait échouer le test
-- [ ] Le bloc déplacé est identique octet pour octet ; les `window.ia*` existants marchent
+- [x] Le bloc déplacé est identique octet pour octet ; les `window.ia*` existants marchent
       comme avant (section IA du banc verte)
 
 **Vérification :** `node test/banc-interface.js`
