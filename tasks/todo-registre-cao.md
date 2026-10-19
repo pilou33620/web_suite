@@ -48,18 +48,18 @@ Le script est chargé dans les trois pages, avant l'assistant.
 **Dépendances :** T1 · **Fichiers :** `commun/lecture-cao.js`,
 `editeur-schematique/test/harness.js` · **Taille :** S
 
-## Tâche 3 : commandes de lecture dans la page
+## Tâche 3 : ✅ commandes de lecture dans la page
 
 **Description :** `pilote-cao.js` déclare `cao_schema_lire`, `cao_pcb_lire`,
 `cao_ipc_lire` et `cao_sim_lire` selon la page. `executer` choisit le registre et le
 `quoi`. `cao_sim_lire` avec `afficher: true` passe le panneau sur l'analyse avant de lire.
 
 **Critères d'acceptation :**
-- [ ] Chaque page déclare exactement ses commandes (`banc-pilote-cao.js`)
-- [ ] Un `quoi` inconnu rend la liste des `quoi` de la page
-- [ ] Aucune lecture ne change l'historique (`S.undo` / `S.hist`) ni `S.dirty` : vérifié dans
+- [x] Chaque page déclare exactement ses commandes (`banc-pilote-cao.js`)
+- [x] Un `quoi` inconnu rend la liste des `quoi` de la page
+- [x] Aucune lecture ne change l'historique (`S.undo` / `S.hist`) ni `S.dirty` : vérifié dans
       les deux harnais
-- [ ] La visionneuse est éprouvée sur un `V` minimal fait à la main
+- [x] La visionneuse est éprouvée sur un `V` minimal fait à la main
 
 **Vérification :** `node commun/test/banc-pilote-cao.js` et les harnais
 
@@ -67,7 +67,7 @@ Le script est chargé dans les trois pages, avant l'assistant.
 les deux harnais · **Taille :** M
 
 ## Checkpoint : lecture dans la page
-- [ ] Bancs verts, bundles reconstruits ; Gemini répond comme avant (sorties identiques)
+- [x] Bancs verts, bundles reconstruits ; Gemini répond comme avant (sorties identiques)
 
 ## Tâche 4 : `cao_vue` et `cao_drc`
 
