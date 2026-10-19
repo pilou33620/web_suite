@@ -48,7 +48,7 @@ par elles, et `poser {catalogue: "Part Name"}` aussi, avec les lignes de
 **Dépendances :** T1 · **Fichiers :** `editeur-schematique/js/09-interaction.js`,
 `editeur-schematique/js/14-clavier-boutons.js`, `28-dessin-pilote.js`, harnais · **Taille :** M
 
-## Tâche 3 : relier, supprimer_fil, pas de connexion par accident
+## Tâche 3 : ✅ relier, supprimer_fil, pas de connexion par accident
 
 **Description :**
 - `relier {de, a}` trace le fil en L (`routeL`), puis `touchWires` et `resolveSplits` ;
@@ -58,11 +58,11 @@ par elles, et `poser {catalogue: "Part Name"}` aussi, avec les lignes de
   refuse le lot.
 
 **Critères d'acceptation :**
-- [ ] `relier R1.2 → R2.1` : les deux broches sont sur le même net, et la carte le dit
+- [x] `relier R1.2 → R2.1` : les deux broches sont sur le même net, et la carte le dit
       (« R1.2 — R2.1 sur N$… »)
-- [ ] Un fil qui passerait sur la broche d'un troisième composant est refusé, et la
+- [x] Un fil qui passerait sur la broche d'un troisième composant est refusé, et la
       raison nomme cette broche ; rien n'est touché
-- [ ] `supprimer_fil` défait un `relier` (les deux broches retrouvent leurs nets
+- [x] `supprimer_fil` défait un `relier` (les deux broches retrouvent leurs nets
       séparés) ; sans fil direct entre elles : refus
 
 **Vérification :** `node editeur-schematique/test/harness.js`
