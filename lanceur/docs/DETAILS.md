@@ -232,11 +232,20 @@ Outils MCP (`etat` dans `mcp_web_suite.py`, les autres dans `mcp_api_outils.py`,
   préparer les points. La page joue le lot puis le défait, montre un aperçu en pointillés et,
   au clic, charge le résultat vu en une étape Ctrl+Z. Une route bloquée ne laisse rien.
   Code de page : `WEB_CAO/editeur-pcb/js/37-routage-pilote.js`.
+- Composants de la LIB (`mcp_composants.py`, voir [SPEC-mcp-composants.md](SPEC-mcp-composants.md)),
+  dans la page Gestion LIB ouverte : `lib_empreinte_generer` (IPC-7351B : chip, SOT, SOIC,
+  TSSOP, MSOP, QFN, DFN, DIP, barrette), `lib_empreinte_verifier`, `lib_kicad_convertir`
+  (kicad_mod de 200 Ko au plus) et `lib_brochage_verifier` calculent sans rien écrire ;
+  `lib_composant_creer` montre une carte avec l'aperçu de l'empreinte et n'écrit qu'au
+  clic, même interrupteur allumé : l'empreinte neuve (jamais d'écrasement) puis une ligne
+  ajoutée au catalogue, sans réécrire les autres. Pas d'annulation par la carte. Code de
+  page : `WEB_CAO/gestion-lib/js/08-pilote-lib.js`, `WEB_CAO/commun/composants-lib.js`.
 
 **Le panneau « Claude ».** Chaque page des outils a, en bas à droite, un bouton « Claude ».
 Une écriture proposée par Claude s'y affiche en carte, avant → après, avec Appliquer et
 Refuser : rien ne change avant le clic. La case « Appliquer directement (cet onglet) »
-saute la carte ; elle est éteinte à chaque chargement de la page. Une écriture appliquée
+saute la carte, sauf pour la création de composants dans la LIB, qui attend toujours le
+clic ; elle est éteinte à chaque chargement de la page. Une écriture appliquée
 se défait par Ctrl+Z dans l'éditeur qui a un historique (schéma), sinon par le bouton
 Annuler de la carte, qui refuse si quelque chose a changé depuis. Un seul onglet par outil
 et par navigateur tient la connexion au serveur et relaie les autres.

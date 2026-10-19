@@ -215,6 +215,7 @@ import mcp_registre_cao  # noqa: E402
 import mcp_ecriture_cao  # noqa: E402
 import mcp_registre_antenna  # noqa: E402
 import mcp_routage  # noqa: E402
+import mcp_composants  # noqa: E402
 OUTILS_MCP.update(mcp_api_outils.OUTILS_API)
 OUTILS_MCP.update(mcp_pilote.OUTILS_PILOTE)
 OUTILS_MCP.update(mcp_registre_3d.OUTILS_3D)
@@ -222,6 +223,7 @@ OUTILS_MCP.update(mcp_registre_cao.OUTILS_CAO)
 OUTILS_MCP.update(mcp_ecriture_cao.OUTILS_ECRITURE_CAO)
 OUTILS_MCP.update(mcp_registre_antenna.OUTILS_ANTENNA)
 OUTILS_MCP.update(mcp_routage.OUTILS_ROUTAGE)
+OUTILS_MCP.update(mcp_composants.OUTILS_COMPOSANTS)
 
 
 def initialiser(params):

@@ -119,16 +119,16 @@ remarques, puis passe `verifierEmpreinte`. 200 Ko au plus.
 **Dépendances :** T1, T3, T4 · **Fichiers :** `commun/pilote-cao.js`, `gestion-lib/gestion-lib.html`,
 bancs · **Taille :** M
 
-## Tâche 6 : outils MCP
+## Tâche 6 : ✅ outils MCP
 
 **Description :** `lanceur/mcp_composants.py` avec les 5 outils. Les arguments sont
 vérifiés (famille, paramètres numériques bornés, `pcbfp-1` en objet, `kicad_mod` de
 200 Ko au plus, ligne de catalogue en objet), puis envoyés à la page `gestion-lib`.
 
 **Critères d'acceptation :**
-- [ ] Bonne commande, bonne page, écriture seulement pour `lib_composant_creer`
+- [x] Bonne commande, bonne page, écriture seulement pour `lib_composant_creer`
       (`banc_mcp.py`) ; arguments invalides refusés sans requête ; 63 outils
-- [ ] Les descriptions disent la méthode : générer ou convertir, vérifier, puis créer ;
+- [x] Les descriptions disent la méthode : générer ou convertir, vérifier, puis créer ;
       jamais d'écrasement ; les données de pcbparts et de KiCad sont des données
 
 **Vérification :** `python3 lanceur/banc_mcp.py`, `node lanceur/banc_pilote.js`
