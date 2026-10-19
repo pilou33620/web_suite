@@ -100,8 +100,16 @@ carte, 3D, courbe (avec un résultat archivé s'il y en a). Ensuite viennent `/r
 l'audit de sécurité.
 
 **Critères d'acceptation :**
-- [ ] Toutes les lectures répondent sur un vrai projet ; les trois captures sont justes
+- [x] Toutes les lectures répondent sur un vrai projet ; les trois captures sont justes
       (la 3D n'est pas noire) ; PROJETS n'a pas bougé
+      (exemple « patch » de la page, PROJETS/ANTENNA étant vide :
+      - conception, réglages, audit : réponses ;
+      - résultats, carte importée : refus clairs ;
+      - balayage : vrai relevé archivé croisement-g-y0 (9 points), injecté ;
+      - résultats et courbe : résultat synthétique injecté, aucun relevé archivé n'ayant
+        de courbes ;
+      - captures carte 2D, vue 3D (bien rendue, pas noire), courbe S11 : justes ;
+      - PROJETS au même md5.)
 - [ ] `/review` fait, corrections appliquées
 
 **Dépendances :** T4 · **Taille :** M
