@@ -48,14 +48,14 @@ ou `contourner`. Le DRC avant → après est donné dans la réponse.
 `commun/ecriture-cao.js` (export du bilan DRC), `editeur-pcb/editeur-pcb.html`,
 `commun/pilote-cao.js`, harnais · **Taille :** L
 
-## Tâche 3 : `cao_paire`
+## Tâche 3 : ✅ `cao_paire`
 
 **Description :** une paire déclarée, routée avec `dpStart`, puis pour chaque point
 `dpUpdate` et `dpStep`, puis `dpCommit`. Elle passe par le même socle.
 
 **Critères d'acceptation :**
-- [ ] Une paire de l'exemple routée en un lot ; une étape ; Ctrl+Z l'enlève
-- [ ] Paire inconnue, départ hors des deux nets, jambes croisées : refus avec la raison
+- [x] Une paire de l'exemple routée en un lot ; une étape ; Ctrl+Z l'enlève
+- [x] Paire inconnue, départ hors des deux nets, jambes croisées : refus avec la raison
 
 **Vérification :** `node editeur-pcb/test/harness.js`
 
