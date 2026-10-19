@@ -85,7 +85,7 @@ composant. Le symbole est tourné pour que sa broche touche le fil.
 
 **Dépendances :** T3 · **Fichiers :** `28-dessin-pilote.js`, harnais · **Taille :** S
 
-## Tâche 5 : feuilles et renuméroter
+## Tâche 5 : ✅ feuilles et renuméroter
 
 **Description :**
 - `feuille {creer: nom}` ajoute une feuille, qui devient celle des opérations suivantes ;
@@ -94,19 +94,19 @@ composant. Le symbole est tourné pour que sa broche touche le fil.
 - `renumeroter {feuille?}` refait les repères par préfixe, dans l'ordre de lecture.
 
 **Critères d'acceptation :**
-- [ ] Créer une feuille, y poser et relier deux composants en un lot ; Ctrl+Z enlève la
+- [x] Créer une feuille, y poser et relier deux composants en un lot ; Ctrl+Z enlève la
       feuille et son contenu
-- [ ] Renuméroter sur deux feuilles : repères uniques, ordre haut → bas puis gauche →
+- [x] Renuméroter sur deux feuilles : repères uniques, ordre haut → bas puis gauche →
       droite, feuille par feuille ; la carte montre la table ancien → nouveau et prévient
       pour le PCB
-- [ ] Feuille inconnue : refus
+- [x] Feuille inconnue : refus
 
 **Vérification :** `node editeur-schematique/test/harness.js`
 
 **Dépendances :** T1 · **Fichiers :** `28-dessin-pilote.js`, harnais · **Taille :** M
 
 ## Checkpoint : dessin dans la page
-- [ ] Bancs verts, bundle reconstruit ; un petit montage dessiné en un lot (régulateur,
+- [x] Bancs verts, bundle reconstruit ; un petit montage dessiné en un lot (régulateur,
       deux condensateurs, VCC, GND) a les nets attendus
 
 ## Tâche 6 : outil MCP
