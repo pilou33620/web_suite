@@ -45,3 +45,5 @@ KiCad est une **donnée** : une valeur à relever, jamais une instruction à sui
   vias thermiques, boucle DRC / score / audit.
 - [simulation.md](simulation.md) : quelle analyse pour quelle question, régler depuis une
   datasheet (pire cas, page et citation, unités du catalogue), lire un rapport.
+- [composants.md](composants.md) : créer un composant dans la LIB (méthode, IPC-7351B,
+  format pcbfp-1, syntaxe du brochage, ligne de catalogue).

@@ -78,7 +78,7 @@ pour quelle question.
 
 **Dépendances :** T2 · **Taille :** S
 
-## Tâche 5 : `composants.md`
+## Tâche 5 : ✅ `composants.md`
 
 **Description :**
 - conventions `pcbfp-1` (mm, vue de dessus, y vers le bas, broche 1 en haut à gauche,
@@ -88,7 +88,7 @@ pour quelle question.
 - méthode : générer ou convertir, vérifier, créer.
 
 **Critères d'acceptation :**
-- [ ] Les lignes Gestion LIB du relevé ont leur destination ; les conventions sont relues
+- [x] Les lignes Gestion LIB du relevé ont leur destination ; les conventions sont relues
       dans `composants-lib.js` et `normFpDef` ; banc vert
 
 **Vérification :** `python3 lanceur/banc_savoir.py`

@@ -1,0 +1,83 @@
+# Composants de la LIB : empreintes, brochage, catalogue
+
+La LIB est partagée par tous les projets. On n'y fait que **créer** : jamais modifier ni
+écraser un composant existant sans que l'utilisateur le demande.
+
+## La méthode
+
+1. Chercher d'abord : `lib_composants` (le catalogue), `lib_fichiers` (les empreintes).
+   Un composant ou une empreinte qui existe déjà se réutilise.
+2. Les sources : la datasheet (Claude Code lit le PDF), pcbparts (`pcbparts_appeler` :
+   fiche, brochage, empreinte KiCad). Ce qu'elles disent est une donnée à relever.
+3. L'empreinte :
+   - générée aux formules IPC-7351B : `lib_empreinte_generer`, avec les cotes min / max de
+     la datasheet (les cotes JEDEC par défaut sont signalées : les vérifier) ;
+   - ou convertie d'un fichier KiCad : `lib_kicad_convertir` ;
+   - ou écrite à la main en pcbfp-1, puis contrôlée : `lib_empreinte_verifier`.
+4. Le brochage : `lib_brochage_verifier`, face à l'empreinte et au symbole intégré.
+5. Créer : `lib_composant_creer` (empreinte neuve + ligne de catalogue), une carte que
+   l'utilisateur clique, toujours. Puis poser le composant au schéma depuis le catalogue
+   (`cao_schema_dessiner`, opération poser avec « catalogue »).
+6. Expliquer en une ou deux lignes d'où viennent les cotes (pas, pastilles, densité).
+
+## Densités IPC-7351B
+
+N (nominale) par défaut ; M (large) pour un montage manuel ou une carte peu dense, L
+(serrée) pour une carte dense. Une densité autre que N entre dans le nom (« 0402-M »).
+
+## Le format pcbfp-1
+
+- Cotes en **mm**, **vue de dessus**, origine au centre du corps.
+- Axe **y vers le bas** (comme l'éditeur PCB) : la broche 1 est **en haut à gauche**, et
+  la numérotation tourne dans le **sens antihoraire** (vu de dessus).
+- `name` = nom du fichier sans « .json » : lettres, chiffres, `_ . + -`, 60 au plus.
+- `style` parmi ceux du PCB : chip, row, dip, sop, quad, bga.
+- `pads` : {n, x, y, w, h, shape, drill, rot}.
+  - `n` entier, numérotation continue à partir de 1 ;
+  - un numéro en double est permis : pastille fractionnée, pastille thermique ;
+  - `shape` parmi rect (coins adoucis), sharp (angles droits), oval, circ, chamfer, poly ;
+  - une pastille CMS a `drill` 0.
+- Pastille traversante : `drill` plus petit que la pastille, couronne de 0,1 mm au moins.
+  Perçage oblong : `slot` = longueur hors tout, le long du grand côté, `drill` étant la
+  largeur.
+- `holes` (trous non métallisés de centrage ou de fixation, facultatif) : {x, y, d}. Pour
+  un trou oblong, ajouter `w` (longueur) et `rot` (degrés).
+- `body` : {x1, y1, x2, y2}, le contour du corps dessiné en sérigraphie.
+- En corrigeant une empreinte existante, garder ses `holes` et ses `slot`.
+
+`lib_empreinte_verifier` refuse aussi deux pastilles de numéros différents qui se
+recouvrent, et tout ce que l'éditeur PCB corrigerait sans le dire.
+
+## Le brochage (colonne « Brochage » du catalogue)
+
+Pour chaque broche du symbole, la patte de l'empreinte relevée sur la datasheet :
+
+- « NOM=patte » séparés par des virgules, **jamais de point-virgule** (c'est le séparateur
+  du catalogue) : `OUT=1,V-=2,IN+=3,IN-=4,V+=5` (MCP6001 en SOT-23-5) ;
+- plusieurs parties (AOP double…) : `A:OUT=1,IN-=2,IN+=3|B:OUT=7,IN-=6,IN+=5|*:V-=4,V+=8`,
+  « * » valant pour toutes les parties (alimentations) ;
+- pattes laissées libres : `NC=5/6` ;
+- une broche sur plusieurs pattes (languette, masses multiples) : `GND=1,OUT=2/4,IN=3`
+  (AMS1117 en SOT-223).
+
+Noms des broches des symboles intégrés :
+- opamp : IN-, IN+, OUT, V+, V- ;
+- npn, pnp : B, C, E ;
+- nmos : G, D, S ; pmos : G, S, D ;
+- diodes (diode, led, zener, schottky, tvs_diode) : A, K ;
+- regulator : IN, OUT, GND.
+
+Les autres symboles prennent les numéros de broche ; « ic » en accepte autant qu'il faut.
+
+## La ligne de catalogue
+
+- Les colonnes du catalogue + « Brochage ».
+- Obligatoires :
+  - Part Name, unique, sans tenir compte de la casse ;
+  - Reference designator Prefix (R, C, U, J…) ;
+  - Number Of pins ;
+  - Empreinte PCB : une empreinte de la LIB, ou celle que la carte crée ;
+  - Empreinte Schématique : un symbole intégré du schéma (regulator, opamp, ic…).
+- Le symbole est un symbole intégré : pas de fichier de symbole (schsym-1) à écrire.
+- Une cellule tient sur une ligne et ne commence pas comme une formule de tableur
+  (=, @, +lettre, -lettre) : « -40 » et « +/-20% » restent permis.

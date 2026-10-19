@@ -45,15 +45,15 @@ consignes de l'assistant Gemini, jusqu'à l'endroit où le skill `web-suite`
 | C24 | WEB_CAO/commun/ia-assistant.js:564 | Net IPC-2581 : continuité, impédance, pertes, transitions | écartée : question ouverte sans règle ; se lit par `cao_ipc_lire` |
 | C25 | WEB_CAO/commun/ia-assistant.js:574 | Composant IPC-2581 : vérifications d'assemblage | écartée : question ouverte sans règle ; se lit par `cao_ipc_lire` |
 | R1 | WEB_CAO/commun/simulation-rapport.js:898 | Rapport de simulation : lire chiffres clés et diagnostics d'abord ; dire si le résultat est fiable, ce qui ne va pas et pourquoi, quoi corriger par priorité | simulation.md |
-| L1 | WEB_CAO/gestion-lib/js/06-ia-lib.js:192 | Empreintes selon IPC-7351B ; symboles IEC 60617 / IEEE 315 | à faire |
+| L1 | WEB_CAO/gestion-lib/js/06-ia-lib.js:192 | Empreintes selon IPC-7351B ; symboles IEC 60617 / IEEE 315 | composants.md |
 | L2 | WEB_CAO/gestion-lib/js/06-ia-lib.js:194 | Répondre en français | écartée : propre à Gemma ; Claude Code suit la langue de l'utilisateur |
-| L3 | WEB_CAO/gestion-lib/js/06-ia-lib.js:195 | pcbfp-1 : mm, vue de dessus, origine au centre du corps, y vers le bas, broche 1 en haut à gauche, sens antihoraire | à faire |
-| L4 | WEB_CAO/gestion-lib/js/06-ia-lib.js:195 | Trous NPTH « holes » {x, y, d} (oblong : w, rot) ; perçage oblong « slot » ; les garder en corrigeant une empreinte | à faire |
+| L3 | WEB_CAO/gestion-lib/js/06-ia-lib.js:195 | pcbfp-1 : mm, vue de dessus, origine au centre du corps, y vers le bas, broche 1 en haut à gauche, sens antihoraire | composants.md |
+| L4 | WEB_CAO/gestion-lib/js/06-ia-lib.js:195 | Trous NPTH « holes » {x, y, d} (oblong : w, rot) ; perçage oblong « slot » ; les garder en corrigeant une empreinte | composants.md |
 | L5 | WEB_CAO/gestion-lib/js/06-ia-lib.js:196 | Bloc ```action:pcb | écartée : remplacé par les outils `lib_empreinte_verifier` et `lib_composant_creer` |
 | L6 | WEB_CAO/gestion-lib/js/06-ia-lib.js:213 | Symbole schsym-1, bloc ```action:sch | écartée : décision du module composants (symbole intégré + brochage, pas de schsym-1) |
 | L7 | WEB_CAO/gestion-lib/js/06-ia-lib.js:235 | Ligne de catalogue, bloc ```action:comp | écartée : remplacé par l'outil `lib_composant_creer` |
-| L8 | WEB_CAO/gestion-lib/js/06-ia-lib.js:249 | Brochage : NOM=patte, virgules, jamais « ; » ; noms des broches des symboles ; parties A:…\|B:…, « *: » ; NC=5/6 ; OUT=2/4 ; exemples AMS1117, MCP6001 | à faire |
-| L9 | WEB_CAO/gestion-lib/js/06-ia-lib.js:251 | Être direct ; expliquer brièvement les cotes choisies (pas, pastilles) | à faire |
+| L8 | WEB_CAO/gestion-lib/js/06-ia-lib.js:249 | Brochage : NOM=patte, virgules, jamais « ; » ; noms des broches des symboles ; parties A:…\|B:…, « *: » ; NC=5/6 ; OUT=2/4 ; exemples AMS1117, MCP6001 | composants.md |
+| L9 | WEB_CAO/gestion-lib/js/06-ia-lib.js:251 | Être direct ; expliquer brièvement les cotes choisies (pas, pastilles) | composants.md |
 | A1 | WEB_ANTENNA/js/30-ia.js:1581 | Rôle : ingénieur antennes de l'outil | écartée : rôle de Gemini, sans objet pour Claude Code |
 | A2 | WEB_ANTENNA/js/30-ia.js:1586 | Carte importée = export IPC-2581 de WEB_CAO : modifier le cuivre dans le PCB de WEB_CAO puis réexporter ; projet dans PROJETS/ANTENNA/<projet> | à faire |
 | A3 | WEB_ANTENNA/js/30-ia.js:1595 | Répondre exclusivement en français | écartée : propre à Gemma ; Claude Code suit la langue de l'utilisateur |
