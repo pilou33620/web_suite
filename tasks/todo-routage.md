@@ -25,7 +25,7 @@ Bundle à reconstruire avant le harnais : `python3 editeur-pcb/outils/build-mono
 **Dépendances :** aucune · **Fichiers :** `commun/lecture-cao.js`, `commun/pilote-cao.js`,
 `editeur-pcb/test/harness.js` · **Taille :** S
 
-## Tâche 2 : socle « simuler puis charger » et `cao_router`
+## Tâche 2 : ✅ socle « simuler puis charger » et `cao_router`
 
 **Description :** `editeur-pcb/js/37-routage-pilote.js`. Le socle simule le lot, relève le
 document, remet l'original, garde l'aperçu, puis au clic charge le relevé en une étape.
@@ -33,12 +33,12 @@ document, remet l'original, garde l'aperçu, puis au clic charge le relevé en u
 ou `contourner`. Le DRC avant → après est donné dans la réponse.
 
 **Critères d'acceptation :**
-- [ ] Sur l'exemple 1, trois liaisons routées par points de passage, dont une qui change
+- [x] Sur l'exemple 1, trois liaisons routées par points de passage, dont une qui change
       de couche (via) ; la carte dit « posée » pour chacune ; une seule étape `S.undo` ;
       Ctrl+Z enlève tout ; le document appliqué est celui de l'aperçu (`serialize()` égal)
-- [ ] Une route bloquée ou un départ hors cuivre : « refusée : raison », rien d'elle ne
+- [x] Une route bloquée ou un départ hors cuivre : « refusée : raison », rien d'elle ne
       reste, les autres routes du lot sont posées
-- [ ] Proposer seul ne laisse rien : document, piles d'historique, drapeau, sélection,
+- [x] Proposer seul ne laisse rien : document, piles d'historique, drapeau, sélection,
       vue, réglages du routeur ; le document qui bouge entre la carte et le clic fait
       refuser la carte
 
