@@ -3,7 +3,7 @@
 Spec : [lanceur/docs/SPEC-mcp-composants.md](../lanceur/docs/SPEC-mcp-composants.md) ·
 Plan : [plan-composants.md](plan-composants.md)
 
-## Tâche 1 : serveur, jamais d'écrasement
+## Tâche 1 : ✅ serveur, jamais d'écrasement
 
 **Description :**
 - `web_CAO.py` : `PUT /api/lib/fichier` avec `si_absent` (409 si le fichier existe) ;
@@ -12,13 +12,14 @@ Plan : [plan-composants.md](plan-composants.md)
 - MCP : `lib_fichier_ecrire` passe à `si_absent`.
 
 **Critères d'acceptation :**
-- [ ] `si_absent` : 409 sur un fichier existant, écrit sinon ; sans `si_absent`, le
+- [x] `si_absent` : 409 sur un fichier existant, écrit sinon ; sans `si_absent`, le
       comportement d'aujourd'hui ne change pas
-- [ ] `ajouter` : doublon (casse ignorée) → 409 ; sinon la ligne est ajoutée, et toutes les
+- [x] `ajouter` : doublon (casse ignorée) → 409 ; sinon la ligne est ajoutée, et toutes les
       autres lignes restent identiques octet pour octet, en utf-8 comme en latin1 ; fins
       de ligne gardées ; `Brochage` ajoutée à l'en-tête si absente ; colonne inconnue ou
       caractère hors encodage → 400
-- [ ] `banc-lib-routes.py` et `banc_mcp.py` verts
+- [x] `banc-lib-routes.py` et `banc_mcp.py` verts (le MCP garde aussi le contrôle
+      préalable, pour un WEB_CAO pas encore à jour qui ignorerait `si_absent`)
 
 **Vérification :** `python3 python/test/banc-lib-routes.py`, `python3 lanceur/banc_mcp.py`
 

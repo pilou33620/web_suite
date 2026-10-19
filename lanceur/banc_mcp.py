@@ -463,9 +463,13 @@ verifier("fichier LIB texte", outil("lib_fichier_ecrire", type="simulation", nom
 verifier("contrôles puis écritures", FauxApi.recues, [
     ("GET", "/api/profil" + q(nom="neuf"), None), ("PUT", "/api/profil" + q(nom="neuf"), profil),
     ("GET", "/api/lib/fichier" + q(type="pcb", nom="C0402.json"), None),
-    ("POST", "/api/lib/fichier", {"type": "pcb", "nom": "C0402.json", "data": {"a": 1}}),
+    ("POST", "/api/lib/fichier", {"type": "pcb", "nom": "C0402.json", "si_absent": True, "data": {"a": 1}}),
     ("GET", "/api/lib/fichier" + q(type="simulation", nom="m.sub"), None),
-    ("POST", "/api/lib/fichier", {"type": "simulation", "nom": "m.sub", "contenu": "* x"})])
+    ("POST", "/api/lib/fichier", {"type": "simulation", "nom": "m.sub", "si_absent": True, "contenu": "* x"})])
+# créé entre le contrôle et l'écriture : le serveur refuse (409), le message le dit
+FauxApi.table[("POST", "/api/lib/fichier")] = (409, {"detail": "existe"})
+erreur, texte = outil("lib_fichier_ecrire", type="pcb", nom="C0402.json", data={"a": 1})
+verifier("course : 409 lisible", (erreur, "n'écrase pas" in texte), (True, True))
 FauxApi.table.clear()
 
 # Plafond tenu sur le texte rendu à Claude, pas seulement sur le JSON compact

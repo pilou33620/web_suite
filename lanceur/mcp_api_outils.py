@@ -255,11 +255,18 @@ def lib_fichier_ecrire(args):
     data, contenu = args.get("data"), facultatif(args, "contenu", str, None)
     if (data is None) == (contenu is None) or not isinstance(data, (dict, list, type(None))):
         raise noyau.ErreurOutil("Donne exactement un de « data » (objet ou liste JSON) et « contenu » (texte).")
+    deja = "« %s » existe déjà dans la LIB (%s) : le MCP n'écrase pas." % (nom, type_)
+    # le contrôle préalable reste pour un WEB_CAO pas encore à jour, qui ignorerait « si_absent »
     if not absent(route("/api/lib/fichier", type=type_, nom=nom)):
-        raise noyau.ErreurOutil("« %s » existe déjà dans la LIB (%s) : le MCP n'écrase pas." % (nom, type_))
-    corps = {"type": type_, "nom": nom}
+        raise noyau.ErreurOutil(deja)
+    corps = {"type": type_, "nom": nom, "si_absent": True}   # le serveur refuse lui-même (pas de course)
     corps.update({"data": data} if data is not None else {"contenu": contenu})
-    return noyau.appeler_outil_web("web_cao", "/api/lib/fichier", corps)
+    try:
+        return noyau.appeler_outil_web("web_cao", "/api/lib/fichier", corps)
+    except noyau.ErreurOutil as exc:
+        if exc.code == 409:
+            raise noyau.ErreurOutil(deja)
+        raise
 
 
 def pcbparts_appeler(args):
