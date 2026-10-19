@@ -166,9 +166,17 @@ interrupteur éteint (carte cliquée par CDP), puis allumé. Ensuite viennent `/
 l'audit de sécurité.
 
 **Critères d'acceptation :**
-- [ ] Les 5 outils écrivent sur un vrai projet ; Ctrl+Z ou Annuler remettent tout ; la
+- [x] Les 5 outils écrivent sur un vrai projet ; Ctrl+Z ou Annuler remettent tout ; la
       copie de PROJETS n'est pas enregistrée (le projet reste « modifié »)
-- [ ] Durée d'une carte (vérification + DRC) mesurée sur « carte PIR v2 »
+      (« carte PIR v2 » : schéma par carte cliquée ; PCB, classes, contraintes et simulation
+      interrupteur allumé ; pistes refusées proprement, la carte n'est pas routée ; PROJETS
+      au même md5. Trouvé et corrigé :
+      - le boîtier d'une empreinte venue de la LIB était refusé : il passe maintenant par
+        `fpReposerBoitier`, extrait de l'import de la netlist ;
+      - le bilan DRC comptait comme neuves des erreurs seulement déplacées ;
+      - Annuler ne remettait pas une valeur d'avant hors des bornes du catalogue, comme
+        `tr` à 0.)
+- [x] Durée d'une carte (vérification + DRC) mesurée sur « carte PIR v2 » : 0,3 à 0,8 s (51 empreintes)
 - [ ] `/review` fait, corrections appliquées
 
 **Dépendances :** T7 · **Taille :** M
