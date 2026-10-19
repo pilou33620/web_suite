@@ -32,9 +32,6 @@ jobs:
       - name: Serveur MCP — protocole, outil etat, publication GitHub et lanceur refusés
         run: python lanceur/banc_mcp.py
 
-      - name: Skill web-suite — outils et lectures cités, longueurs, liens, rien de privé
-        run: python lanceur/banc_savoir.py
-
       # Node 20 comme sur le Pi : BroadcastChannel et crypto y sont globaux, le banc s'en sert
       - uses: actions/setup-node@v4
         with:
@@ -97,6 +94,10 @@ jobs:
             verifier pilote.css $o/css/pilote.css
           done
           echo "canal de pilotage identique dans les trois outils"
+
+      # après le clone des outils : le banc relit les consignes Gemini que le relevé cite
+      - name: Skill web-suite — outils et lectures cités, relevé des consignes, rien de privé
+        run: python lanceur/banc_savoir.py
 
       # Même raison pour le lecteur IPC-2581 : WEB_CAO et WEB_ANTENNA en ont
       # chacun une copie, qui avait divergé (chacune avait une correction que

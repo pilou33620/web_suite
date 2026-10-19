@@ -23,7 +23,7 @@ Plan : [plan-savoir-metier.md](plan-savoir-metier.md)
 **Dépendances :** aucune · **Fichiers :** `lanceur/banc_savoir.py`, `.claude/skills/web-suite/SKILL.md`,
 `lanceur/mcp_web_suite.py`, `lanceur/banc_mcp.py`, `.github/workflows/ci.yml` · **Taille :** M
 
-## Tâche 2 : relevé des règles Gemini
+## Tâche 2 : ✅ relevé des règles Gemini
 
 **Description :** `lanceur/docs/savoir-trace.md` donne une ligne par règle des consignes
 Gemini. Pour chaque règle : la source (fichier:ligne), la règle en une phrase et sa
@@ -36,8 +36,10 @@ Consignes relevées :
 - `WEB_ANTENNA/js/30-ia.js` : promptSysteme.
 
 **Critères d'acceptation :**
-- [ ] Chaque consigne relevée en entier (contrôle : nombre de lignes de règles par source)
-- [ ] Le banc lit le tableau et compte les lignes « à faire »
+- [x] Chaque consigne relevée en entier (61 règles : ia-assistant.js 25, simulation-rapport.js 1,
+      06-ia-lib.js 9, 30-ia.js 26 ; 14 écartées avec leur raison, 1 déjà dans SKILL.md)
+- [x] Le banc lit le tableau et compte les lignes « à faire » (source et numéro de ligne
+      vérifiés, outils et lectures cités vérifiés ; en CI, après le clone des outils)
 
 **Vérification :** `python3 lanceur/banc_savoir.py`
 
