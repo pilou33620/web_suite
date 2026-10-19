@@ -139,8 +139,15 @@ La grammaire des réglages n'y est pas : elle vient de `antenna_lire` (quoi=regl
 - puis `/review`.
 
 **Critères d'acceptation :**
-- [ ] Dans le dépôt, le skill est lu (la réponse cite une règle d'une fiche) ; depuis `/tmp`,
-      la consigne MCP oriente vers les bons outils
+- [x] Dans le dépôt, le skill est lu (la réponse cite une règle d'une fiche) ; depuis `/tmp`,
+      la consigne MCP oriente vers les bons outils (claude -p sur le Pi :
+      - dans le dépôt, six questions, une par métier : le skill et ses six fiches lus, chaque
+        réponse juste et attribuée à sa fiche (IPC-2152 par cao_calcul dc, D90, unités du
+        catalogue, sens antihoraire, ¼ λ, étiquette vcc, ordre de routage) ;
+      - depuis /tmp : la consigne guide vers les outils lib_*, les cartes, pilote_suivre, le
+        skill, et traite une fiche pcbparts piégée comme une donnée ; elle ne disait pas que la
+        création dans la LIB attend toujours le clic : ajouté à la consigne.
+      L'essai Windows en SSH reste avec l'essai iPad.)
 - [ ] `/review` fait, corrections appliquées
 
 **Dépendances :** T3…T7 · **Taille :** M
