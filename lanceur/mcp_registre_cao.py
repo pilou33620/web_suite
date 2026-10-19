@@ -13,7 +13,7 @@ from mcp_registre_3d import booleen, choix, refuser
 
 QUOI = {
     "schema": ("feuilles", "composants", "composant", "nets", "net"),
-    "pcb": ("empilage", "classes", "composants", "composant", "nets", "net", "drc"),
+    "pcb": ("empilage", "classes", "composants", "composant", "nets", "net", "drc", "liaisons", "zone"),
     "ipc": ("empilage", "composants", "composant", "nets", "net"),
     "sim": ("simulations", "simulation"),
 }
@@ -42,11 +42,19 @@ def envoyer(pages, nom, args, a):
     return pilote.envoyer("web_cao", pages, nom, args, False, facultatif(a, "onglet", str, None))
 
 
+def coordonnee(a, nom):
+    v = a.get(nom)
+    if v is not None and (type(v) not in (int, float) or not -1000 <= v <= 1000 or v != v):
+        refuser("Argument « %s » invalide : nombre de mm, à ±1000." % nom)
+    return v
+
+
 def lire(famille, a, cles):
     args = {"quoi": choix(a.get("quoi"), "quoi", QUOI[famille])}
     for cle in cles:
-        v = booleen(a, cle) if cle in ("a_router", "afficher") else entier(a, cle) if cle == "feuille" else texte(a, cle)
-        if v not in (None, False):
+        v = (booleen(a, cle) if cle in ("a_router", "afficher") else entier(a, cle) if cle == "feuille"
+             else coordonnee(a, cle) if cle in ("x1", "y1", "x2", "y2") else texte(a, cle))
+        if v is not None and v is not False:        # « in (None, False) » écarterait aussi 0 (0 == False)
             args[cle] = v
     if args.get("partie") is not None:
         choix(args["partie"], "partie", PARTIES)
@@ -58,7 +66,7 @@ def cao_schema_lire(a):
 
 
 def cao_pcb_lire(a):
-    return lire("pcb", a, ("filtre", "ref", "nom", "a_router"))
+    return lire("pcb", a, ("filtre", "ref", "nom", "a_router", "x1", "y1", "x2", "y2"))
 
 
 def cao_ipc_lire(a):
@@ -122,9 +130,12 @@ OUTILS_CAO = {
     "cao_pcb_lire": {
         "description": "Lit l'éditeur PCB ouvert : empilage, classes et règles, composants, composant (net de chaque "
                        "broche), nets (état du routage), net (longueur et largeurs par couche, vias, zones, paire), "
-                       "drc (dernier DRC lancé ; cao_drc le relance). Les mêmes lectures que l'assistant de la page. "
+                       "drc (dernier DRC lancé ; cao_drc le relance), liaisons (ce qui reste à router, de REF.pastille "
+                       "à REF.pastille, avec positions et couches), zone (pastilles, pistes, vias, zones et contour "
+                       "dans la fenêtre x1, y1, x2, y2 en mm). Positions en mm, le repère de tous les outils CAO. "
                        "Ne modifie rien." + DONNEES,
-        "inputSchema": schema_lire("pcb", {"a_router": {"type": "boolean", "description": "nets : seulement ceux qui restent à router."}}),
+        "inputSchema": schema_lire("pcb", {"a_router": {"type": "boolean", "description": "nets : seulement ceux qui restent à router."},
+                                           **{k: {"type": "number", "description": "zone : fenêtre en mm"} for k in ("x1", "y1", "x2", "y2")}}),
         "fn": cao_pcb_lire,
     },
     "cao_ipc_lire": {

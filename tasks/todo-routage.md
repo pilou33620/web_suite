@@ -98,16 +98,16 @@ ligne d'export), harnais · **Taille :** M
 ## Checkpoint : routage dans la page
 - [x] Bancs verts, bundle reconstruit
 
-## Tâche 6 : outils MCP
+## Tâche 6 : ✅ outils MCP
 
 **Description :** `lanceur/mcp_routage.py` contient `cao_router`, `cao_paire`,
 `cao_placement_auto` et `cao_score`, avec la forme des arguments vérifiée. `cao_pcb_lire`
 gagne `liaisons` et `zone`.
 
 **Critères d'acceptation :**
-- [ ] Bonne commande, bonne page, écriture ou lecture selon l'outil (`banc_mcp.py`) ;
+- [x] Bonne commande, bonne page, écriture ou lecture selon l'outil (`banc_mcp.py`) ;
       arguments invalides refusés sans requête ; 58 outils
-- [ ] Les descriptions disent la méthode : points de passage, un lot = une carte, tout ou
+- [x] Les descriptions disent la méthode : points de passage, un lot = une carte, tout ou
       rien par route, et l'aperçu qu'on peut capturer
 
 **Vérification :** `python3 lanceur/banc_mcp.py`, `node lanceur/banc_pilote.js`

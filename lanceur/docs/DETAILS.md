@@ -225,6 +225,13 @@ Outils MCP (`etat` dans `mcp_web_suite.py`, les autres dans `mcp_api_outils.py`,
   de balayage, étape, panneau ; capture de la carte, de la 3D ou des courbes). Rien n'est
   écrit, aucune préférence, jamais de calcul lancé : les écritures restent
   `antenna_proposer`. Lectures de la page : `WEB_ANTENNA/js/29-lecture-antenna.js`.
+- Routage (`mcp_routage.py`, voir [SPEC-mcp-routage.md](SPEC-mcp-routage.md)) : `cao_router` (routes
+  par points de passage, changement de couche par via, vias seules ; 20 routes par carte),
+  `cao_paire` (paire différentielle déclarée), `cao_placement_auto` (forces, satellites, blocs)
+  et `cao_score` (routage, placement). `cao_pcb_lire` donne aussi `liaisons` et `zone` pour
+  préparer les points. La page joue le lot puis le défait, montre un aperçu en pointillés et,
+  au clic, charge le résultat vu en une étape Ctrl+Z. Une route bloquée ne laisse rien.
+  Code de page : `WEB_CAO/editeur-pcb/js/37-routage-pilote.js`.
 
 **Le panneau « Claude ».** Chaque page des outils a, en bas à droite, un bouton « Claude ».
 Une écriture proposée par Claude s'y affiche en carte, avant → après, avec Appliquer et

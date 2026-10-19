@@ -717,7 +717,7 @@ FauxApi.table.clear()
 os.environ["WEB_SUITE_MCP_PORTS"] = json.dumps(dict(PORTS, web_cao=api.server_address[1]))
 OC = ["cao_schema_lire", "cao_pcb_lire", "cao_ipc_lire", "cao_sim_lire", "cao_vue", "cao_drc"]
 verifier("outils de registre-cao listés", set(OC) <= set(noms), True)
-verifier("54 outils en tout (registre-cao, ecriture-cao, dessin-schema, registre-antenna)", len(noms), 54)
+verifier("58 outils en tout (registre-cao, ecriture-cao, dessin-schema, registre-antenna, routage)", len(noms), 58)
 verifier("registre-cao : ce que rend la page est une donnée",
          all("donnée" in o["description"] for o in outils if o["name"] in OC), True)
 FauxApi.table[("POST", "/api/pilote/commande")] = fin("- GND")
@@ -869,6 +869,43 @@ r = mcp.appeler({"name": "antenna_vue", "arguments": {"vue": "3d", "capturer": T
 FauxApi.table = _table
 verifier("antenna_vue + capturer : image puis texte", [c["type"] for c in r["content"]], ["image", "text"])
 verifier("la capture vise l'onglet de la vue (antenna)", (FauxApi.recues[-1][2]["nom"], FauxApi.recues[-1][2]["onglet"]), ("capture", "A"))
+
+
+# routage (lanceur/docs/SPEC-mcp-routage.md) : routes par points de passage, paires, placement, scores
+os.environ["WEB_SUITE_MCP_PORTS"] = json.dumps(dict(PORTS, web_cao=api.server_address[1]))
+OR = ["cao_router", "cao_paire", "cao_placement_auto", "cao_score"]
+verifier("outils du routage listés", set(OR) <= set(noms), True)
+verifier("routage : donnée ; les écritures disent la carte et l'aperçu",
+         all("donnée" in o["description"] and (o["name"] == "cao_score" or "aperçu" in o["description"])
+             for o in outils if o["name"] in OR), True)
+FauxApi.table[("POST", "/api/pilote/commande")] = fin("ok", "appliquee")
+FauxApi.recues.clear()
+R1 = {"depart": "U1.3", "points": [{"x": 10, "y": 5.5}, {"x": 12, "y": 5.5, "couche": "Bottom"}], "arrivee": "R2.1", "largeur": 0.3}
+for nom, args in (("cao_router", {"routes": [R1], "vias": [{"x": 1, "y": 2, "net": "GND"}], "mode": "contourner"}),
+                  ("cao_paire", {"paire": "USB", "depart": {"x": 7, "y": 19.7}, "arrivee": "U1.4"}),
+                  ("cao_placement_auto", {"methode": "blocs", "motif": "Alim"}),
+                  ("cao_score", {"quoi": "routage"}),
+                  ("cao_pcb_lire", {"quoi": "zone", "x1": 0, "y1": 0, "x2": 20, "y2": 10.5}),
+                  ("cao_pcb_lire", {"quoi": "liaisons", "filtre": "GND"})):
+    verifier(nom + " accepté", outil(nom, **args)[0], False)
+deposees = [r[2] for r in FauxApi.recues]
+verifier("routage : pages et écriture", [(d["nom"], d["page"], d["ecriture"]) for d in deposees],
+         [("cao_router", ["pcb"], True), ("cao_paire", ["pcb"], True), ("cao_placement_auto", ["pcb"], True),
+          ("cao_score", ["pcb"], False), ("cao_pcb_lire", ["pcb"], False), ("cao_pcb_lire", ["pcb"], False)])
+verifier("la route arrive telle quelle", deposees[0]["args"]["routes"][0], R1)
+verifier("la fenêtre de zone arrive", deposees[4]["args"], {"quoi": "zone", "x1": 0, "y1": 0, "x2": 20, "y2": 10.5})
+FauxApi.recues.clear()
+for nom, args in (("cao_router", {}), ("cao_router", {"routes": [R1] * 21}), ("cao_router", {"routes": [{"depart": "U1.3"}]}),
+                  ("cao_router", {"routes": [dict(R1, depart={"x": "a", "y": 1})]}),
+                  ("cao_router", {"routes": [dict(R1, points=[{"x": 1, "y": 2, "z": 3}])]}),
+                  ("cao_router", {"routes": [dict(R1, points=[{"x": 1, "y": 2}] * 201)]}),
+                  ("cao_router", {"routes": [R1], "mode": "sauter"}), ("cao_router", {"vias": [{"x": 1, "y": 2}]}),
+                  ("cao_paire", {"paire": "USB", "depart": "J1.1"}), ("cao_paire", dict(R1, paire="USB", largeur=0.2)),
+                  ("cao_placement_auto", {"methode": "hasard"}), ("cao_placement_auto", {"methode": "blocs", "motif": "a\nb"}),
+                  ("cao_score", {"quoi": "tout"}), ("cao_pcb_lire", {"quoi": "zone", "x1": 5000}),
+                  ("cao_pcb_lire", {"quoi": "zone", "x1": "5"}), ("cao_pcb_lire", {"quoi": "zone", "x1": float("nan")})):
+    verifier("%s refuse %r" % (nom, str(args)[:60]), outil(nom, **args)[0], True)
+verifier("aucun argument invalide n'atteint la page (routage)", FauxApi.recues, [])
 
 FauxApi.table.clear()
 os.environ["WEB_SUITE_MCP_PORTS"] = json.dumps(PORTS)
