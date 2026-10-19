@@ -48,7 +48,7 @@ ajouté à `prop.apres`.
 
 **Dépendances :** T1 · **Fichiers :** `commun/ecriture-cao.js`, `editeur-pcb/test/harness.js` · **Taille :** M
 
-## Tâche 3 : largeur des pistes
+## Tâche 3 : ✅ largeur des pistes
 
 **Description :** `cao_pistes_ecrire`, un lot d'actions :
 - `{net, largeur, couche?}` : toutes les pistes du net, ou d'une seule couche ;
@@ -56,11 +56,11 @@ ajouté à `prop.apres`.
   `applyClasses` mais limité au net.
 
 **Critères d'acceptation :**
-- [ ] Largeur d'un net sur une couche : seules ces pistes changent ; une étape ; `touch()`
+- [x] Largeur d'un net sur une couche : seules ces pistes changent ; une étape ; `touch()`
       et `zoneCache.clear()`
-- [ ] Net inconnu, couche inconnue, largeur hors 0,05 à 10 mm : refus ; un net sans piste
+- [x] Net inconnu, couche inconnue, largeur hors 0,05 à 10 mm : refus ; un net sans piste
       est refusé (« rien à changer »)
-- [ ] `realigner` donne le même résultat que `applyClasses()` sur ce net, sans toucher aux
+- [x] `realigner` donne le même résultat que `applyClasses()` sur ce net, sans toucher aux
       autres
 
 **Vérification :** `node editeur-pcb/test/harness.js`
