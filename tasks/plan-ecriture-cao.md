@@ -46,10 +46,11 @@ T1 socle « carte en lot » (commun/ecriture-cao.js) + composants du schéma
   - la carte « avant → après » ;
   - au clic, une seconde vérification, puis un seul `push()`, `muter`, un seul
     rafraîchissement.
-- **Document changé entre la carte et le clic** : `proposer` garde une empreinte du
-  document, un hachage court de `JSON.stringify(serialize())`. `appliquer` refuse si
-  elle a changé (« le document a changé : reproposer »), comme le fait déjà
-  `antenna_proposer` avec `attendu`.
+- **Document changé entre la carte et le clic** : la carte garde ses lignes « avant →
+  après » ; au clic, la vérification est refaite et doit redonner les mêmes lignes, sinon
+  refus (« le document a changé : reproposer »). *Changé à la tâche 1 : une empreinte de
+  `serialize()` aurait refusé la carte pour un simple déplacement de la vue (la vue est
+  dans `serialize()` au schéma, la visibilité des couches au PCB).*
 - **DRC au PCB** : `proposer` compte les erreurs (`runDrc()` est synchrone, 0,3 s).
   Après `muter`, `appliquer` relance `runDrc()` et ajoute à `prop.apres` la ligne
   « DRC : N erreurs avant → M après » et les nouvelles erreurs (80 lignes au plus).
@@ -88,7 +89,6 @@ T1 socle « carte en lot » (commun/ecriture-cao.js) + composants du schéma
 | Changer le boîtier au PCB refait les pastilles ; des pistes restent en l'air | Moyen | DRC avant → après dans la réponse ; `fpReshape` garde les pistes par numéro |
 | `transformFps` déplace le cuivre selon `S.moveEtch`, une préférence de l'utilisateur | Faible | Dit dans la description de l'outil ; pas de changement de la préférence |
 | `simDsAppliquer` a des effets de bord (assistant ΔI allumé) que `annuler` ne défait pas | Moyen | `etat` et `annuler` couvrent les champs ; l'effet ΔI est écrit sur la carte ; test dédié |
-| L'empreinte du document (`serialize`) coûte sur une grosse carte | Faible | Une fois à la carte, une fois au clic ; mesuré à l'essai réel (carte PIR v2) |
 
 ## Questions ouvertes
 

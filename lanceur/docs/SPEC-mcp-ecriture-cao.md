@@ -18,7 +18,7 @@ Le dessin du schéma (poser, relier) vient ensuite, dans [`dessin-schema`](SPEC-
 
 1. **Toute écriture passe par une carte** quand l'interrupteur de l'onglet est éteint. Une
    carte porte un **lot** : plusieurs changements, une seule étape d'historique, taille
-   bornée (50 changements).
+   bornée (50 éléments : composants, nets, classes…).
 2. **Propriétés écrivables** :
    - schéma : repère, valeur, boîtier, fabricant, référence fabricant (MPN), champs libres
      `specs`, « non monté » ;
@@ -54,7 +54,7 @@ fichier voisin `commun/ecriture-cao.js` si `pilote-cao.js` dépasse ~400 lignes)
 
 1. **Une carte = un lot.** La carte montre chaque changement « avant → après ». Appliquer
    fait **un seul** `push()` (une étape Ctrl+Z), puis toutes les mutations, puis un seul
-   rafraîchissement. Plus de 50 changements : refus sans rien proposer.
+   rafraîchissement. Plus de 50 éléments : refus sans rien proposer.
 2. **Tout est vérifié avant la carte**, puis revérifié au clic : un repère inconnu, un
    boîtier absent de la bibliothèque d'empreintes (PCB), un repère en double, une classe
    inconnue, une valeur hors bornes refusent **tout le lot**, avec la liste des refus. Si

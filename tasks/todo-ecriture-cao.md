@@ -6,7 +6,7 @@ Plan : [plan-ecriture-cao.md](plan-ecriture-cao.md)
 Bundles à reconstruire avant les harnais :
 `python3 editeur-pcb/outils/build-monofichier.py ; python3 editeur-schematique/outils/build-monofichier.py`
 
-## Tâche 1 : socle « carte en lot » et composants du schéma
+## Tâche 1 : ✅ socle « carte en lot » et composants du schéma
 
 **Description :** `commun/ecriture-cao.js` (chargé dans les trois pages, avant
 `pilote-cao.js`) pose `ecLot(def)`, puis `cao_composants_ecrire` au schéma. Champs :
@@ -14,14 +14,14 @@ Bundles à reconstruire avant les harnais :
 (`nonMonte`). Un repère se cherche sur toutes les feuilles.
 
 **Critères d'acceptation :**
-- [ ] Un lot de 3 composants sur 2 feuilles : une carte « avant → après », puis une seule
+- [x] Un lot de 3 composants sur 2 feuilles : une carte « avant → après », puis une seule
       étape `S.hist`, et Ctrl+Z remet tout
-- [ ] Refus de tout le lot, sans rien toucher, pour :
+- [x] Refus de tout le lot, sans rien toucher, pour :
       - un repère inconnu ou en double ;
-      - plus de 50 changements ;
+      - plus de 50 éléments dans le lot ;
       - plus de 30 clés `specs` ;
       - un texte de plus de 200 caractères
-- [ ] Le document change entre la carte et le clic : refus « à reproposer » ; une valeur
+- [x] Le document change entre la carte et le clic : refus « à reproposer » ; une valeur
       de CI passe par `reshapeComp` (les fils suivent)
 
 **Vérification :** `node editeur-schematique/test/harness.js`, `node commun/test/banc-pilote-cao.js`
@@ -168,7 +168,7 @@ l'audit de sécurité.
 **Critères d'acceptation :**
 - [ ] Les 5 outils écrivent sur un vrai projet ; Ctrl+Z ou Annuler remettent tout ; la
       copie de PROJETS n'est pas enregistrée (le projet reste « modifié »)
-- [ ] Coût de l'empreinte du document mesuré sur « carte PIR v2 »
+- [ ] Durée d'une carte (vérification + DRC) mesurée sur « carte PIR v2 »
 - [ ] `/review` fait, corrections appliquées
 
 **Dépendances :** T7 · **Taille :** M
