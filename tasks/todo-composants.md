@@ -146,8 +146,20 @@ cotes de la datasheet), en carte cliquée. Ensuite :
 Puis viennent `/review` et l'audit de sécurité.
 
 **Critères d'acceptation :**
-- [ ] Composant créé, posé au schéma, empreinte trouvée au PCB ; la LIB d'origine n'a pas
-      bougé ; un second essai sur le même nom est refusé
+- [x] Composant créé, posé au schéma, empreinte trouvée au PCB ; la LIB d'origine n'a pas
+      bougé ; un second essai sur le même nom est refusé (copie de PROJETS, LP5907 3,3 V en
+      SOT-23-5 :
+      - lib_empreinte_generer (cotes DBV de la datasheet), puis lib_brochage_verifier
+        « IN=1/3,GND=2,OUT=5,NC=4 » : sans erreur ;
+      - lib_composant_creer : carte cliquée ; empreinte écrite, ligne ajoutée ; l'ancien
+        catalogue est un préfixe exact du nouveau ;
+      - second essai : refusé en 0,1 s (empreinte et Part Name déjà là), rien d'écrit ;
+      - cao_schema_dessiner poser depuis le catalogue : U9 regulator, boîtier SOT-23-5-DBV-IPC,
+        pinMap IN 1/3, OUT 5, GND 2 ; au PCB, fpLibPourBoitier trouve l'empreinte (5 pastilles) ;
+      - PROJETS au même md5.
+      Constaté, antérieur au module : Gestion LIB monte à ~890 Mo au chargement sur le Pi
+      (500 Mo ensuite) ; le rafraîchissement de la table après la création a relancé ce pic,
+      et le noyau a tué l'onglet d'essai (OOM). Même comportement au commit d'avant le module.)
 - [ ] `/review` fait, corrections appliquées
 
 **Dépendances :** T6 · **Taille :** M
