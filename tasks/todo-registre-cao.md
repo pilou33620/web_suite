@@ -28,18 +28,20 @@ Le script est chargé dans les trois pages, avant l'assistant.
 **Dépendances :** aucune · **Fichiers :** `commun/lecture-cao.js`, `commun/ia-assistant.js`,
 3 pages `.html`, `editeur-pcb/test/harness.js`, fixture du relevé · **Taille :** M
 
-## Tâche 2 : registre du schéma
+## Tâche 2 : ✅ registre du schéma
 
 **Description :** `LECTURE_CAO.schema` : `feuilles`, `composants` (filtre), `composant`
 (ref), `nets` (filtre), `net` (nom). Les nets viennent de `docNets()`, les broches de
 `computeNets`, les noms de broche de `brNomBroche`. Positions en mm (20 px = 1 mm).
 
 **Critères d'acceptation :**
-- [ ] Chaque `quoi` donne la sortie attendue sur un schéma de deux feuilles fait dans le
-      harnais, avec un net global présent sur les deux
-- [ ] Un repère est trouvé sur une autre feuille que la feuille active, sans tenir compte
-      de la casse ; un repère ou un net inconnu rend le refus qui nomme l'outil de liste
-- [ ] Bornes : 150 lignes, 200 broches, puis « … (N de plus : précise le filtre) »
+- [x] Chaque `quoi` donne la sortie attendue sur un schéma de deux feuilles fait dans le
+      harnais, avec un net global présent sur les deux (et deux nets locaux de même nom,
+      départagés par `feuille`)
+- [x] Un repère est trouvé sur une autre feuille que la feuille active, sans tenir compte
+      de la casse ; un repère ou un net inconnu rend le refus qui nomme l'outil de liste ;
+      une broche en l'air est dite « non connectée »
+- [x] Bornes : 150 lignes, 200 broches, puis « … (N de plus : précise le filtre) »
 
 **Vérification :** `node editeur-schematique/test/harness.js`
 
