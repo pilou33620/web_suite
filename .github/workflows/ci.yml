@@ -32,6 +32,9 @@ jobs:
       - name: Serveur MCP — protocole, outil etat, publication GitHub et lanceur refusés
         run: python lanceur/banc_mcp.py
 
+      - name: Skill web-suite — outils et lectures cités, longueurs, liens, rien de privé
+        run: python lanceur/banc_savoir.py
+
       # Node 20 comme sur le Pi : BroadcastChannel et crypto y sont globaux, le banc s'en sert
       - uses: actions/setup-node@v4
         with:

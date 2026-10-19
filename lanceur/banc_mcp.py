@@ -97,6 +97,8 @@ init = reponses[0]["result"]
 verifier("version reprise du client", init["protocolVersion"], "2025-06-18")
 verifier("nom du serveur", init["serverInfo"]["name"], "web_suite")
 verifier("capacité outils", "tools" in init["capabilities"], True)
+verifier("consigne de session : présente, 1500 caractères au plus, renvoi au skill",
+         (0 < len(init["instructions"]) <= 1500, "web-suite" in init["instructions"]), (True, True))
 verifier("ping", reponses[1]["result"], {})
 outils = reponses[2]["result"]["tools"]
 verifier("chaque outil a nom, description, schéma",

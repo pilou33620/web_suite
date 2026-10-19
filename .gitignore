@@ -27,4 +27,6 @@ Thumbs.db
 Desktop.ini
 .vscode/
 .idea/
-.claude/
+# Claude Code : réglages locaux ignorés, mais le skill web-suite est versionné
+.claude/*
+!.claude/skills/

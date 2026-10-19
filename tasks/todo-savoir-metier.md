@@ -3,7 +3,7 @@
 Spec : [lanceur/docs/SPEC-mcp-savoir-metier.md](../lanceur/docs/SPEC-mcp-savoir-metier.md) ·
 Plan : [plan-savoir-metier.md](plan-savoir-metier.md)
 
-## Tâche 1 : banc, squelette du skill, consigne MCP
+## Tâche 1 : ✅ banc, squelette du skill, consigne MCP
 
 **Description :**
 - `lanceur/banc_savoir.py` : outils et `quoi` cités, longueurs, liens, rien de privé ;
@@ -12,10 +12,11 @@ Plan : [plan-savoir-metier.md](plan-savoir-metier.md)
 - le banc entre dans la CI de web_suite.
 
 **Critères d'acceptation :**
-- [ ] Un outil inventé, un `quoi` inconnu, une fiche trop longue, un lien mort ou un
+- [x] Un outil inventé, un `quoi` inconnu, une fiche trop longue, un lien mort ou un
       `/home/` cité font échouer le banc (essais sur fiches factices)
-- [ ] `initialize` rend `instructions` (≤ 1500 caractères, renvoi au skill) ; `banc_mcp.py`
-      le vérifie
+- [x] `initialize` rend `instructions` (≤ 1500 caractères, renvoi au skill) ; `banc_mcp.py`
+      le vérifie (le `.gitignore` ignorait `.claude/` : seul `.claude/skills/` est désormais
+      suivi, les réglages locaux restent ignorés)
 
 **Vérification :** `python3 lanceur/banc_savoir.py`, `python3 lanceur/banc_mcp.py`
 
