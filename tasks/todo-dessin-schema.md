@@ -29,7 +29,7 @@ puis remet le document. Opérations de cette tâche :
 `commun/ecriture-cao.js`, `commun/pilote-cao.js`, `editeur-schematique/editeur-schematique.html`,
 `editeur-schematique/test/harness.js` · **Taille :** M
 
-## Tâche 2 : poser depuis le catalogue
+## Tâche 2 : ✅ poser depuis le catalogue
 
 **Description :** extraire de la page `schTypeDuCatalogue(ligne)` (explorateur) et
 `schPoserDepuisCatalogue(el, ligne)` (clic de pose). La souris et l'explorateur passent
@@ -37,11 +37,11 @@ par elles, et `poser {catalogue: "Part Name"}` aussi, avec les lignes de
 `window.CSV_LIB`.
 
 **Critères d'acceptation :**
-- [ ] Une même ligne de catalogue posée à la souris et par Claude donne le même
+- [x] Une même ligne de catalogue posée à la souris et par Claude donne le même
       composant : type, valeur, boîtier, MPN, brochage, specs
-- [ ] Part Name inconnue : refus qui nomme `lib_composants` ; catalogue pas chargé :
+- [x] Part Name inconnue : refus qui nomme `lib_composants` ; catalogue pas chargé :
       refus clair ; symbole inconnu de la page : symbole générique, et la carte le dit
-- [ ] Bancs existants de pose et de brochage verts
+- [x] Bancs existants de pose et de brochage verts
 
 **Vérification :** `node editeur-schematique/test/harness.js`
 
