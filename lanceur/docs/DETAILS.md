@@ -242,6 +242,15 @@ Outils MCP (`etat` dans `mcp_web_suite.py`, les autres dans `mcp_api_outils.py`,
   ajoutée au catalogue, sans réécrire les autres. Pas d'annulation par la carte. Code de
   page : `WEB_CAO/gestion-lib/js/08-pilote-lib.js`, `WEB_CAO/commun/composants-lib.js`.
 
+**Le savoir métier.** Le skill `web-suite` (`.claude/skills/web-suite/`, voir
+[SPEC-mcp-savoir-metier.md](SPEC-mcp-savoir-metier.md)) dit quel outil prendre pour quelle tâche.
+Il a une fiche par métier : PCB (IPC-2152, classes, paires, retour), simulation depuis une
+datasheet, composants (IPC-7351B, pcbfp-1, brochage), schéma, routage et antennes. Claude
+Code le charge dans le dépôt web_suite ; ailleurs (Windows en SSH), le serveur MCP envoie un
+résumé dans sa réponse `initialize` (`instructions`). Les règles des anciennes consignes Gemini
+y sont suivies une à une dans [savoir-trace.md](savoir-trace.md), et `lanceur/banc_savoir.py`
+vérifie que ce que les fiches citent existe.
+
 **Le panneau « Claude ».** Chaque page des outils a, en bas à droite, un bouton « Claude ».
 Une écriture proposée par Claude s'y affiche en carte, avant → après, avec Appliquer et
 Refuser : rien ne change avant le clic. La case « Appliquer directement (cet onglet) »

@@ -17,8 +17,8 @@ RACINE = os.path.dirname(ICI)
 SKILL = os.path.join(RACINE, ".claude", "skills", "web-suite")
 TRACE = os.path.join(RACINE, "lanceur", "docs", "savoir-trace.md")
 MAX_SKILL, MAX_FICHE = 150, 200
-# « à faire » est permis tant que les fiches s'écrivent ; faux à la fin du module (tâche 8)
-A_FAIRE_PERMIS = True
+# toutes les règles ont leur destination : une nouvelle règle relevée en garde une
+A_FAIRE_PERMIS = False
 
 OUTIL = re.compile(r"`((?:cao|lib|antenna|web3d|pilote|pcbparts)_[a-z0-9_]+)`")
 LECTURE = re.compile(r"`([a-z0-9_]+)`\s*\(([a-z_]+)=([a-z0-9_]+)\)")
@@ -136,7 +136,7 @@ def essais():
     l = "| C1 | lanceur/banc_savoir.py:1 | une règle | %s |"
     for dest in ("pcb.md", "à faire", "écartée : propre à Gemini", "outil : cao_drc", "généré : cao_pcb_lire (quoi=liaisons)",
                  "pcb.md, SKILL.md"):
-        assert controler_trace(l % dest, fiches)[0] == [], (dest, controler_trace(l % dest, fiches))
+        assert controler_trace(l % dest, fiches, a_faire_permis=True)[0] == [], (dest, controler_trace(l % dest, fiches))
     for dest, motif in (("antenne.md", "destination inconnue"), ("outil : cao_rien", "outil inconnu"),
                         ("généré : cao_pcb_lire (quoi=tout)", "lecture inconnue"), ("écartée : ", "destination inconnue")):
         e = controler_trace(l % dest, fiches)[0]

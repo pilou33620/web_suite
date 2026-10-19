@@ -127,7 +127,7 @@ La grammaire des réglages n'y est pas : elle vient de `antenna_lire` (quoi=regl
 **Dépendances :** T2 · **Taille :** S
 
 ## Checkpoint : les fiches
-- [ ] Banc vert, plus aucune ligne « à faire » dans le relevé
+- [x] Banc vert, plus aucune ligne « à faire » dans le relevé
 
 ## Tâche 8 : `SKILL.md` final, essai réel, revue
 

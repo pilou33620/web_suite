@@ -20,8 +20,8 @@ consignes de l'assistant Gemini, jusqu'à l'endroit où le skill `web-suite`
 | Id | Source | Règle | Destination |
 |---|---|---|---|
 | C1 | WEB_CAO/commun/ia-assistant.js:281 | La suite : WEB_CAO (schéma, PCB push & shove, DRC, classes, paires, LIB, visionneuse IPC-2581, simulations SI/PI/RF), WEB_ANTENNA (openEMS), WEB_3D (STEP, mesure, assemblage) | SKILL.md |
-| C2 | WEB_CAO/commun/ia-assistant.js:285 | Un projet = schéma -SCH, PCB -PCB, carte -IPC ; dans PROJETS/CAO/<projet>, synchronisé sur GitHub ; LIB commune dans PROJETS/LIB_CAO | à faire |
-| C3 | WEB_CAO/commun/ia-assistant.js:286 | Une question qui dépasse l'outil ouvert : dire quel outil de la suite y répond | à faire |
+| C2 | WEB_CAO/commun/ia-assistant.js:285 | Un projet = schéma -SCH, PCB -PCB, carte -IPC ; dans PROJETS/CAO/<projet>, synchronisé sur GitHub ; LIB commune dans PROJETS/LIB_CAO | SKILL.md |
+| C3 | WEB_CAO/commun/ia-assistant.js:286 | Une question qui dépasse l'outil ouvert : dire quel outil de la suite y répond | SKILL.md |
 | C4 | WEB_CAO/commun/ia-assistant.js:291 | Schéma : pull-up I2C, découplage (100 nF / 10 µF), protection contre l'inversion de polarité (MOSFET P), filtre RC d'entrée ADC | schema.md |
 | C5 | WEB_CAO/commun/ia-assistant.js:297 | PCB : largeur selon le courant (IPC-2152, échauffement, cuivre 35 µm), paire USB 2.0 90 Ω, chemin de retour et fente dans le plan, vias thermiques sous une pastille de puissance QFN | pcb.md |
 | C6 | WEB_CAO/commun/ia-assistant.js:303 | IPC-2581 : structure du fichier, Rev B / Rev C, tolérances de perçage, isolation et masque | écartée : suggestions de questions générales, sans règle propre à la suite (savoir général de Claude) ; la carte se lit par `cao_ipc_lire` |
@@ -38,7 +38,7 @@ consignes de l'assistant Gemini, jusqu'à l'endroit où le skill `web-suite`
 | C17 | WEB_CAO/commun/ia-assistant.js:1804 | Répondre d'abord par un tableau court (paramètre, valeur, page, citation), avec une confiance | simulation.md |
 | C18 | WEB_CAO/commun/ia-assistant.js:1806 | Bloc sim_params (valeurs, condensateurs ESR/ESL, bornes_dc) | écartée : remplacé par l'outil `cao_sim_ecrire` pour les groupes pdn_fiche, pdn, si, bus, dc ; condensateurs et bornes_dc n'ont pas encore d'écriture MCP (simulation.md le dit : valeurs données à l'utilisateur) |
 | C19 | WEB_CAO/commun/ia-assistant.js:1809 | Le catalogue des paramètres réglables (clé, unité, bornes, valeur actuelle, où la lire) joint à la consigne | généré : cao_sim_lire (quoi=catalogue) |
-| C20 | WEB_CAO/commun/ia-assistant.js:253 | Le contexte n'est qu'un résumé : demander le détail avant de répondre, du plus ciblé au plus large ; ne jamais inventer une donnée qu'on peut lire | à faire |
+| C20 | WEB_CAO/commun/ia-assistant.js:253 | Le contexte n'est qu'un résumé : demander le détail avant de répondre, du plus ciblé au plus large ; ne jamais inventer une donnée qu'on peut lire | SKILL.md |
 | C21 | WEB_CAO/commun/ia-assistant.js:538 | Bus de pistes : skew acceptable à 100 MHz et plus, règle des 3W, diaphonie | pcb.md |
 | C22 | WEB_CAO/commun/ia-assistant.js:545 | Empreintes posées : boîtiers, pastilles, recommandations de routage | écartée : question ouverte sans règle ; se lit par `cao_pcb_lire` |
 | C23 | WEB_CAO/commun/ia-assistant.js:554 | Portion de schéma : cohérence électrique, valeurs, découplages et résistances de tirage manquants | schema.md |
@@ -79,4 +79,4 @@ consignes de l'assistant Gemini, jusqu'à l'endroit où le skill `web-suite`
 | A23 | WEB_ANTENNA/js/30-ia.js:1678 | Préférer un motif à la géométrie libre ; le dire quand on ne le fait pas | antenne.md |
 | A24 | WEB_ANTENNA/js/30-ia.js:1684 | Seuls chemins acceptés pour « reglages » : la grammaire de la page | généré : antenna_lire (quoi=reglages) |
 | A25 | WEB_ANTENNA/js/30-ia.js:1688 | port.X / ports.0.X ; con.* en conception seulement ; cotes = motif ouvert ; balayage = cotes balayables ; garde-fou du nombre de points | antenne.md |
-| A26 | WEB_ANTENNA/js/30-ia.js:146 | Outils de lecture : le contexte est un résumé, demander avant de répondre, ne rien inventer | à faire |
+| A26 | WEB_ANTENNA/js/30-ia.js:146 | Outils de lecture : le contexte est un résumé, demander avant de répondre, ne rien inventer | SKILL.md |

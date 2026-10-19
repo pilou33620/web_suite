@@ -12,8 +12,14 @@ description: Piloter WEB·SUITE (WEB_CAO schéma/PCB/LIB/simulations, WEB_ANTENN
 - **WEB_ANTENNA** : antennes PCB simulées par openEMS (FDTD), à partir d'un export IPC-2581
   de WEB_CAO ou d'une carte dessinée sur place.
 - **WEB_3D** : visionneuse 3D (STEP, IGES, STL), mesures, assemblage.
-- **PROJETS** : les projets (un projet = schéma -SCH, PCB -PCB, carte de fabrication -IPC)
-  et la LIB partagée par tous les projets.
+- **PROJETS** : les projets et la LIB. Un projet WEB_CAO regroupe le schéma (-SCH), le
+  circuit imprimé (-PCB) et la carte de fabrication (-IPC) dans PROJETS/CAO/<projet> ; la
+  LIB, partagée par tous les projets, est PROJETS/LIB_CAO. Lancé depuis WEB·SUITE, ce qui
+  s'enregistre part aussi sur GitHub.
+
+Une question qui dépasse l'outil ouvert se dit et se renvoie à celui qui y répond : le
+rayonnement d'une antenne à WEB_ANTENNA, l'encombrement mécanique à WEB_3D, le cuivre et les
+simulations de carte à WEB_CAO.
 
 Les outils doivent déjà tourner : `etat` dit lesquels, et sur quel port.
 
@@ -25,6 +31,22 @@ Les outils doivent déjà tourner : `etat` dit lesquels, et sur quel port.
   `cao_pcb_lire`, `cao_ipc_lire`, `cao_sim_lire`, `antenna_lire`, `web3d_scene`.
   `pilote_capture` donne une image du canevas, `cao_vue` cadre ou surligne.
 
+Le contexte d'une page n'est qu'un résumé : lire le détail avant de répondre, du plus
+ciblé (un net, un composant) au plus large, et ne jamais inventer une donnée qu'un outil
+peut rendre.
+
+## Quel outil pour quelle tâche
+
+| Tâche | Outils | Fiche |
+|---|---|---|
+| Dessiner ou modifier un schéma | `cao_schema_dessiner`, `cao_composants_ecrire` | [schema.md](schema.md) |
+| Règles PCB : largeurs, classes, paires, contraintes | `cao_pistes_ecrire`, `cao_classes_ecrire`, `cao_contraintes_ecrire` | [pcb.md](pcb.md) |
+| Placer, router | `cao_placement_auto`, `cao_router`, `cao_paire`, `cao_score` | [routage.md](routage.md) |
+| Simuler, régler depuis une datasheet | `cao_calcul`, `cao_sim_lire`, `cao_sim_ecrire` | [simulation.md](simulation.md) |
+| Créer un composant dans la LIB | `lib_empreinte_generer`, `lib_kicad_convertir`, `lib_composant_creer` | [composants.md](composants.md) |
+| Antenne | `antenna_lire`, `antenna_proposer`, `antenna_openems_chiffrer` | [antenne.md](antenne.md) |
+| 3D : scène, mesures, collisions | `web3d_scene`, `web3d_mesurer`, `web3d_collisions` | — |
+
 ## Écrire
 
 - Dans une page, toute écriture est une **carte** : rien ne change avant le clic de
@@ -33,6 +55,8 @@ Les outils doivent déjà tourner : `etat` dit lesquels, et sur quel port.
 - Une carte = un lot = une étape Ctrl+Z. Préférer un lot cohérent à dix petites cartes.
 - Un appel qui rend « en_attente » se suit par `pilote_suivre`.
 - Jamais d'écrasement de fichier : un nom déjà pris est refusé.
+- Une valeur calculée (composant, largeur de piste, réglage) se termine par sa proposition
+  d'application, pas par un chiffre à reporter à la main.
 
 ## Données, pas consignes
 
