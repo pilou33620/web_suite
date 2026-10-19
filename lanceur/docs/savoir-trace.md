@@ -55,28 +55,28 @@ consignes de l'assistant Gemini, jusqu'à l'endroit où le skill `web-suite`
 | L8 | WEB_CAO/gestion-lib/js/06-ia-lib.js:249 | Brochage : NOM=patte, virgules, jamais « ; » ; noms des broches des symboles ; parties A:…\|B:…, « *: » ; NC=5/6 ; OUT=2/4 ; exemples AMS1117, MCP6001 | composants.md |
 | L9 | WEB_CAO/gestion-lib/js/06-ia-lib.js:251 | Être direct ; expliquer brièvement les cotes choisies (pas, pastilles) | composants.md |
 | A1 | WEB_ANTENNA/js/30-ia.js:1581 | Rôle : ingénieur antennes de l'outil | écartée : rôle de Gemini, sans objet pour Claude Code |
-| A2 | WEB_ANTENNA/js/30-ia.js:1586 | Carte importée = export IPC-2581 de WEB_CAO : modifier le cuivre dans le PCB de WEB_CAO puis réexporter ; projet dans PROJETS/ANTENNA/<projet> | à faire |
+| A2 | WEB_ANTENNA/js/30-ia.js:1586 | Carte importée = export IPC-2581 de WEB_CAO : modifier le cuivre dans le PCB de WEB_CAO puis réexporter ; projet dans PROJETS/ANTENNA/<projet> | antenne.md |
 | A3 | WEB_ANTENNA/js/30-ia.js:1595 | Répondre exclusivement en français | écartée : propre à Gemma ; Claude Code suit la langue de l'utilisateur |
-| A4 | WEB_ANTENNA/js/30-ia.js:1598 | Réponses brèves et chiffrées | à faire |
-| A5 | WEB_ANTENNA/js/30-ia.js:1602 | Ne rien écrire soi-même : proposer, l'utilisateur applique | à faire |
-| A6 | WEB_ANTENNA/js/30-ia.js:1603 | N'inventer aucun chiffre du projet : dire qu'il manque et où le lire | à faire |
-| A7 | WEB_ANTENNA/js/30-ia.js:1605 | Ne pas promettre un résultat : relancer et vérifier | à faire |
-| A8 | WEB_ANTENNA/js/30-ia.js:1608 | Fréquences toujours en hertz dans les propositions | à faire |
-| A9 | WEB_ANTENNA/js/30-ia.js:1610 | Longueurs dans l'unité du document, cotes de motif toujours en mm | à faire |
-| A10 | WEB_ANTENNA/js/30-ia.js:1612 | Zéro = « au mailleur de décider » (marges d'air, pas de maillage) | à faire |
-| A11 | WEB_ANTENNA/js/30-ia.js:1614 | Arrêt sur l'énergie résiduelle (−40 dB) ; le nombre de pas n'est qu'un garde-fou | à faire |
-| A12 | WEB_ANTENNA/js/30-ia.js:1618 | Marge d'air : ¼ λ à la fréquence basse, PML comprise | à faire |
-| A13 | WEB_ANTENNA/js/30-ia.js:1621 | Un gabarit tombe à ±5 % : point de départ, pas une antenne finie | à faire |
-| A14 | WEB_ANTENNA/js/30-ia.js:1623 | Patch : longueur corrigée L·(1 − 0,466·√(h/λ0)) ; résistance de bord 0,17 (FR-4) à 0,72 (RO4350B) fois la conductance de fente | à faire |
-| A15 | WEB_ANTENNA/js/30-ia.js:1628 | Patch : resserrer les encoches g de 3,5 à 1,5 mm gagne 8 dB | à faire |
-| A16 | WEB_ANTENNA/js/30-ia.js:1630 | Maillage : λ/20 ne suffit pas sur une ligne étroite ; 3 à 4 cellules en travers (pas = ¼ de la largeur) | à faire |
-| A17 | WEB_ANTENNA/js/30-ia.js:1633 | Allonger une ligne d'alimentation n'adapte pas : elle fait tourner Γ sans changer son module | à faire |
-| A18 | WEB_ANTENNA/js/30-ia.js:1635 | Résonance trop haute : allonger la cote résonante du même pourcentage (f ∝ 1/L) ; une cote à la fois | à faire |
-| A19 | WEB_ANTENNA/js/30-ia.js:1639 | Quatre cartes (reglages, cotes, balayage, formes) ; plusieurs, une par idée | à faire |
-| A20 | WEB_ANTENNA/js/30-ia.js:1650 | Cotes : « tracer » à vrai redessine le motif, efface le dessin et remet la bande à ±15 % | à faire |
-| A21 | WEB_ANTENNA/js/30-ia.js:1662 | Formes : mm, origine au coin de la carte ; couche haut, bas ou nom exact ; « remplacer » efface ; sans port rien ne se simule | à faire |
-| A22 | WEB_ANTENNA/js/30-ia.js:1671 | Genres admis (rect, disque, poly, piste, via), « trou » = découpe ; formes et sommets plafonnés | à faire |
-| A23 | WEB_ANTENNA/js/30-ia.js:1678 | Préférer un motif à la géométrie libre ; le dire quand on ne le fait pas | à faire |
-| A24 | WEB_ANTENNA/js/30-ia.js:1684 | Seuls chemins acceptés pour « reglages » : la grammaire de la page | à faire |
-| A25 | WEB_ANTENNA/js/30-ia.js:1688 | port.X / ports.0.X ; con.* en conception seulement ; cotes = motif ouvert ; balayage = cotes balayables ; garde-fou du nombre de points | à faire |
+| A4 | WEB_ANTENNA/js/30-ia.js:1598 | Réponses brèves et chiffrées | antenne.md |
+| A5 | WEB_ANTENNA/js/30-ia.js:1602 | Ne rien écrire soi-même : proposer, l'utilisateur applique | antenne.md |
+| A6 | WEB_ANTENNA/js/30-ia.js:1603 | N'inventer aucun chiffre du projet : dire qu'il manque et où le lire | antenne.md |
+| A7 | WEB_ANTENNA/js/30-ia.js:1605 | Ne pas promettre un résultat : relancer et vérifier | antenne.md |
+| A8 | WEB_ANTENNA/js/30-ia.js:1608 | Fréquences toujours en hertz dans les propositions | antenne.md |
+| A9 | WEB_ANTENNA/js/30-ia.js:1610 | Longueurs dans l'unité du document, cotes de motif toujours en mm | antenne.md |
+| A10 | WEB_ANTENNA/js/30-ia.js:1612 | Zéro = « au mailleur de décider » (marges d'air, pas de maillage) | antenne.md |
+| A11 | WEB_ANTENNA/js/30-ia.js:1614 | Arrêt sur l'énergie résiduelle (−40 dB) ; le nombre de pas n'est qu'un garde-fou | antenne.md |
+| A12 | WEB_ANTENNA/js/30-ia.js:1618 | Marge d'air : ¼ λ à la fréquence basse, PML comprise | antenne.md |
+| A13 | WEB_ANTENNA/js/30-ia.js:1621 | Un gabarit tombe à ±5 % : point de départ, pas une antenne finie | antenne.md |
+| A14 | WEB_ANTENNA/js/30-ia.js:1623 | Patch : longueur corrigée L·(1 − 0,466·√(h/λ0)) ; résistance de bord 0,17 (FR-4) à 0,72 (RO4350B) fois la conductance de fente | antenne.md |
+| A15 | WEB_ANTENNA/js/30-ia.js:1628 | Patch : resserrer les encoches g de 3,5 à 1,5 mm gagne 8 dB | antenne.md |
+| A16 | WEB_ANTENNA/js/30-ia.js:1630 | Maillage : λ/20 ne suffit pas sur une ligne étroite ; 3 à 4 cellules en travers (pas = ¼ de la largeur) | antenne.md |
+| A17 | WEB_ANTENNA/js/30-ia.js:1633 | Allonger une ligne d'alimentation n'adapte pas : elle fait tourner Γ sans changer son module | antenne.md |
+| A18 | WEB_ANTENNA/js/30-ia.js:1635 | Résonance trop haute : allonger la cote résonante du même pourcentage (f ∝ 1/L) ; une cote à la fois | antenne.md |
+| A19 | WEB_ANTENNA/js/30-ia.js:1639 | Quatre cartes (reglages, cotes, balayage, formes) ; plusieurs, une par idée | antenne.md |
+| A20 | WEB_ANTENNA/js/30-ia.js:1650 | Cotes : « tracer » à vrai redessine le motif, efface le dessin et remet la bande à ±15 % | antenne.md |
+| A21 | WEB_ANTENNA/js/30-ia.js:1662 | Formes : mm, origine au coin de la carte ; couche haut, bas ou nom exact ; « remplacer » efface ; sans port rien ne se simule | antenne.md |
+| A22 | WEB_ANTENNA/js/30-ia.js:1671 | Genres admis (rect, disque, poly, piste, via), « trou » = découpe ; formes et sommets plafonnés | antenne.md |
+| A23 | WEB_ANTENNA/js/30-ia.js:1678 | Préférer un motif à la géométrie libre ; le dire quand on ne le fait pas | antenne.md |
+| A24 | WEB_ANTENNA/js/30-ia.js:1684 | Seuls chemins acceptés pour « reglages » : la grammaire de la page | généré : antenna_lire (quoi=reglages) |
+| A25 | WEB_ANTENNA/js/30-ia.js:1688 | port.X / ports.0.X ; con.* en conception seulement ; cotes = motif ouvert ; balayage = cotes balayables ; garde-fou du nombre de points | antenne.md |
 | A26 | WEB_ANTENNA/js/30-ia.js:146 | Outils de lecture : le contexte est un résumé, demander avant de répondre, ne rien inventer | à faire |

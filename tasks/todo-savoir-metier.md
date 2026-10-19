@@ -95,7 +95,7 @@ pour quelle question.
 
 **Dépendances :** T2 · **Taille :** S
 
-## Tâche 6 : `antenne.md`
+## Tâche 6 : ✅ `antenne.md`
 
 **Description :**
 - marge ¼λ, corrections de patch, maillage (3 à 4 cellules sur une ligne) ;
@@ -105,7 +105,7 @@ pour quelle question.
 La grammaire des réglages n'y est pas : elle vient de `antenna_lire` (quoi=reglages).
 
 **Critères d'acceptation :**
-- [ ] Les lignes ANTENNA du relevé ont leur destination ; banc vert
+- [x] Les lignes ANTENNA du relevé ont leur destination ; banc vert
 
 **Vérification :** `python3 lanceur/banc_savoir.py`
 
