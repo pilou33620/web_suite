@@ -170,4 +170,4 @@ La grammaire des réglages n'y est pas : elle vient de `antenna_lire` (quoi=regl
 **Dépendances :** T3…T7 · **Taille :** M
 
 ## Checkpoint : terminé
-- [ ] Critères de la spec remplis ; CI de web_suite verte
+- [x] Critères de la spec remplis ; CI de web_suite verte (7e7f1d9, WEB_CAO 4db8858)

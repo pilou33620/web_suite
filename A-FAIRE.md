@@ -16,6 +16,30 @@ détail de chaque module dans `tasks/`). Ce qui reste, au 19/10/2026 :
   `web-suite` n'est pas chargé et passe par `savoir_lire`.
 - [ ] **WEB_CAO** : `cao_paire` et `cao_placement_auto` dans la vraie page (voir son A-FAIRE).
 - [ ] **WEB_ANTENNA** : un vrai calcul openEMS pour les courbes (voir son A-FAIRE).
+- [ ] **WEB_3D** : un fichier introuvable ou illisible doit rendre « echouee » avec le message de
+  la page (`ui.charger` rend {ok, erreur}) : à éprouver en vrai (`tasks/todo-registre-3d.md`).
+
+## Vérifications à faire avec toi
+
+- [ ] **mcp-noyau** : sur le Pi, `/mcp` montre `web_suite` connecté et la réponse de Claude est
+  juste ; puis depuis le PC Windows par SSH (`tasks/todo-mcp-noyau.md`).
+- [ ] **api-outils** : relecture des passages cités dans la spec (`tasks/todo-api-outils.md`).
+- [ ] **registre-3d** : revue des deux checkpoints (`tasks/todo-registre-3d.md`).
+
+## Laissé par les modules, en connaissance de cause
+
+- [ ] **ecriture-cao** : un flot de cartes appliquées directement (interrupteur allumé) peut
+  vider l'historique de l'éditeur (80 étapes) ; « affecter » une classe ne connaît pas les
+  classes publiées par le schéma.
+- [ ] **dessin-schema** : les étiquettes et alimentations posées n'ont pas de repère ; seul
+  Ctrl+Z les retire.
+- [ ] **routage** : `cao_placement_auto` n'a pas d'aperçu dessiné (la carte dit ce qui bouge) ;
+  la méthode « blocs » n'a pas d'essai positif au banc.
+- [ ] **registre-antenna** : une vue changée par `antenna_vue` part avec le prochain
+  enregistrement du projet ; un panneau montré reste si l'utilisateur change ensuite la
+  disposition.
+- [ ] **composants** : constantes IPC des puces < 0603 à confirmer ; QFN, DIP et barrette sans
+  comparaison externe (détail dans l'A-FAIRE de WEB_CAO).
 
 ## Capacités manquantes, relevées en route
 
@@ -24,6 +48,7 @@ détail de chaque module dans `tasks/`). Ce qui reste, au 19/10/2026 :
 
 ## Défauts des outils vus pendant les essais (antérieurs au MCP)
 
-- [ ] Gestion LIB : environ 890 Mo au chargement sur le Pi (OOM possible).
+- [ ] Gestion LIB : environ 890 Mo au chargement sur le Pi (OOM possible) ; son tutoriel ne
+  passe pas en Chromium headless sur le Pi.
 - [ ] Visionneuse et WEB_ANTENNA : clic droit sans carte ouverte → `TypeError`.
 - [ ] WEB_ANTENNA : 422 de `/api/openems` pendant le tutoriel sur une page vide.

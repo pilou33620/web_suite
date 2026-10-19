@@ -183,4 +183,4 @@ Puis viennent `/review` et l'audit de sécurité.
 **Dépendances :** T6 · **Taille :** M
 
 ## Checkpoint : terminé
-- [ ] Critères de la spec remplis ; 4 CI vertes
+- [x] Critères de la spec remplis ; 4 CI vertes (WEB_CAO 2faa40c, WEB_ANTENNA 24ba852, WEB_3D e4400ab, web_suite f4cc503)
