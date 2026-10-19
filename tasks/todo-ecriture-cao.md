@@ -114,22 +114,22 @@ Les valeurs sont contrôlées par `normClass` ; les affectations passent par `se
 - [x] Bancs verts, bundles reconstruits ; chaque écriture fait une seule étape et se défait
       par Ctrl+Z
 
-## Tâche 6 : paramètres de simulation
+## Tâche 6 : ✅ paramètres de simulation
 
 **Description :** `cao_sim_ecrire` (PCB, visionneuse) : un lot de `[{groupe, cle, valeur,
 unite}]` passé par `simDsPreparer`, puis appliqué par `simDsAppliquer`. Il déclare `etat`
 et `annuler`.
 
 **Critères d'acceptation :**
-- [ ] Refus de tout le lot, sans rien écrire, pour :
+- [x] Refus de tout le lot, sans rien écrire, pour :
       - une unité différente de celle du catalogue ;
       - une clé inconnue ;
       - une valeur hors bornes ou hors choix.
 
       « Déjà à cette valeur » est une remarque, pas un refus.
-- [ ] Annuler dans le panneau remet les valeurs d'avant ; si une valeur a rebougé depuis,
+- [x] Annuler dans le panneau remet les valeurs d'avant ; si une valeur a rebougé depuis,
       l'annulation est refusée (`etat`)
-- [ ] L'assistant ΔI allumé par la carte est écrit sur la carte
+- [x] L'assistant ΔI allumé par la carte est écrit sur la carte
 
 **Vérification :** `node visionneuse-ipc2581/test/harness-sim.js`, `node commun/test/banc-pilote-cao.js`
 
