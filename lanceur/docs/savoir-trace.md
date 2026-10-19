@@ -23,11 +23,11 @@ consignes de l'assistant Gemini, jusqu'à l'endroit où le skill `web-suite`
 | C2 | WEB_CAO/commun/ia-assistant.js:285 | Un projet = schéma -SCH, PCB -PCB, carte -IPC ; dans PROJETS/CAO/<projet>, synchronisé sur GitHub ; LIB commune dans PROJETS/LIB_CAO | à faire |
 | C3 | WEB_CAO/commun/ia-assistant.js:286 | Une question qui dépasse l'outil ouvert : dire quel outil de la suite y répond | à faire |
 | C4 | WEB_CAO/commun/ia-assistant.js:291 | Schéma : pull-up I2C, découplage (100 nF / 10 µF), protection contre l'inversion de polarité (MOSFET P), filtre RC d'entrée ADC | à faire |
-| C5 | WEB_CAO/commun/ia-assistant.js:297 | PCB : largeur selon le courant (IPC-2152, échauffement, cuivre 35 µm), paire USB 2.0 90 Ω, chemin de retour et fente dans le plan, vias thermiques sous une pastille de puissance QFN | à faire |
+| C5 | WEB_CAO/commun/ia-assistant.js:297 | PCB : largeur selon le courant (IPC-2152, échauffement, cuivre 35 µm), paire USB 2.0 90 Ω, chemin de retour et fente dans le plan, vias thermiques sous une pastille de puissance QFN | pcb.md |
 | C6 | WEB_CAO/commun/ia-assistant.js:303 | IPC-2581 : structure du fichier, Rev B / Rev C, tolérances de perçage, isolation et masque | écartée : suggestions de questions générales, sans règle propre à la suite (savoir général de Claude) ; la carte se lit par `cao_ipc_lire` |
 | C7 | WEB_CAO/commun/ia-assistant.js:1774 | Rôle : « ingénieur électronicien d'élite » | écartée : rôle de Gemini, sans objet pour Claude Code |
 | C8 | WEB_CAO/commun/ia-assistant.js:1776 | Répondre exclusivement en français, sans méta-commentaire anglais | écartée : propre à Gemma ; Claude Code suit la langue de l'utilisateur |
-| C9 | WEB_CAO/commun/ia-assistant.js:1778 | Valeurs calculées (composants, largeur de piste) : toujours proposer de les appliquer | à faire |
+| C9 | WEB_CAO/commun/ia-assistant.js:1778 | Valeurs calculées (composants, largeur de piste) : toujours proposer de les appliquer | pcb.md |
 | C10 | WEB_CAO/commun/ia-assistant.js:1779 | Blocs ```action schema_values et pcb_track_width | écartée : remplacés par les outils `cao_valeur_composant`, `cao_composants_ecrire` et `cao_pistes_ecrire` |
 | C11 | WEB_CAO/commun/ia-assistant.js:1798 | Datasheet → simulation : ne relever que des valeurs écrites dans le document | à faire |
 | C12 | WEB_CAO/commun/ia-assistant.js:1799 | Pire cas : courants et tco au max, temps de montée au min, tsu/th au min exigé ; conditions les plus proches du projet | à faire |
@@ -39,7 +39,7 @@ consignes de l'assistant Gemini, jusqu'à l'endroit où le skill `web-suite`
 | C18 | WEB_CAO/commun/ia-assistant.js:1806 | Bloc sim_params (valeurs, condensateurs ESR/ESL, bornes_dc) | à faire |
 | C19 | WEB_CAO/commun/ia-assistant.js:1809 | Le catalogue des paramètres réglables (clé, unité, bornes, valeur actuelle, où la lire) joint à la consigne | à faire |
 | C20 | WEB_CAO/commun/ia-assistant.js:253 | Le contexte n'est qu'un résumé : demander le détail avant de répondre, du plus ciblé au plus large ; ne jamais inventer une donnée qu'on peut lire | à faire |
-| C21 | WEB_CAO/commun/ia-assistant.js:538 | Bus de pistes : skew acceptable à 100 MHz et plus, règle des 3W, diaphonie | à faire |
+| C21 | WEB_CAO/commun/ia-assistant.js:538 | Bus de pistes : skew acceptable à 100 MHz et plus, règle des 3W, diaphonie | pcb.md |
 | C22 | WEB_CAO/commun/ia-assistant.js:545 | Empreintes posées : boîtiers, pastilles, recommandations de routage | écartée : question ouverte sans règle ; se lit par `cao_pcb_lire` |
 | C23 | WEB_CAO/commun/ia-assistant.js:554 | Portion de schéma : cohérence électrique, valeurs, découplages et résistances de tirage manquants | à faire |
 | C24 | WEB_CAO/commun/ia-assistant.js:564 | Net IPC-2581 : continuité, impédance, pertes, transitions | écartée : question ouverte sans règle ; se lit par `cao_ipc_lire` |

@@ -45,14 +45,17 @@ Consignes relevées :
 
 **Dépendances :** T1 · **Fichiers :** `lanceur/docs/savoir-trace.md`, `lanceur/banc_savoir.py` · **Taille :** M
 
-## Tâche 3 : `pcb.md`
+## Tâche 3 : ✅ `pcb.md`
 
 **Description :** largeurs selon le courant (IPC-2152), isolations, classes, paires (90 Ω
 USB…), chemin de retour, vias thermiques ; la boucle `cao_drc` / `cao_score`. Chaque
 valeur est relue dans la consigne et dans le code.
 
 **Critères d'acceptation :**
-- [ ] Les lignes PCB du relevé ont leur destination ; banc vert
+- [x] Les lignes PCB du relevé ont leur destination ; banc vert (classes d'usine relues dans
+      `01-core.js` SCH_CLASSES, règle de paire DP_FALLBACK, profils D90… de cao_contraintes_ecrire ;
+      pas de valeur de charte IPC-2152 recopiée : renvoi à `cao_calcul` analyse=dc ; le banc
+      vérifie aussi `analyse=` et tout argument à choix)
 
 **Vérification :** `python3 lanceur/banc_savoir.py`
 

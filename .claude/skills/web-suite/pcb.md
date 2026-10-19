@@ -1,0 +1,76 @@
+# PCB : règles de conception et méthode
+
+Toujours lire avant de proposer : `cao_pcb_lire` (quoi=empilage) pour les couches et les
+épaisseurs, (quoi=classes) pour les règles, (quoi=net) pour un net, (quoi=drc) pour les
+erreurs en cours. Ne jamais supposer une épaisseur de cuivre ou un empilage : ils se lisent.
+
+## Largeur de piste selon le courant (IPC-2152)
+
+- IPC-2152 a remplacé la vieille charte d'IPC-2221 : l'échauffement d'une piste dépend du
+  courant, de l'épaisseur de cuivre (35 µm, 70 µm…), de la couche (interne ou externe) et
+  surtout de l'**étalement** de la chaleur dans le stratifié et les plans voisins.
+- La largeur se donne pour un échauffement admis, en °C (un écart : °C et K, c'est pareil),
+  à comparer à une température absolue : Tg du stratifié, limite d'un boîtier.
+- Ne pas recopier une valeur de charte comme un fait. Calculer avec la page :
+  `cao_calcul` (analyse=dc) résout la chute de tension et l'échauffement par étalement.
+- Appliquer : `cao_pistes_ecrire` (largeur d'un net, réalignement sur sa classe), ou mieux une
+  classe de nets (`cao_classes_ecrire`), pour que les pistes futures la suivent.
+- Un calcul de largeur se termine par une proposition d'application (une carte), jamais par
+  un chiffre laissé à reporter à la main.
+
+## Classes et isolations
+
+Le schéma propose des classes d'usine (créées au besoin, jamais imposées) :
+
+| Classe | Largeur | Isolation | Via / perçage |
+|---|---|---|---|
+| Alimentation, Masse | 0,6 mm | 0,25 mm | 0,9 / 0,45 mm |
+| Horloge | 0,25 mm | 0,5 mm (règle des 3W, d'axe à axe) | 0,8 / 0,4 mm |
+| Rapide | 0,25 mm | 0,25 mm | 0,8 / 0,4 mm |
+| RF | 50 Ω sur la couche du dessus, d'après l'empilage | 0,5 mm | 0,8 / 0,4 mm |
+| Analogique | 0,3 mm | 0,35 mm | 0,8 / 0,4 mm |
+
+Ce sont des points de départ : la classe réelle se lit (`cao_pcb_lire` (quoi=classes)) et se
+règle par `cao_classes_ecrire` (créer, modifier, rattacher des nets).
+
+## Paires différentielles
+
+- USB 2.0 : 90 Ω différentiel. D'autres liens ont la leur (LVDS, Ethernet 100 Ω…) : la
+  datasheet ou la norme du lien la donne.
+- La règle de paire d'usine ne fixe pas d'impédance : largeur 0,15 / 0,2 / 0,4 mm
+  (min / préférée / max), écart 0,13 / 0,15 / 0,4 mm, 12,7 mm au plus de longueur non
+  couplée. Pour une impédance visée : `cao_contraintes_ecrire` (action paire, impedance :
+  profil D90 pour l'USB, D100, D85 ou D120).
+- Vérifier l'impédance obtenue avec `cao_calcul` (analyse=diff), router la paire avec
+  `cao_paire`.
+
+## Chemin de retour
+
+- Tout signal rapide court au-dessus d'un plan de référence continu. Une fente ou une
+  coupure du plan sous la piste allonge la boucle de retour : rayonnement et diaphonie.
+- Un changement de couche d'un signal rapide change aussi de plan de référence : poser une
+  via de masse près de la via de signal.
+- `cao_calcul` (analyse=retour) montre le chemin de retour d'un net.
+
+## Diaphonie et bus
+
+- Règle des 3W : écart d'axe à axe d'au moins trois largeurs (isolation = deux largeurs)
+  entre une horloge ou un signal rapide et ses voisins.
+- Le décalage de longueur (skew) d'un bus se juge sur le budget de temps de l'interface
+  (tsu / th de la datasheet), pas sur un chiffre fixe : le convertir en temps avec la vitesse
+  de propagation de l'empilage.
+- `cao_calcul` (analyse=crosstalk) chiffre la diaphonie, (analyse=oeil) un lien rapide.
+
+## Vias thermiques
+
+Sous la pastille thermique d'un QFN ou d'un composant de puissance : une grille de vias vers
+le plan de masse interne. La grille recommandée (diamètre, pas, vias bouchées ou non) est
+dans la datasheet du boîtier : la lire plutôt que l'inventer. `cao_calcul` (analyse=dc)
+chiffre l'échauffement obtenu.
+
+## La boucle de vérification
+
+1. Proposer le lot (une carte, une étape Ctrl+Z).
+2. Après le clic : `cao_drc`, puis `cao_score` (quoi=routage) pour le routage.
+3. `cao_calcul` (analyse=verif) pour l'audit de la carte avant fabrication.
+4. Corriger ce qui reste, une cause à la fois.

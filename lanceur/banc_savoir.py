@@ -21,7 +21,7 @@ MAX_SKILL, MAX_FICHE = 150, 200
 A_FAIRE_PERMIS = True
 
 OUTIL = re.compile(r"`((?:cao|lib|antenna|web3d|pilote|pcbparts)_[a-z0-9_]+)`")
-LECTURE = re.compile(r"`([a-z0-9_]+)`\s*\(quoi=([a-z_]+)\)")
+LECTURE = re.compile(r"`([a-z0-9_]+)`\s*\(([a-z_]+)=([a-z0-9_]+)\)")
 LIEN = re.compile(r"\]\(([^)\s]+)\)")
 PRIVE = re.compile(r"/home/|/Users/|[A-Za-z]:\\\\|AIza[0-9A-Za-z_-]{20}|ghp_[0-9A-Za-z]{20}|sk-ant-")
 
@@ -44,10 +44,10 @@ def controler(fiches, outils=None, dossier=SKILL):
         for o in OUTIL.findall(texte):
             if o not in outils:
                 erreurs.append("%s : outil inconnu du serveur MCP : %s" % (nom, o))
-        for o, quoi in LECTURE.findall(texte):
-            enum = (outils.get(o, {}).get("inputSchema", {}).get("properties", {}).get("quoi", {}).get("enum"))
-            if not enum or quoi not in enum:
-                erreurs.append("%s : %s n'a pas de quoi=%s" % (nom, o, quoi))
+        for o, arg, val in LECTURE.findall(texte):
+            enum = (outils.get(o, {}).get("inputSchema", {}).get("properties", {}).get(arg, {}).get("enum"))
+            if not enum or val not in enum:
+                erreurs.append("%s : %s n'a pas de %s=%s" % (nom, o, arg, val))
         for cible in LIEN.findall(texte):
             if re.match(r"[a-z]+:", cible):
                 continue          # lien externe : pas vérifié ici
@@ -124,6 +124,7 @@ def essais():
     assert controler({"SKILL.md": bon, "pcb.md": "ok"}) == [], controler({"SKILL.md": bon, "pcb.md": "ok"})
     for faute, motif in ((bon + "`cao_inventer`", "outil inconnu"),
                          (bon + "`cao_pcb_lire` (quoi=tout)", "quoi=tout"),
+                         (bon + "`cao_calcul` (analyse=thermique)", "analyse=thermique"),
                          (bon + "x\n" * 160, "lignes"),
                          (bon + "[x](absent.md)", "lien mort"),
                          (bon + "dans /home/pilou/x", "chemin personnel"),
