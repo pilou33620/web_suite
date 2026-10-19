@@ -724,7 +724,7 @@ FauxApi.table.clear()
 os.environ["WEB_SUITE_MCP_PORTS"] = json.dumps(dict(PORTS, web_cao=api.server_address[1]))
 OC = ["cao_schema_lire", "cao_pcb_lire", "cao_ipc_lire", "cao_sim_lire", "cao_vue", "cao_drc"]
 verifier("outils de registre-cao listés", set(OC) <= set(noms), True)
-verifier("63 outils en tout (registre-cao, ecriture-cao, dessin-schema, registre-antenna, routage, composants)", len(noms), 63)
+verifier("64 outils en tout (registre-cao, ecriture-cao, dessin-schema, registre-antenna, routage, composants, savoir_lire)", len(noms), 64)
 verifier("registre-cao : ce que rend la page est une donnée",
          all("donnée" in o["description"] for o in outils if o["name"] in OC), True)
 FauxApi.table[("POST", "/api/pilote/commande")] = fin("- GND")
@@ -961,6 +961,15 @@ for nom, args in (("lib_empreinte_generer", {"famille": "bga"}), ("lib_empreinte
                   ("lib_composant_creer", {"ligne": dict(LIGNE, Value=["3V3"])})):
     verifier("%s refuse %r" % (nom, str(args)[:60]), outil(nom, **args)[0], True)
 verifier("aucun argument invalide n'atteint la page (composants)", FauxApi.recues, [])
+
+
+# le skill servi par le MCP (hors du dépôt) : une liste fermée de fiches, rien d'autre
+verifier("savoir_lire : les fiches du skill", mcp.FICHES,
+         ["SKILL", "antenne", "composants", "pcb", "routage", "schema", "simulation"])
+erreur, texte = outil("savoir_lire", fiche="pcb")
+verifier("savoir_lire pcb", (erreur, texte.startswith("# PCB")), (False, True))
+for f in ("../../README", "SKILL.md", "/etc/passwd", None):
+    verifier("savoir_lire refuse %r" % f, outil("savoir_lire", fiche=f)[0], True)
 
 FauxApi.table.clear()
 os.environ["WEB_SUITE_MCP_PORTS"] = json.dumps(PORTS)

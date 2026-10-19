@@ -164,8 +164,8 @@ La grammaire des réglages n'y est pas : elle vient de `antenna_lire` (quoi=regl
         grille courante du schéma, renuméroter avant le PCB, clés pcbfp-1 obligatoires,
         broches d'esd_rail et mos_np ; relevé : L1 séparé, savoir ajouté recensé avec sa
         source ; .gitignore limité au skill web-suite ; nom du skill dans la spec.
-      Laissé à l'utilisateur : servir les fiches par le MCP hors du dépôt ; deux précisions de
-      savoir général dans pcb.md.)
+      Décisions de l'utilisateur ensuite : les fiches servies par le MCP (outil `savoir_lire`,
+      liste fermée, 64 outils) ; les deux précisions de savoir général de pcb.md gardées.)
 
 **Dépendances :** T3…T7 · **Taille :** M
 

@@ -87,12 +87,12 @@ et `WEB_ANTENNA@24ba852f80ac21d0efc97a997d08ffe6f8f72c9e`, avant le retrait de G
 ## Savoir ajouté hors des consignes Gemini
 
 `schema.md` et `routage.md` sont nouvelles par décision de la spec. Ailleurs, ce qui ne vient
-pas d'une consigne Gemini vient du code, sauf deux précisions soumises à l'utilisateur :
+pas d'une consigne Gemini vient du code, sauf deux précisions validées par l'utilisateur (2026-10-19) :
 
 | Fiche | Ajout | Source |
 |---|---|---|
 | pcb.md | IPC-2152 a remplacé la charte d'IPC-2221 ; l'étalement compte ; un échauffement en °C vaut des K | code : `WEB_CAO/commun/simulation-em.js` (vers 269, 906) |
 | pcb.md | Classes d'usine, classes d'interface et leur Z différentielle, règle de paire d'usine | code : `editeur-pcb/js/01-core.js` (SCH_CLASSES, DP_FALLBACK), `commun/classes-interface.js` |
-| pcb.md | Via de masse près d'une via de signal rapide ; grille de vias thermiques prise dans la datasheet | savoir général, précisant les suggestions C5 : à valider |
+| pcb.md | Via de masse près d'une via de signal rapide ; grille de vias thermiques prise dans la datasheet | savoir général, précisant les suggestions C5 : validé par l'utilisateur |
 | antenne.md | Fente, anneau : antennes qu'aucun motif ne trace | code : `WEB_ANTENNA/js/30-ia.js` (vers 509) |
 | simulation.md | Quelle analyse pour quelle question | code : SIM_ANALYSES (`commun/simulation-em.js`) |

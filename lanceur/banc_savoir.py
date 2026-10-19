@@ -24,7 +24,7 @@ MAX_SKILL, MAX_FICHE, MAX_INSTRUCTIONS = 150, 200, 1500
 # toutes les règles ont leur destination : une nouvelle règle relevée en garde une
 A_FAIRE_PERMIS = False
 
-OUTIL = re.compile(r"`(etat|(?:cao|lib|antenna|web3d|pilote|pcbparts)_[a-z0-9_]+)`")
+OUTIL = re.compile(r"`(etat|(?:cao|lib|antenna|web3d|pilote|pcbparts|savoir)_[a-z0-9_]+)`")
 # un nom d'outil entre accents graves, ou une citation d'argument « (arg=valeur) »
 CITATION = re.compile(r"`([a-z0-9_]+)`|\(([a-z_]+)=([^)\s]+)\)")
 LIEN = re.compile(r"\]\(([^)\s]+)\)")

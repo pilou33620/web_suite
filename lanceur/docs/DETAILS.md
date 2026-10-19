@@ -247,7 +247,7 @@ Outils MCP (`etat` dans `mcp_web_suite.py`, les autres dans `mcp_api_outils.py`,
 Il a une fiche par métier : PCB (IPC-2152, classes, paires, retour), simulation depuis une
 datasheet, composants (IPC-7351B, pcbfp-1, brochage), schéma, routage et antennes. Claude
 Code le charge dans le dépôt web_suite ; ailleurs (Windows en SSH), le serveur MCP envoie un
-résumé dans sa réponse `initialize` (`instructions`). Les règles des anciennes consignes Gemini
+résumé dans sa réponse `initialize` (`instructions`) et sert les fiches par l'outil `savoir_lire`. Les règles des anciennes consignes Gemini
 y sont suivies une à une dans [savoir-trace.md](savoir-trace.md), et `lanceur/banc_savoir.py`
 vérifie que ce que les fiches citent existe.
 
