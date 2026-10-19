@@ -16,11 +16,13 @@ import sys
 
 ICI = os.path.dirname(os.path.abspath(__file__))
 RACINE = os.path.dirname(ICI)
-TRACE = re.compile(r"generativelanguage|gemma|gemini|/api/ia/cle|ia-assistant|06-ia-lib|30-ia\.js", re.I)
+# les noms de l'ancien assistant, et ses crochets dans les pages (un crochet remis se verrait)
+TRACE = re.compile(r"generativelanguage|gemma|gemini|/api/ia/cle|ia-assistant|06-ia-lib|30-ia\.js"
+                   r"|bIaAssistant|iaAfficherMenuContextuel|iaPanneau|tb-ia\b", re.I)
 PERMIS = {
-    "web_suite": (r"lanceur/docs/", r"tasks/", r"lanceur/mcp_web_suite\.py$", r"lanceur/banc_mcp\.py$",
-                  r"lanceur/banc_savoir\.py$", r"lanceur/banc_traces_ia\.py$", r"\.gitignore$"),
-    "outil": (r"tasks/", r"python/test/", r"\.gitignore$"),
+    "web_suite": (r"^lanceur/docs/(SPEC-|savoir-trace)", r"^tasks/", r"^lanceur/mcp_web_suite\.py$",
+                  r"^lanceur/banc_mcp\.py$", r"^lanceur/banc_savoir\.py$", r"^lanceur/banc_traces_ia\.py$", r"\.gitignore$"),
+    "outil": (r"^tasks/", r"^python/test/banc-(serveur|lib-routes|serveur-routes)\.py$", r"\.gitignore$"),
 }
 
 
@@ -28,10 +30,10 @@ def chercher(fichiers, permis):
     """fichiers : {chemin: texte}. Rend les traces hors des chemins permis : [(chemin, n°, ligne)]."""
     traces = []
     for chemin, texte in sorted(fichiers.items()):
-        if any(re.match(p, chemin) or re.search(p, chemin) for p in permis):
+        if any(re.search(p, chemin) for p in permis):
             continue
         for n, ligne in enumerate(texte.split("\n"), 1):
-            if TRACE.search(ligne):
+            if TRACE.search(ligne.replace("SPEC-mcp-retrait-gemini", "")):   # le nom de la spec, cité en lien
                 traces.append((chemin, n, ligne.strip()[:120]))
     return traces
 
@@ -59,11 +61,13 @@ def depot(outil):
 def essais():
     faux = {"js/page.js": "fetch('https://generativelanguage.googleapis.com')",
             "tasks/todo.md": "retirer ia-assistant.js",
-            "python/test/banc.py": "GET /api/ia/cle -> 404",
+            "python/test/banc-serveur.py": "GET /api/ia/cle -> 404",
+            "python/test/autre.py": "bIaAssistant",
             "css/x.css": "rien à signaler"}
     t = chercher(faux, PERMIS["outil"])
-    assert [c for c, _n, _l in t] == ["js/page.js"], t
-    assert chercher({"lanceur/docs/SPEC.md": "comme Gemini"}, PERMIS["web_suite"]) == []
+    assert [c for c, _n, _l in t] == ["js/page.js", "python/test/autre.py"], t
+    assert chercher({"lanceur/docs/SPEC-x.md": "comme Gemini"}, PERMIS["web_suite"]) == []
+    assert chercher({"lanceur/docs/DETAILS.md": "Gemini"}, PERMIS["web_suite"])     # doc vivante : pas permise
     assert chercher({"lanceur/outil.py": "Gemma 4"}, PERMIS["web_suite"])
 
 

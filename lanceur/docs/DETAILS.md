@@ -242,7 +242,7 @@ Outils MCP (`etat` dans `mcp_web_suite.py`, les autres dans `mcp_api_outils.py`,
   ajoutée au catalogue, sans réécrire les autres. Pas d'annulation par la carte. Code de
   page : `WEB_CAO/gestion-lib/js/08-pilote-lib.js`, `WEB_CAO/commun/composants-lib.js`.
 
-**L'ancien assistant IA.** Les assistants Gemini / Gemma intégrés aux pages de WEB_CAO
+**L'ancien assistant IA.** Les assistants IA intégrés aux pages de WEB_CAO
 (schéma, PCB, visionneuse, Gestion LIB) et de WEB_ANTENNA sont retirés (voir
 [SPEC-mcp-retrait-gemini.md](SPEC-mcp-retrait-gemini.md)) : Claude, par ce MCP, fait leur
 travail. Les deux serveurs n'ont plus de route de clé ; le MCP continue de refuser `/api/ia`.
@@ -253,7 +253,7 @@ travail. Les deux serveurs n'ont plus de route de clé ; le MCP continue de refu
 Il a une fiche par métier : PCB (IPC-2152, classes, paires, retour), simulation depuis une
 datasheet, composants (IPC-7351B, pcbfp-1, brochage), schéma, routage et antennes. Claude
 Code le charge dans le dépôt web_suite ; ailleurs (Windows en SSH), le serveur MCP envoie un
-résumé dans sa réponse `initialize` (`instructions`) et sert les fiches par l'outil `savoir_lire`. Les règles des anciennes consignes Gemini
+résumé dans sa réponse `initialize` (`instructions`) et sert les fiches par l'outil `savoir_lire`. Les règles des anciennes consignes de l'assistant IA
 y sont suivies une à une dans [savoir-trace.md](savoir-trace.md), et `lanceur/banc_savoir.py`
 vérifie que ce que les fiches citent existe.
 

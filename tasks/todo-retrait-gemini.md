@@ -118,7 +118,7 @@ Plan : [plan-retrait-gemini.md](plan-retrait-gemini.md)
 
 **Dépendances :** T5 · **Taille :** S
 
-## Tâche 7 : essai réel, puis revue
+## Tâche 7 : ✅ essai réel, puis revue
 
 **Description :** dans Chromium (copie de PROJETS), charger chaque page :
 - PCB, schéma, visionneuse, Gestion LIB, WEB_ANTENNA ;
@@ -139,7 +139,15 @@ Puis `/review`.
         lanceur, attendu ;
       - antenna_lire audit lu ; antenna_proposer boite.pml 8 → 10 cliquée, puis Annuler de la
         carte : 8 ; clés de session de l'ancien assistant absentes ; PROJETS au même md5.)
-- [ ] `/review` fait, corrections appliquées
+- [x] `/review` fait, corrections appliquées (rien de critique. Corrigé :
+      - la carte « Claude » de WEB_ANTENNA écrit les valeurs comme la page (unités, « au mailleur
+        de décider »), liste chaque forme posée et les avis ; README réécrit sur l'Annuler ; banc §10 ;
+      - exports morts retirés (FORMES_MAX, PTS_MAX) ; la lecture reglages vérifiée = liste blanche ;
+      - clic droit du PCB et du schéma : bloc de sélection mort retiré ;
+      - catalogue de simulation : condensateurs et bornes DC dits « saisis dans la page » ;
+      - escapeHtml de Gestion LIB retrouve un test ; mentions périmées corrigées ;
+      - banc_traces_ia : exceptions resserrées, crochets de l'assistant ajoutés au motif.
+      Reste noté dans les A-FAIRE (web_suite, WEB_CAO, WEB_ANTENNA).)
 
 **Dépendances :** T6 · **Taille :** M
 
