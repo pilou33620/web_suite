@@ -69,16 +69,16 @@ par elles, et `poser {catalogue: "Part Name"}` aussi, avec les lignes de
 
 **Dépendances :** T1 · **Fichiers :** `28-dessin-pilote.js`, harnais · **Taille :** M
 
-## Tâche 4 : étiqueter
+## Tâche 4 : ✅ étiqueter
 
 **Description :** `etiqueter {broche, net, genre: local|global|vcc|gnd}` pose `port`,
 `gport`, `vcc` ou `gnd` au bout d'un court fil (2 mm) qui part vers l'extérieur du
 composant. Le symbole est tourné pour que sa broche touche le fil.
 
 **Critères d'acceptation :**
-- [ ] Les quatre genres, sur des broches qui partent dans les quatre directions : la
+- [x] Les quatre genres, sur des broches qui partent dans les quatre directions : la
       broche rejoint le net nommé (`docNets()`), global ou local selon le genre
-- [ ] Un nom de net vide ou de plus de 40 caractères est refusé ; une étiquette qui
+- [x] Un nom de net vide ou de plus de 40 caractères est refusé ; une étiquette qui
       toucherait autre chose est refusée (même garde que T3)
 
 **Vérification :** `node editeur-schematique/test/harness.js`
