@@ -29,7 +29,7 @@ Bundles à reconstruire avant les harnais :
 **Dépendances :** aucune · **Fichiers :** `commun/ecriture-cao.js`, `commun/pilote-cao.js`,
 3 pages `.html`, `editeur-schematique/test/harness.js` · **Taille :** M
 
-## Tâche 2 : composants du PCB, DRC avant → après
+## Tâche 2 : ✅ composants du PCB, DRC avant → après
 
 **Description :** `cao_composants_ecrire` au PCB. Champs : `ref`, `valeur`, `boitier`
 (contrôlé par `pkgGeom`, puis `applyPkgGeom`), `face`, `x`, `y` (repère utilisateur,
@@ -37,11 +37,11 @@ Bundles à reconstruire avant les harnais :
 ajouté à `prop.apres`.
 
 **Critères d'acceptation :**
-- [ ] Déplacer, tourner et retourner deux empreintes : une étape `S.undo`, le cuivre suit
+- [x] Déplacer, tourner et retourner deux empreintes : une étape `S.undo`, le cuivre suit
       (`transformFps`), Ctrl+Z remet tout
-- [ ] Un boîtier hors table est refusé ; un repère déjà pris est refusé ; position à
+- [x] Un boîtier hors table est refusé ; un repère déjà pris est refusé ; position à
       ±1000 mm, rotation ramenée dans [0, 360)
-- [ ] La réponse « appliquee » porte « DRC : N erreurs avant → M après » et les nouvelles
+- [x] La réponse « appliquee » porte « DRC : N erreurs avant → M après » et les nouvelles
       erreurs, cohérents avec `runDrc()`
 
 **Vérification :** `node editeur-pcb/test/harness.js`
