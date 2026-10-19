@@ -3,7 +3,7 @@
 Spec : [lanceur/docs/SPEC-mcp-retrait-gemini.md](../lanceur/docs/SPEC-mcp-retrait-gemini.md) ·
 Plan : [plan-retrait-gemini.md](plan-retrait-gemini.md)
 
-## Tâche 1 : WEB_ANTENNA, le registre des cartes déplacé
+## Tâche 1 : ✅ WEB_ANTENNA, le registre des cartes déplacé
 
 **Description :** `js/31-cartes-antenna.js` (`CARTES_ANTENNA`) reçoit, sans rien y changer :
 - IA_CHAMPS ;
@@ -15,8 +15,10 @@ Plan : [plan-retrait-gemini.md](plan-retrait-gemini.md)
 `banc-interface.js` §9 passent aux nouveaux noms.
 
 **Critères d'acceptation :**
-- [ ] Relevé `test/releve-lecture-antenna.json` identique ; §9 vert avec les seuls noms changés
-- [ ] Panneau IA encore fonctionnel (il lit CARTES_ANTENNA) ; bancs WEB_ANTENNA verts
+- [x] Relevé `test/releve-lecture-antenna.json` identique ; §9 vert avec les seuls noms changés
+- [x] Panneau IA encore fonctionnel (il lit CARTES_ANTENNA) ; bancs WEB_ANTENNA verts
+      (banc-interface 586, comme avant ; les doublures du §10 visent CARTES_ANTENNA ; la partie
+      déplacée ne prenait au panneau que les aides de LECTURE_ANTENNA, reprises telles quelles)
 
 **Vérification :** `node test/banc-interface.js`, `python3 python/test/banc-openems.py`,
 `python3 python/test/banc-serveur.py`
