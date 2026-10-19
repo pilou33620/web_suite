@@ -903,7 +903,9 @@ for nom, args in (("cao_router", {}), ("cao_router", {"routes": [R1] * 21}), ("c
                   ("cao_paire", {"paire": "USB", "depart": "J1.1"}), ("cao_paire", dict(R1, paire="USB", largeur=0.2)),
                   ("cao_placement_auto", {"methode": "hasard"}), ("cao_placement_auto", {"methode": "blocs", "motif": "a\nb"}),
                   ("cao_score", {"quoi": "tout"}), ("cao_pcb_lire", {"quoi": "zone", "x1": 5000}),
-                  ("cao_pcb_lire", {"quoi": "zone", "x1": "5"}), ("cao_pcb_lire", {"quoi": "zone", "x1": float("nan")})):
+                  ("cao_pcb_lire", {"quoi": "zone", "x1": "5"}), ("cao_pcb_lire", {"quoi": "zone", "x1": float("nan")}),
+                  ("cao_router", {"routes": [dict(R1, depart={"x": 5000, "y": 1})]}),
+                  ("cao_router", {"routes": [dict(R1, points=[{"x": 1, "y": 2}] * 200)] * 6})):
     verifier("%s refuse %r" % (nom, str(args)[:60]), outil(nom, **args)[0], True)
 verifier("aucun argument invalide n'atteint la page (routage)", FauxApi.recues, [])
 

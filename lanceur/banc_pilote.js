@@ -228,12 +228,14 @@ function onglet(serveur, stockage, page, nomCanal) {
     .declarer({ page: "antenna", projet: () => "dipole" });
   const etat = { v: "1" };
   let annule = 0;
+  const refusees = [];
   D.commande("regler", {
     ecriture: true,
     proposer: a => ({ titre: "<img src=x onerror=alert(1)>", avant: etat.v, apres: a.v }),
     appliquer: a => { const avant = etat.v; etat.v = a.v; return avant; },
     annuler: (a, avant) => { etat.v = avant; annule++; },
     etat: () => etat.v,
+    refuser: (a, prop) => { refusees.push([a.v, prop.apres]); },
   });
   const doc = D._env.document;
   // Le bouton « Claude » et l'interrupteur sont là dès le chargement, avant toute carte :
@@ -271,6 +273,7 @@ function onglet(serveur, stockage, page, nomCanal) {
   bouton("Refuser").click();
   await attendreQue(() => serveur.finale(id), 2000, "refusée");
   assert.deepStrictEqual([serveur.finale(id).etat, etat.v], ["refusee", "1"]);
+  assert.deepStrictEqual(refusees, [["9", "9"]], "le crochet refuser de la commande est appelé, avec ses arguments et sa carte");
 
   // Interrupteur allumé : appliquée sans clic, la trace reste ; il est éteint au départ
   const inter = trouver(doc.body, e => e.tagName === "input" && e.type === "checkbox")[0];

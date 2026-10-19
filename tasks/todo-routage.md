@@ -115,7 +115,7 @@ gagne `liaisons` et `zone`.
 **Dépendances :** T2…T5 · **Fichiers :** `lanceur/mcp_routage.py`, `lanceur/mcp_registre_cao.py`,
 `lanceur/mcp_web_suite.py`, `lanceur/banc_mcp.py`, `lanceur/docs/DETAILS.md` · **Taille :** M
 
-## Tâche 7 : essai réel, puis revue
+## Tâche 7 : ✅ essai réel, puis revue
 
 **Description :** sur une copie de « carte PIR v2 », Claude route quelques liaisons par le
 MCP, en bouclant sur `cao_score` et sur l'aperçu capturé. Une carte est cliquée, puis
@@ -131,7 +131,26 @@ viennent `/review` et l'audit de sécurité.
         raison (liaisons tentées en ligne droite, sans point de passage) ;
       - score : 81 → 65 liaisons, total 1371 → 1243 ;
       - deux Ctrl+Z remettent la carte vide ; PROJETS au même md5.)
-- [ ] `/review` fait, corrections appliquées
+- [x] `/review` fait, corrections appliquées (revue 5 axes + audit de sécurité : ni critique
+      ni élevé. Corrigé :
+      - au clic, seuls le cuivre et les empreintes du relevé sont repris : réglages du routeur,
+        couche active et couches vues restent ceux de l'utilisateur ;
+      - la carte périmée se juge sur le cuivre, pas sur S.ver (masquer une couche ne la périme
+        plus, une retouche du cuivre sans touch() est vue) ;
+      - refus pendant un geste en cours ;
+      - la largeur demandée tient après une via ;
+      - l'aperçu s'efface quand la carte est refusée (crochet refuser ajouté à pilote.js, copié
+        dans les trois outils) ;
+      - une proposition ne vide plus le DRC, ne perd plus la paire de couches, la sélection
+        entière ni le message d'aide ;
+      - le cuivre poussé ou retiré est compté et dessiné en rouge ;
+      - le lot est borné à 10 s de calcul et à 1000 points ;
+      - deux pastilles de nets différents sont refusées d'emblée ; la via n'est plus posée en
+        silence sur la pastille de départ ; la couche de départ ne dépend plus de l'affichage ;
+      - DRC raté après un clic : le lot reste appliqué ; noms du projet sur une ligne ;
+      - score : topologie à part, fetch borné à 20 s ; zone et liaisons plus robustes.
+      Laissé : les placements n'ont pas d'aperçu dessiné (la carte dit ce qui bouge) ;
+      « blocs » n'a pas d'essai positif au banc.)
 
 **Dépendances :** T6 · **Taille :** M
 

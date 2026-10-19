@@ -11,17 +11,21 @@ from mcp_api_outils import facultatif, resumer
 from mcp_ecriture_cao import NOM, NOMBRE, parmi, valider
 from mcp_registre_3d import choix, refuser
 
-ROUTES_MAX, POINTS_MAX, VIAS_MAX = 20, 200, 50
+ROUTES_MAX, POINTS_MAX, VIAS_MAX, POINTS_LOT = 20, 200, 50, 1000
 MODE = parmi("pousser", "contourner")
+
+
+def _mm(v):
+    return NOMBRE[0](v) and -1000 <= v <= 1000
 
 
 def _point(v):
     return (isinstance(v, str) and NOM[0](v)) or (
-        isinstance(v, dict) and set(v) <= {"x", "y", "couche"} and NOMBRE[0](v.get("x")) and NOMBRE[0](v.get("y"))
+        isinstance(v, dict) and set(v) <= {"x", "y", "couche"} and _mm(v.get("x")) and _mm(v.get("y"))
         and (v.get("couche") is None or NOM[0](v["couche"])))
 
 
-POINT = (_point, "« REF.pastille », ou {x, y, couche?} en mm")
+POINT = (_point, "« REF.pastille », ou {x, y, couche?} en mm (±1000)")
 POINTS = (lambda v: isinstance(v, list) and len(v) <= POINTS_MAX and all(_point(x) for x in v),
           "liste de %d points au plus" % POINTS_MAX)
 ROUTE = {"depart": POINT, "arrivee": POINT, "points": POINTS, "largeur": NOMBRE, "couche": NOM}
@@ -49,6 +53,8 @@ def cao_router(a):
             "vias": liste(a, "vias", VIAS_MAX, VIA, ("x", "y", "net"))}
     if not args["routes"] and not args["vias"]:
         refuser("Rien à router : « routes » ou « vias ».")
+    if sum(len(r.get("points") or []) for r in args["routes"]) > POINTS_LOT:
+        refuser("%d points de passage au plus par carte : découpe le lot." % POINTS_LOT)
     if a.get("mode") is not None:
         args["mode"] = choix(a["mode"], "mode", ("pousser", "contourner"))
     return envoyer("cao_router", args, a)
@@ -78,8 +84,10 @@ ONGLET = pilote.ONGLET
 T = {"type": "string"}
 PT = {"description": "« REF.pastille » (U1.3) ou {x, y, couche?} en mm, repère de cao_pcb_lire"}
 CARTE = (" Le lot est joué pour de vrai par la page puis défait ; la carte montre route par route « posée » "
-         "ou « refusée : raison », et un aperçu en pointillés (pilote_capture le montre). Au clic, le "
-         "résultat vu est chargé en une étape d'historique (Ctrl+Z la défait), avec le DRC avant → après.")
+         "ou « refusée : raison », et un aperçu en pointillés (le cuivre déplacé par la poussée en rouge ; "
+         "pilote_capture le montre). Au clic, le cuivre vu est chargé en une étape d'historique (Ctrl+Z la "
+         "défait), avec le DRC avant → après ; les réglages de l'éditeur ne changent pas. Le lot entier est "
+         "borné à 10 s de calcul dans la page.")
 OUTILS_ROUTAGE = {
     "cao_router": {
         "description": "Route des liaisons de la carte PCB ouverte par points de passage : le routeur de la page "
@@ -110,7 +118,9 @@ OUTILS_ROUTAGE = {
         "description": "Lance un placement automatique de la page sur la carte PCB : forces (dégrossit tout, "
                        "découplages contre leur broche), satellites (découplages et composants série contre leur "
                        "circuit), blocs (agence un motif ou une zone publiés par le schéma : « motif »)."
-                       + CARTE.replace("route par route « posée » ou « refusée : raison »", "combien d'empreintes bougent")
+                       + " Le placement est joué par la page puis défait ; la carte dit combien d'empreintes bougent "
+                         "et lesquelles (pas d'aperçu dessiné : capture après le clic). Au clic, une étape "
+                         "d'historique (Ctrl+Z la défait)."
                        + pilote.ATTENTE_DOC + pilote.DONNEES,
         "inputSchema": {"type": "object", "required": ["methode"], "properties": {
             "methode": {"type": "string", "enum": ["forces", "satellites", "blocs"]}, "motif": T, "onglet": ONGLET}},
