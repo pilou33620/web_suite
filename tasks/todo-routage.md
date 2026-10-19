@@ -76,7 +76,7 @@ même socle : une carte, une étape.
 
 **Dépendances :** T2 · **Fichiers :** `37-routage-pilote.js`, harnais · **Taille :** S
 
-## Tâche 5 : `cao_score`
+## Tâche 5 : ✅ `cao_score`
 
 **Description :**
 - `routage` : le tableau de la spec (liaisons restantes, DRC, vias, longueur,
@@ -84,11 +84,11 @@ même socle : une carte, une étape.
 - `placement` : le score du serveur, résumé.
 
 **Critères d'acceptation :**
-- [ ] `routage` sur l'exemple, puis sur une carte abîmée : les valeurs attendues
+- [x] `routage` sur l'exemple, puis sur une carte abîmée : les valeurs attendues
       (liaisons, erreurs, vias, longueur au centième)
-- [ ] `placement` : le document envoyé est celui de `PLACEMENT_SCORE` ; une réponse en
+- [x] `placement` : le document envoyé est celui de `PLACEMENT_SCORE` ; une réponse en
       erreur du serveur devient un refus clair
-- [ ] Aucune écriture (lecture)
+- [x] Aucune écriture (lecture)
 
 **Vérification :** `node editeur-pcb/test/harness.js`
 
@@ -96,7 +96,7 @@ même socle : une carte, une étape.
 ligne d'export), harnais · **Taille :** M
 
 ## Checkpoint : routage dans la page
-- [ ] Bancs verts, bundle reconstruit
+- [x] Bancs verts, bundle reconstruit
 
 ## Tâche 6 : outils MCP
 
