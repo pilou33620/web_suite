@@ -50,18 +50,18 @@ Banc principal : `node WEB_ANTENNA/test/banc-interface.js` (la CI passe par
 **Dépendances :** T1 · **Fichiers :** `js/29-lecture-antenna.js`, `js/pilote-antenna.js`,
 `test/banc-interface.js` · **Taille :** M
 
-## Tâche 3 : `antenna_vue` et captures
+## Tâche 3 : ✅ `antenna_vue` et captures
 
 **Description :** `antenna_vue` change la vue de la page : `vue` (`2d`/`3d`),
 `maillage`, `ajuster`, `onglet`, `point_balayage`, `etape`, `panneau`, `toile`. La
 fonction de capture rend la toile choisie : carte, 3D (avec un rendu forcé) ou courbe.
 
 **Critères d'acceptation :**
-- [ ] Tout est vérifié avant le premier changement : un onglet, une étape, un panneau ou
+- [x] Tout est vérifié avant le premier changement : un onglet, une étape, un panneau ou
       un point inconnus refusent sans rien changer
-- [ ] Rien n'est écrit : ni `ANT`/`CON`/`PRJ`, ni préférences (`antReglagesEcrire` et
+- [x] Rien n'est écrit : ni `ANT`/`CON`/`PRJ`, ni préférences (`antReglagesEcrire` et
       `localStorage.setItem` piégés)
-- [ ] La fonction de capture rend `#carte`, `#vue3d` (après `ant3dDessiner`) ou `#courbe`
+- [x] La fonction de capture rend `#carte`, `#vue3d` (après `ant3dDessiner`) ou `#courbe`
       selon la dernière vue ; une toile cachée est d'abord montrée, sinon refus clair
 
 **Vérification :** `node test/banc-interface.js`
@@ -69,7 +69,7 @@ fonction de capture rend la toile choisie : carte, 3D (avec un rendu forcé) ou 
 **Dépendances :** T2 · **Fichiers :** `js/pilote-antenna.js`, `test/banc-interface.js` · **Taille :** M
 
 ## Checkpoint : lecture et vue dans la page
-- [ ] Bancs verts (`banc-interface.js`, `banc-openems.py`) ; Gemini répond comme avant
+- [x] Bancs verts (`banc-interface.js`, `banc-openems.py`) ; Gemini répond comme avant
       (sorties identiques)
 
 ## Tâche 4 : outils MCP
