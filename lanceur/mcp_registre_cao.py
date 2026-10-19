@@ -148,9 +148,11 @@ OUTILS_CAO = {
     },
     "cao_vue": {
         "description": "Règle la vue d'une page WEB_CAO, sans rien changer au projet : cadrer sur un repère ou un net "
-                       "(sélectionné), surligner sans bouger la vue, feuille (schéma), couches visibles (PCB, "
+                       "(sélectionné), surligner sans bouger la vue ni la sélection (au schéma, sur la feuille "
+                       "affichée ou donnée), feuille (schéma), couches visibles (PCB, "
                        "visionneuse : les autres sont masquées), ajuster à tout le document. capturer=true rend "
-                       "l'image dans la foulée. Un repère ou une couche inconnus ne changent rien." + DONNEES,
+                       "l'image dans la foulée. Un repère ou une couche inconnus ne changent rien. La visibilité des "
+                       "couches du PCB part avec le prochain Enregistrer de l'utilisateur." + DONNEES,
         "inputSchema": {"type": "object", "properties": {
             "page": {"type": "string", "enum": PAGES_VUE, "description": "Page visée ; par défaut, la dernière utilisée."},
             "cadrer": {"type": "string"}, "surligner": {"type": "string"},

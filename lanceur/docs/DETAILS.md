@@ -200,7 +200,9 @@ Outils MCP (`etat` dans `mcp_web_suite.py`, les autres dans `mcp_api_outils.py`,
   (visionneuse), `cao_sim_lire` (simulations, une partie d'un rapport), `cao_vue` (cadrer,
   surligner, feuille, couches, ajuster, capture), `cao_drc` (lance le DRC). Lectures et vue
   seulement : rien n'est écrit dans le projet. Les lectures sont celles de l'assistant de la
-  page (`WEB_CAO/commun/lecture-cao.js`).
+  page (`WEB_CAO/commun/lecture-cao.js`). Seule exception : la visibilité des couches du PCB
+  fait partie du fichier, comme l'œil du panneau ; elle part avec le prochain Enregistrer.
+  Surligner un net le met en avant sans sélectionner son routage.
 
 **Le panneau « Claude ».** Chaque page des outils a, en bas à droite, un bouton « Claude ».
 Une écriture proposée par Claude s'y affiche en carte, avant → après, avec Appliquer et

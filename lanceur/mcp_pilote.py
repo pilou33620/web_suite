@@ -42,7 +42,7 @@ def etat_rendu(id_outil, vue):
     etat = vue.get("etat")
     if etat in ("echouee", "expiree"):
         raise noyau.ErreurOutil("%s : %s" % ("Échec dans la page" if etat == "echouee" else "Commande expirée",
-                                             vue.get("resultat") or "l'onglet a été fermé avant de répondre."))
+                                             str(vue.get("resultat") or "l'onglet a été fermé avant de répondre.")[:2000]))  # le texte peut venir des fichiers du projet
     if etat == "refusee":
         vue["detail"] = "Refusée par l'utilisateur dans la page : rien n'a été modifié."
     elif etat not in ("appliquee", "finie"):

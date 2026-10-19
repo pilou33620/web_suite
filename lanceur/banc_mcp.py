@@ -621,6 +621,8 @@ for etat in ("echouee", "expiree"):
     erreur, texte = outil("cao_valeur_composant", ref="R99", valeur="1k")
     verifier("%s en erreur lisible" % etat, (erreur, "R99" in texte or "fermé" in texte or "expir" in texte),
              (True, True))
+FauxApi.table[("POST", "/api/pilote/commande")] = fin("x" * 50000, "echouee")    # texte venu du projet : borné
+verifier("échec borné", len(outil("cao_valeur_composant", ref="R1", valeur="1k")[1]) < 2200, True)
 # Pas encore de réponse (ta carte attend) : en attente, avec l'id pour pilote_suivre
 FauxApi.table[("POST", "/api/pilote/commande")] = fin(None, "proposee")
 erreur, att = outil("cao_valeur_composant", ref="R1", valeur="1k")

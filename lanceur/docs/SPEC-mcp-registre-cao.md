@@ -152,9 +152,13 @@ function schTrouver(ref) {
   - exposer `/api/ia/*` ;
   - modifier un fichier de PROJETS pendant l'essai réel (copie dans `/tmp`).
 
-## Questions ouvertes
+## Questions tranchées (essai réel, 2026-10-19)
 
-1. Le schéma n'a qu'une forme de nom de broche fiable (`brNomBroche`) : si une broche n'a
-   pas de nom, la sortie dit seulement son numéro. À vérifier à l'essai réel.
-2. Durée du DRC sur une grosse carte : non mesurée. Si elle dépasse 2 min, le canal rend
-   « en_attente », à suivre par `pilote_suivre`.
+1. **Noms de broche** : ceux du symbole ou saisis sur le composant (`brNomBroche`), par
+   exemple « 1 (GND) → GND » sur le TLC555 ; une broche sans nom (résistance) donne son
+   numéro seul.
+2. **Durée du DRC** : 0,3 s sur « carte PIR v2 » (51 empreintes, 108 erreurs). La sortie
+   s'arrête à 80 lignes, comme pour Gemini.
+3. **Simulations** : `cao_sim_lire` vise la dernière page utilisée entre PCB et
+   visionneuse ; `afficher` y fait le calcul que l'onglet lance de lui-même (PDN, par
+   exemple).

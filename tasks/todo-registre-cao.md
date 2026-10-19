@@ -105,16 +105,23 @@ documenté dans `lanceur/docs/DETAILS.md`.
 **Dépendances :** T4 · **Fichiers :** `lanceur/mcp_registre_cao.py`, `lanceur/mcp_web_suite.py`,
 `lanceur/banc_mcp.py`, `lanceur/docs/DETAILS.md` · **Taille :** M
 
-## Tâche 6 : essai réel, puis revue
+## Tâche 6 : ✅ essai réel, puis revue
 
 **Description :** WEB_CAO lancé sur une copie de PROJETS dans `/tmp`. Les trois pages sont
 ouvertes dans Chromium sur le Pi. Chaque outil est appelé par le MCP, avec des captures.
 Ensuite viennent `/review` et l'audit de sécurité.
 
 **Critères d'acceptation :**
-- [ ] Les 6 outils répondent sur un vrai projet ; PROJETS reste intact
-- [ ] Les questions ouvertes de la spec sont tranchées : noms de broche, durée du DRC
-- [ ] `/review` fait, corrections appliquées
+- [x] Les 6 outils répondent sur un vrai projet ; PROJETS reste intact (« carte PIR v2 » :
+      schéma 2 feuilles et 49 composants, PCB 51 empreintes, son export IPC-2581 dans la
+      visionneuse ; captures du PCB, du schéma et de la visionneuse ; ni historique ni drapeau
+      « modifié » touchés, copie de PROJETS identique à la fin)
+- [x] Les questions ouvertes de la spec sont tranchées : noms de broche (ceux du symbole,
+      « 1 (GND) » ; sans nom, le numéro seul), DRC en 0,3 s sur 51 empreintes
+- [x] `/review` fait, corrections appliquées (revue 5 axes et audit de sécurité : ni critique
+      ni élevé ; couches sans `touch()` qui périmait les simulations, surligner sans
+      sélectionner le routage, cible d'une autre feuille refusée au schéma, noms hérités de
+      `Object.prototype` refusés, erreurs de page bornées à 2000 caractères)
 
 **Dépendances :** T5 · **Taille :** M
 
