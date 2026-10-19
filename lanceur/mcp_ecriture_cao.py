@@ -143,7 +143,7 @@ def cao_schema_dessiner(a):
     if not isinstance(ops, list) or not 1 <= len(ops) <= DESSIN_MAX:
         refuser("Argument « operations » invalide : liste de 1 à %d opérations (une carte)." % DESSIN_MAX)
     for i, o in enumerate(ops, 1):
-        if not isinstance(o, dict) or o.get("op") not in OPERATIONS:
+        if not isinstance(o, dict) or not isinstance(o.get("op"), str) or o["op"] not in OPERATIONS:
             refuser("operations, élément %d : « op » parmi %s." % (i, ", ".join(OPERATIONS)))
         valider(o, dict(OPERATIONS[o["op"]], op=(lambda v: True, "")), (), "operations, élément %d (%s)" % (i, o["op"]))
     return envoyer(["schema"], "cao_schema_dessiner", ops, a)
@@ -231,8 +231,9 @@ OUTILS_ECRITURE_CAO = {
                        "valeur, x, y (mm ; sans position, place libre), rotation, miroir} ; deplacer {ref, x, y "
                        "ou dx, dy} ; tourner {ref, angle} ; miroir {ref} ; supprimer {ref} ; relier {de, a : "
                        "« R1.2 » ou « U1.OUT »} ; supprimer_fil {de, a} ; etiqueter {broche, net, genre : local, "
-                       "global, vcc, gnd} ; feuille {creer} ou {renommer, nom} ; renumeroter. Chaque opération "
-                       "peut viser une « feuille » (n°), sinon la feuille affichée. Un repère posé sert aux "
+                       "global, vcc, gnd} ; feuille {creer} ou {renommer, nom} ; renumeroter (tout le document). "
+                       "Les autres opérations peuvent viser une « feuille » (n°), sinon la feuille affichée. Les "
+                       "étiquettes et alimentations n'ont pas de repère : seul Ctrl+Z les retire. Un repère posé sert aux "
                        "opérations suivantes. Un fil qui relierait d'autres broches que celles demandées est "
                        "refusé : étiquette alors. Un seul refus et rien ne change."
                        + pilote.ATTENTE_DOC + pilote.DONNEES,

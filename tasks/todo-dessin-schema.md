@@ -129,7 +129,7 @@ Documenté dans `DETAILS.md`.
 **Dépendances :** T2…T5 · **Fichiers :** `lanceur/mcp_ecriture_cao.py`, `lanceur/banc_mcp.py`,
 `lanceur/docs/DETAILS.md` · **Taille :** S
 
-## Tâche 7 : essai réel, puis revue
+## Tâche 7 : ✅ essai réel, puis revue
 
 **Description :** sur une copie de PROJETS, Claude dessine par le MCP un petit montage
 dans une nouvelle feuille de « carte PIR v2 » : une carte cliquée, puis l'interrupteur
@@ -147,7 +147,22 @@ sécurité.
         retombait sur un CI générique, même à la souris ;
       - les étiquettes se posaient en travers des fils déjà tracés : elles cherchent
         maintenant une direction libre.)
-- [ ] `/review` fait, corrections appliquées
+- [x] `/review` fait, corrections appliquées (revue 5 axes + audit de sécurité : rien de
+      critique à l'audit ; la revue avait vu des trous dans la garde. Corrigé :
+      - poser, déplacer, tourner et miroir passent la garde ; poser refuse étiquettes et
+        alimentations (etiqueter seul nomme un net) ;
+      - la garde compare aussi les noms de nets ;
+      - deux noms réunis et deux broches déjà reliées sont refusés ;
+      - renuméroter garde les parties d'un boîtier sous un repère et signale les repères
+        repris ;
+      - la simulation travaille sur un clone, sans restore() : objets, geste en cours et
+        sélection gardés ;
+      - supprimer_fil essaie chaque branche et refuse un chemin qui passe par une broche ;
+      - noms réservés refusés ; le symbole inconnu est dit sur la carte ;
+      - la pile de rétablissement survit à un échec, aussi dans la visionneuse ;
+      - netlist : l'empreinte sur une ligne ; une pose de catalogue part avec le changement
+        de feuille.
+      Laissé : les étiquettes n'ont pas de repère, seul Ctrl+Z les retire.)
 
 **Dépendances :** T6 · **Taille :** M
 

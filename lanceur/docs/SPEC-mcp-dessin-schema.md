@@ -39,7 +39,7 @@ au plus.
 | `supprimer` | `ref` | Le composant, comme `delSel` (les fils restent, comme à la souris) |
 | `supprimer_fil` | `de` « REF.broche », `a` « REF.broche » | Les segments du fil qui relie ces deux broches, jusqu'aux jonctions ; refus s'il n'y a pas de fil direct entre elles |
 | `feuille` | `creer` (nom) ou `renommer` (n° + nom) | `addPage` / renommage |
-| `renumeroter` | `feuille` facultatif | Par préfixe, ordre de lecture (haut → bas, gauche → droite) ; la carte montre la table ancien → nouveau |
+| `renumeroter` | — | Tout le document, par préfixe, feuille par feuille, ordre de lecture (haut → bas, gauche → droite) ; les parties d'un même boîtier gardent un seul repère ; la carte montre la table ancien → nouveau et les repères repris par d'autres composants |
 
 Les broches se nomment par numéro ou par nom de broche (`U1.OUT`), comme dans les lectures
 de `registre-cao`.
