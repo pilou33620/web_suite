@@ -44,7 +44,7 @@ fichier voisin `commun/ecriture-cao.js` si `pilote-cao.js` dépasse ~400 lignes)
 | `cao_composants_ecrire` | schéma, PCB | Lot `[{ref, champs:{…}}]`. Champs du schéma : `ref`, `valeur`, `boitier`, `fabricant`, `mpn`, `specs` (objet clé → texte), `non_monte`. Champs du PCB : `ref`, `valeur`, `boitier`, `face` (`dessus`/`dessous`), `x`, `y` (mm, repère utilisateur de la page), `rotation` (degrés) |
 | `cao_pistes_ecrire` | PCB | Largeur en mm pour les pistes d'un net (toutes, ou d'une couche), ou réaligner des nets sur leur classe (`applyClasses` limité à ces nets) |
 | `cao_classes_ecrire` | PCB | Lot d'actions sur `S.classes` (`creer`, `modifier`, `supprimer` : largeur, isolation, via, perçage, largeur par couche) et affectations `{net: classe}` |
-| `cao_contraintes_ecrire` | PCB | Règles de paires (`S.dpRules` : largeurs min/préf/max, écarts, impédance, découplé max, couches) et contraintes par net (`S.contraintes.nets` : longueurs min/max, vias max, couches, impédance et tolérance) |
+| `cao_contraintes_ecrire` | PCB | Règles de paires (`S.dpRules` : largeurs min/préf/max, écarts, impédance, découplé max, portée ; les retouches couche par couche restent dans la page) et contraintes par net (`S.contraintes.nets` : longueurs min/max, vias max, couches, impédance et tolérance) |
 | `cao_sim_ecrire` | PCB, visionneuse | Lot `[{groupe, cle, valeur, unite}]` contrôlé par `simDsGroupes()` |
 
 `cao_valeur_composant` (canal-pilote) reste, pour ne rien casser ; sa description renvoie à

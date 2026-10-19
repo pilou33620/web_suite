@@ -10,7 +10,7 @@ import math
 import re
 
 import mcp_pilote as pilote
-from mcp_api_outils import facultatif
+from mcp_api_outils import facultatif, resumer
 from mcp_registre_3d import refuser
 
 LOT_MAX = 50
@@ -89,7 +89,9 @@ def lot(a, champs, requis, sous=None):
 
 
 def envoyer(pages, nom, liste, a):
-    return pilote.envoyer("web_cao", pages, nom, {"lot": liste}, True, facultatif(a, "onglet", str, None))
+    # la réponse reprend les lignes de la carte (textes du projet) : résumée au-delà de 100 Ko
+    return resumer(pilote.envoyer("web_cao", pages, nom, {"lot": liste}, True, facultatif(a, "onglet", str, None)),
+                   "Lot trop gros pour la réponse : la carte est dans la page ; relis avec cao_*_lire.")
 
 
 def cao_composants_ecrire(a):
@@ -143,7 +145,8 @@ OUTILS_ECRITURE_CAO = {
                        "specs (objet clé → texte, null efface), non_monte. PCB : ref, valeur, boitier (doit "
                        "exister dans les empreintes), face (dessus/dessous), x, y (mm, origine de "
                        "l'utilisateur), rotation (degrés) ; le cuivre accroché suit selon la préférence de "
-                       "la page. Un repère est unique dans le document."
+                       "la page. Un repère est unique dans le document, à chaque étape du lot : pour échanger R1 et R2, "
+                       "passe par un repère libre dans deux cartes."
                        + CARTE + DRC + pilote.ATTENTE_DOC + pilote.DONNEES,
         "inputSchema": schema_lot({"ref": T, "champs": {"type": "object"}}, ("ref", "champs"),
                                   page={"type": "string", "enum": ["schema", "pcb"]}),

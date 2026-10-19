@@ -158,7 +158,7 @@ Importé par le noyau. La description de `cao_valeur_composant` renvoie à
 **Dépendances :** T2…T6 · **Fichiers :** `lanceur/mcp_ecriture_cao.py`, `lanceur/mcp_web_suite.py`,
 `lanceur/mcp_pilote.py`, `lanceur/banc_mcp.py`, `lanceur/docs/DETAILS.md` · **Taille :** M
 
-## Tâche 8 : essai réel, puis revue
+## Tâche 8 : ✅ essai réel, puis revue
 
 **Description :** WEB_CAO lancé sur une copie de PROJETS dans `/tmp`, schéma, PCB et
 visionneuse ouverts dans Chromium sur le Pi. Chaque outil est appelé par le MCP,
@@ -177,7 +177,24 @@ l'audit de sécurité.
       - Annuler ne remettait pas une valeur d'avant hors des bornes du catalogue, comme
         `tr` à 0.)
 - [x] Durée d'une carte (vérification + DRC) mesurée sur « carte PIR v2 » : 0,3 à 0,8 s (51 empreintes)
-- [ ] `/review` fait, corrections appliquées
+- [x] `/review` fait, corrections appliquées (revue 5 axes + audit de sécurité : ni critique
+      ni élevé. Corrigé :
+      - un lot qui échoue en route revient à l'état d'avant ;
+      - la simulation garde et remet la fiche, l'assistant ΔI, le mode de ΔI et la section du
+        profil ; un échec est signalé ;
+      - un CI d'une autre feuille fait suivre les fils de sa feuille ;
+      - formules neutralisées dans les CSV de nomenclature et de placement ;
+      - repère vide et clés `__proto__`/`constructor`/`prototype` refusés ;
+      - classes vérifiées par nom exact à la fin du lot ;
+      - règle de paire créée puis modifiée gardée neuve ;
+      - perçage de réalignement aligné sur `applyClasses` ;
+      - choix déjà à la valeur ignoré ;
+      - DRC final qui ne fait pas échouer un lot appliqué ;
+      - réponses résumées au-delà de 100 Ko ;
+      - « couches » des règles de paire retiré de la spec.
+      Laissé :
+      - un flot de cartes directes peut vider l'historique (80 étapes) ;
+      - « affecter » ne connaît pas les classes publiées par le schéma.)
 
 **Dépendances :** T7 · **Taille :** M
 
