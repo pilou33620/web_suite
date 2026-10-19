@@ -78,15 +78,15 @@ de Gestion LIB passent aux styles connus du PCB.
 **Dépendances :** T2 · **Fichiers :** `commun/composants-lib.js`, `gestion-lib/js/05-editeur-lib.js`,
 bancs · **Taille :** L
 
-## Tâche 4 : conversion KiCad
+## Tâche 4 : ✅ conversion KiCad
 
 **Description :** `convertirKicad(texte)` : un `kicad_mod` devient un `pcbfp-1`, avec ses
 remarques, puis passe `verifierEmpreinte`. 200 Ko au plus.
 
 **Critères d'acceptation :**
-- [ ] Un `kicad_mod` connu (SOT-23-5, avec pastilles roundrect et contour) donne les
+- [x] Un `kicad_mod` connu (SOT-23-5, avec pastilles roundrect et contour) donne les
       bonnes pastilles (numéros, positions, tailles, formes) et le corps
-- [ ] Pastille personnalisée, texte illisible ou trop gros : refus ; arcs, textes,
+- [x] Pastille personnalisée, texte illisible ou trop gros : refus ; arcs, textes,
       modèles 3D : remarques
 
 **Vérification :** `node gestion-lib/test/banc-composants.js`
@@ -94,7 +94,7 @@ remarques, puis passe `verifierEmpreinte`. 200 Ko au plus.
 **Dépendances :** T2 · **Fichiers :** `commun/composants-lib.js`, banc · **Taille :** M
 
 ## Checkpoint : le code métier
-- [ ] Bancs verts ; générateurs et conversion contrôlés par `verifierEmpreinte`
+- [x] Bancs verts ; générateurs et conversion contrôlés par `verifierEmpreinte`
 
 ## Tâche 5 : commandes de Gestion LIB
 
