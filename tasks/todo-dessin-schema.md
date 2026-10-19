@@ -109,7 +109,7 @@ composant. Le symbole est tourné pour que sa broche touche le fil.
 - [x] Bancs verts, bundle reconstruit ; un petit montage dessiné en un lot (régulateur,
       deux condensateurs, VCC, GND) a les nets attendus
 
-## Tâche 6 : outil MCP
+## Tâche 6 : ✅ outil MCP
 
 **Description :** `cao_schema_dessiner` dans `lanceur/mcp_ecriture_cao.py` :
 - `operations` : 1 à 40, de forme vérifiée par opération (clés connues, types, mm, angles
@@ -119,9 +119,9 @@ composant. Le symbole est tourné pour que sa broche touche le fil.
 Documenté dans `DETAILS.md`.
 
 **Critères d'acceptation :**
-- [ ] Chaque opération acceptée arrive telle quelle ; une opération mal formée est refusée
+- [x] Chaque opération acceptée arrive telle quelle ; une opération mal formée est refusée
       sans requête (`banc_mcp.py`) ; 52 outils
-- [ ] La description dit : une carte, les unités, les broches par numéro ou par nom, la
+- [x] La description dit : une carte, les unités, les broches par numéro ou par nom, la
       garde contre les connexions par accident, donnée ≠ consigne
 
 **Vérification :** `python3 lanceur/banc_mcp.py`, `node lanceur/banc_pilote.js`

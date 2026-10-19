@@ -212,6 +212,13 @@ Outils MCP (`etat` dans `mcp_web_suite.py`, les autres dans `mcp_api_outils.py`,
   = une étape Ctrl+Z (la simulation : Annuler sur la carte). Un seul refus et rien ne
   change ; au clic, la page revérifie que rien n'a bougé sous la carte. Au PCB, la réponse
   donne le DRC avant → après. Code de page : `WEB_CAO/commun/ecriture-cao.js`.
+- Dessin du schéma (`cao_schema_dessiner`, voir [SPEC-mcp-dessin-schema.md](SPEC-mcp-dessin-schema.md)) :
+  une liste de 40 opérations au plus, en une carte. Les opérations : poser (symbole intégré
+  ou ligne du catalogue), relier broche à broche, étiqueter (local, global, VCC, GND),
+  déplacer, tourner, miroir, supprimer, supprimer_fil, feuille (créer, renommer), renuméroter.
+  La page joue le lot puis le défait avant de montrer la carte ; elle refuse un fil qui
+  relierait d'autres broches que celles demandées. Une étape Ctrl+Z. Code de page :
+  `WEB_CAO/editeur-schematique/js/28-dessin-pilote.js`.
 
 **Le panneau « Claude ».** Chaque page des outils a, en bas à droite, un bouton « Claude ».
 Une écriture proposée par Claude s'y affiche en carte, avant → après, avec Appliquer et

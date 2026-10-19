@@ -62,6 +62,24 @@ CONTRAINTE = {"action": parmi("paire", "net"), "nom": NOM, "portee": TEXTE_, "im
               "vias_max": NOMBRE_OU_NUL, "couches": COUCHES}
 SIM = {"groupe": NOM, "cle": NOM, "valeur": VALEUR_SIM, "unite": TEXTE_}
 
+# dessin-schema : les clés de chaque opération (la page vérifie les valeurs)
+DESSIN_MAX = 40
+ENTIER = (lambda v: type(v) is int and 1 <= v <= 1000, "entier de 1 à 1000")
+ANGLE = (lambda v: type(v) is int and v in (0, 90, 180, 270), "0, 90, 180 ou 270")
+F = {"feuille": ENTIER}
+OPERATIONS = {
+    "poser": dict(F, type=NOM, catalogue=NOM, ref=NOM, valeur=NOM, x=NOMBRE, y=NOMBRE, rotation=ANGLE, miroir=BOOLEEN),
+    "deplacer": dict(F, ref=NOM, x=NOMBRE, y=NOMBRE, dx=NOMBRE, dy=NOMBRE),
+    "tourner": dict(F, ref=NOM, angle=ANGLE),
+    "miroir": dict(F, ref=NOM),
+    "supprimer": dict(F, ref=NOM),
+    "relier": dict(F, de=NOM, a=NOM),
+    "supprimer_fil": dict(F, de=NOM, a=NOM),
+    "etiqueter": dict(F, broche=NOM, net=NOM, genre=parmi("local", "global", "vcc", "gnd")),
+    "feuille": {"creer": NOM, "renommer": ENTIER, "nom": NOM},
+    "renumeroter": {},
+}
+
 
 def valider(element, champs, requis, ou):
     if not isinstance(element, dict):
@@ -118,6 +136,17 @@ def cao_classes_ecrire(a):
 
 def cao_contraintes_ecrire(a):
     return envoyer(["pcb"], "cao_contraintes_ecrire", lot(a, CONTRAINTE, ("action",)), a)
+
+
+def cao_schema_dessiner(a):
+    ops = a.get("operations")
+    if not isinstance(ops, list) or not 1 <= len(ops) <= DESSIN_MAX:
+        refuser("Argument « operations » invalide : liste de 1 à %d opérations (une carte)." % DESSIN_MAX)
+    for i, o in enumerate(ops, 1):
+        if not isinstance(o, dict) or o.get("op") not in OPERATIONS:
+            refuser("operations, élément %d : « op » parmi %s." % (i, ", ".join(OPERATIONS)))
+        valider(o, dict(OPERATIONS[o["op"]], op=(lambda v: True, "")), (), "operations, élément %d (%s)" % (i, o["op"]))
+    return envoyer(["schema"], "cao_schema_dessiner", ops, a)
 
 
 def cao_sim_ecrire(a):
@@ -193,5 +222,24 @@ OUTILS_ECRITURE_CAO = {
         "inputSchema": schema_lot({"groupe": T, "cle": T, "valeur": {"type": ["number", "string"]}, "unite": T},
                                   ("groupe", "cle", "valeur")),
         "fn": cao_sim_ecrire,
+    },
+    "cao_schema_dessiner": {
+        "description": "Dessine dans le schéma ouvert, en une carte : une liste ordonnée d'opérations (40 au "
+                       "plus), simulée par la page avant la carte puis appliquée en une étape d'historique "
+                       "(Ctrl+Z la défait). Opérations (« op ») : poser {type (symbole intégré : resistor, "
+                       "capacitor, ic, opamp, regulator…) ou catalogue (Part Name de lib_composants), ref, "
+                       "valeur, x, y (mm ; sans position, place libre), rotation, miroir} ; deplacer {ref, x, y "
+                       "ou dx, dy} ; tourner {ref, angle} ; miroir {ref} ; supprimer {ref} ; relier {de, a : "
+                       "« R1.2 » ou « U1.OUT »} ; supprimer_fil {de, a} ; etiqueter {broche, net, genre : local, "
+                       "global, vcc, gnd} ; feuille {creer} ou {renommer, nom} ; renumeroter. Chaque opération "
+                       "peut viser une « feuille » (n°), sinon la feuille affichée. Un repère posé sert aux "
+                       "opérations suivantes. Un fil qui relierait d'autres broches que celles demandées est "
+                       "refusé : étiquette alors. Un seul refus et rien ne change."
+                       + pilote.ATTENTE_DOC + pilote.DONNEES,
+        "inputSchema": {"type": "object", "required": ["operations"], "properties": {
+            "operations": {"type": "array", "minItems": 1, "maxItems": DESSIN_MAX, "items": {
+                "type": "object", "required": ["op"], "properties": {"op": {"type": "string", "enum": list(OPERATIONS)}}}},
+            "onglet": ONGLET}},
+        "fn": cao_schema_dessiner,
     },
 }

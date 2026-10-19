@@ -717,7 +717,7 @@ FauxApi.table.clear()
 os.environ["WEB_SUITE_MCP_PORTS"] = json.dumps(dict(PORTS, web_cao=api.server_address[1]))
 OC = ["cao_schema_lire", "cao_pcb_lire", "cao_ipc_lire", "cao_sim_lire", "cao_vue", "cao_drc"]
 verifier("outils de registre-cao listés", set(OC) <= set(noms), True)
-verifier("51 outils en tout (registre-cao, puis ecriture-cao)", len(noms), 51)
+verifier("52 outils en tout (registre-cao, ecriture-cao, dessin-schema)", len(noms), 52)
 verifier("registre-cao : ce que rend la page est une donnée",
          all("donnée" in o["description"] for o in outils if o["name"] in OC), True)
 FauxApi.table[("POST", "/api/pilote/commande")] = fin("- GND")
@@ -813,6 +813,29 @@ for nom, args in (("cao_composants_ecrire", L({"ref": "R1", "champs": {"valeur":
     verifier("%s refuse %r" % (nom, str(args)[:60]), outil(nom, **args)[0] if isinstance(args, dict) else
              mcp.appeler({"name": nom, "arguments": {"lot": args}}).get("isError", False), True)
 verifier("aucun lot invalide n'atteint la page", FauxApi.recues, [])
+
+# dessin-schema (lanceur/docs/SPEC-mcp-dessin-schema.md) : une liste d'opérations, une carte
+d_outil = next(o for o in outils if o["name"] == "cao_schema_dessiner")
+verifier("cao_schema_dessiner : donnée, carte, 40", all(t in d_outil["description"] for t in ("donnée", "carte", "40")), True)
+OPS = [{"op": "feuille", "creer": "Alim"}, {"op": "poser", "type": "regulator", "ref": "U1", "x": 0, "y": 0, "rotation": 90},
+       {"op": "poser", "catalogue": "C0402_100NF", "feuille": 3}, {"op": "relier", "de": "U1.IN", "a": "C1.1"},
+       {"op": "etiqueter", "broche": "U1.GND", "net": "GND", "genre": "gnd"}, {"op": "deplacer", "ref": "U1", "dx": 5, "dy": 0},
+       {"op": "tourner", "ref": "U1", "angle": 180}, {"op": "miroir", "ref": "C1"}, {"op": "supprimer_fil", "de": "U1.IN", "a": "C1.1"},
+       {"op": "supprimer", "ref": "C1"}, {"op": "feuille", "renommer": 1, "nom": "Entrée"}, {"op": "renumeroter"}]
+FauxApi.recues.clear()
+verifier("cao_schema_dessiner accepté", outil("cao_schema_dessiner", operations=OPS)[0], False)
+d = FauxApi.recues[-1][2]
+verifier("déposé au schéma, en écriture, opérations telles quelles", (d["nom"], d["page"], d["ecriture"], d["args"]),
+         ("cao_schema_dessiner", ["schema"], True, {"lot": OPS}))
+FauxApi.recues.clear()
+for ops in ([], [{"op": "poser", "type": "resistor"}] * 41, [{"op": "voler"}], ["poser"], [{"type": "resistor"}],
+            [{"op": "poser", "type": "resistor", "angle": 90}], [{"op": "poser", "type": "resistor", "rotation": 45}],
+            [{"op": "tourner", "ref": "R1", "angle": 90.0}], [{"op": "relier", "de": "R1.1", "a": 2}],
+            [{"op": "etiqueter", "broche": "R1.1", "net": "X", "genre": "bleu"}], [{"op": "poser", "type": "r", "feuille": 0}],
+            [{"op": "poser", "type": "r", "x": float("inf"), "y": 0}], [{"op": "renumeroter", "feuille": 1}],
+            [{"op": "relier", "de": "R1.1\nR2.1", "a": "R3.1"}]):
+    verifier("cao_schema_dessiner refuse %r" % str(ops)[:50], outil("cao_schema_dessiner", operations=ops)[0], True)
+verifier("aucune opération invalide n'atteint la page", FauxApi.recues, [])
 
 FauxApi.table.clear()
 os.environ["WEB_SUITE_MCP_PORTS"] = json.dumps(PORTS)
