@@ -91,7 +91,7 @@ Les valeurs sont contrôlées par `normClass` ; les affectations passent par `se
 
 **Dépendances :** T2 · **Fichiers :** `commun/ecriture-cao.js`, `editeur-pcb/test/harness.js` · **Taille :** M
 
-## Tâche 5 : paires différentielles et contraintes
+## Tâche 5 : ✅ paires différentielles et contraintes
 
 **Description :** `cao_contraintes_ecrire` :
 - `paires` : règles de `S.dpRules`, contrôlées par `normDpRule`, créées ou modifiées par
@@ -100,18 +100,18 @@ Les valeurs sont contrôlées par `normClass` ; les affectations passent par `se
   `couches`), contrôlés par `cmNormRegle`.
 
 **Critères d'acceptation :**
-- [ ] Une règle de paire et deux contraintes de net en un lot : une étape ; `dpRuleFor` et
+- [x] Une règle de paire et deux contraintes de net en un lot : une étape ; `dpRuleFor` et
       `cmVerifier` les voient
-- [ ] Une valeur que le normaliseur écarterait est refusée (au lieu d'être perdue en
+- [x] Une valeur que le normaliseur écarterait est refusée (au lieu d'être perdue en
       silence) ; `lMin > lMax` est refusé
-- [ ] Les contraintes saisies au schéma (`S.contraintes.schema`) ne sont pas touchées
+- [x] Les contraintes saisies au schéma (`S.contraintes.schema`) ne sont pas touchées
 
 **Vérification :** `node editeur-pcb/test/harness.js`
 
 **Dépendances :** T2 · **Fichiers :** `commun/ecriture-cao.js`, `editeur-pcb/test/harness.js` · **Taille :** M
 
 ## Checkpoint : écritures du schéma et du PCB
-- [ ] Bancs verts, bundles reconstruits ; chaque écriture fait une seule étape et se défait
+- [x] Bancs verts, bundles reconstruits ; chaque écriture fait une seule étape et se défait
       par Ctrl+Z
 
 ## Tâche 6 : paramètres de simulation
