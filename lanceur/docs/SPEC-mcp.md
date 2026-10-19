@@ -29,11 +29,13 @@ dans ce dossier. Les ids ne changent plus.
 | `api-outils` | Couche 1 : les API HTTP existantes en outils MCP (SI/PI/RF, œil, crosstalk, openEMS asynchrone, projets, LIB, pcbparts) | `mcp-noyau` |
 | `canal-pilote` | Serveur ↔ page en long-poll, onglets et onglet actif, proposer / appliquer, undo, captures du canevas | `mcp-noyau` |
 | `registre-3d` | Commandes WEB_3D : ouvrir, arbre, mesure, coupe, collisions, déplacement, export | `canal-pilote` |
-| `registre-cao` | Commandes WEB_CAO (schéma, PCB, IPC-2581, simulations) : `OUTILS_PCB/IPC/SIM` repris, écriture ajoutée | `canal-pilote` |
+| `registre-cao` | Lecture de WEB_CAO (schéma, PCB, IPC-2581, simulations : `OUTILS_PCB/IPC/SIM` repris, schéma ajouté), commandes de vue, DRC | `canal-pilote` |
+| `ecriture-cao` | Écritures WEB_CAO par cartes en lot : propriétés de composants (schéma, PCB), largeur de piste et classes de nets, paramètres de simulation | `registre-cao` |
+| `dessin-schema` | Dessin du schéma : poser, relier, étiqueter, déplacer, supprimer | `ecriture-cao` |
 | `registre-antenna` | Commandes WEB_ANTENNA : lecture et actions `reglages/cotes/balayage/formes` reprises | `canal-pilote` |
 | `composants` | Symbole, empreinte, brochage, ligne de catalogue (39 colonnes), validés par le code, écrits dans la LIB | `api-outils`, `registre-cao` |
 | `routage` | Le routeur PNS piloté sans souris : placer, router, paire, via ; boucle DRC et score | `registre-cao` |
-| `savoir-metier` | Le savoir des consignes Gemini déplacé dans un skill `web_suite` et dans les descriptions d'outils | `registre-cao`, `registre-antenna`, `composants` |
+| `savoir-metier` | Le savoir des consignes Gemini déplacé dans un skill `web_suite` et dans les descriptions d'outils | `ecriture-cao`, `registre-antenna`, `composants` |
 | `retrait-gemini` | Retrait de l'assistant Gemini/Gemma et de `/api/ia/cle` | `savoir-metier`, `routage` |
 
 ## Ordre de construction
@@ -51,6 +53,8 @@ dans ce dossier. Les ids ne changent plus.
 2. `api-outils`, `canal-pilote`
 3. `registre-3d`
 4. `registre-cao`, `registre-antenna`
+   - puis `ecriture-cao`, puis `dessin-schema` (découpage de `registre-cao` décidé le
+     2026-10-19 : le dessin du schéma entre dans le périmètre)
 5. `composants`, `routage`
 6. `savoir-metier`
 7. `retrait-gemini`
@@ -61,3 +65,4 @@ dans ce dossier. Les ids ne changent plus.
 - [x] `api-outils` : [SPEC-mcp-api-outils.md](SPEC-mcp-api-outils.md)
 - [x] `canal-pilote` : [SPEC-mcp-canal-pilote.md](SPEC-mcp-canal-pilote.md)
 - [x] `registre-3d` : [SPEC-mcp-registre-3d.md](SPEC-mcp-registre-3d.md)
+- [x] `registre-cao` : [SPEC-mcp-registre-cao.md](SPEC-mcp-registre-cao.md)
