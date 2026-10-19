@@ -131,4 +131,4 @@ l'audit de sécurité.
 **Dépendances :** T4 · **Taille :** M
 
 ## Checkpoint : terminé
-- [ ] Critères de la spec remplis ; 4 CI vertes
+- [x] Critères de la spec remplis ; 4 CI vertes (WEB_ANTENNA ef5d984, web_suite 90b7ee3)
