@@ -61,7 +61,7 @@ Plan : [plan-retrait-gemini.md](plan-retrait-gemini.md)
 
 **Dépendances :** aucune · **Taille :** S
 
-## Tâche 4 : WEB_CAO, l'assistant des trois pages retiré
+## Tâche 4 : ✅ WEB_CAO, l'assistant des trois pages retiré
 
 **Description :**
 - retirer `commun/ia-assistant.js` et `.css` ;
@@ -74,15 +74,17 @@ Plan : [plan-retrait-gemini.md](plan-retrait-gemini.md)
 - mettre à jour README et A-FAIRE.
 
 **Critères d'acceptation :**
-- [ ] Aucune trace dans le code ni dans les bundles reconstruits ; harnais PCB, schéma,
-      visionneuse et banc du canal verts
+- [x] Aucune trace dans le code ni dans les bundles reconstruits ; harnais PCB, schéma,
+      visionneuse et banc du canal verts (1017, 173, 228, 11 ; profils/Pilou.json est local,
+      non suivi par git : nettoyé sur ce poste ; la doc de la datasheet → simulations renvoie
+      à Claude et à cao_sim_ecrire)
 
 **Vérification :** bundles, puis les trois harnais et `banc-pilote-cao.js`
 
 **Dépendances :** T3 (même dépôt, tutoriel commun) · **Taille :** L
 
 ## Checkpoint : les pages
-- [ ] Bancs verts dans les deux outils
+- [x] Bancs verts dans les deux outils
 
 ## Tâche 5 : serveurs, `/api/ia/cle` retiré
 
