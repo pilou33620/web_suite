@@ -152,4 +152,4 @@ Puis `/review`.
 **Dépendances :** T6 · **Taille :** M
 
 ## Checkpoint : terminé
-- [ ] Critères de la spec remplis ; 4 CI vertes
+- [x] Critères de la spec remplis ; 4 CI vertes (WEB_CAO 41dfc0c, WEB_ANTENNA 8f09b60, WEB_3D e4400ab, web_suite ef614c0)
