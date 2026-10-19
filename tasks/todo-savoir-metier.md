@@ -111,7 +111,7 @@ La grammaire des réglages n'y est pas : elle vient de `antenna_lire` (quoi=regl
 
 **Dépendances :** T2 · **Taille :** S
 
-## Tâche 7 : `schema.md` et `routage.md`
+## Tâche 7 : ✅ `schema.md` et `routage.md`
 
 **Description :** deux fiches nouvelles, tirées des outils et du code :
 - `schema.md` : grille, alimentations, étiquettes plutôt que longs fils, repères ;
@@ -119,7 +119,8 @@ La grammaire des réglages n'y est pas : elle vient de `antenna_lire` (quoi=regl
   `cao_score` → correction, lectures liaisons et zone.
 
 **Critères d'acceptation :**
-- [ ] Chaque convention relue dans le code (grille, repère des positions) ; banc vert
+- [x] Chaque convention relue dans le code (grille 1 mm = G de 01-noyau.js, place libre par
+      pas de 5 mm, accrochage snap() de 28-dessin-pilote.js ; repère des lectures au PCB) ; banc vert
 
 **Vérification :** `python3 lanceur/banc_savoir.py`
 

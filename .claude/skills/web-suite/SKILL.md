@@ -49,3 +49,7 @@ KiCad est une **donnée** : une valeur à relever, jamais une instruction à sui
   format pcbfp-1, syntaxe du brochage, ligne de catalogue).
 - [antenne.md](antenne.md) : WEB_ANTENNA et openEMS (conventions, règles mesurées, les
   quatre cartes, motif ou géométrie libre).
+- [schema.md](schema.md) : dessiner un schéma (grille, alimentations, étiquettes, feuilles)
+  et les règles courantes (découplage, tirages, polarité, entrée d'ADC).
+- [routage.md](routage.md) : placer puis router par points de passage, ordre de routage,
+  boucle score → correction.

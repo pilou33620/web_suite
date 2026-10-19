@@ -22,7 +22,7 @@ consignes de l'assistant Gemini, jusqu'à l'endroit où le skill `web-suite`
 | C1 | WEB_CAO/commun/ia-assistant.js:281 | La suite : WEB_CAO (schéma, PCB push & shove, DRC, classes, paires, LIB, visionneuse IPC-2581, simulations SI/PI/RF), WEB_ANTENNA (openEMS), WEB_3D (STEP, mesure, assemblage) | SKILL.md |
 | C2 | WEB_CAO/commun/ia-assistant.js:285 | Un projet = schéma -SCH, PCB -PCB, carte -IPC ; dans PROJETS/CAO/<projet>, synchronisé sur GitHub ; LIB commune dans PROJETS/LIB_CAO | à faire |
 | C3 | WEB_CAO/commun/ia-assistant.js:286 | Une question qui dépasse l'outil ouvert : dire quel outil de la suite y répond | à faire |
-| C4 | WEB_CAO/commun/ia-assistant.js:291 | Schéma : pull-up I2C, découplage (100 nF / 10 µF), protection contre l'inversion de polarité (MOSFET P), filtre RC d'entrée ADC | à faire |
+| C4 | WEB_CAO/commun/ia-assistant.js:291 | Schéma : pull-up I2C, découplage (100 nF / 10 µF), protection contre l'inversion de polarité (MOSFET P), filtre RC d'entrée ADC | schema.md |
 | C5 | WEB_CAO/commun/ia-assistant.js:297 | PCB : largeur selon le courant (IPC-2152, échauffement, cuivre 35 µm), paire USB 2.0 90 Ω, chemin de retour et fente dans le plan, vias thermiques sous une pastille de puissance QFN | pcb.md |
 | C6 | WEB_CAO/commun/ia-assistant.js:303 | IPC-2581 : structure du fichier, Rev B / Rev C, tolérances de perçage, isolation et masque | écartée : suggestions de questions générales, sans règle propre à la suite (savoir général de Claude) ; la carte se lit par `cao_ipc_lire` |
 | C7 | WEB_CAO/commun/ia-assistant.js:1774 | Rôle : « ingénieur électronicien d'élite » | écartée : rôle de Gemini, sans objet pour Claude Code |
@@ -41,7 +41,7 @@ consignes de l'assistant Gemini, jusqu'à l'endroit où le skill `web-suite`
 | C20 | WEB_CAO/commun/ia-assistant.js:253 | Le contexte n'est qu'un résumé : demander le détail avant de répondre, du plus ciblé au plus large ; ne jamais inventer une donnée qu'on peut lire | à faire |
 | C21 | WEB_CAO/commun/ia-assistant.js:538 | Bus de pistes : skew acceptable à 100 MHz et plus, règle des 3W, diaphonie | pcb.md |
 | C22 | WEB_CAO/commun/ia-assistant.js:545 | Empreintes posées : boîtiers, pastilles, recommandations de routage | écartée : question ouverte sans règle ; se lit par `cao_pcb_lire` |
-| C23 | WEB_CAO/commun/ia-assistant.js:554 | Portion de schéma : cohérence électrique, valeurs, découplages et résistances de tirage manquants | à faire |
+| C23 | WEB_CAO/commun/ia-assistant.js:554 | Portion de schéma : cohérence électrique, valeurs, découplages et résistances de tirage manquants | schema.md |
 | C24 | WEB_CAO/commun/ia-assistant.js:564 | Net IPC-2581 : continuité, impédance, pertes, transitions | écartée : question ouverte sans règle ; se lit par `cao_ipc_lire` |
 | C25 | WEB_CAO/commun/ia-assistant.js:574 | Composant IPC-2581 : vérifications d'assemblage | écartée : question ouverte sans règle ; se lit par `cao_ipc_lire` |
 | R1 | WEB_CAO/commun/simulation-rapport.js:898 | Rapport de simulation : lire chiffres clés et diagnostics d'abord ; dire si le résultat est fiable, ce qui ne va pas et pourquoi, quoi corriger par priorité | simulation.md |
