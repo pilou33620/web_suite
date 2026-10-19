@@ -69,17 +69,18 @@ les deux harnais · **Taille :** M
 ## Checkpoint : lecture dans la page
 - [x] Bancs verts, bundles reconstruits ; Gemini répond comme avant (sorties identiques)
 
-## Tâche 4 : `cao_vue` et `cao_drc`
+## Tâche 4 : ✅ `cao_vue` et `cao_drc`
 
 **Description :** `cao_vue` (`cadrer` sur un repère ou un net, `surligner` un net,
 `feuille`, `couches`, `ajuster`) dans les trois pages, avec les fonctions de la page.
 `cao_drc` (PCB) lance `runDrc()` et rend la sortie de `LECTURE_CAO.pcb.drc`.
 
 **Critères d'acceptation :**
-- [ ] Cadrer sur un repère change `S.scale/ox/oy` (ou `V.vue`) et sélectionne la cible ;
+- [x] Cadrer sur un repère change `S.scale/ox/oy` (ou `V.vue`) et sélectionne la cible ;
       un repère inconnu est refusé sans bouger la vue
-- [ ] Aucune commande de vue ni le DRC ne passe par `push()` ; `S.dirty` est inchangé
-- [ ] `cao_drc` sur un exemple rend autant d'erreurs que `runDrc()` lancé par le bouton
+- [x] Aucune commande de vue ni le DRC ne passe par `push()` ; `S.dirty` est inchangé
+- [x] `cao_drc` sur un exemple rend autant d'erreurs que `runDrc()` lancé par le bouton (carte abîmée ; la visionneuse
+      ne cadre pas un net, elle le surligne, et n'enregistre pas les couches dans ses préférences)
 
 **Vérification :** harnais PCB et schéma, `banc-pilote-cao.js`
 
