@@ -137,8 +137,16 @@ allumé. Captures, lecture des nets, Ctrl+Z. Ensuite viennent `/review` et l'aud
 sécurité.
 
 **Critères d'acceptation :**
-- [ ] Le montage a les nets voulus (`cao_schema_lire nets`) ; Ctrl+Z l'enlève ; PROJETS
+- [x] Le montage a les nets voulus (`cao_schema_lire nets`) ; Ctrl+Z l'enlève ; PROJETS
       n'a pas bougé
+      (« carte PIR v2 », feuille « Essai Claude » : LDO du catalogue REG_LD39050PU25R, deux
+      condensateurs, 5V, 2V5, GND, en une carte cliquée puis interrupteur allumé ;
+      IN → 5V, OUT → 2V5, GND → GND ; Ctrl+Z retire la feuille ; PROJETS au même md5.
+      Trouvé et corrigé :
+      - le symbole du catalogue, écrit avec son chemin (« lib/symbole/regulator.json »),
+        retombait sur un CI générique, même à la souris ;
+      - les étiquettes se posaient en travers des fils déjà tracés : elles cherchent
+        maintenant une direction libre.)
 - [ ] `/review` fait, corrections appliquées
 
 **Dépendances :** T6 · **Taille :** M
