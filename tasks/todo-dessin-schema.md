@@ -167,4 +167,4 @@ sécurité.
 **Dépendances :** T6 · **Taille :** M
 
 ## Checkpoint : terminé
-- [ ] Critères de la spec remplis ; 4 CI vertes
+- [x] Critères de la spec remplis ; 4 CI vertes (WEB_CAO ae81829, web_suite 1b532e6)
