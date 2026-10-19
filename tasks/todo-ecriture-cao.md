@@ -67,7 +67,7 @@ ajouté à `prop.apres`.
 
 **Dépendances :** T2 · **Fichiers :** `commun/ecriture-cao.js`, `editeur-pcb/test/harness.js` · **Taille :** S
 
-## Tâche 4 : classes et affectations
+## Tâche 4 : ✅ classes et affectations
 
 **Description :** `cao_classes_ecrire` :
 - `classes` : `[{action: creer|modifier|supprimer, nom, largeur, isolation, via, percage,
@@ -77,14 +77,14 @@ ajouté à `prop.apres`.
 Les valeurs sont contrôlées par `normClass` ; les affectations passent par `setNetClass`.
 
 **Critères d'acceptation :**
-- [ ] Créer une classe puis lui affecter deux nets dans le même lot : une étape ; `classOf`
+- [x] Créer une classe puis lui affecter deux nets dans le même lot : une étape ; `classOf`
       rend la nouvelle classe
-- [ ] Refus :
+- [x] Refus :
       - nom en double ;
       - supprimer la classe par défaut (index 0) ou une classe encore affectée ;
       - perçage ≥ via ;
       - valeur que `normClass` changerait
-- [ ] Les pistes posées ne bougent pas (il faut `cao_pistes_ecrire realigner`) ; la carte
+- [x] Les pistes posées ne bougent pas (il faut `cao_pistes_ecrire realigner`) ; la carte
       le rappelle
 
 **Vérification :** `node editeur-pcb/test/harness.js`
