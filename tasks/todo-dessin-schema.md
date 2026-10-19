@@ -5,7 +5,7 @@ Plan : [plan-dessin-schema.md](plan-dessin-schema.md)
 
 Bundle à reconstruire avant le harnais : `python3 editeur-schematique/outils/build-monofichier.py`
 
-## Tâche 1 : socle du dessin, poser un type intégré, déplacer, tourner, supprimer
+## Tâche 1 : ✅ socle du dessin, poser un type intégré, déplacer, tourner, supprimer
 
 **Description :** `editeur-schematique/js/28-dessin-pilote.js` déclare
 `cao_schema_dessiner` sur `ECRITURE_CAO.lot` (plafond de 40). `verifier` simule le lot,
@@ -15,12 +15,12 @@ puis remet le document. Opérations de cette tâche :
 - `deplacer`, `tourner`, `miroir`, `supprimer`.
 
 **Critères d'acceptation :**
-- [ ] Proposer ne change rien : `serialize()`, `S.hist`, `S.dirty`, la sélection et la
+- [x] Proposer ne change rien : `serialize()`, `S.hist`, `S.dirty`, la sélection et la
       vue sont identiques après la carte. Appliquer fait une étape, et Ctrl+Z remet tout
-- [ ] Poser trois composants : repères donnés ou tirés par `nextRef`, positions en mm sur
+- [x] Poser trois composants : repères donnés ou tirés par `nextRef`, positions en mm sur
       la grille, chevauchement refusé ; sans position, la place libre ne chevauche rien ;
       un repère posé sert aux opérations suivantes du lot
-- [ ] Déplacer, tourner et miroir font suivre les fils, comme à la souris. Repère, type
+- [x] Déplacer, tourner et miroir font suivre les fils, comme à la souris. Repère, type
       ou angle inconnu : refus de tout le lot, rien n'est touché
 
 **Vérification :** `node editeur-schematique/test/harness.js`, `node commun/test/banc-pilote-cao.js`
