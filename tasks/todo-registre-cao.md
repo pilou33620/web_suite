@@ -6,7 +6,7 @@ Plan : [plan-registre-cao.md](plan-registre-cao.md)
 Bundles à reconstruire avant les harnais :
 `python3 editeur-pcb/outils/build-monofichier.py ; python3 editeur-schematique/outils/build-monofichier.py`
 
-## Tâche 1 : registres dans `commun/lecture-cao.js`
+## Tâche 1 : ✅ registres dans `commun/lecture-cao.js`
 
 **Description :** relever les sorties des registres Gemini sur la carte d'exemple, puis
 déplacer `OUTILS_PCB`, `OUTILS_IPC`, `OUTILS_SIM` et leurs aides dans
@@ -14,11 +14,13 @@ déplacer `OUTILS_PCB`, `OUTILS_IPC`, `OUTILS_SIM` et leurs aides dans
 Le script est chargé dans les trois pages, avant l'assistant.
 
 **Critères d'acceptation :**
-- [ ] Le relevé (fixture) est pris avant le déplacement : chaque outil PCB, avec et sans
-      filtre, sur un exemple de `17-exemples.js` avec DRC lancé
-- [ ] Après le déplacement, `LECTURE_CAO.pcb` redonne le relevé au caractère près
-- [ ] Le diff de `ia-assistant.js` ne montre que du code déplacé (`git diff --color-moved`)
-      et la lecture du global ; le reste de l'assistant ne change pas
+- [x] Le relevé (fixture `editeur-pcb/test/releve-lecture-pcb.json`, 36 cas) est pris avant le
+      déplacement : chaque outil PCB et simulation, avec et sans filtre, sur les deux exemples
+      et sur une carte abîmée (liaisons à router, erreurs de DRC)
+- [x] Après le déplacement, `LECTURE_CAO.pcb` redonne le relevé au caractère près (test en
+      tête du banc PCB, page neuve ; une mutation d'un caractère le fait échouer)
+- [x] Le bloc déplacé est identique octet pour octet ; `ia-assistant.js` ne garde que la
+      lecture du global
 
 **Vérification :** bundles, `node editeur-pcb/test/harness.js`,
 `node editeur-schematique/test/harness.js`, `node visionneuse-ipc2581/test/harness-sim.js`
