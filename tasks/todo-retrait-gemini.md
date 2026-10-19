@@ -26,7 +26,7 @@ Plan : [plan-retrait-gemini.md](plan-retrait-gemini.md)
 **Dépendances :** aucune · **Fichiers :** `js/31-cartes-antenna.js`, `js/30-ia.js`,
 `js/pilote-antenna.js`, `js/29-lecture-antenna.js`, `index.html`, `test/banc-interface.js` · **Taille :** M
 
-## Tâche 2 : WEB_ANTENNA, le panneau IA retiré
+## Tâche 2 : ✅ WEB_ANTENNA, le panneau IA retiré
 
 **Description :**
 - retirer `js/30-ia.js`, `css/ia.css`, leurs balises, le bouton et les crochets (menu
@@ -35,8 +35,11 @@ Plan : [plan-retrait-gemini.md](plan-retrait-gemini.md)
 - mettre à jour README et A-FAIRE.
 
 **Critères d'acceptation :**
-- [ ] Aucune trace (`gemini`, `gemma`, `generativelanguage`, `30-ia.js`, `iaOuvrir`…) dans le
+- [x] Aucune trace (`gemini`, `gemma`, `generativelanguage`, `30-ia.js`, `iaOuvrir`…) dans le
       code ; bancs verts ; les cartes et l'audit marchent (banc §9, banc du canal)
+      (banc-interface 565 : les 21 vérifications du panneau sont parties avec lui, le relevé
+      des lectures passe directement par LECTURE_ANTENNA ; grammaire() retirée, plus
+      personne ne l'appelait ; noms internes sans « ia » ; README et A-FAIRE réécrits)
 
 **Vérification :** bancs de T1
 
