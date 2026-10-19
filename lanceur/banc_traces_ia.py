@@ -33,7 +33,7 @@ def chercher(fichiers, permis):
         if any(re.search(p, chemin) for p in permis):
             continue
         for n, ligne in enumerate(texte.split("\n"), 1):
-            if TRACE.search(ligne.replace("SPEC-mcp-retrait-gemini", "")):   # le nom de la spec, cité en lien
+            if TRACE.search(ligne.replace("retrait-gemini", "")):   # le nom du module (et de sa spec), cité tel quel
                 traces.append((chemin, n, ligne.strip()[:120]))
     return traces
 
@@ -69,6 +69,7 @@ def essais():
     assert chercher({"lanceur/docs/SPEC-x.md": "comme Gemini"}, PERMIS["web_suite"]) == []
     assert chercher({"lanceur/docs/DETAILS.md": "Gemini"}, PERMIS["web_suite"])     # doc vivante : pas permise
     assert chercher({"lanceur/outil.py": "Gemma 4"}, PERMIS["web_suite"])
+    assert chercher({"A-FAIRE.md": "fait jusqu'à retrait-gemini (SPEC-mcp-retrait-gemini.md)"}, PERMIS["web_suite"]) == []
 
 
 if __name__ == "__main__":
