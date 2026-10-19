@@ -10,7 +10,9 @@ consignes de l'assistant Gemini, jusqu'à l'endroit où le skill `web-suite`
 - `WEB_CAO/gestion-lib/js/06-ia-lib.js` : consigne de Gestion LIB ;
 - `WEB_ANTENNA/js/30-ia.js` : promptSysteme et outils de lecture.
 
-`lanceur/banc_savoir.py` relit ce tableau. Une destination est l'une des formes suivantes :
+Les numéros de ligne valent aux révisions `WEB_CAO@c814de83f32d3e11d1c2f2d498efa430631bd586`
+et `WEB_ANTENNA@24ba852f80ac21d0efc97a997d08ffe6f8f72c9e`, avant le retrait de Gemini.
+`lanceur/banc_savoir.py` relit chaque source à cette révision et vérifie ce tableau. Une destination est l'une des formes suivantes :
 - une fiche du skill (`pcb.md`), qui doit exister ;
 - `outil : nom`, dont l'outil doit exister ;
 - `généré : nom (quoi=x)`, dont l'outil et le `quoi` doivent exister ;
@@ -37,7 +39,7 @@ consignes de l'assistant Gemini, jusqu'à l'endroit où le skill `web-suite`
 | C16 | WEB_CAO/commun/ia-assistant.js:1803 | Bonne cible : pdn_fiche = charge du rail ; une datasheet de régulateur règle pdn.rVrmMOhm et pdn.fVrmKhz | simulation.md |
 | C17 | WEB_CAO/commun/ia-assistant.js:1804 | Répondre d'abord par un tableau court (paramètre, valeur, page, citation), avec une confiance | simulation.md |
 | C18 | WEB_CAO/commun/ia-assistant.js:1806 | Bloc sim_params (valeurs, condensateurs ESR/ESL, bornes_dc) | écartée : remplacé par l'outil `cao_sim_ecrire` pour les groupes pdn_fiche, pdn, si, bus, dc ; condensateurs et bornes_dc n'ont pas encore d'écriture MCP (simulation.md le dit : valeurs données à l'utilisateur) |
-| C19 | WEB_CAO/commun/ia-assistant.js:1809 | Le catalogue des paramètres réglables (clé, unité, bornes, valeur actuelle, où la lire) joint à la consigne | généré : cao_sim_lire (quoi=catalogue) |
+| C19 | WEB_CAO/commun/ia-assistant.js:1811 | Le catalogue des paramètres réglables (clé, unité, bornes, valeur actuelle, où la lire) joint à la consigne | généré : cao_sim_lire (quoi=catalogue) |
 | C20 | WEB_CAO/commun/ia-assistant.js:253 | Le contexte n'est qu'un résumé : demander le détail avant de répondre, du plus ciblé au plus large ; ne jamais inventer une donnée qu'on peut lire | SKILL.md |
 | C21 | WEB_CAO/commun/ia-assistant.js:538 | Bus de pistes : skew acceptable à 100 MHz et plus, règle des 3W, diaphonie | pcb.md |
 | C22 | WEB_CAO/commun/ia-assistant.js:545 | Empreintes posées : boîtiers, pastilles, recommandations de routage | écartée : question ouverte sans règle ; se lit par `cao_pcb_lire` |
@@ -45,7 +47,8 @@ consignes de l'assistant Gemini, jusqu'à l'endroit où le skill `web-suite`
 | C24 | WEB_CAO/commun/ia-assistant.js:564 | Net IPC-2581 : continuité, impédance, pertes, transitions | écartée : question ouverte sans règle ; se lit par `cao_ipc_lire` |
 | C25 | WEB_CAO/commun/ia-assistant.js:574 | Composant IPC-2581 : vérifications d'assemblage | écartée : question ouverte sans règle ; se lit par `cao_ipc_lire` |
 | R1 | WEB_CAO/commun/simulation-rapport.js:898 | Rapport de simulation : lire chiffres clés et diagnostics d'abord ; dire si le résultat est fiable, ce qui ne va pas et pourquoi, quoi corriger par priorité | simulation.md |
-| L1 | WEB_CAO/gestion-lib/js/06-ia-lib.js:192 | Empreintes selon IPC-7351B ; symboles IEC 60617 / IEEE 315 | composants.md |
+| L1 | WEB_CAO/gestion-lib/js/06-ia-lib.js:192 | Empreintes selon IPC-7351B | composants.md |
+| L10 | WEB_CAO/gestion-lib/js/06-ia-lib.js:192 | Symboles selon IEC 60617 / IEEE 315 | écartée : le schéma ne dessine que ses symboles intégrés (module composants), aucun symbole n'est écrit |
 | L2 | WEB_CAO/gestion-lib/js/06-ia-lib.js:194 | Répondre en français | écartée : propre à Gemma ; Claude Code suit la langue de l'utilisateur |
 | L3 | WEB_CAO/gestion-lib/js/06-ia-lib.js:195 | pcbfp-1 : mm, vue de dessus, origine au centre du corps, y vers le bas, broche 1 en haut à gauche, sens antihoraire | composants.md |
 | L4 | WEB_CAO/gestion-lib/js/06-ia-lib.js:195 | Trous NPTH « holes » {x, y, d} (oblong : w, rot) ; perçage oblong « slot » ; les garder en corrigeant une empreinte | composants.md |
@@ -80,3 +83,16 @@ consignes de l'assistant Gemini, jusqu'à l'endroit où le skill `web-suite`
 | A24 | WEB_ANTENNA/js/30-ia.js:1684 | Seuls chemins acceptés pour « reglages » : la grammaire de la page | généré : antenna_lire (quoi=reglages) |
 | A25 | WEB_ANTENNA/js/30-ia.js:1688 | port.X / ports.0.X ; con.* en conception seulement ; cotes = motif ouvert ; balayage = cotes balayables ; garde-fou du nombre de points | antenne.md |
 | A26 | WEB_ANTENNA/js/30-ia.js:146 | Outils de lecture : le contexte est un résumé, demander avant de répondre, ne rien inventer | SKILL.md |
+
+## Savoir ajouté hors des consignes Gemini
+
+`schema.md` et `routage.md` sont nouvelles par décision de la spec. Ailleurs, ce qui ne vient
+pas d'une consigne Gemini vient du code, sauf deux précisions soumises à l'utilisateur :
+
+| Fiche | Ajout | Source |
+|---|---|---|
+| pcb.md | IPC-2152 a remplacé la charte d'IPC-2221 ; l'étalement compte ; un échauffement en °C vaut des K | code : `WEB_CAO/commun/simulation-em.js` (vers 269, 906) |
+| pcb.md | Classes d'usine, classes d'interface et leur Z différentielle, règle de paire d'usine | code : `editeur-pcb/js/01-core.js` (SCH_CLASSES, DP_FALLBACK), `commun/classes-interface.js` |
+| pcb.md | Via de masse près d'une via de signal rapide ; grille de vias thermiques prise dans la datasheet | savoir général, précisant les suggestions C5 : à valider |
+| antenne.md | Fente, anneau : antennes qu'aucun motif ne trace | code : `WEB_ANTENNA/js/30-ia.js` (vers 509) |
+| simulation.md | Quelle analyse pour quelle question | code : SIM_ANALYSES (`commun/simulation-em.js`) |

@@ -29,7 +29,7 @@ Claude Code lit le PDF lui-même. Ensuite :
 
 1. Lire le catalogue : `cao_sim_lire` (quoi=catalogue). Il donne chaque paramètre réglable
    (groupe.clé), son unité ou ses choix, la valeur actuelle et où la trouver sur une
-   datasheet. Les bornes sont celles du catalogue : ne pas les recopier ici.
+   datasheet, et ses bornes : une valeur hors bornes est refusée par `cao_sim_ecrire`.
 2. Ne relever que des valeurs **écrites** dans le document. Une valeur absente ne s'invente
    pas et ne se tire pas d'une « valeur usuelle » : la dire manquante (le nombre de sorties
    qui basculent ensemble, par exemple, dépend du firmware).

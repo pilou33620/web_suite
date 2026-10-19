@@ -12,7 +12,7 @@ d'antenne, et la façon d'utiliser les outils (cartes, interrupteur, données �
 
 ### Décisions (2026-10-19)
 
-1. **Un skill dans le dépôt web_suite**, `.claude/skills/web_suite/`, versionné : un
+1. **Un skill dans le dépôt web_suite**, `.claude/skills/web-suite/`, versionné : un
    `SKILL.md` court (quand l'utiliser, quel outil pour quoi) et une fiche par métier, lue à
    la demande.
 2. **Une consigne MCP** : un court résumé dans le champ `instructions` de la réponse
@@ -51,7 +51,7 @@ d'antenne, et la façon d'utiliser les outils (cartes, interrupteur, données �
 ## Architecture
 
 ```
-web_suite/.claude/skills/web_suite/
+web_suite/.claude/skills/web-suite/   (nom de skill : minuscules et tirets, d'où « web-suite »)
   SKILL.md   pcb.md   simulation.md   composants.md   schema.md   routage.md   antenne.md
 lanceur/mcp_web_suite.py   initialize → instructions (résumé + renvoi au skill)
 lanceur/docs/savoir-trace.md   règle Gemini → où elle est passée

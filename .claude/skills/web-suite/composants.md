@@ -22,20 +22,22 @@ La LIB est partagée par tous les projets. On n'y fait que **créer** : jamais m
 
 ## Densités IPC-7351B
 
-N (nominale) par défaut ; M (large) pour un montage manuel ou une carte peu dense, L
-(serrée) pour une carte dense. Une densité autre que N entre dans le nom (« 0402-M »).
+N (nominale) par défaut ; M (large) ou L (serrée) au choix. Une densité autre que N entre dans le nom (« 0402-M »).
 
 ## Le format pcbfp-1
 
+- `"format": "pcbfp-1"` obligatoire ; une clé inconnue est refusée (clés permises : format,
+  name, pkg, pins, style, pitch, span, pads, body, holes, description).
 - Cotes en **mm**, **vue de dessus**, origine au centre du corps.
 - Axe **y vers le bas** (comme l'éditeur PCB) : la broche 1 est **en haut à gauche**, et
   la numérotation tourne dans le **sens antihoraire** (vu de dessus).
 - `name` = nom du fichier sans « .json » : lettres, chiffres, `_ . + -`, 60 au plus.
 - `style` parmi ceux du PCB : chip, row, dip, sop, quad, bga.
 - `pads` : {n, x, y, w, h, shape, drill, rot}.
-  - `n` entier, numérotation continue à partir de 1 ;
+  - `n` entier, numérotation continue à partir de 1 ; `pins` = nombre de numéros distincts ;
   - un numéro en double est permis : pastille fractionnée, pastille thermique ;
-  - `shape` parmi rect (coins adoucis), sharp (angles droits), oval, circ, chamfer, poly ;
+  - `shape` parmi rect (coins adoucis), sharp (angles droits), oval, circ, chamfer, poly
+    (un poly demande `pts`, trois points au moins) ;
   - une pastille CMS a `drill` 0.
 - Pastille traversante : `drill` plus petit que la pastille, couronne de 0,1 mm au moins.
   Perçage oblong : `slot` = longueur hors tout, le long du grand côté, `drill` étant la
@@ -65,7 +67,9 @@ Noms des broches des symboles intégrés :
 - npn, pnp : B, C, E ;
 - nmos : G, D, S ; pmos : G, S, D ;
 - diodes (diode, led, zener, schottky, tvs_diode) : A, K ;
-- regulator : IN, OUT, GND.
+- regulator : IN, OUT, GND ;
+- esd_rail4 : IO1 à IO4, VCC, GND ; esd_rail2 : IO1, IO2, VCC, GND ;
+- mos_np : G1, S1, D1, G2, S2, D2.
 
 Les autres symboles prennent les numéros de broche ; « ic » en accepte autant qu'il faut.
 

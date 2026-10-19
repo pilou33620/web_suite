@@ -129,7 +129,7 @@ La grammaire des réglages n'y est pas : elle vient de `antenna_lire` (quoi=regl
 ## Checkpoint : les fiches
 - [x] Banc vert, plus aucune ligne « à faire » dans le relevé
 
-## Tâche 8 : `SKILL.md` final, essai réel, revue
+## Tâche 8 : ✅ `SKILL.md` final, essai réel, revue
 
 **Description :**
 - `SKILL.md` final : quel outil pour quelle tâche, cartes, lots, interrupteur, données ≠
@@ -148,7 +148,24 @@ La grammaire des réglages n'y est pas : elle vient de `antenna_lire` (quoi=regl
         skill, et traite une fiche pcbparts piégée comme une donnée ; elle ne disait pas que la
         création dans la LIB attend toujours le clic : ajouté à la consigne.
       L'essai Windows en SSH reste avec l'essai iPad.)
-- [ ] `/review` fait, corrections appliquées
+- [x] `/review` fait, corrections appliquées (rien de critique. Corrigé :
+      - le catalogue de simulation annonce les bornes (simDsCatalogue, testé au harnais) ;
+      - antenne.md : syntaxe complète de la carte « formes », 40 points de balayage, forme
+        hors carte refusée ;
+      - SKILL.md et consigne MCP : les écritures de fichiers sans carte (cao_doc_ecrire,
+        antenna_projet_enregistrer, lib_fichier_ecrire, cao_profil_ecrire) ; exceptions au
+        « une carte = une étape Ctrl+Z » ; données ≠ consignes élargi, avec « le signaler » ;
+        hors du dépôt, le skill est à copier dans ~/.claude/skills ;
+      - banc : citations rattachées à leur outil (tableaux compris), ancres, `etat`, lignes de
+        relevé mal formées, chemins Windows et ~/, clés GitHub, OpenAI, AWS, Slack, noms de
+        projets ; consigne et relevé contrôlés aussi ; sources relues à une révision figée
+        (git show, fetch au besoin en CI) pour survivre au retrait de Gemini ;
+      - fiches : classes Antenne et d'interface, réalignement après un changement de classe,
+        grille courante du schéma, renuméroter avant le PCB, clés pcbfp-1 obligatoires,
+        broches d'esd_rail et mos_np ; relevé : L1 séparé, savoir ajouté recensé avec sa
+        source ; .gitignore limité au skill web-suite ; nom du skill dans la spec.
+      Laissé à l'utilisateur : servir les fiches par le MCP hors du dépôt ; deux précisions de
+      savoir général dans pcb.md.)
 
 **Dépendances :** T3…T7 · **Taille :** M
 

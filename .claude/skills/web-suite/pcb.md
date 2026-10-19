@@ -13,8 +13,9 @@ erreurs en cours. Ne jamais supposer une épaisseur de cuivre ou un empilage : i
   à comparer à une température absolue : Tg du stratifié, limite d'un boîtier.
 - Ne pas recopier une valeur de charte comme un fait. Calculer avec la page :
   `cao_calcul` (analyse=dc) résout la chute de tension et l'échauffement par étalement.
-- Appliquer : `cao_pistes_ecrire` (largeur d'un net, réalignement sur sa classe), ou mieux une
-  classe de nets (`cao_classes_ecrire`), pour que les pistes futures la suivent.
+- Appliquer : `cao_pistes_ecrire` (largeur d'un net), ou mieux une classe de nets
+  (`cao_classes_ecrire`), pour que les pistes futures la suivent. Changer une classe ne
+  touche pas les pistes déjà posées : les réaligner ensuite (`cao_pistes_ecrire`, realigner).
 - Un calcul de largeur se termine par une proposition d'application (une carte), jamais par
   un chiffre laissé à reporter à la main.
 
@@ -25,10 +26,15 @@ Le schéma propose des classes d'usine (créées au besoin, jamais imposées) :
 | Classe | Largeur | Isolation | Via / perçage |
 |---|---|---|---|
 | Alimentation, Masse | 0,6 mm | 0,25 mm | 0,9 / 0,45 mm |
-| Horloge | 0,25 mm | 0,5 mm (règle des 3W, d'axe à axe) | 0,8 / 0,4 mm |
+| Horloge | 0,25 mm | 0,5 mm = 2 largeurs, soit 3W d'axe à axe | 0,8 / 0,4 mm |
 | Rapide | 0,25 mm | 0,25 mm | 0,8 / 0,4 mm |
 | RF | 50 Ω sur la couche du dessus, d'après l'empilage | 0,5 mm | 0,8 / 0,4 mm |
 | Analogique | 0,3 mm | 0,35 mm | 0,8 / 0,4 mm |
+| Antenne | 0,3 mm | 0,5 mm | 0,8 / 0,4 mm |
+
+Les classes d'interface (USB FS et HS, ETH 100 et 1000, LVDS, CAN, RS-485) prennent les
+règles de leur famille (Rapide ou Lent) et portent l'impédance différentielle de leur
+norme : 90 Ω (USB), 100 Ω (Ethernet, LVDS), 120 Ω (CAN, RS-485).
 
 Ce sont des points de départ : la classe réelle se lit (`cao_pcb_lire` (quoi=classes)) et se
 règle par `cao_classes_ecrire` (créer, modifier, rattacher des nets).
@@ -71,6 +77,7 @@ chiffre l'échauffement obtenu.
 ## La boucle de vérification
 
 1. Proposer le lot (une carte, une étape Ctrl+Z).
-2. Après le clic : `cao_drc`, puis `cao_score` (quoi=routage) pour le routage.
+2. Après le clic : `cao_score` (quoi=routage), puis `cao_drc` pour le détail des erreurs
+   (comme dans [routage.md](routage.md)).
 3. `cao_calcul` (analyse=verif) pour l'audit de la carte avant fabrication.
 4. Corriger ce qui reste, une cause à la fois.

@@ -63,14 +63,24 @@ Une carte par idée ; plusieurs cartes si plusieurs idées.
    et son aperçu changent.
 3. `{"type":"balayage","titre":…,"source":…,"min":…,"max":…,"pas":…}` : arme un balayage
    (jamais lancé) sur une des cotes balayables listées par la lecture conception, recopiée à
-   la lettre ; s'il n'y en a aucune, pas de balayage.
-4. `{"type":"formes",…}` : de la géométrie libre en mode conception.
+   la lettre ; s'il n'y en a aucune, pas de balayage. 40 points au plus.
+4. `{"type":"formes",…}` : de la géométrie libre en mode conception, par exemple :
+   ```json
+   {"type":"formes","titre":"Patch à coins coupés","carte":{"L":40,"W":45},"remplacer":true,
+    "elements":[{"type":"rect","couche":"bas","net":"GND","x1":0,"y1":0,"x2":40,"y2":45},
+                {"type":"poly","couche":"haut","net":"ANTENNE","pts":[[8,12],[30,12],[32,14],[32,36],[10,36],[8,34]]},
+                {"type":"piste","couche":"haut","net":"ANTENNE","pts":[[20,0],[20,12]],"w":3.06}],
+    "port":{"x":20,"y":0.4,"w":3.06,"l":0.8}}
+   ```
    - mm, origine au coin de la carte, x de 0 à L, y de 0 à W ;
    - « couche » : haut, bas, ou le nom exact d'une couche ;
-   - genres : rect, disque, poly (trois sommets au moins), piste (pts, w), via ; « trou » à
-     vrai fait une découpe (rect, disque, poly) ;
-   - « remplacer » à vrai efface le dessin ; sans port, rien ne se simule.
-   Le nombre de formes et de sommets est plafonné : la page refuse au-delà.
+   - genres et champs : rect (x1, y1, x2, y2), disque (cx, cy, r), poly (pts, trois sommets
+     au moins), piste (pts, w), via (x, y, d) ; « trou » à vrai fait une découpe (rect,
+     disque, poly) ;
+   - « carte » et « port » sont facultatifs, mais sans port rien ne se simule ;
+     « remplacer » à vrai efface le dessin en cours ;
+   - une forme entièrement hors de la carte est refusée ; le nombre de formes et de sommets
+     est plafonné (la page refuse au-delà).
 
 ## Motif ou géométrie libre
 
@@ -78,4 +88,4 @@ Toujours un motif quand il en existe un : patch rectangulaire, monopôle imprim�
 (IFA), F inversé à méandres (MIFA), dipôle imprimé, réseau 3 × 3 de dipôles (et une ligne
 50 Ω étalon). Un motif calcule ses cotes, tient une fiche, se repose et se balaye. La
 géométrie libre ne sait rien d'elle-même : ne la proposer que pour une antenne qu'aucun
-motif ne trace (fente, anneau, patch à coins coupés), et le dire en une phrase.
+motif ne trace (fente, anneau, patch à coins coupés : les exemples de la page), et le dire en une phrase.

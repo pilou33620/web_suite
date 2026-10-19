@@ -9,9 +9,9 @@ broches et nets existants. On ne pose rien sans savoir ce qui est déjà là.
 
 - Une carte = une liste ordonnée d'opérations (un lot, une étape Ctrl+Z). Un repère posé
   dans le lot sert aux opérations suivantes.
-- Positions en mm, accrochées à la grille de 1 mm (le pas des broches). Sans position, la
-  page cherche une place libre à droite du dernier posé, par pas de 5 mm : donner les
-  positions quand l'agencement compte.
+- Positions en mm, accrochées à la grille courante de l'éditeur (0,25 à 5 mm ; 1 mm par
+  défaut, le pas des broches). Sans position, la page cherche une place libre à droite du
+  dernier posé, par pas de 5 mm : donner les positions quand l'agencement compte.
 - Poser depuis le catalogue (« catalogue » : Part Name de `lib_composants`) plutôt qu'un
   symbole nu : boîtier, empreinte et brochage suivent.
 - Alimentations et masses : étiquettes de genre vcc et gnd sur la broche, jamais un long fil
@@ -21,7 +21,8 @@ broches et nets existants. On ne pose rien sans savoir ce qui est déjà là.
   étiquette alors.
 - Une feuille par sous-système (alimentation, microcontrôleur, connecteurs, RF…) ; à
   l'intérieur, un bloc par fonction, les signaux de gauche à droite.
-- Renuméroter les repères à la fin (renumeroter, sur tout le document).
+- Renuméroter les repères à la fin (renumeroter, sur tout le document), et **avant** de
+  passer au PCB : le PCB garde les anciens repères jusqu'à sa resynchronisation.
 
 ## Règles de conception courantes
 
