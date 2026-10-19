@@ -717,7 +717,7 @@ FauxApi.table.clear()
 os.environ["WEB_SUITE_MCP_PORTS"] = json.dumps(dict(PORTS, web_cao=api.server_address[1]))
 OC = ["cao_schema_lire", "cao_pcb_lire", "cao_ipc_lire", "cao_sim_lire", "cao_vue", "cao_drc"]
 verifier("outils de registre-cao listés", set(OC) <= set(noms), True)
-verifier("52 outils en tout (registre-cao, ecriture-cao, dessin-schema)", len(noms), 52)
+verifier("54 outils en tout (registre-cao, ecriture-cao, dessin-schema, registre-antenna)", len(noms), 54)
 verifier("registre-cao : ce que rend la page est une donnée",
          all("donnée" in o["description"] for o in outils if o["name"] in OC), True)
 FauxApi.table[("POST", "/api/pilote/commande")] = fin("- GND")
@@ -836,6 +836,39 @@ for ops in ([], [{"op": "poser", "type": "resistor"}] * 41, [{"op": "voler"}], [
             [{"op": "relier", "de": "R1.1\nR2.1", "a": "R3.1"}]):
     verifier("cao_schema_dessiner refuse %r" % str(ops)[:50], outil("cao_schema_dessiner", operations=ops)[0], True)
 verifier("aucune opération invalide n'atteint la page", FauxApi.recues, [])
+
+
+# registre-antenna (lanceur/docs/SPEC-mcp-registre-antenna.md) : lectures et vue de la page WEB_ANTENNA
+os.environ["WEB_SUITE_MCP_PORTS"] = json.dumps(dict(PORTS, web_antenna=api.server_address[1]))
+OA = ["antenna_lire", "antenna_vue"]
+verifier("outils de registre-antenna listés", set(OA) <= set(noms), True)
+verifier("registre-antenna : donnée, jamais de calcul", all("donnée" in o["description"] and "calcul" in o["description"]
+                                                          for o in outils if o["name"] in OA), True)
+FauxApi.table[("POST", "/api/pilote/commande")] = fin("f0 2.45 GHz")
+FauxApi.recues.clear()
+for nom, args in (("antenna_lire", {"quoi": "courbe", "grandeur": "z"}), ("antenna_lire", {"quoi": "reglages", "filtre": "bande"}),
+                  ("antenna_lire", {"quoi": "composant", "ref": "U1"}),
+                  ("antenna_vue", {"vue": "3d", "maillage": False, "resultats": "s21", "etape": 2, "panneau": "resultats", "toile": "3d"})):
+    verifier(nom + " accepté", outil(nom, **args)[0], False)
+deposees = [r[2] for r in FauxApi.recues]
+verifier("antenna : pages, noms, sans écriture", [(d["nom"], d["page"], d["ecriture"]) for d in deposees],
+         [("antenna_lire", ["antenna"], False)] * 3 + [("antenna_vue", ["antenna"], False)])
+verifier("« resultats » arrive à la page comme onglet de résultats", deposees[3]["args"],
+         {"vue": "3d", "maillage": False, "onglet": "s21", "etape": 2, "panneau": "resultats", "toile": "3d"})
+FauxApi.recues.clear()
+for nom, args in (("antenna_lire", {}), ("antenna_lire", {"quoi": "tout"}), ("antenna_lire", {"quoi": "courbe", "grandeur": "phase"}),
+                  ("antenna_lire", {"quoi": "nets", "filtre": "a\nb"}), ("antenna_vue", {}), ("antenna_vue", {"vue": "4d"}),
+                  ("antenna_vue", {"maillage": "oui"}), ("antenna_vue", {"resultats": "phase"}), ("antenna_vue", {"etape": 0}),
+                  ("antenna_vue", {"point_balayage": 1.5}), ("antenna_vue", {"toile": "pdf"}), ("antenna_vue", {"capturer": True})):
+    verifier("%s refuse %r" % (nom, args), outil(nom, **args)[0], True)
+verifier("aucun argument invalide n'atteint la page (antenna)", FauxApi.recues, [])
+reponses = iter([fin("Vue : vue 3D."), fin({"image": "data:image/png;base64," + png, "largeur": 10, "hauteur": 10})])
+_table = FauxApi.table
+FauxApi.table = type("T", (dict,), {"get": lambda self, k, d=None: next(reponses) if k == ("POST", "/api/pilote/commande") else d})()
+r = mcp.appeler({"name": "antenna_vue", "arguments": {"vue": "3d", "capturer": True}})
+FauxApi.table = _table
+verifier("antenna_vue + capturer : image puis texte", [c["type"] for c in r["content"]], ["image", "text"])
+verifier("la capture vise l'onglet de la vue (antenna)", (FauxApi.recues[-1][2]["nom"], FauxApi.recues[-1][2]["onglet"]), ("capture", "A"))
 
 FauxApi.table.clear()
 os.environ["WEB_SUITE_MCP_PORTS"] = json.dumps(PORTS)

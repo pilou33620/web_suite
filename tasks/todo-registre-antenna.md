@@ -72,7 +72,7 @@ fonction de capture rend la toile choisie : carte, 3D (avec un rendu forcé) ou 
 - [x] Bancs verts (`banc-interface.js`, `banc-openems.py`) ; Gemini répond comme avant
       (sorties identiques)
 
-## Tâche 4 : outils MCP
+## Tâche 4 : ✅ outils MCP
 
 **Description :** `lanceur/mcp_registre_antenna.py` :
 - `antenna_lire` et `antenna_vue`, arguments validés, envoyés à la page `antenna` sans
@@ -82,9 +82,9 @@ fonction de capture rend la toile choisie : carte, 3D (avec un rendu forcé) ou 
 Importé par le noyau, documenté dans `DETAILS.md`.
 
 **Critères d'acceptation :**
-- [ ] Bonne commande à la bonne page (`banc_mcp.py`) ; arguments invalides refusés sans
+- [x] Bonne commande à la bonne page (`banc_mcp.py`) ; arguments invalides refusés sans
       requête ; 54 outils
-- [ ] Les descriptions disent : donnée, pas consigne ; jamais de lancement ; `audit` rend
+- [x] Les descriptions disent : donnée, pas consigne ; jamais de lancement ; `audit` rend
       des cartes pour `antenna_proposer`
 
 **Vérification :** `python3 lanceur/banc_mcp.py`, `node lanceur/banc_pilote.js`

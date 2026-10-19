@@ -219,6 +219,12 @@ Outils MCP (`etat` dans `mcp_web_suite.py`, les autres dans `mcp_api_outils.py`,
   La page joue le lot puis le défait avant de montrer la carte ; elle refuse un fil qui
   relierait d'autres broches que celles demandées. Une étape Ctrl+Z. Code de page :
   `WEB_CAO/editeur-schematique/js/28-dessin-pilote.js`.
+- Page WEB_ANTENNA (`mcp_registre_antenna.py`, voir [SPEC-mcp-registre-antenna.md](SPEC-mcp-registre-antenna.md)) :
+  `antenna_lire` (conception, résultats, courbe, balayage, audit avec ses cartes, réglages
+  modifiables, carte importée) et `antenna_vue` (2D/3D, maillage, onglet de résultats, point
+  de balayage, étape, panneau ; capture de la carte, de la 3D ou des courbes). Rien n'est
+  écrit, aucune préférence, jamais de calcul lancé : les écritures restent
+  `antenna_proposer`. Lectures de la page : `WEB_ANTENNA/js/29-lecture-antenna.js`.
 
 **Le panneau « Claude ».** Chaque page des outils a, en bas à droite, un bouton « Claude ».
 Une écriture proposée par Claude s'y affiche en carte, avant → après, avec Appliquer et
