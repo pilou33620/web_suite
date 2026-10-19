@@ -41,9 +41,12 @@ Dans `lanceur/mcp_registre_antenna.py`, page `antenna`.
 1. **Mêmes sorties que Gemini** : `conception`, `audit` et les lectures de la carte importée
    sont identiques au caractère près à celles de `30-ia.js`, vérifié par un relevé pris
    avant le déplacement du code.
-2. **Rien n'est écrit** : aucune lecture ni commande de vue ne change `ANT`, `CON`,
-   `PRJ.modifie`, l'historique de conception (`CON_HIST`) ni les préférences
-   (`antReglagesEcrire`). La vue n'enregistre pas de préférence.
+2. **Rien n'est écrit** : aucune lecture ni commande de vue ne change les réglages d'`ANT`,
+   `CON`, `PRJ.modifie`, l'historique de conception (`CON_HIST`) ni les préférences
+   (`antReglagesEcrire`). La vue ne change que l'état de vue (`ANT.vue`, `ANT.vueMaillage`,
+   `ANT.etape`, comme un clic ; l'étape part avec le prochain enregistrement du projet) et
+   n'enregistre pas de préférence. Le texte rendu commence par un en-tête qui le dit donnée,
+   et les noms venus d'un fichier y restent chacun sur sa ligne.
 3. **Bornes** : 150 lignes par liste, 200 points par courbe, puis « … (N de plus) ». Le
    MCP résume au-delà de 100 Ko.
 4. **Captures** : `toile: "3d"` rend la vue 3D (WebGL, lue après un rendu), `courbe` le

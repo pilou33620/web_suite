@@ -92,7 +92,7 @@ Importé par le noyau, documenté dans `DETAILS.md`.
 **Dépendances :** T3 · **Fichiers :** `lanceur/mcp_registre_antenna.py`, `lanceur/mcp_web_suite.py`,
 `lanceur/banc_mcp.py`, `lanceur/docs/DETAILS.md` · **Taille :** M
 
-## Tâche 5 : essai réel, puis revue
+## Tâche 5 : ✅ essai réel, puis revue
 
 **Description :** WEB_ANTENNA lancé sur une copie de PROJETS dans `/tmp`, un projet
 ouvert dans Chromium sur le Pi. Chaque lecture est appelée par le MCP ; trois captures :
@@ -110,7 +110,23 @@ l'audit de sécurité.
         de courbes ;
       - captures carte 2D, vue 3D (bien rendue, pas noire), courbe S11 : justes ;
       - PROJETS au même md5.)
-- [ ] `/review` fait, corrections appliquées
+- [x] `/review` fait, corrections appliquées (revue 5 axes + audit de sécurité : ni critique
+      ni élevé. Corrigé :
+      - les noms venus d'un fichier sont remis sur une ligne et bornés (un nom piégé ne fabrique
+        plus de fausse ligne ni de fausse carte) ;
+      - en-tête « données » sur chaque lecture ;
+      - « aucune résonance » sous le seuil, comme la page, et impédance au pied ;
+      - courbes : leur panneau est ouvert s'il est caché ; la capture suit la vue affichée ;
+      - point de balayage : on quitte l'onglet « bal », comme au clic ; la réponse dit l'onglet
+        vraiment affiché ;
+      - dernier point de la courbe gardé ; audit coupé par contrôle entier ;
+      - tests : cartes d'audit vraiment applicables, espions sur antMaj, conAppliquer et
+        antReglagesEcrire ;
+      - MCP : point_balayage jusqu'à 100 000, réponse sans onglet sans plantage (aussi
+        cao_vue).
+      Laissé, et dit dans la description et la spec : l'étape part avec le prochain
+      enregistrement ; un panneau montré reste si l'utilisateur change ensuite la
+      disposition.)
 
 **Dépendances :** T4 · **Taille :** M
 

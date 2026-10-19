@@ -44,7 +44,7 @@ def antenna_vue(a):
     if a.get("resultats") is not None:
         args["onglet"] = choix(a["resultats"], "resultats", ONGLETS)
     if a.get("point_balayage") is not None:
-        args["point_balayage"] = entier(a, "point_balayage")
+        args["point_balayage"] = entier(a, "point_balayage", 100000)   # un balayage croisé dépasse vite 1000 points
     if a.get("etape") is not None:
         args["etape"] = entier(a, "etape", 20)
     if a.get("panneau") is not None:
@@ -58,7 +58,7 @@ def antenna_vue(a):
     if not capturer or vue.get("etat") != "finie":
         return vue
     # la capture du même onglet, dans la foulée : l'image et la vue en un appel
-    image = pilote.pilote_capture({"outil": "web_antenna", "onglet": vue["onglet"]["id"]})
+    image = pilote.pilote_capture({"outil": "web_antenna", "onglet": (vue.get("onglet") or {}).get("id")})
     image["vue"] = vue.get("resultat")
     return image
 
@@ -85,7 +85,8 @@ OUTILS_ANTENNA = {
                        "(2d, 3d), maillage (montré ou caché), ajuster (2D), resultats (onglet de résultats : bal, ts, "
                        "s11, s21, roe, z, ff), point_balayage (n°), etape (n° de l'étape de l'assistant ; elle part "
                        "avec le prochain enregistrement du projet), panneau (assistant, resultats, couches…), toile "
-                       "à capturer (carte, 3d, courbe). capturer=true rend l'image dans la foulée. Tout est vérifié "
+                       "à capturer (carte ou 3d : la vue affichée ; courbe : ouvre le panneau des résultats s'il est caché). "
+                       "Un panneau montré reste si tu changes ensuite la disposition. capturer=true rend l'image dans la foulée. Tout est vérifié "
                        "avant le premier changement. Jamais de calcul lancé." + pilote.DONNEES,
         "inputSchema": {"type": "object", "properties": {
             "vue": {"type": "string", "enum": ["2d", "3d"]}, "maillage": {"type": "boolean"}, "ajuster": {"type": "boolean"},
