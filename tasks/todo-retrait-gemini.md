@@ -86,7 +86,7 @@ Plan : [plan-retrait-gemini.md](plan-retrait-gemini.md)
 ## Checkpoint : les pages
 - [x] Bancs verts dans les deux outils
 
-## Tâche 5 : serveurs, `/api/ia/cle` retiré
+## Tâche 5 : ✅ serveurs, `/api/ia/cle` retiré
 
 **Description :**
 - `web_CAO.py` et `web_antenna.py` : la route, sa lecture du fichier de clé, son entrée
@@ -95,7 +95,8 @@ Plan : [plan-retrait-gemini.md](plan-retrait-gemini.md)
 - restent : `.gitignore` et la liste des fichiers préservés.
 
 **Critères d'acceptation :**
-- [ ] `GET /api/ia/cle` rend 404 sur les deux serveurs (bancs)
+- [x] `GET /api/ia/cle` rend 404 sur les deux serveurs (bancs : banc-lib-routes, banc-serveur-routes,
+      banc-serveur 30/30 ; le contrôle CORS « autre appareil du LAN » vise désormais /api/lib/fichiers)
 
 **Vérification :** `python3 python/test/banc-serveur-routes.py`, `python3 python/test/banc-lib-routes.py`
 (WEB_CAO), `python3 python/test/banc-serveur.py` (WEB_ANTENNA)
