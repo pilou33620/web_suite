@@ -45,7 +45,7 @@ Plan : [plan-retrait-gemini.md](plan-retrait-gemini.md)
 
 **Dépendances :** T1 · **Taille :** M
 
-## Tâche 3 : WEB_CAO, l'assistant de Gestion LIB retiré
+## Tâche 3 : ✅ WEB_CAO, l'assistant de Gestion LIB retiré
 
 **Description :**
 - retirer `gestion-lib/js/06-ia-lib.js`, son panneau et ses boutons (`iaActionRapide`,
@@ -54,7 +54,8 @@ Plan : [plan-retrait-gemini.md](plan-retrait-gemini.md)
   d'IA).
 
 **Critères d'acceptation :**
-- [ ] Gestion LIB sans trace ; bancs de Gestion LIB verts
+- [x] Gestion LIB sans trace ; bancs de Gestion LIB verts (banc-ia-xss.js ne testait que
+      l'assistant : retiré entièrement ; aucune fonction de 06-ia-lib.js n'était appelée ailleurs)
 
 **Vérification :** `node gestion-lib/test/*.js`, `node commun/test/banc-pilote-cao.js`
 
