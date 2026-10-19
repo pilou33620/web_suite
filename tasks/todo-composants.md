@@ -26,7 +26,7 @@ Plan : [plan-composants.md](plan-composants.md)
 **Dépendances :** aucune · **Fichiers :** `web_CAO.py`, `python/test/banc-lib-routes.py`,
 `lanceur/mcp_api_outils.py`, `lanceur/banc_mcp.py` · **Taille :** M
 
-## Tâche 2 : contrôles (`commun/composants-lib.js`)
+## Tâche 2 : ✅ contrôles (`commun/composants-lib.js`)
 
 **Description :** `COMPOSANTS_LIB` contient :
 - `verifierEmpreinte(def, nom)` : erreurs et remarques (contrôles de la spec, accord avec
@@ -37,12 +37,13 @@ Plan : [plan-composants.md](plan-composants.md)
   et nombre de broches.
 
 **Critères d'acceptation :**
-- [ ] Empreintes fautives refusées, chacune avec sa raison : perçage trop grand,
+- [x] Empreintes fautives refusées, chacune avec sa raison : perçage trop grand,
       couronne trop fine, pas de pastille 1, style inconnu, nom ≠ fichier, pastille
       minuscule ; un numéro en double est une remarque
-- [ ] Ligne : colonne manquante, Part Name déjà prise, empreinte absente, symbole inconnu
+- [x] Ligne : colonne manquante, Part Name déjà prise, empreinte absente, symbole inconnu
       → refus ; la liste des symboles égale les clés de `LIB` du schéma (banc)
-- [ ] Brochage incohérent (pastille absente de l'empreinte) refusé
+- [x] Brochage incohérent (pastille absente de l'empreinte) refusé ; les 269 empreintes
+      de la LIB passent les contrôles (description longue et `span` 0 admis)
 
 **Vérification :** `node gestion-lib/test/banc-composants.js`
 
