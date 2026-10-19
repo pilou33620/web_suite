@@ -29,7 +29,7 @@ Banc principal : `node WEB_ANTENNA/test/banc-interface.js` (la CI passe par
 **Dépendances :** aucune · **Fichiers :** `js/29-lecture-antenna.js`, `js/30-ia.js`, `index.html`,
 `test/banc-interface.js`, fixture · **Taille :** M
 
-## Tâche 2 : `antenna_lire` dans la page
+## Tâche 2 : ✅ `antenna_lire` dans la page
 
 **Description :** `pilote-antenna.js` déclare `antenna_lire`. Les `quoi` :
 - `conception`, `resultats`, `courbe` (`grandeur` : `s11`, `s21`, `z`, `roe`),
@@ -37,13 +37,13 @@ Banc principal : `node WEB_ANTENNA/test/banc-interface.js` (la CI passe par
 - pour la carte importée : `composants`, `composant`, `nets`, `net`.
 
 **Critères d'acceptation :**
-- [ ] Chaque `quoi` rend la sortie attendue sur un état du banc. Bornes : 150 lignes,
+- [x] Chaque `quoi` rend la sortie attendue sur un état du banc. Bornes : 150 lignes,
       200 points, puis « … (N de plus) ». Sans résultat, sans balayage ou sans carte
       importée : refus qui dit quoi faire
-- [ ] Rien n'est écrit : `ANT`, `CON`, `PRJ.modifie` et `CON_HIST` sont identiques avant et
+- [x] Rien n'est écrit : `ANT`, `CON`, `PRJ.modifie` et `CON_HIST` sont identiques avant et
       après toutes les lectures ; les fonctions de lancement, remplacées par des pièges,
       ne sont jamais appelées
-- [ ] `audit` donne pour chaque contrôle une carte JSON que `iaProposition` accepte
+- [x] `audit` donne pour chaque contrôle une carte JSON que `iaProposition` accepte
 
 **Vérification :** `node test/banc-interface.js`
 
