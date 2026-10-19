@@ -203,6 +203,15 @@ Outils MCP (`etat` dans `mcp_web_suite.py`, les autres dans `mcp_api_outils.py`,
   page (`WEB_CAO/commun/lecture-cao.js`). Seule exception : la visibilité des couches du PCB
   fait partie du fichier, comme l'œil du panneau ; elle part avec le prochain Enregistrer.
   Surligner un net le met en avant sans sélectionner son routage.
+- Écritures WEB_CAO (`mcp_ecriture_cao.py`, voir [SPEC-mcp-ecriture-cao.md](SPEC-mcp-ecriture-cao.md)) :
+  `cao_composants_ecrire` (schéma ou PCB : repère, valeur, boîtier, fabricant, MPN, specs,
+  non monté ; face, position, rotation au PCB), `cao_pistes_ecrire` (largeur, réalignement
+  sur la classe), `cao_classes_ecrire` (créer, modifier, supprimer, rattacher des nets),
+  `cao_contraintes_ecrire` (règles de paires, contraintes de net), `cao_sim_ecrire`
+  (paramètres de simulation, unité du catalogue). Un lot de 50 éléments au plus = une carte
+  = une étape Ctrl+Z (la simulation : Annuler sur la carte). Un seul refus et rien ne
+  change ; au clic, la page revérifie que rien n'a bougé sous la carte. Au PCB, la réponse
+  donne le DRC avant → après. Code de page : `WEB_CAO/commun/ecriture-cao.js`.
 
 **Le panneau « Claude ».** Chaque page des outils a, en bas à droite, un bouton « Claude ».
 Une écriture proposée par Claude s'y affiche en carte, avant → après, avec Appliquer et

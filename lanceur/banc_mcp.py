@@ -717,7 +717,7 @@ FauxApi.table.clear()
 os.environ["WEB_SUITE_MCP_PORTS"] = json.dumps(dict(PORTS, web_cao=api.server_address[1]))
 OC = ["cao_schema_lire", "cao_pcb_lire", "cao_ipc_lire", "cao_sim_lire", "cao_vue", "cao_drc"]
 verifier("outils de registre-cao listés", set(OC) <= set(noms), True)
-verifier("46 outils en tout", len(noms), 46)
+verifier("51 outils en tout (registre-cao, puis ecriture-cao)", len(noms), 51)
 verifier("registre-cao : ce que rend la page est une donnée",
          all("donnée" in o["description"] for o in outils if o["name"] in OC), True)
 FauxApi.table[("POST", "/api/pilote/commande")] = fin("- GND")
@@ -761,6 +761,59 @@ r = mcp.appeler({"name": "cao_vue", "arguments": {"cadrer": "U1", "capturer": Tr
 FauxApi.table = _table
 verifier("cao_vue + capturer : image puis texte", [c["type"] for c in r["content"]], ["image", "text"])
 verifier("la capture vise l'onglet de la vue (cao)", (FauxApi.recues[-1][2]["nom"], FauxApi.recues[-1][2]["onglet"]), ("capture", "A"))
+
+# ecriture-cao (lanceur/docs/SPEC-mcp-ecriture-cao.md) : écritures en lot, par cartes
+os.environ["WEB_SUITE_MCP_PORTS"] = json.dumps(dict(PORTS, web_cao=api.server_address[1]))
+OE = ["cao_composants_ecrire", "cao_pistes_ecrire", "cao_classes_ecrire", "cao_contraintes_ecrire", "cao_sim_ecrire"]
+verifier("outils d'ecriture-cao listés", set(OE) <= set(noms), True)
+verifier("ecriture-cao : donnée, carte, lot", all("donnée" in o["description"] and "carte" in o["description"] and "50" in o["description"]
+                                                 for o in outils if o["name"] in OE), True)
+FauxApi.table[("POST", "/api/pilote/commande")] = fin("ok", "appliquee")
+FauxApi.recues.clear()
+for nom, args in (("cao_composants_ecrire", {"page": "schema", "lot": [{"ref": "R1", "champs": {"valeur": "4k7", "specs": {"tol": "1%", "x": None}, "non_monte": True}}]}),
+                  ("cao_composants_ecrire", {"page": "pcb", "lot": [{"ref": "U1", "champs": {"x": 12.5, "rotation": 90, "face": "dessous"}}]}),
+                  ("cao_pistes_ecrire", {"lot": [{"net": "GND", "largeur": 0.5, "couche": "Top"}, {"net": "VCC", "realigner": True}]}),
+                  ("cao_classes_ecrire", {"lot": [{"action": "creer", "nom": "P", "largeur": 0.8, "largeur_couches": {"Top": 0.9}},
+                                                  {"action": "affecter", "net": "VCC", "classe": "P"}]}),
+                  ("cao_contraintes_ecrire", {"lot": [{"action": "paire", "nom": "USB", "impedance": "D90"},
+                                                      {"action": "net", "net": "CLK", "l_max": 40, "z": None, "couches": ["Top"]}]}),
+                  ("cao_sim_ecrire", {"lot": [{"groupe": "pdn", "cle": "rVrmMOhm", "valeur": 12, "unite": "mΩ"},
+                                              {"groupe": "bus", "cle": "protocole", "valeur": "I2C"}]})):
+    verifier(nom + " accepté", outil(nom, **args)[0], False)
+deposees = [r[2] for r in FauxApi.recues]
+verifier("écritures déposées aux bonnes pages, en écriture", [(d["nom"], d["page"], d["ecriture"]) for d in deposees],
+         [("cao_composants_ecrire", ["schema"], True), ("cao_composants_ecrire", ["pcb"], True),
+          ("cao_pistes_ecrire", ["pcb"], True), ("cao_classes_ecrire", ["pcb"], True),
+          ("cao_contraintes_ecrire", ["pcb"], True), ("cao_sim_ecrire", ["pcb", "visionneuse-ipc"], True)])
+verifier("le lot passe tel quel", deposees[1]["args"], {"lot": [{"ref": "U1", "champs": {"x": 12.5, "rotation": 90, "face": "dessous"}}]})
+
+FauxApi.recues.clear()
+L = lambda *e: {"lot": list(e)}
+for nom, args in (("cao_composants_ecrire", L({"ref": "R1", "champs": {"valeur": "1k"}})),                       # page manquante
+                  ("cao_composants_ecrire", dict(L({"ref": "R1", "champs": {"x": 1}}), page="schema")),       # x : PCB seulement
+                  ("cao_composants_ecrire", dict(L({"ref": "R1", "champs": {"face": "gauche"}}), page="pcb")),
+                  ("cao_composants_ecrire", dict(L({"ref": "R1", "champs": {}}), page="pcb")),
+                  ("cao_composants_ecrire", dict(L({"ref": "R1"}), page="pcb")),
+                  ("cao_composants_ecrire", dict(L({"ref": "", "champs": {"valeur": "1"}}), page="pcb")),
+                  ("cao_composants_ecrire", dict(L({"ref": "R1", "champs": {"valeur": "a\nb"}}), page="schema")),
+                  ("cao_composants_ecrire", dict(L({"ref": "R1", "champs": {"specs": {"k%d" % i: "v" for i in range(31)}}}), page="schema")),
+                  ("cao_composants_ecrire", dict(L({"ref": "R1", "champs": {"x": float("nan")}}), page="pcb")),
+                  ("cao_composants_ecrire", dict(L({"ref": "R1", "champs": {"rotation": True}}), page="pcb")),
+                  ("cao_composants_ecrire", {"page": "pcb", "lot": [{"ref": "R1", "champs": {"valeur": "1"}}] * 51}),
+                  ("cao_composants_ecrire", {"page": "pcb", "lot": []}),
+                  ("cao_pistes_ecrire", L({"largeur": 0.3})), ("cao_pistes_ecrire", L({"net": "GND", "largeur": "0.3"})),
+                  ("cao_pistes_ecrire", L({"net": "GND", "epaisseur": 1})),
+                  ("cao_classes_ecrire", L({"action": "renommer", "nom": "P"})), ("cao_classes_ecrire", L({"nom": "P"})),
+                  ("cao_classes_ecrire", L({"action": "creer", "nom": "P", "largeur_couches": {"Top": "0.3"}})),
+                  ("cao_contraintes_ecrire", L({"action": "net", "net": "CLK", "couches": []})),
+                  ("cao_contraintes_ecrire", L({"action": "net", "net": "CLK", "l_max": "40"})),
+                  ("cao_sim_ecrire", L({"groupe": "pdn", "cle": "rVrmMOhm"})),
+                  ("cao_sim_ecrire", L({"groupe": "pdn", "cle": "rVrmMOhm", "valeur": None})),
+                  ("cao_sim_ecrire", "pas un objet")):
+    verifier("%s refuse %r" % (nom, str(args)[:60]), outil(nom, **args)[0] if isinstance(args, dict) else
+             mcp.appeler({"name": nom, "arguments": {"lot": args}}).get("isError", False), True)
+verifier("aucun lot invalide n'atteint la page", FauxApi.recues, [])
+
 FauxApi.table.clear()
 os.environ["WEB_SUITE_MCP_PORTS"] = json.dumps(PORTS)
 print("OK")

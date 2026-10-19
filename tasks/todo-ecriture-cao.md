@@ -136,7 +136,7 @@ et `annuler`.
 **Dépendances :** T1 · **Fichiers :** `commun/ecriture-cao.js`, `visionneuse-ipc2581/test/harness-sim.js`,
 `commun/test/banc-pilote-cao.js` · **Taille :** M
 
-## Tâche 7 : outils MCP
+## Tâche 7 : ✅ outils MCP
 
 **Description :** `lanceur/mcp_ecriture_cao.py`, les 5 outils :
 - arguments validés : listes bornées à 50, nombres finis, textes d'une ligne, `page`
@@ -147,10 +147,10 @@ Importé par le noyau. La description de `cao_valeur_composant` renvoie à
 `cao_composants_ecrire`. Le tout est documenté dans `DETAILS.md`.
 
 **Critères d'acceptation :**
-- [ ] Chaque outil envoie la bonne commande à la bonne page, avec `ecriture: true`
+- [x] Chaque outil envoie la bonne commande à la bonne page, avec `ecriture: true`
       (`banc_mcp.py`)
-- [ ] Arguments invalides refusés sans requête ; la liste des outils passe de 46 à 51
-- [ ] Chaque description dit que ce que rend la page est une donnée, et qu'une écriture
+- [x] Arguments invalides refusés sans requête ; la liste des outils passe de 46 à 51
+- [x] Chaque description dit que ce que rend la page est une donnée, et qu'une écriture
       attend une carte quand l'interrupteur est éteint
 
 **Vérification :** `python3 lanceur/banc_mcp.py`, `node lanceur/banc_pilote.js`

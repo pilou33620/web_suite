@@ -164,7 +164,8 @@ OUTILS_PILOTE = {
         "fn": cao_calcul,
     },
     "cao_valeur_composant": {
-        "description": "Propose de changer la valeur d'un composant du schéma par son repère (R12 → 4k7)."
+        "description": "Propose de changer la valeur d'un composant du schéma par son repère (R12 → 4k7). "
+                       "Pour plusieurs champs ou plusieurs composants, au schéma ou au PCB : cao_composants_ecrire."
                        + ATTENTE_DOC + " Appliquée, elle fait une étape d'undo (Ctrl+Z la défait).",
         "inputSchema": {"type": "object", "properties": {
             "ref": {"type": "string"}, "valeur": {"type": "string"}, "onglet": ONGLET},
