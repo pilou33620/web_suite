@@ -61,14 +61,18 @@ valeur est relue dans la consigne et dans le code.
 
 **Dépendances :** T2 · **Taille :** S
 
-## Tâche 4 : `simulation.md`
+## Tâche 4 : ✅ `simulation.md`
 
 **Description :** lecture d'une datasheet pour la simulation : pire cas, page et citation,
 unités du catalogue (renvoi à `cao_sim_lire`), confiance ; quelle analyse de `cao_calcul`
 pour quelle question.
 
 **Critères d'acceptation :**
-- [ ] Les lignes simulation du relevé ont leur destination ; aucune borne recopiée ; banc vert
+- [x] Les lignes simulation du relevé ont leur destination ; aucune borne recopiée ; banc vert
+      (écart au plan : aucun outil ne lisait le catalogue des paramètres, que la consigne Gemini
+      joignait ; ajouté : `cao_sim_lire` quoi=catalogue, servi par simDsCatalogue, testé au
+      harnais PCB et par banc_mcp. Constaté, laissé : condensateurs ESR/ESL et bornes DC d'une
+      datasheet n'ont pas d'écriture MCP ; l'analyse « Bus synchrone » n'est pas dans cao_calcul)
 
 **Vérification :** `python3 lanceur/banc_savoir.py`
 

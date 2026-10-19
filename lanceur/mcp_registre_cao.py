@@ -15,7 +15,7 @@ QUOI = {
     "schema": ("feuilles", "composants", "composant", "nets", "net"),
     "pcb": ("empilage", "classes", "composants", "composant", "nets", "net", "drc", "liaisons", "zone"),
     "ipc": ("empilage", "composants", "composant", "nets", "net"),
-    "sim": ("simulations", "simulation"),
+    "sim": ("simulations", "simulation", "catalogue"),
 }
 PAGES = {"schema": ["schema"], "pcb": ["pcb"], "ipc": ["visionneuse-ipc"], "sim": ["pcb", "visionneuse-ipc"]}
 PAGES_VUE = ["schema", "pcb", "visionneuse-ipc"]
@@ -147,8 +147,9 @@ OUTILS_CAO = {
     "cao_sim_lire": {
         "description": "Lit les simulations de la page PCB ou de la visionneuse : simulations (analyses, celles qui ont un "
                        "résultat, chiffres clés), simulation (une partie du rapport d'une analyse ; commence par chiffres "
-                       "et diagnostics). Le rapport complet n'existe que pour l'analyse affichée : afficher=true y passe "
-                       "le panneau. cao_calcul lance un calcul." + DONNEES,
+                       "et diagnostics), catalogue (paramètres réglables par cao_sim_ecrire : groupe.clé, unité ou "
+                       "choix, valeur actuelle, où la lire dans une datasheet). Le rapport complet n'existe que pour "
+                       "l'analyse affichée : afficher=true y passe le panneau. cao_calcul lance un calcul." + DONNEES,
         "inputSchema": {"type": "object", "required": ["quoi"], "properties": {
             "quoi": {"type": "string", "enum": list(QUOI["sim"])},
             "analyse": {"type": "string", "description": "Clé de l'analyse (rendue par quoi = simulations)."},

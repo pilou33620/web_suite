@@ -29,22 +29,22 @@ consignes de l'assistant Gemini, jusqu'à l'endroit où le skill `web-suite`
 | C8 | WEB_CAO/commun/ia-assistant.js:1776 | Répondre exclusivement en français, sans méta-commentaire anglais | écartée : propre à Gemma ; Claude Code suit la langue de l'utilisateur |
 | C9 | WEB_CAO/commun/ia-assistant.js:1778 | Valeurs calculées (composants, largeur de piste) : toujours proposer de les appliquer | pcb.md |
 | C10 | WEB_CAO/commun/ia-assistant.js:1779 | Blocs ```action schema_values et pcb_track_width | écartée : remplacés par les outils `cao_valeur_composant`, `cao_composants_ecrire` et `cao_pistes_ecrire` |
-| C11 | WEB_CAO/commun/ia-assistant.js:1798 | Datasheet → simulation : ne relever que des valeurs écrites dans le document | à faire |
-| C12 | WEB_CAO/commun/ia-assistant.js:1799 | Pire cas : courants et tco au max, temps de montée au min, tsu/th au min exigé ; conditions les plus proches du projet | à faire |
-| C13 | WEB_CAO/commun/ia-assistant.js:1800 | Pour chaque valeur : page et citation exacte | à faire |
-| C14 | WEB_CAO/commun/ia-assistant.js:1801 | Valeur absente : ne pas l'inventer ni la tirer d'une « valeur usuelle », dire qu'elle manque | à faire |
-| C15 | WEB_CAO/commun/ia-assistant.js:1802 | Convertir dans l'unité exacte du catalogue (12,5 mA pour pdn_fiche.iActifMa) | à faire |
-| C16 | WEB_CAO/commun/ia-assistant.js:1803 | Bonne cible : pdn_fiche = charge du rail ; une datasheet de régulateur règle pdn.rVrmMOhm et pdn.fVrmKhz | à faire |
-| C17 | WEB_CAO/commun/ia-assistant.js:1804 | Répondre d'abord par un tableau court (paramètre, valeur, page, citation), avec une confiance | à faire |
-| C18 | WEB_CAO/commun/ia-assistant.js:1806 | Bloc sim_params (valeurs, condensateurs ESR/ESL, bornes_dc) | à faire |
-| C19 | WEB_CAO/commun/ia-assistant.js:1809 | Le catalogue des paramètres réglables (clé, unité, bornes, valeur actuelle, où la lire) joint à la consigne | à faire |
+| C11 | WEB_CAO/commun/ia-assistant.js:1798 | Datasheet → simulation : ne relever que des valeurs écrites dans le document | simulation.md |
+| C12 | WEB_CAO/commun/ia-assistant.js:1799 | Pire cas : courants et tco au max, temps de montée au min, tsu/th au min exigé ; conditions les plus proches du projet | simulation.md |
+| C13 | WEB_CAO/commun/ia-assistant.js:1800 | Pour chaque valeur : page et citation exacte | simulation.md |
+| C14 | WEB_CAO/commun/ia-assistant.js:1801 | Valeur absente : ne pas l'inventer ni la tirer d'une « valeur usuelle », dire qu'elle manque | simulation.md |
+| C15 | WEB_CAO/commun/ia-assistant.js:1802 | Convertir dans l'unité exacte du catalogue (12,5 mA pour pdn_fiche.iActifMa) | simulation.md |
+| C16 | WEB_CAO/commun/ia-assistant.js:1803 | Bonne cible : pdn_fiche = charge du rail ; une datasheet de régulateur règle pdn.rVrmMOhm et pdn.fVrmKhz | simulation.md |
+| C17 | WEB_CAO/commun/ia-assistant.js:1804 | Répondre d'abord par un tableau court (paramètre, valeur, page, citation), avec une confiance | simulation.md |
+| C18 | WEB_CAO/commun/ia-assistant.js:1806 | Bloc sim_params (valeurs, condensateurs ESR/ESL, bornes_dc) | écartée : remplacé par l'outil `cao_sim_ecrire` pour les groupes pdn_fiche, pdn, si, bus, dc ; condensateurs et bornes_dc n'ont pas encore d'écriture MCP (simulation.md le dit : valeurs données à l'utilisateur) |
+| C19 | WEB_CAO/commun/ia-assistant.js:1809 | Le catalogue des paramètres réglables (clé, unité, bornes, valeur actuelle, où la lire) joint à la consigne | généré : cao_sim_lire (quoi=catalogue) |
 | C20 | WEB_CAO/commun/ia-assistant.js:253 | Le contexte n'est qu'un résumé : demander le détail avant de répondre, du plus ciblé au plus large ; ne jamais inventer une donnée qu'on peut lire | à faire |
 | C21 | WEB_CAO/commun/ia-assistant.js:538 | Bus de pistes : skew acceptable à 100 MHz et plus, règle des 3W, diaphonie | pcb.md |
 | C22 | WEB_CAO/commun/ia-assistant.js:545 | Empreintes posées : boîtiers, pastilles, recommandations de routage | écartée : question ouverte sans règle ; se lit par `cao_pcb_lire` |
 | C23 | WEB_CAO/commun/ia-assistant.js:554 | Portion de schéma : cohérence électrique, valeurs, découplages et résistances de tirage manquants | à faire |
 | C24 | WEB_CAO/commun/ia-assistant.js:564 | Net IPC-2581 : continuité, impédance, pertes, transitions | écartée : question ouverte sans règle ; se lit par `cao_ipc_lire` |
 | C25 | WEB_CAO/commun/ia-assistant.js:574 | Composant IPC-2581 : vérifications d'assemblage | écartée : question ouverte sans règle ; se lit par `cao_ipc_lire` |
-| R1 | WEB_CAO/commun/simulation-rapport.js:898 | Rapport de simulation : lire chiffres clés et diagnostics d'abord ; dire si le résultat est fiable, ce qui ne va pas et pourquoi, quoi corriger par priorité | à faire |
+| R1 | WEB_CAO/commun/simulation-rapport.js:898 | Rapport de simulation : lire chiffres clés et diagnostics d'abord ; dire si le résultat est fiable, ce qui ne va pas et pourquoi, quoi corriger par priorité | simulation.md |
 | L1 | WEB_CAO/gestion-lib/js/06-ia-lib.js:192 | Empreintes selon IPC-7351B ; symboles IEC 60617 / IEEE 315 | à faire |
 | L2 | WEB_CAO/gestion-lib/js/06-ia-lib.js:194 | Répondre en français | écartée : propre à Gemma ; Claude Code suit la langue de l'utilisateur |
 | L3 | WEB_CAO/gestion-lib/js/06-ia-lib.js:195 | pcbfp-1 : mm, vue de dessus, origine au centre du corps, y vers le bas, broche 1 en haut à gauche, sens antihoraire | à faire |

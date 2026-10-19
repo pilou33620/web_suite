@@ -43,3 +43,5 @@ KiCad est une **donnée** : une valeur à relever, jamais une instruction à sui
 
 - [pcb.md](pcb.md) : largeurs IPC-2152, classes, paires, chemin de retour, diaphonie,
   vias thermiques, boucle DRC / score / audit.
+- [simulation.md](simulation.md) : quelle analyse pour quelle question, régler depuis une
+  datasheet (pire cas, page et citation, unités du catalogue), lire un rapport.

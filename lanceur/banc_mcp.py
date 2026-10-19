@@ -746,6 +746,10 @@ verifier("arguments transmis", [deposees[0]["args"], deposees[1]["args"], depose
           {"cadrer": "U1", "couches": ["Top"], "ajuster": True}])
 outil("cao_vue", surligner="GND")
 verifier("cao_vue sans page : les trois pages qui ont une vue", FauxApi.recues[-1][2]["page"], ["schema", "pcb", "visionneuse-ipc"])
+FauxApi.recues.clear()
+verifier("catalogue de simulation lisible (savoir-metier)", outil("cao_sim_lire", quoi="catalogue")[0], False)
+verifier("catalogue : page PCB ou visionneuse, sans écriture", [(r[2]["nom"], r[2]["args"], r[2]["ecriture"]) for r in FauxApi.recues],
+         [("cao_sim_lire", {"quoi": "catalogue"}, False)])
 
 FauxApi.recues.clear()
 for nom, args in (("cao_pcb_lire", {}), ("cao_pcb_lire", {"quoi": "feuilles"}), ("cao_schema_lire", {"quoi": "drc"}),

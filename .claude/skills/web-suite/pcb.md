@@ -57,8 +57,8 @@ règle par `cao_classes_ecrire` (créer, modifier, rattacher des nets).
 - Règle des 3W : écart d'axe à axe d'au moins trois largeurs (isolation = deux largeurs)
   entre une horloge ou un signal rapide et ses voisins.
 - Le décalage de longueur (skew) d'un bus se juge sur le budget de temps de l'interface
-  (tsu / th de la datasheet), pas sur un chiffre fixe : le convertir en temps avec la vitesse
-  de propagation de l'empilage.
+  (tsu / th de la datasheet), pas sur un chiffre fixe : l'analyse « Bus synchrone » de la page
+  calcule temps de vol, skews et marge setup / hold (voir [simulation.md](simulation.md)).
 - `cao_calcul` (analyse=crosstalk) chiffre la diaphonie, (analyse=oeil) un lien rapide.
 
 ## Vias thermiques
