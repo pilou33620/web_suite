@@ -103,7 +103,7 @@ Plan : [plan-retrait-gemini.md](plan-retrait-gemini.md)
 
 **Dépendances :** T2, T4 · **Taille :** S
 
-## Tâche 6 : web_suite, CI et docs
+## Tâche 6 : ✅ web_suite, CI et docs
 
 **Description :**
 - `lanceur/banc_traces_ia.py` (recherche des traces, avec ses exceptions, éprouvé sur un
@@ -112,7 +112,7 @@ Plan : [plan-retrait-gemini.md](plan-retrait-gemini.md)
 - README racine et DETAILS.md mis à jour.
 
 **Critères d'acceptation :**
-- [ ] Le banc trouve une trace plantée dans un fichier factice et rien dans les dépôts ; CI à jour
+- [x] Le banc trouve une trace plantée dans un fichier factice et rien dans les dépôts ; CI à jour
 
 **Vérification :** `python3 lanceur/banc_traces_ia.py`, `python3 lanceur/banc_mcp.py`
 

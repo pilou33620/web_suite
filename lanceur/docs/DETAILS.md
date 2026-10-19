@@ -188,7 +188,7 @@ Outils MCP (`etat` dans `mcp_web_suite.py`, les autres dans `mcp_api_outils.py`,
   [SPEC-mcp-canal-pilote.md](SPEC-mcp-canal-pilote.md)) : `pilote_onglets` (onglets ouverts sur
   ce poste et les appareils appairés), `pilote_capture` (image du canevas), `pilote_suivre`,
   `cao_calcul` (lance une analyse dans la page PCB ou la visionneuse et rend son rapport),
-  `cao_valeur_composant` (schéma), `antenna_proposer` (cartes de l'assistant ANTENNA).
+  `cao_valeur_composant` (schéma), `antenna_proposer` (cartes d'action de WEB_ANTENNA : réglages, cotes, balayage, formes).
 - Page WEB_3D (`mcp_registre_3d.py`, voir [SPEC-mcp-registre-3d.md](SPEC-mcp-registre-3d.md)) :
   `web3d_scene` (fichiers et pièces : uuid, chemin, nom), `web3d_vue` (vue standard, cadrage,
   capture), `web3d_visibilite`, `web3d_coupe`, `web3d_mesurer` (dimensions, distance avec cote,
@@ -200,8 +200,8 @@ Outils MCP (`etat` dans `mcp_web_suite.py`, les autres dans `mcp_api_outils.py`,
   `cao_pcb_lire` (empilage, classes, composants, composant, nets, net, drc), `cao_ipc_lire`
   (visionneuse), `cao_sim_lire` (simulations, une partie d'un rapport), `cao_vue` (cadrer,
   surligner, feuille, couches, ajuster, capture), `cao_drc` (lance le DRC). Lectures et vue
-  seulement : rien n'est écrit dans le projet. Les lectures sont celles de l'assistant de la
-  page (`WEB_CAO/commun/lecture-cao.js`). Seule exception : la visibilité des couches du PCB
+  seulement : rien n'est écrit dans le projet. Les lectures sont celles de
+  `WEB_CAO/commun/lecture-cao.js`, reprises de l'ancien assistant IA de la page. Seule exception : la visibilité des couches du PCB
   fait partie du fichier, comme l'œil du panneau ; elle part avec le prochain Enregistrer.
   Surligner un net le met en avant sans sélectionner son routage.
 - Écritures WEB_CAO (`mcp_ecriture_cao.py`, voir [SPEC-mcp-ecriture-cao.md](SPEC-mcp-ecriture-cao.md)) :
@@ -241,6 +241,12 @@ Outils MCP (`etat` dans `mcp_web_suite.py`, les autres dans `mcp_api_outils.py`,
   clic, même interrupteur allumé : l'empreinte neuve (jamais d'écrasement) puis une ligne
   ajoutée au catalogue, sans réécrire les autres. Pas d'annulation par la carte. Code de
   page : `WEB_CAO/gestion-lib/js/08-pilote-lib.js`, `WEB_CAO/commun/composants-lib.js`.
+
+**L'ancien assistant IA.** Les assistants Gemini / Gemma intégrés aux pages de WEB_CAO
+(schéma, PCB, visionneuse, Gestion LIB) et de WEB_ANTENNA sont retirés (voir
+[SPEC-mcp-retrait-gemini.md](SPEC-mcp-retrait-gemini.md)) : Claude, par ce MCP, fait leur
+travail. Les deux serveurs n'ont plus de route de clé ; le MCP continue de refuser `/api/ia`.
+`lanceur/banc_traces_ia.py` vérifie en CI qu'il n'en reste aucune trace.
 
 **Le savoir métier.** Le skill `web-suite` (`.claude/skills/web-suite/`, voir
 [SPEC-mcp-savoir-metier.md](SPEC-mcp-savoir-metier.md)) dit quel outil prendre pour quelle tâche.

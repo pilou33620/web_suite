@@ -104,6 +104,8 @@ python lanceur/web_suite.py [--port 8100] [--racine DOSSIER] [--installer]
 
 ## Claude Code (MCP)
 
+L'ancien assistant IA intégré aux outils est retiré : Claude, par ce serveur MCP, fait son travail.
+
 `lanceur/mcp_web_suite.py` branche Claude Code sur les outils du poste (serveur MCP, sans
 dépendance). Les outils doivent déjà tourner. Sur le poste des outils :
 
