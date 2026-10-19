@@ -37,7 +37,7 @@ Un outil par action, chacun avec un schéma d'entrée précis. Il n'y a pas d'ou
 | `lib_composants` | WEB_CAO | GET `/api/lib/composants` | filtré et paginé **par le MCP** : `filtre` (texte), `colonnes`, `debut`, `nombre` (50 par défaut) |
 | `lib_fichiers` | WEB_CAO | GET `/api/lib/fichiers` | — |
 | `lib_fichier_lire` | WEB_CAO | GET `/api/lib/fichier?type=&nom=` | `type` ∈ `pcb`, `schematique`, `simulation` |
-| `lib_fichier_ecrire` | WEB_CAO | POST `/api/lib/fichier` | **refus si le fichier existe déjà** : `GET /api/lib/fichier?type=&nom=` doit rendre 404 (le serveur applique sa propre normalisation du nom) |
+| `lib_fichier_ecrire` | WEB_CAO | POST `/api/lib/fichier` | **refus si le fichier existe déjà** : `GET /api/lib/fichier?type=&nom=` doit rendre 404 (le serveur applique sa propre normalisation du nom), puis `si_absent` (le serveur refuse lui-même, 409). Depuis le module composants (2026-10-19) : symboles et modèles seulement, une empreinte PCB passe par la carte de `lib_composant_creer` |
 | `lib_parasites` | WEB_CAO | GET `/api/lib/parasites` | — |
 | `pcbparts_outils` | WEB_CAO | GET `/api/tools` | — |
 | `pcbparts_appeler` | WEB_CAO | POST `/api/tool` | `name` doit figurer dans la liste `allowed` rendue par `/api/tools` ; arguments de 2 Ko au plus |

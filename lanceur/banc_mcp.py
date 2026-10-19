@@ -446,29 +446,30 @@ for statut in (200, 500):   # existe, ou contrôle impossible : jamais d'écritu
     FauxApi.table[("GET", "/api/profil")] = (statut, {})
     FauxApi.table[("GET", "/api/lib/fichier")] = (statut, {})
     verifier("profil refusé (%d)" % statut, outil("cao_profil_ecrire", nom="JLC 4c", profil=profil)[0], True)
-    verifier("LIB refusé (%d)" % statut, outil("lib_fichier_ecrire", type="pcb", nom="C:R0603.json", data={})[0], True)
+    verifier("LIB refusé (%d)" % statut, outil("lib_fichier_ecrire", type="schematique", nom="C:R0603.json", data={})[0], True)
 FauxApi.table[("GET", "/api/profil")] = (404, {})
 FauxApi.table[("GET", "/api/lib/fichier")] = (404, {})
 for nom, args in (("cao_profil_ecrire", {"nom": "neuf", "profil": "texte"}),
-                  ("lib_fichier_ecrire", {"type": "pcb", "nom": "neuf.json"}),           # ni data ni contenu
-                  ("lib_fichier_ecrire", {"type": "pcb", "nom": "neuf.json", "data": {}, "contenu": "x"}),
-                  ("lib_fichier_ecrire", {"type": "pcb", "nom": "neuf.json", "data": 5}),
-                  ("lib_fichier_ecrire", {"type": "autre", "nom": "neuf.json", "data": {}})):
+                  ("lib_fichier_ecrire", {"type": "schematique", "nom": "neuf.json"}),           # ni data ni contenu
+                  ("lib_fichier_ecrire", {"type": "schematique", "nom": "neuf.json", "data": {}, "contenu": "x"}),
+                  ("lib_fichier_ecrire", {"type": "schematique", "nom": "neuf.json", "data": 5}),
+                  ("lib_fichier_ecrire", {"type": "autre", "nom": "neuf.json", "data": {}}),
+                  ("lib_fichier_ecrire", {"type": "pcb", "nom": "neuf.json", "data": {}})):     # par la carte seulement
     verifier("%s refuse %r" % (nom, args), outil(nom, **args)[0], True)
 verifier("aucune écriture refusée envoyée (bis)", ecritures(), [])
 FauxApi.recues.clear()
 verifier("profil neuf", outil("cao_profil_ecrire", nom="neuf", profil=profil)[0], False)
-verifier("fichier LIB neuf", outil("lib_fichier_ecrire", type="pcb", nom="C0402.json", data={"a": 1})[0], False)
+verifier("fichier LIB neuf", outil("lib_fichier_ecrire", type="schematique", nom="C0402.json", data={"a": 1})[0], False)
 verifier("fichier LIB texte", outil("lib_fichier_ecrire", type="simulation", nom="m.sub", contenu="* x")[0], False)
 verifier("contrôles puis écritures", FauxApi.recues, [
     ("GET", "/api/profil" + q(nom="neuf"), None), ("PUT", "/api/profil" + q(nom="neuf"), profil),
-    ("GET", "/api/lib/fichier" + q(type="pcb", nom="C0402.json"), None),
-    ("POST", "/api/lib/fichier", {"type": "pcb", "nom": "C0402.json", "si_absent": True, "data": {"a": 1}}),
+    ("GET", "/api/lib/fichier" + q(type="schematique", nom="C0402.json"), None),
+    ("POST", "/api/lib/fichier", {"type": "schematique", "nom": "C0402.json", "si_absent": True, "data": {"a": 1}}),
     ("GET", "/api/lib/fichier" + q(type="simulation", nom="m.sub"), None),
     ("POST", "/api/lib/fichier", {"type": "simulation", "nom": "m.sub", "si_absent": True, "contenu": "* x"})])
 # créé entre le contrôle et l'écriture : le serveur refuse (409), le message le dit
 FauxApi.table[("POST", "/api/lib/fichier")] = (409, {"detail": "existe"})
-erreur, texte = outil("lib_fichier_ecrire", type="pcb", nom="C0402.json", data={"a": 1})
+erreur, texte = outil("lib_fichier_ecrire", type="schematique", nom="C0402.json", data={"a": 1})
 verifier("course : 409 lisible", (erreur, "n'écrase pas" in texte), (True, True))
 FauxApi.table.clear()
 

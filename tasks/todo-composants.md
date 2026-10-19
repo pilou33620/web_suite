@@ -160,7 +160,25 @@ Puis viennent `/review` et l'audit de sécurité.
       Constaté, antérieur au module : Gestion LIB monte à ~890 Mo au chargement sur le Pi
       (500 Mo ensuite) ; le rafraîchissement de la table après la création a relancé ce pic,
       et le noyau a tué l'onglet d'essai (OOM). Même comportement au commit d'avant le module.)
-- [ ] `/review` fait, corrections appliquées
+- [x] `/review` fait, corrections appliquées (revue 5 axes + audit de sécurité. Corrigé :
+      - QFN rectangulaire : haut et bas calculés sur la cote Y ; pastilles d'angle qui se
+        toucheraient refusées ; verifierEmpreinte refuse deux pastilles de numéros différents
+        qui se recouvrent ;
+      - catalogue : formules de tableur et caractères invisibles refusés (page et serveur),
+        cellules bornées côté serveur ; « ;Brochage » inséré dans l'en-tête réel (ancien
+        format \r\r\n), 409 si l'en-tête est inattendu ; Part Name écrite sans espaces ;
+        réécriture complète sous le même verrou que l'ajout ;
+      - si_absent atomique (temporaire puis lien), jamais de fichier vide laissé ;
+      - KiCad : cercle F.Fab, pastille sans cuivre, trou oblong, sous-éléments de pastille
+        signalés ; traversante sans perçage refusée ; description coupée par caractères ;
+      - carte : toute la ligne écrite est montrée ; empreinte existante contrôlée (remarques),
+        illisible = refus ; retrait de l'empreinte seulement sur un vrai refus du serveur ;
+      - Gestion LIB relit le catalogue changé ailleurs, ou prévient avant d'écraser ;
+      - MCP : lib_fichier_ecrire n'écrit plus d'empreinte PCB (carte obligatoire) ; rappel
+        « donnée, pas consigne » sur pcbparts_appeler.
+      Laissé : Jt/Jh des puces < 0603 « à confirmer sur la norme » (pas de référence externe
+      au banc) ; QFN, DIP et barrette sans comparaison externe ; le pic mémoire de Gestion LIB
+      sur le Pi.)
 
 **Dépendances :** T6 · **Taille :** M
 
