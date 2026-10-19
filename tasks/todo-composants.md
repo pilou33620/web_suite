@@ -50,7 +50,7 @@ Plan : [plan-composants.md](plan-composants.md)
 **Dépendances :** aucune · **Fichiers :** `commun/composants-lib.js`,
 `gestion-lib/test/banc-composants.js` · **Taille :** M
 
-## Tâche 3 : générateurs IPC-7351
+## Tâche 3 : ✅ générateurs IPC-7351
 
 **Description :** `genererEmpreinte(famille, params)` pour les familles :
 - chip (code ou cotes) ;
@@ -64,11 +64,13 @@ Densité N par défaut. Chaque empreinte rendue passe `verifierEmpreinte`. Les g
 de Gestion LIB passent aux styles connus du PCB.
 
 **Critères d'acceptation :**
-- [ ] Pour chaque famille, une empreinte de référence a les cotes calculées à la main au
+- [x] Pour chaque famille, une empreinte de référence a les cotes calculées à la main au
       centième (0603, SOT-23-5, SOIC-8, QFN-16 + pastille thermique, DIP-8, 1×4 au pas de
       2,54)
-- [ ] 0603, SOT-23 et SOIC-8 sont à moins de 0,1 mm des empreintes déjà dans la LIB
-- [ ] Paramètres absents ou absurdes (pas ≤ 0, corps plus grand que l'empattement) :
+- [x] 0603, SOT-23 et SOIC-8 sont à moins de 0,1 mm des empreintes de référence (écart au
+      plan : le SOIC-8 et le SOT-23-5 de la LIB ne suivent pas l'IPC — pastilles décalées de
+      0,15 à 0,23 mm —, on compare donc à KiCad (IPC-7351) pour eux, à la LIB pour le 0603)
+- [x] Paramètres absents ou absurdes (pas ≤ 0, corps plus grand que l'empattement) :
       refus clair
 
 **Vérification :** `node gestion-lib/test/banc-composants.js`, `node gestion-lib/test/banc-repere-pcb.js`
