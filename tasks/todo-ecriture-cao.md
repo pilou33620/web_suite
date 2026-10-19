@@ -199,4 +199,4 @@ l'audit de sécurité.
 **Dépendances :** T7 · **Taille :** M
 
 ## Checkpoint : terminé
-- [ ] Critères de la spec remplis ; 4 CI vertes
+- [x] Critères de la spec remplis ; 4 CI vertes (WEB_CAO b2eb696, web_suite 0c01c61)
