@@ -50,5 +50,4 @@ détail de chaque module dans `tasks/`). Ce qui reste, au 19/10/2026 :
 
 - [ ] Gestion LIB : environ 890 Mo au chargement sur le Pi (OOM possible) ; son tutoriel ne
   passe pas en Chromium headless sur le Pi.
-- [ ] Visionneuse et WEB_ANTENNA : clic droit sans carte ouverte → `TypeError`.
 - [ ] WEB_ANTENNA : 422 de `/api/openems` pendant le tutoriel sur une page vide.
