@@ -247,6 +247,12 @@ function onglet(serveur, stockage, page, nomCanal) {
   const bouton = texte => boutons().find(b => b.textContent === texte);
   await attendreQue(() => restants.concat(D).some(o => o.relais), 2000, "relais avec D");
 
+  // × masque le panneau, et le masquage est gardé ; une carte à valider le fait revenir (plus bas)
+  const panneauD = trouver(doc.body, e => e.classes.has("pilote"))[0];
+  bouton("×").click();
+  assert.ok(panneauD.classes.has("masque"), "× masque le panneau");
+  assert.strictEqual(stockage.getItem("websuite.pilote.masque"), "1", "masquage gardé");
+
   // Proposée : rien n'est appliqué avant le clic ; la carte montre le texte tel quel
   id = serveur.deposer(D.id, "regler", { v: "2" }, true);
   await attendreQue(() => serveur.reponsesDe(id).includes("proposee"), 2000, "carte proposée");
@@ -254,6 +260,7 @@ function onglet(serveur, stockage, page, nomCanal) {
   assert.ok(texteDe(doc.body).includes("<img src=x onerror=alert(1)>"), "titre affiché tel quel");
   assert.ok(texteDe(doc.body).includes("1") && texteDe(doc.body).includes("2"), "avant et après affichés");
   assert.ok(panneauOuvert(doc), "le panneau s'ouvre à l'arrivée d'une carte");
+  assert.ok(!panneauD.classes.has("masque"), "une carte à valider fait revenir le panneau masqué");
   bouton("Appliquer").click();
   await attendreQue(() => serveur.finale(id), 2000, "appliquée");
   assert.deepStrictEqual([serveur.finale(id).etat, etat.v], ["appliquee", "2"]);
