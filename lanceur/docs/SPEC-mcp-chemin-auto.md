@@ -27,7 +27,8 @@ fonctionnement.
    demi-largeur de la piste ; la marge de bord (`S.rule.edge`) le long du contour et des
    découpes ; les trous NPTH. Le cuivre du même net gêne aussi (le routeur s'arrête dès
    qu'il le touche), sauf les pastilles des deux bouts. Les **zones de cuivre ne gênent
-   pas** : elles se recoulent autour de la piste.
+   pas** : elles se recoulent autour de la piste (gardé le 2026-10-21 : avec la via à 10 mm,
+   aucune piste ne traverse le plan d'un autre net sur les exemples 1 et 2).
 5. **Vias** : là où le centre d'une via (diamètre de la classe) est libre sur toutes les
    couches qu'elle traverse ; jamais dans la pastille CMS d'un bout. Une via coûte 10 mm
    (revu le 2026-10-21 : à 2 mm, l'exemple 1 dérouté prenait 6 vias et `cao_router` refusait
