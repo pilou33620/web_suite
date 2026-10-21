@@ -26,6 +26,11 @@ détail de chaque module dans `tasks/`). Ce qui reste, au 21/10/2026 :
   juste ; puis depuis le PC Windows par SSH (`tasks/todo-mcp-noyau.md`).
 - [ ] **api-outils** : relecture des passages cités dans la spec (`tasks/todo-api-outils.md`).
 - [ ] **registre-3d** : revue des deux checkpoints (`tasks/todo-registre-3d.md`).
+- [ ] **chemin-auto** : revue des choix pris d'office (coût d'une via, d'un virage, pas de 0,25 mm,
+  zones de cuivre ignorées) après un essai réel (`tasks/todo-chemin-auto.md`).
+- [ ] **Branche `mcp`** : à fusionner en même temps dans web_suite et dans WEB_CAO ; les outils
+  `lib_simulation_lier`, `cao_chemin` et la lecture `etiquettes` n'ont leur commande de page que
+  dans la branche `mcp` de WEB_CAO.
 
 ## Laissé par les modules, en connaissance de cause
 
