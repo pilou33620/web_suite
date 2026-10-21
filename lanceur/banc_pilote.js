@@ -318,6 +318,14 @@ function onglet(serveur, stockage, page, nomCanal) {
   assert.strictEqual(pousse, 1);
   assert.strictEqual(boutons().filter(b => b.textContent === "Annuler").length, avantClic, "pas d'Annuler de carte");
   assert.ok(/Ctrl\+Z/.test(texteDe(doc.body)), "renvoi au Ctrl+Z");
+  // Le clic n'a rien signalé ; un « appliquer » appelé sans carte (console) écrit quand même, et se voit
+  assert.ok(!/sans carte ni clic/.test(texteDe(doc.body)), "le clic ne laisse pas de signalement");
+  const avertir = console.warn; let averti = "";
+  console.warn = m => { averti = m; };
+  try { D.commandes.valeur.appliquer({ ref: "R1", v: "1k" }, {}); } finally { console.warn = avertir; }
+  assert.strictEqual(pousse, 2, "pas une barrière : l'écriture a lieu");
+  assert.ok(/« valeur » appliquée sans carte ni clic/.test(texteDe(doc.body)) && /sans carte ni clic/.test(averti),
+            "un appliquer hors carte est signalé dans le panneau et la console");
 
   // Une proposition qui plante : échouée ; une lecture : trace, sans ouvrir le panneau
   D.commande("casse", { ecriture: true, historique: true, proposer: () => { throw new Error("R99 introuvable"); },
