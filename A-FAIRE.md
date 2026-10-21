@@ -1,20 +1,21 @@
 # Ce qui reste à faire — web_suite
 
-Le serveur MCP (`lanceur/mcp_web_suite.py`, 64 outils) et ses modules sont faits jusqu'à
-retrait-gemini inclus (carte des modules : [lanceur/docs/SPEC-mcp.md](lanceur/docs/SPEC-mcp.md),
+Le serveur MCP (`lanceur/mcp_web_suite.py`, 71 outils) et ses modules sont faits jusqu'à
+retrait-gemini inclus, plus chemin-auto (branche `mcp`, 21/10/2026) (carte des modules : [lanceur/docs/SPEC-mcp.md](lanceur/docs/SPEC-mcp.md),
 détail de chaque module dans `tasks/`). Ce qui reste, au 21/10/2026 :
 
 ## Modules
 
-- [ ] **chemin-auto** : le routage automatique (A*) qui proposerait lui-même les points de
-  passage de `cao_router` ; spec à écrire (décision du 19/10/2026 : « Oui, mais spec plus tard »).
+- [x] **chemin-auto** (21/10/2026, branche `mcp`) : `cao_chemin` propose les points de passage
+  de `cao_router` par A* sur grille ([SPEC-mcp-chemin-auto.md](lanceur/docs/SPEC-mcp-chemin-auto.md)).
+  Reste : l'essai réel sur le Pi et la revue des choix pris d'office (`tasks/todo-chemin-auto.md`).
 
 ## Essais réels en attente
 
 - [ ] **iPad** : le canal de pilotage depuis un appareil appairé (cartes, interrupteur, capture).
 - [ ] **Claude Code relancé avec le MCP** : sur le Pi, puis sous Windows par SSH, où le skill
   `web-suite` n'est pas chargé et passe par `savoir_lire`.
-- [ ] **WEB_CAO** : `cao_paire` et `cao_placement_auto` dans la vraie page (voir son A-FAIRE).
+- [ ] **WEB_CAO** : `cao_paire`, `cao_placement_auto` et `cao_chemin` dans la vraie page (voir son A-FAIRE).
 - [ ] **WEB_ANTENNA** : un vrai calcul openEMS pour les courbes (voir son A-FAIRE).
 - [ ] **WEB_3D** : un fichier introuvable ou illisible doit rendre « echouee » avec le message de
   la page (`ui.charger` rend {ok, erreur}) : à éprouver en vrai (`tasks/todo-registre-3d.md`).
@@ -28,13 +29,13 @@ détail de chaque module dans `tasks/`). Ce qui reste, au 21/10/2026 :
 
 ## Laissé par les modules, en connaissance de cause
 
-- [ ] **ecriture-cao** : un flot de cartes appliquées directement (interrupteur allumé) peut
-  vider l'historique de l'éditeur (80 étapes) ; « affecter » une classe ne connaît pas les
-  classes publiées par le schéma.
-- [ ] **dessin-schema** : les étiquettes et alimentations posées n'ont pas de repère ; seul
-  Ctrl+Z les retire.
-- [ ] **routage** : `cao_placement_auto` n'a pas d'aperçu dessiné (la carte dit ce qui bouge) ;
-  la méthode « blocs » n'a pas d'essai positif au banc.
+- [x] **ecriture-cao** (21/10/2026, branche `mcp`) : les lots de Claude se fondent entre eux
+  quand l'historique est plein, les étapes de l'utilisateur restent ; « affecter » crée une
+  classe que le schéma connaît (Horloge, RF, interfaces…).
+- [x] **dessin-schema** (21/10/2026, branche `mcp`) : étiquettes et alimentations désignées par
+  « #id » (rendu par etiqueter, lecture `etiquettes`) pour déplacer, tourner, supprimer.
+- [x] **routage** (21/10/2026, branche `mcp`) : aperçu dessiné de `cao_placement_auto` ; la
+  méthode « blocs » a son essai réussi au harnais.
 - [ ] **registre-antenna** : une vue changée par `antenna_vue` part avec le prochain
   enregistrement du projet ; un panneau montré reste si l'utilisateur change ensuite la
   disposition.
@@ -48,12 +49,13 @@ détail de chaque module dans `tasks/`). Ce qui reste, au 21/10/2026 :
 - [x] Simulation RF : un Touchstone à N ports sur une puce qui a plus de broches (« ! broches »,
   « ! masse » dans le fichier) et plusieurs états d'une pièce au catalogue ; les deux états de
   l'AS179 sont dans la LIB (21/10/2026, A-FAIRE de WEB_CAO).
-- [ ] **Outil MCP pour lier un modèle de simulation** à une référence de la LIB (demandé le
-  21/10/2026) : le pendant de « 📎 Lier un fichier » de la Gestion LIB. Claude donne la référence,
-  le fichier (.sNp ou SPICE) et, pour un Touchstone, la patte de chaque port et la masse (numéro
-  ou nom du brochage) ; carte de confirmation, puis le fichier rangé dans `lib_simulation` et
-  ajouté à la colonne « Modèle Simulation ». Réutiliser `COMPOSANTS_LIB.brancherTouchstone`
-  (`commun/composants-lib.js` de WEB_CAO), comme `lib_composant_creer` réutilise ses contrôles.
+- [x] **Outil MCP pour lier un modèle de simulation** (21/10/2026, branche `mcp`) :
+  `lib_simulation_lier`, carte toujours cliquée ; le serveur WEB_CAO ne réécrit que la case
+  « Modèle Simulation » de la référence. 60 Ko au plus par fichier.
+- [ ] **Canal de pilotage borné à 64 Ko par commande** (`pilote.py`, `max_petit`), relevé le
+  21/10/2026 en lisant le code : `lib_kicad_convertir` accepte 200 Ko côté MCP, mais un
+  kicad_mod de plus de 64 Ko serait refusé par le canal (à éprouver). Élargir demande de
+  changer `pilote.py` dans les trois outils (copies identiques vérifiées par la CI).
 
 ## Défauts des outils vus pendant les essais (antérieurs au MCP)
 
