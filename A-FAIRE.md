@@ -38,8 +38,8 @@ détail de chaque module dans `tasks/`). Ce qui reste, au 19/10/2026 :
 - [ ] **registre-antenna** : une vue changée par `antenna_vue` part avec le prochain
   enregistrement du projet ; un panneau montré reste si l'utilisateur change ensuite la
   disposition.
-- [ ] **composants** : constantes IPC des puces < 0603 à confirmer ; QFN, DIP et barrette sans
-  comparaison externe (détail dans l'A-FAIRE de WEB_CAO).
+- [x] **composants** : constantes des puces alignées sur l'IPC-7351B relayé par KiCad ; 0201, 0402,
+  0603 et QFN comparés aux empreintes KiCad, DIP et barrette aussi (21/10/2026, A-FAIRE de WEB_CAO).
 
 ## Capacités manquantes, relevées en route
 

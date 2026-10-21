@@ -123,9 +123,9 @@ OUTILS_COMPOSANTS = {
                        "soic, tssop, msop (broches, pas, empattement pointe à pointe, pied, largeur de patte, "
                        "corps [largeur, longueur]) ; qfn, dfn (broches, pas, corps, pied, largeur, longueur?, "
                        "thermique [l, h]) ; dip (broches, pas, rangee, diametre de patte) ; barrette (broches, "
-                       "rangees 1 ou 2, pas, diametre). Les cotes absentes prennent des valeurs JEDEC courantes, "
-                       "signalées dans les remarques. Rend l'empreinte, ses erreurs, ses remarques et Z/G/X : rien "
-                       "n'est écrit." + METHODE + DONNEES,
+                       "rangees 1 ou 2, pas, diametre : la DIAGONALE d'une patte carrée, 0,91 pour 0,64). Les "
+                       "cotes absentes prennent des valeurs JEDEC courantes, signalées dans les remarques. Rend "
+                       "l'empreinte, ses erreurs, ses remarques et Z/G/X : rien n'est écrit." + METHODE + DONNEES,
         "inputSchema": {"type": "object", "required": ["famille"], "properties": {
             "famille": {"type": "string", "enum": list(FAMILLES)},
             "parametres": {"type": "object", "properties": {
