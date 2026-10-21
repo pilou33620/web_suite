@@ -45,7 +45,7 @@ OCCT, en fonction pure exportée.
 **Dépendances :** T1 (pour la suite) · **Fichiers :** `js/14-pilote-3d.js`, `test/banc-pilote-3d.mjs`, peut-être `js/02-import.js` · **Taille :** M
 
 ## Checkpoint : socle
-- [ ] Bancs verts (lanceur, WEB_3D)
+- [x] Bancs verts (lanceur, WEB_3D)
 - [ ] Revue avec toi
 
 ## Tâche 3 : ✅ mesures et cote
@@ -115,7 +115,9 @@ rendre un résultat (succès, ou échec et message). La commande `web3d_ouvrir` 
 **Critères d'acceptation :**
 - [x] Un `.obj` emmène son `.mtl` ; un chemin hors de PROJETS (`..`, absolu) est refusé
       avant tout `fetch`
-- [ ] Un fichier introuvable ou illisible rend « echouee » avec le message de la page (ui.charger rend maintenant {ok, erreur} ; à éprouver à l'essai réel, T11)
+- [x] Un fichier introuvable ou illisible rend « echouee » avec le message de la page (éprouvé le 21/10/2026 dans
+      Chromium par le MCP : fichier absent, STEP corrompu, STL corrompu — ce dernier rendait l'erreur brute du
+      lecteur de three.js, il dit maintenant « Ce fichier STL est illisible… »)
 
 **Vérification :** banc Node pour `compagnons` et la validation des chemins ; le reste à
 l'essai réel (T11)
@@ -139,7 +141,7 @@ appelle `POST /api/projets` (`X-Web3D: 1`) depuis la page, puis rend le chemin c
 **Dépendances :** T2 · **Fichiers :** `js/14-pilote-3d.js`, `test/banc-pilote-3d.mjs`, peut-être `js/10-export-step.js` · **Taille :** S
 
 ## Checkpoint : calcul
-- [ ] `banc-pilote-3d.mjs` et `banc-exemples.mjs` verts
+- [x] `banc-pilote-3d.mjs` et `banc-exemples.mjs` verts
 - [ ] Revue avec toi
 
 ## Tâche 8 : ✅ les 9 commandes dans la page

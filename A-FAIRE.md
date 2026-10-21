@@ -21,8 +21,9 @@ détail de chaque module dans `tasks/`). Ce qui reste, au 21/10/2026 :
   sous Linux) lancé depuis la page, puis lu par le MCP : `antenna_lire` resultats (f0 2,45 GHz,
   S11 −23,4 dB, bande −10 dB 2,421–2,479 GHz) et courbe, `antenna_vue` onglets S11 et impédance,
   capture de la courbe juste.
-- [ ] **WEB_3D** : un fichier introuvable ou illisible doit rendre « echouee » avec le message de
-  la page (`ui.charger` rend {ok, erreur}) : à éprouver en vrai (`tasks/todo-registre-3d.md`).
+- [x] **WEB_3D** (21/10/2026) : éprouvé dans Chromium par le MCP : un fichier absent, un STEP et un
+  STL corrompus rendent « echouee » avec le message de la page (le STL rendait l'erreur brute du
+  lecteur : corrigé), un bon STEP s'ouvre ; `claude -p` avec le MCP lit la scène et la mesure.
 
 ## Vérifications à faire avec toi
 

@@ -62,30 +62,30 @@ T9 MCP mcp_registre_3d.py + banc_mcp ──▶ T10 CI WEB_3D + docs ──▶ T1
 ## Liste des tâches
 
 ### Phase 1 : canal et socle
-- [ ] T1 : `pilote.js` : `appliquer`/`annuler` asynchrones, écriture `irreversible` (4 dépôts)
-- [ ] T2 : `14-pilote-3d.js` : identification et scène, banc Node sur la vraie hiérarchie
+- [x] T1 : `pilote.js` : `appliquer`/`annuler` asynchrones, écriture `irreversible` (4 dépôts)
+- [x] T2 : `14-pilote-3d.js` : identification et scène, banc Node sur la vraie hiérarchie
 
 ### Checkpoint : socle
 - [ ] Bancs verts (lanceur, WEB_3D) ; revue avec toi
 
 ### Phase 2 : le calcul (fonctions pures)
-- [ ] T3 : mesures et cote
-- [ ] T4 : collisions
-- [ ] T5 : déplacement, contrainte, matrices ; `apresDeplacement` exporté
-- [ ] T6 : ouvrir depuis PROJETS/3D, annulation
-- [ ] T7 : extraction STEP
+- [x] T3 : mesures et cote
+- [x] T4 : collisions
+- [x] T5 : déplacement, contrainte, matrices ; `apresDeplacement` exporté
+- [x] T6 : ouvrir depuis PROJETS/3D, annulation
+- [x] T7 : extraction STEP
 
 ### Checkpoint : calcul
 - [ ] Banc 3D vert ; revue avec toi
 
 ### Phase 3 : branchement et fin
-- [ ] T8 : `brancherPilote3d` : les 9 commandes dans la page
-- [ ] T9 : `lanceur/mcp_registre_3d.py`, banc MCP
-- [ ] T10 : CI WEB_3D, documentation
-- [ ] T11 : essai réel dans Chromium, puis `/review`
+- [x] T8 : `brancherPilote3d` : les 9 commandes dans la page
+- [x] T9 : `lanceur/mcp_registre_3d.py`, banc MCP
+- [x] T10 : CI WEB_3D, documentation
+- [x] T11 : essai réel dans Chromium, puis `/review`
 
 ### Checkpoint : terminé
-- [ ] Critères de la spec remplis ; CI verte dans les dépôts touchés
+- [x] Critères de la spec remplis ; CI verte dans les dépôts touchés
 
 ## Risques et parades
 
