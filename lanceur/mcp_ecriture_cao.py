@@ -237,8 +237,10 @@ OUTILS_ECRITURE_CAO = {
     "cao_classes_ecrire": {
         "description": "Classes de nets, actions jouées dans l'ordre : creer / modifier {nom, largeur, "
                        "isolation, via, percage (mm), largeur_couches {couche: mm}}, supprimer {nom} (pas la "
-                       "classe par défaut, ni une classe qui garde des nets), affecter {net, classe}. Le "
-                       "routage posé ne bouge pas : cao_pistes_ecrire realigner le fait."
+                       "classe par défaut, ni une classe qui garde des nets), affecter {net, classe}. Affecter à une "
+                       "classe que le schéma connaît et que la carte n'a pas encore (Masse, Horloge, Rapide, RF, "
+                       "Analogique, Antenne, USB FS, CAN…) la crée avec ses règles d'office, comme le menu des "
+                       "classes du PCB. Le routage posé ne bouge pas : cao_pistes_ecrire realigner le fait."
                        + CARTE + DRC + pilote.ATTENTE_DOC + pilote.DONNEES,
         "inputSchema": schema_lot({"action": {"type": "string", "enum": ["creer", "modifier", "supprimer", "affecter"]},
                                    "nom": T, "net": T, "classe": T, "largeur": N, "isolation": N, "via": N,
