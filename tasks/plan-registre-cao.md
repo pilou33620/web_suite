@@ -56,5 +56,5 @@ T1 commun/lecture-cao.js (déplacement, sorties identiques)
 
 ## Questions ouvertes
 
-Aucune pour le plan. Les deux questions de la spec (noms de broches, durée du DRC) se
-tranchent à l'essai réel.
+Aucune. Les deux questions de la spec (noms de broches, durée du DRC) sont tranchées à
+l'essai réel du 2026-10-19 (`lanceur/docs/SPEC-mcp-registre-cao.md`, « Questions tranchées »).

@@ -61,30 +61,30 @@ toutes les deux mêmes fichiers : elles restent donc séquentielles.
 
 ### Phase 1 : risques levés, socle
 
-- [ ] Tâche 1 : vérifier comment l'éditeur enregistre et ce que fait `_pr_enregistrer` (lecture seule)
-- [ ] Tâche 2 : `methode`, `exiger()`, `resumer()`, puis `cao_projets`, `cao_projet_lire` et `cao_doc_lire`
+- [x] Tâche 1 : vérifier comment l'éditeur enregistre et ce que fait `_pr_enregistrer` (lecture seule)
+- [x] Tâche 2 : `methode`, `exiger()`, `resumer()`, puis `cao_projets`, `cao_projet_lire` et `cao_doc_lire`
 
 ### Checkpoint : socle
-- [ ] Tous les bancs du lanceur verts ; revue avec toi
+- [x] Tous les bancs du lanceur verts ; revue avec toi
 
 ### Phase 2 : outils
 
-- [ ] Tâche 3 : lectures CAO, LIB, WEB_3D
-- [ ] Tâche 4 : écritures CAO gardées
-- [ ] Tâche 5 : pcbparts par le relais WEB_CAO
+- [x] Tâche 3 : lectures CAO, LIB, WEB_3D
+- [x] Tâche 4 : écritures CAO gardées
+- [x] Tâche 5 : pcbparts par le relais WEB_CAO
 
 ### Checkpoint : WEB_CAO complet
-- [ ] Bancs verts ; revue avec toi
+- [x] Bancs verts ; revue avec toi
 
-- [ ] Tâche 6 : projets WEB_ANTENNA
-- [ ] Tâche 7 : openEMS, chiffrer et suivre
+- [x] Tâche 6 : projets WEB_ANTENNA
+- [x] Tâche 7 : openEMS, chiffrer et suivre
 
 ### Phase 3 : fin
 
-- [ ] Tâche 8 : documentation, puis essai réel avec Claude Code
+- [x] Tâche 8 : documentation, puis essai réel avec Claude Code
 
 ### Checkpoint : terminé
-- [ ] Critères de réussite de la spec remplis ; `/review` fait
+- [x] Critères de réussite de la spec remplis ; `/review` fait
 
 ## Risques et parades
 

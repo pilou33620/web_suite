@@ -83,5 +83,6 @@ MCP :     python3 lanceur/banc_mcp.py
 
 ## Questions ouvertes
 
-Les choix ci-dessus (coût d'une via, d'un virage, pas par défaut, zones ignorées) ont été
-pris sans toi : à confirmer ou à changer après un essai réel.
+Aucune. Les choix ci-dessus ont été revus avec toi le 2026-10-21 : via portée à 10 mm
+(décision 5) ; virage 0,3 mm, pas 0,25 mm et zones de cuivre ignorées gardés. Reste
+l'essai réel sur le Pi (`tasks/todo-chemin-auto.md`).

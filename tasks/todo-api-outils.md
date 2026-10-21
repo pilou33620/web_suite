@@ -189,7 +189,8 @@ openEMS.
 
 **Vérification :**
 - [x] CI verte après le push (relancée après l'alignement IPC de WEB_ANTENNA)
-- [x] Essai réel sur le Pi (fait par Claude ; reste l'essai par Claude Code redémarré, avec toi)
+- [x] Essai réel sur le Pi (fait par Claude ; reste l'essai par Claude Code redémarré, avec toi ;
+      suivi dans A-FAIRE.md, Essais réels en attente)
 
 **Dépendances :** tâches 1 à 7
 

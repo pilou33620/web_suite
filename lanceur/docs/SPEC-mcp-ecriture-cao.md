@@ -129,5 +129,6 @@ MCP :          python3 lanceur/banc_mcp.py ; node lanceur/banc_pilote.js
 
 ## Questions ouvertes
 
-1. Le panneau Propriétés du schéma écrit repère, valeur et boîtier **sans** étape
-   d'historique. Ce module ne le change pas ; à signaler dans `A-FAIRE.md` ?
+1. Le panneau Propriétés du schéma écrivait repère, valeur et boîtier **sans** étape
+   d'historique. Corrigé le 21/10/2026 dans WEB_CAO, boîtier compris
+   (`editeur-schematique/js/12-panneaux.js`, `push()` à la première frappe).

@@ -66,7 +66,7 @@ T9 MCP mcp_registre_3d.py + banc_mcp ──▶ T10 CI WEB_3D + docs ──▶ T1
 - [x] T2 : `14-pilote-3d.js` : identification et scène, banc Node sur la vraie hiérarchie
 
 ### Checkpoint : socle
-- [ ] Bancs verts (lanceur, WEB_3D) ; revue avec toi
+- [x] Bancs verts (lanceur, WEB_3D) ; revue avec toi (21/10/2026)
 
 ### Phase 2 : le calcul (fonctions pures)
 - [x] T3 : mesures et cote
@@ -76,7 +76,7 @@ T9 MCP mcp_registre_3d.py + banc_mcp ──▶ T10 CI WEB_3D + docs ──▶ T1
 - [x] T7 : extraction STEP
 
 ### Checkpoint : calcul
-- [ ] Banc 3D vert ; revue avec toi
+- [x] Banc 3D vert ; revue avec toi (21/10/2026)
 
 ### Phase 3 : branchement et fin
 - [x] T8 : `brancherPilote3d` : les 9 commandes dans la page
@@ -92,7 +92,7 @@ T9 MCP mcp_registre_3d.py + banc_mcp ──▶ T10 CI WEB_3D + docs ──▶ T1
 | Risque | Impact | Parade |
 |---|---|---|
 | La hiérarchie réelle (groupes repliés, noms OCCT) ne se reconstruit pas sous Node sans le Worker | Moyen | T2 : extraire de `02-import.js` la construction de scène à partir d'un résultat OCCT (fonction pure exportée) et la réutiliser dans le banc ; sinon, tester l'identification sur une scène construite à la main |
-| `charger` ne rejette jamais : on ne sait pas si l'ouverture a échoué | Moyen | T6 : lire `#errDepot` et le nombre de groupes après `await` ; ou faire rendre un résultat à `charger` (petit changement, à faire si c'est plus propre) |
+| `charger` ne rejette jamais : on ne sait pas si l'ouverture a échoué | Moyen | T6 : lire `#errDepot` et le nombre de groupes après `await` ; ou faire rendre un résultat à `charger` (petit changement, à faire si c'est plus propre). Réglé : un fichier absent, un STEP ou un STL corrompus rendent « echouee » avec le message de la page (essai WEB_3D du 21/10/2026, A-FAIRE.md) |
 | Annuler un remplacement recharge les fichiers : lent, positions perdues | Faible (voulu) | La carte le dit ; l'état comparé est la liste des fichiers et leurs matrices |
 | Collisions ralenties dans un onglet caché | Moyen | Mesurer à T11 ; le résultat le signale ; au-delà de 2 min, « en_attente » |
 | `trouverProduit` du STEP choisit la mauvaise pièce quand des noms se répètent | Moyen | T7 : extraire par l'index de produit associé au maillage quand c'est possible ; sinon, refuser les noms en double avec un message clair |

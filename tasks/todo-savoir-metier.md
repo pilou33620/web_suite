@@ -147,7 +147,8 @@ La grammaire des réglages n'y est pas : elle vient de `antenna_lire` (quoi=regl
       - depuis /tmp : la consigne guide vers les outils lib_*, les cartes, pilote_suivre, le
         skill, et traite une fiche pcbparts piégée comme une donnée ; elle ne disait pas que la
         création dans la LIB attend toujours le clic : ajouté à la consigne.
-      L'essai Windows en SSH reste avec l'essai iPad.)
+      L'essai Windows en SSH reste avec l'essai iPad ; suivi dans A-FAIRE.md, Essais réels en
+      attente.)
 - [x] `/review` fait, corrections appliquées (rien de critique. Corrigé :
       - le catalogue de simulation annonce les bornes (simDsCatalogue, testé au harnais) ;
       - antenne.md : syntaxe complète de la carte « formes », 40 points de balayage, forme

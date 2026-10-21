@@ -70,37 +70,38 @@ T1 vérifications ──▶ T2 pilote.py (serveur + auto-test)
 ## Liste des tâches
 
 ### Phase 1 : risques et socle serveur
-- [ ] T1 : vérifications en lecture seule (fin des calculs, API du schéma, API des cartes
+- [x] T1 : vérifications en lecture seule (fin des calculs, API du schéma, API des cartes
       ANTENNA, contexte non sécurisé)
-- [ ] T2 : `lanceur/pilote.py` et son auto-test
-- [ ] T3 : `lanceur/mcp_pilote.py`, contenu image dans le noyau, `banc_mcp.py`
+- [x] T2 : `lanceur/pilote.py` et son auto-test
+- [x] T3 : `lanceur/mcp_pilote.py`, contenu image dans le noyau, `banc_mcp.py`
 
 ### Checkpoint : socle
-- [ ] Bancs du lanceur verts ; revue avec toi
+- [x] Bancs du lanceur verts ; revue avec toi
 
 ### Phase 2 : la page
-- [ ] T4 : `pilote.js` : id d'onglet, élection du relais, long-poll, registre, réponses
-- [ ] T5 : panneau « Claude », cartes, interrupteur, annuler si rien n'a bougé
+- [x] T4 : `pilote.js` : id d'onglet, élection du relais, long-poll, registre, réponses
+- [x] T5 : panneau « Claude », cartes, interrupteur, annuler si rien n'a bougé
 
 ### Checkpoint : canal complet
-- [ ] Banc Node vert ; revue avec toi
+- [x] Banc Node vert ; revue avec toi
 
 ### Phase 3 : les outils
-- [ ] T6 : WEB_CAO : copies, route, pages (schéma, PCB, gestion-lib, visionneuse), captures, monofichiers
-- [ ] T7 : WEB_CAO : `cao_calcul`
-- [ ] T8 : WEB_CAO : `cao_valeur_composant`
-- [ ] T9 : WEB_ANTENNA : copies, route, capture 2D, `antenna_proposer`
-- [ ] T10 : WEB_3D : copies, route, capture
+- [x] T6 : WEB_CAO : copies, route, pages (schéma, PCB, gestion-lib, visionneuse), captures, monofichiers
+- [x] T7 : WEB_CAO : `cao_calcul`
+- [x] T8 : WEB_CAO : `cao_valeur_composant`
+- [x] T9 : WEB_ANTENNA : copies, route, capture 2D, `antenna_proposer`
+- [x] T10 : WEB_3D : copies, route, capture
 
 ### Checkpoint : outils branchés
-- [ ] Bancs de chaque dépôt verts ; revue avec toi
+- [x] Bancs de chaque dépôt verts ; revue avec toi
 
 ### Phase 4 : fin
-- [ ] T11 : CI de web_suite (copies de `pilote.*`), documentation
-- [ ] T12 : essai réel sur le Pi (Chromium et Playwright), puis `/review`
+- [x] T11 : CI de web_suite (copies de `pilote.*`), documentation
+- [x] T12 : essai réel sur le Pi (Chromium et Playwright), puis `/review`
 
 ### Checkpoint : terminé
-- [ ] Critères de réussite de la spec remplis ; essai iPad avec toi
+- [x] Critères de réussite de la spec remplis (sauf l'essai iPad)
+- [ ] Essai iPad avec toi (suivi dans A-FAIRE.md, Essais réels en attente)
 
 ## Risques et parades
 
@@ -117,5 +118,5 @@ T1 vérifications ──▶ T2 pilote.py (serveur + auto-test)
 
 ## Questions ouvertes
 
-Aucune pour l'instant. La tâche 1 peut changer le mécanisme d'attente de `cao_calcul`, et
-corrige la spec pour l'élection du relais.
+Aucune. La tâche 1 a tranché l'attente de `cao_calcul` et l'élection du relais
+(BroadcastChannel) ; la spec est corrigée (`tasks/todo.md`, tâches 1 et 7).

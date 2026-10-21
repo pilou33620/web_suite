@@ -1,12 +1,12 @@
 # Ce qui reste à faire — web_suite
 
 Le serveur MCP (`lanceur/mcp_web_suite.py`, 71 outils) et ses modules sont faits jusqu'à
-retrait-gemini inclus, plus chemin-auto (branche `mcp`, 21/10/2026) (carte des modules : [lanceur/docs/SPEC-mcp.md](lanceur/docs/SPEC-mcp.md),
+retrait-gemini inclus, plus chemin-auto (21/10/2026) (carte des modules : [lanceur/docs/SPEC-mcp.md](lanceur/docs/SPEC-mcp.md),
 détail de chaque module dans `tasks/`). Ce qui reste, au 21/10/2026 :
 
 ## Modules
 
-- [x] **chemin-auto** (21/10/2026, branche `mcp`) : `cao_chemin` propose les points de passage
+- [x] **chemin-auto** (21/10/2026) : `cao_chemin` propose les points de passage
   de `cao_router` par A* sur grille ([SPEC-mcp-chemin-auto.md](lanceur/docs/SPEC-mcp-chemin-auto.md)).
   Reste : l'essai réel sur le Pi (`tasks/todo-chemin-auto.md`).
 
@@ -38,12 +38,12 @@ détail de chaque module dans `tasks/`). Ce qui reste, au 21/10/2026 :
 
 ## Laissé par les modules, en connaissance de cause
 
-- [x] **ecriture-cao** (21/10/2026, branche `mcp`) : les lots de Claude se fondent entre eux
+- [x] **ecriture-cao** (21/10/2026) : les lots de Claude se fondent entre eux
   quand l'historique est plein, les étapes de l'utilisateur restent ; « affecter » crée une
   classe que le schéma connaît (Horloge, RF, interfaces…).
-- [x] **dessin-schema** (21/10/2026, branche `mcp`) : étiquettes et alimentations désignées par
+- [x] **dessin-schema** (21/10/2026) : étiquettes et alimentations désignées par
   « #id » (rendu par etiqueter, lecture `etiquettes`) pour déplacer, tourner, supprimer.
-- [x] **routage** (21/10/2026, branche `mcp`) : aperçu dessiné de `cao_placement_auto` ; la
+- [x] **routage** (21/10/2026) : aperçu dessiné de `cao_placement_auto` ; la
   méthode « blocs » a son essai réussi au harnais.
 - [x] **registre-antenna** (21/10/2026) : l'étape montrée par `antenna_vue` n'est plus celle
   qu'enregistre le projet, ni un panneau montré celui de la disposition, tant que l'utilisateur
@@ -58,11 +58,11 @@ détail de chaque module dans `tasks/`). Ce qui reste, au 21/10/2026 :
 - [x] Simulation RF : un Touchstone à N ports sur une puce qui a plus de broches (« ! broches »,
   « ! masse » dans le fichier) et plusieurs états d'une pièce au catalogue ; les deux états de
   l'AS179 sont dans la LIB (21/10/2026, A-FAIRE de WEB_CAO).
-- [x] **Outil MCP pour lier un modèle de simulation** (21/10/2026, branche `mcp`) :
+- [x] **Outil MCP pour lier un modèle de simulation** (21/10/2026) :
   `lib_simulation_lier`, carte toujours cliquée ; le serveur WEB_CAO ne réécrit que la case
   « Modèle Simulation » de la référence. 4 Mo au plus par fichier.
 - [x] **Canal de pilotage élargi** (21/10/2026, sur main dans les quatre dépôts) : une commande
-  porte jusqu'à 8 Mo (`pilote.py`, comme une réponse) ; seul le MCP du poste en donne.
+  porte jusqu'à 8 Mo (`pilote.py`, comme une réponse ; avant, 64 Ko) ; seul le MCP du poste en donne.
   `lib_kicad_convertir` (200 Ko) passe, `lib_simulation_lier` monte à 4 Mo.
 
 ## Défauts des outils vus pendant les essais (antérieurs au MCP)
@@ -72,5 +72,3 @@ détail de chaque module dans `tasks/`). Ce qui reste, au 21/10/2026 :
 - [x] WEB_ANTENNA : 422 de `/api/openems` pendant le tutoriel (21/10/2026) : la pose de
   l'exemple revérifiait avant que le gabarit ait dessiné son cuivre ; un document sans cuivre
   est maintenant refusé dans la page, sans appel au serveur.
-- [x] **Canal de pilotage** (21/10/2026) : une commande porte jusqu'à 8 Mo (`pilote.py`, copies des
-  quatre dépôts) ; avant, 64 Ko : un kicad_mod de plus de 64 Ko aurait été refusé.
