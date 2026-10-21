@@ -24,4 +24,5 @@ format de `cao_router`. Commande `cao_chemin` (lecture) avec celles du routage.
 - [x] Bancs verts (harnais PCB, banc-pilote-cao, banc_mcp, banc_savoir)
 - [ ] Essai réel : Claude route une petite carte d'une copie de PROJETS en partant de
       `cao_chemin`, sur le Pi (durée d'un appel de 20 liaisons)
-- [ ] Revue avec toi des choix pris d'office (coût d'une via, d'un virage, pas par défaut)
+- [x] Revue avec toi des choix pris d'office (21/10/2026, essai chiffré au harnais sur les exemples 1 et 2) :
+      via 2 → 10 mm ; virage 0,3 mm et pas 0,25 mm gardés ; zones de cuivre : en attente de ta décision
