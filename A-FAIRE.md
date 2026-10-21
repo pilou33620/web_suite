@@ -1,6 +1,6 @@
 # Ce qui reste à faire — web_suite
 
-Le serveur MCP (`lanceur/mcp_web_suite.py`, 71 outils) et ses modules sont faits jusqu'à
+Le serveur MCP (`lanceur/mcp_web_suite.py`, 73 outils) et ses modules sont faits jusqu'à
 retrait-gemini inclus, plus chemin-auto (21/10/2026) (carte des modules : [lanceur/docs/SPEC-mcp.md](lanceur/docs/SPEC-mcp.md),
 détail de chaque module dans `tasks/`). Ce qui reste, au 21/10/2026 :
 
@@ -11,6 +11,9 @@ détail de chaque module dans `tasks/`). Ce qui reste, au 21/10/2026 :
   Reste : l'essai réel sur le Pi (`tasks/todo-chemin-auto.md`).
 
 ## Essais réels en attente
+
+Chaque essai à faire toi-même a sa spec, un fichier par essai : [tasks/essais/](tasks/essais/README.md)
+(Pi, Windows, iPad, calculs openEMS de WEB_ANTENNA, pièces, cartes et normes de WEB_CAO).
 
 - [ ] **iPad** : le canal de pilotage depuis un appareil appairé (cartes, interrupteur, capture).
 - [ ] **Claude Code relancé avec le MCP** : sur le Pi, puis sous Windows par SSH, où le skill
