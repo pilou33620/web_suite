@@ -12,7 +12,7 @@ détail de chaque module dans `tasks/`). Ce qui reste, au 21/10/2026 :
 
 ## Essais réels en attente
 
-Chaque essai à faire toi-même a sa spec, un fichier par essai : [tasks/essais/](tasks/essais/README.md)
+Chaque essai a sa spec, un fichier par essai, la plupart à donner à Claude in Chrome sur le PC du boulot : [tasks/essais/](tasks/essais/README.md)
 (Pi, Windows, iPad, calculs openEMS de WEB_ANTENNA, pièces, cartes et normes de WEB_CAO).
 
 - [ ] **iPad** : le canal de pilotage depuis un appareil appairé (cartes, interrupteur, capture).
