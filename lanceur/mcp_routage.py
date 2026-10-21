@@ -119,8 +119,9 @@ OUTILS_ROUTAGE = {
                        "découplages contre leur broche), satellites (découplages et composants série contre leur "
                        "circuit), blocs (agence un motif ou une zone publiés par le schéma : « motif »)."
                        + " Le placement est joué par la page puis défait ; la carte dit combien d'empreintes bougent "
-                         "et lesquelles (pas d'aperçu dessiné : capture après le clic). Au clic, une étape "
-                         "d'historique (Ctrl+Z la défait)."
+                         "et lesquelles, et l'aperçu dessine chacune à sa nouvelle place en pointillés, avec son "
+                         "trajet depuis l'ancienne (pilote_capture le montre). Au clic, une étape d'historique "
+                         "(Ctrl+Z la défait)."
                        + pilote.ATTENTE_DOC + pilote.DONNEES,
         "inputSchema": {"type": "object", "required": ["methode"], "properties": {
             "methode": {"type": "string", "enum": ["forces", "satellites", "blocs"]}, "motif": T, "onglet": ONGLET}},
