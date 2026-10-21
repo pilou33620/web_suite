@@ -8,7 +8,7 @@ détail de chaque module dans `tasks/`). Ce qui reste, au 21/10/2026 :
 
 - [x] **chemin-auto** (21/10/2026, branche `mcp`) : `cao_chemin` propose les points de passage
   de `cao_router` par A* sur grille ([SPEC-mcp-chemin-auto.md](lanceur/docs/SPEC-mcp-chemin-auto.md)).
-  Reste : l'essai réel sur le Pi et la revue des choix pris d'office (`tasks/todo-chemin-auto.md`).
+  Reste : l'essai réel sur le Pi (`tasks/todo-chemin-auto.md`).
 
 ## Essais réels en attente
 
@@ -30,10 +30,10 @@ détail de chaque module dans `tasks/`). Ce qui reste, au 21/10/2026 :
 
 - [ ] **mcp-noyau** : sur le Pi, `/mcp` montre `web_suite` connecté et la réponse de Claude est
   juste ; puis depuis le PC Windows par SSH (`tasks/todo-mcp-noyau.md`).
-- [ ] **api-outils** : relecture des passages cités dans la spec (`tasks/todo-api-outils.md`).
-- [ ] **registre-3d** : revue des deux checkpoints (`tasks/todo-registre-3d.md`).
-- [ ] **chemin-auto** : revue des choix pris d'office (coût d'une via, d'un virage, pas de 0,25 mm,
-  zones de cuivre ignorées) après un essai réel (`tasks/todo-chemin-auto.md`).
+- [x] **api-outils** (21/10/2026) : passages cités relus, toujours justes (`tasks/todo-api-outils.md`).
+- [x] **registre-3d** (21/10/2026) : les deux checkpoints revus (`tasks/todo-registre-3d.md`).
+- [x] **chemin-auto** (21/10/2026) : choix revus (via 10 mm ; virage, pas et zones ignorées gardés) ;
+  l'essai réel sur le Pi reste dans « Essais réels en attente » (`tasks/todo-chemin-auto.md`).
 - [x] **Branche `mcp`** (21/10/2026) : fusionnée dans main, ici et dans WEB_CAO.
 
 ## Laissé par les modules, en connaissance de cause

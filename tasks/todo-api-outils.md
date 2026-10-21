@@ -19,7 +19,8 @@ Plan : [plan-api-outils.md](plan-api-outils.md) · Spec : [lanceur/docs/SPEC-mcp
       au projet ouvert dans la spec et dans la tâche 6
 
 **Vérification :**
-- [ ] Relecture des passages cités, avec toi (pas encore faite)
+- [x] Relecture des passages cités, avec toi (21/10/2026 : `projet-disque.js:513-528`, `projet.py:420`,
+      `:432-446`, `:462` toujours justes)
 
 **Dépendances :** aucune
 

@@ -46,7 +46,7 @@ OCCT, en fonction pure exportée.
 
 ## Checkpoint : socle
 - [x] Bancs verts (lanceur, WEB_3D)
-- [ ] Revue avec toi
+- [x] Revue avec toi (21/10/2026)
 
 ## Tâche 3 : ✅ mesures et cote
 
@@ -142,7 +142,7 @@ appelle `POST /api/projets` (`X-Web3D: 1`) depuis la page, puis rend le chemin c
 
 ## Checkpoint : calcul
 - [x] `banc-pilote-3d.mjs` et `banc-exemples.mjs` verts
-- [ ] Revue avec toi
+- [x] Revue avec toi (21/10/2026)
 
 ## Tâche 8 : ✅ les 9 commandes dans la page
 
