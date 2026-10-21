@@ -16,6 +16,9 @@ broches et nets existants. On ne pose rien sans savoir ce qui est déjà là.
   symbole nu : boîtier, empreinte et brochage suivent.
 - Alimentations et masses : étiquettes de genre vcc et gnd sur la broche, jamais un long fil
   qui traverse la feuille.
+- Une étiquette ou une alimentation n'a pas de repère : la carte d'`etiqueter` donne son
+  « #id » (et `cao_schema_lire` quoi=etiquettes les liste) ; `deplacer`, `tourner`,
+  `miroir` et `supprimer` la désignent par `ref: "#id"`, sur la feuille affichée.
 - Fils courts entre broches voisines (relier) ; au-delà, une étiquette de net (local dans la
   feuille, global entre feuilles). Un fil qui toucherait d'autres broches est refusé : on
   étiquette alors.

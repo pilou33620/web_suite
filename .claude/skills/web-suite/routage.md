@@ -41,6 +41,19 @@ passage donnés. Pour les règles électriques (largeurs, paires, retour), voir 
 - Avant de cliquer, l'aperçu en pointillés se voit par `pilote_capture` ; le cuivre poussé
   apparaît en rouge.
 
+## Points proposés (`cao_chemin`)
+
+- Pour des liaisons sans évidence, `cao_chemin` propose les points : un chercheur A* sur
+  une grille (0,25 mm par défaut), angles de 45°, vias là où toutes les couches sont libres,
+  le cuivre des autres nets évité à l'isolation de leur classe. Rien n'est écrit.
+- Donner les liaisons d'une même zone dans l'ordre voulu (les plus critiques d'abord) :
+  chaque chemin trouvé gêne les suivants. 20 au plus par appel.
+- Relire « routes » (une via de trop, un détour) avant de le donner tel quel à
+  `cao_router`. Une liaison « sans chemin » : pas plus fin (pastilles à pas fin), autre
+  ordre, ou points à la main.
+- Les zones de cuivre ne gênent pas le chercheur ; les paires différentielles restent à
+  `cao_paire`.
+
 ## La boucle
 
 1. Après le clic : `cao_score` (quoi=routage) donne les liaisons restantes, le DRC, les vias,

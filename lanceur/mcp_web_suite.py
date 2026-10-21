@@ -257,7 +257,7 @@ INSTRUCTIONS = (
     "Lire : les fichiers par l'API (cao_projet_lire, lib_composants…) ou la page ouverte par le canal de "
     "pilotage (pilote_onglets, cao_schema_lire, cao_pcb_lire, antenna_lire, web3d_scene). "
     "Écrire dans une page : une carte que l'utilisateur clique (sauf interrupteur « Appliquer directement » "
-    "de l'onglet ; la création dans la LIB, lib_composant_creer, attend toujours le clic) ; une carte = un lot "
+    "de l'onglet ; les écritures dans la LIB, lib_composant_creer et lib_simulation_lier, attendent toujours le clic) ; une carte = un lot "
     "= une étape Ctrl+Z ; « en_attente » se suit par pilote_suivre. "
     "Sans carte, effet immédiat (demander d'abord) : cao_doc_ecrire (exige le « modifie » lu), "
     "antenna_projet_enregistrer, lib_fichier_ecrire, cao_profil_ecrire ; une création refuse un nom pris. "

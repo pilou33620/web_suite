@@ -99,6 +99,14 @@ MCP :     python3 lanceur/banc_mcp.py
   par le schéma.
 - **Jamais** : enregistrer le projet ; toucher au PCB depuis ce module.
 
+## Ajout du 21/10/2026 : étiquettes désignées par « #id »
+
+Les étiquettes et alimentations n'ont pas de repère : seul Ctrl+Z les retirait. `etiqueter`
+rend maintenant leur id (« #12 ») sur la carte, `cao_schema_lire` quoi=`etiquettes` les liste
+(#id, genre, net, feuille, position), et `deplacer`, `tourner`, `miroir`, `supprimer`
+acceptent `ref: "#12"` sur la feuille affichée. Supprimer une étiquette laisse son bout de
+fil, comme à la souris.
+
 ## Questions tranchées (2026-10-19)
 
 1. `supprimer_fil` est ajoutée : sans elle, Claude ne pourrait défaire un fil d'un lot appliqué

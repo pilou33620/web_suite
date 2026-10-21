@@ -732,7 +732,7 @@ if os.path.exists(os.path.dirname(_aide)):
         verifier("pilote-aide.json à jour (sinon : python3 lanceur/aide_pilote.py)", _f.read() == aide_pilote.contenu(), True)
 verifier("cao_thermique listé, une lecture de la page PCB (donnée)", "cao_thermique" in noms and
          "donnée" in next(o["description"] for o in outils if o["name"] == "cao_thermique"), True)
-verifier("71 outils en tout (registre-cao, ecriture-cao, dessin-schema, registre-antenna, routage, composants, savoir_lire)", len(noms), 71)
+verifier("73 outils en tout (registre-cao, ecriture-cao, dessin-schema, registre-antenna, routage, chemin-auto, composants, savoir_lire)", len(noms), 73)
 verifier("registre-cao : ce que rend la page est une donnée",
          all("donnée" in o["description"] for o in outils if o["name"] in OC), True)
 FauxApi.table[("POST", "/api/pilote/commande")] = fin("- GND")
@@ -749,6 +749,9 @@ verifier("commandes déposées aux bonnes pages, sans écriture", [(d["nom"], d[
          [("cao_schema_lire", ["schema"], False), ("cao_pcb_lire", ["pcb"], False),
           ("cao_ipc_lire", ["visionneuse-ipc"], False), ("cao_sim_lire", ["pcb", "visionneuse-ipc"], False),
           ("cao_vue", ["pcb"], False), ("cao_drc", ["pcb"], False)])
+FauxApi.recues.clear()
+verifier("cao_schema_lire etiquettes accepté", outil("cao_schema_lire", quoi="etiquettes", filtre="VCC")[0], False)
+verifier("etiquettes transmis", FauxApi.recues[0][2]["args"], {"quoi": "etiquettes", "filtre": "VCC"})
 verifier("arguments transmis", [deposees[0]["args"], deposees[1]["args"], deposees[4]["args"]],
          [{"quoi": "net", "nom": "LOCAL", "feuille": 2}, {"quoi": "nets", "filtre": "USB", "a_router": True},
           {"cadrer": "U1", "couches": ["Top"], "ajuster": True}])
@@ -967,15 +970,32 @@ for nom, args in (("cao_router", {}), ("cao_router", {"routes": [R1] * 21}), ("c
     verifier("%s refuse %r" % (nom, str(args)[:60]), outil(nom, **args)[0], True)
 verifier("aucun argument invalide n'atteint la page (routage)", FauxApi.recues, [])
 
+# chemin-auto (lanceur/docs/SPEC-mcp-chemin-auto.md) : des points de passage proposés, une lecture
+LI = {"depart": "U1.3", "arrivee": {"x": 12, "y": 5.5, "couche": "Bottom"}, "largeur": 0.25}
+verifier("cao_chemin accepté", outil("cao_chemin", liaisons=[LI], pas=0.2)[0], False)
+verifier("cao_chemin : page PCB, sans écriture, arguments tels quels",
+         [(r[2]["nom"], r[2]["page"], r[2]["ecriture"], r[2]["args"]) for r in FauxApi.recues],
+         [("cao_chemin", ["pcb"], False, {"liaisons": [LI], "pas": 0.2})])
+verifier("cao_chemin : la description renvoie à cao_router",
+         "cao_router" in next(o["description"] for o in outils if o["name"] == "cao_chemin"), True)
+FauxApi.recues.clear()
+for args in ({}, {"liaisons": []}, {"liaisons": [LI] * 21}, {"liaisons": [{"depart": "U1.3"}]},
+             {"liaisons": [dict(LI, arrivee={"x": 5000, "y": 1})]}, {"liaisons": [dict(LI, autre=1)]},
+             {"liaisons": [LI], "pas": 0}, {"liaisons": [LI], "pas": "0.2"}, {"liaisons": [LI], "pas": 3}):
+    verifier("cao_chemin refuse %r" % str(args)[:60], outil("cao_chemin", **args)[0], True)
+verifier("aucun argument invalide n'atteint la page (chemin-auto)", FauxApi.recues, [])
+
 
 # composants (lanceur/docs/SPEC-mcp-composants.md) : calculs dans Gestion LIB, création par carte
-OC = ["lib_empreinte_generer", "lib_empreinte_verifier", "lib_kicad_convertir", "lib_brochage_verifier", "lib_composant_creer"]
+OC = ["lib_empreinte_generer", "lib_empreinte_verifier", "lib_kicad_convertir", "lib_brochage_verifier", "lib_composant_creer",
+      "lib_simulation_lier"]
 verifier("outils des composants listés", set(OC) <= set(noms), True)
 desc = {o["name"]: o["description"] for o in outils if o["name"] in OC}
 verifier("composants : méthode et donnée dans chaque description",
          all("lib_empreinte_generer" in d and "lib_composant_creer" in d and "données" in d for d in desc.values()), True)
-verifier("création : jamais d'écrasement, toujours au clic", ("JAMAIS" in desc["lib_composant_creer"],
-         "MÊME interrupteur allumé" in desc["lib_composant_creer"]), (True, True))
+for n in ("lib_composant_creer", "lib_simulation_lier"):
+    verifier(n + " : jamais d'écrasement, toujours au clic", ("JAMAIS" in desc[n], "MÊME interrupteur allumé" in desc[n]),
+             (True, True))
 FauxApi.table[("POST", "/api/pilote/commande")] = fin("ok", "appliquee")
 FauxApi.recues.clear()
 FP = {"format": "pcbfp-1", "name": "SOT-23-5-LDO", "pads": [{"n": 1, "x": 0, "y": 0, "w": 1, "h": 1}]}
@@ -985,11 +1005,15 @@ for nom, args in (("lib_empreinte_generer", {"famille": "soic", "parametres": {"
                   ("lib_empreinte_verifier", {"empreinte": FP}),
                   ("lib_kicad_convertir", {"texte": "(footprint \"X\")"}),
                   ("lib_brochage_verifier", {"brochage": "IN=1,GND=2,OUT=5", "empreinte": "SOT-23-5", "symbole": "regulator"}),
-                  ("lib_composant_creer", {"ligne": LIGNE, "empreinte": FP})):
+                  ("lib_composant_creer", {"ligne": LIGNE, "empreinte": FP}),
+                  ("lib_simulation_lier", {"reference": "AS179", "fichier": "as179.s3p", "texte": "# GHz S DB R 50\n",
+                                           "ports": ["J1", 3, "J3"], "masse": "GND"})):
     verifier(nom + " accepté", outil(nom, **args)[0], False)
 deposees = [r[2] for r in FauxApi.recues]
 verifier("composants : page Gestion LIB, seule la création écrit", [(d["nom"], d["page"], d["ecriture"]) for d in deposees],
-         [(n, ["gestion-lib"], n == "lib_composant_creer") for n in OC])
+         [(n, ["gestion-lib"], n in ("lib_composant_creer", "lib_simulation_lier")) for n in OC])
+verifier("le modèle et ses pattes arrivent tels quels", deposees[5]["args"],
+         {"reference": "AS179", "fichier": "as179.s3p", "texte": "# GHz S DB R 50\n", "ports": ["J1", 3, "J3"], "masse": "GND"})
 verifier("la ligne et l'empreinte arrivent telles quelles", deposees[4]["args"], {"ligne": LIGNE, "empreinte": FP})
 FauxApi.recues.clear()
 for nom, args in (("lib_empreinte_generer", {"famille": "bga"}), ("lib_empreinte_generer", {"famille": "soic", "parametres": {"script": 1}}),
@@ -1005,7 +1029,15 @@ for nom, args in (("lib_empreinte_generer", {"famille": "bga"}), ("lib_empreinte
                   ("lib_composant_creer", {"ligne": "LDO"}), ("lib_composant_creer", {"ligne": dict(LIGNE, Value="a\nb")}),
                   ("lib_composant_creer", {"ligne": {str(i): "x" for i in range(41)}}),
                   ("lib_composant_creer", {"ligne": LIGNE, "empreinte": "SOT-23-5"}),
-                  ("lib_composant_creer", {"ligne": dict(LIGNE, Value=["3V3"])})):
+                  ("lib_composant_creer", {"ligne": dict(LIGNE, Value=["3V3"])}),
+                  ("lib_simulation_lier", {"reference": "R1", "fichier": "r.txt", "texte": "x"}),
+                  ("lib_simulation_lier", {"reference": "", "fichier": "r.sub", "texte": "x"}),
+                  ("lib_simulation_lier", {"reference": "R1", "fichier": "r.sub", "texte": " "}),
+                  ("lib_simulation_lier", {"reference": "R1", "fichier": "r.s2p", "texte": "1 2\n" * 1100000}),
+                  ("lib_simulation_lier", {"reference": "R1", "fichier": "r.s2p", "texte": "x", "ports": "1 2"}),
+                  ("lib_simulation_lier", {"reference": "R1", "fichier": "r.s2p", "texte": "x", "ports": [True, 2]}),
+                  ("lib_simulation_lier", {"reference": "R1", "fichier": "r.s2p", "texte": "x", "ports": list(range(10))}),
+                  ("lib_simulation_lier", {"reference": "R1", "fichier": "r.s2p", "texte": "x", "masse": ["2"]})):
     verifier("%s refuse %r" % (nom, str(args)[:60]), outil(nom, **args)[0], True)
 verifier("aucun argument invalide n'atteint la page (composants)", FauxApi.recues, [])
 

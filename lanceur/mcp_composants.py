@@ -7,6 +7,7 @@ lib_composant_creer écrit, par une carte toujours cliquée. Ne s'importe que pa
 """
 import json
 import math
+import re
 
 import mcp_pilote as pilote
 from mcp_api_outils import facultatif, resumer
@@ -16,6 +17,8 @@ FAMILLES = ("chip", "sot", "soic", "tssop", "msop", "qfn", "dfn", "dip", "barret
 PARAMETRES = ("code", "variante", "densite", "nom", "broches", "pas", "rangee", "rangees", "diametre",
               "longueur", "largeur", "terminaison", "empattement", "pied", "languette", "corps", "thermique")
 KICAD_MAX = 200 * 1024        # octets
+MODELE_MAX = 4 * 1024 * 1024  # octets du texte, une fois en JSON (le canal porte 8 Mo par commande)
+MODELE = re.compile(r"\.(s[1-9]p|sub|cir|lib|mod|sp|spi|spice)$", re.I)
 EMPREINTE_MAX = 512 * 1024    # octets de JSON (4096 pastilles tiennent largement)
 
 
@@ -107,6 +110,32 @@ def lib_composant_creer(a):
     return envoyer("lib_composant_creer", args, a, True)
 
 
+def lib_simulation_lier(a):
+    reference, fichier, texte = a.get("reference"), a.get("fichier"), a.get("texte")
+    if not _texte(reference, 80) or not reference.strip():
+        refuser("Argument « reference » invalide : la Part Name d'une référence du catalogue.")
+    if not _texte(fichier, 80) or not MODELE.search(fichier):
+        refuser("Argument « fichier » invalide : nom du fichier, .s1p à .s9p (Touchstone) ou .sub, .cir, .lib, "
+                ".mod, .sp (SPICE).")
+    if not isinstance(texte, str) or not texte.strip():
+        refuser("Argument « texte » invalide : le contenu du fichier.")
+    if len(json.dumps(texte)) > MODELE_MAX:
+        refuser("Modèle de plus de 4 Mo : lie-le dans Gestion LIB (fiche de la référence, « 📎 Lier un "
+                "fichier »), ou réduis les points de fréquence.")
+    args = {"reference": reference, "fichier": fichier, "texte": texte}
+    ports, masse = a.get("ports"), a.get("masse")
+    if ports is not None:
+        if not (isinstance(ports, list) and 1 <= len(ports) <= 9
+                and all((_texte(p, 20) and p.strip()) or (isinstance(p, int) and not isinstance(p, bool)) for p in ports)):
+            refuser("Argument « ports » invalide : pour chaque port du Touchstone, la patte (numéro ou nom du brochage).")
+        args["ports"] = ports
+    if masse is not None:
+        if not (_texte(masse, 20) or (isinstance(masse, int) and not isinstance(masse, bool))):
+            refuser("Argument « masse » invalide : la patte de masse (numéro ou nom du brochage).")
+        args["masse"] = masse
+    return envoyer("lib_simulation_lier", args, a, True)
+
+
 ONGLET = pilote.ONGLET
 NOMBRE_OU_PAIRE = {"description": "nombre (mm), ou [min, max] en mm relevés sur la datasheet"}
 METHODE = (" Méthode : générer (lib_empreinte_generer) ou convertir (lib_kicad_convertir) l'empreinte, ou "
@@ -183,5 +212,27 @@ OUTILS_COMPOSANTS = {
                                                            "empreinte déjà dans la LIB"},
             "onglet": ONGLET}},
         "fn": lib_composant_creer,
+    },
+    "lib_simulation_lier": {
+        "description": "Lie un modèle de simulation à une référence du catalogue de la LIB, comme « 📎 Lier un "
+                       "fichier » de sa fiche : le fichier est rangé dans lib_simulation, puis ajouté à la case "
+                       "« Modèle Simulation » de la référence (plusieurs modèles séparés par « | » : les états d'un "
+                       "commutateur, le premier par défaut). Touchstone .s1p à .s9p : donne « ports », la patte de "
+                       "chaque port dans l'ordre du fichier (numéro, ou nom du brochage de la référence : J1, RF1…), "
+                       "et « masse », la patte à laquelle les ports se rapportent (absente : la masse de la carte) ; "
+                       "la simulation RF lit ce branchement. Modèle SPICE (.sub, .cir, .lib, .mod, .sp) : rangé tel "
+                       "quel, sans ports. « texte » : le contenu du fichier, 4 Mo au plus. JAMAIS d'écrasement : un "
+                       "fichier de même nom n'est repris que s'il a le même contenu. Une carte dans Gestion LIB ; rien "
+                       "n'est écrit avant le clic, MÊME interrupteur allumé ; pas d'annulation par la carte."
+                       + METHODE + DONNEES,
+        "inputSchema": {"type": "object", "required": ["reference", "fichier", "texte"], "properties": {
+            "reference": {"type": "string", "description": "Part Name de la référence"},
+            "fichier": {"type": "string", "description": "nom du fichier, avec son extension (.s3p, .sub…)"},
+            "texte": {"type": "string", "description": "contenu du fichier"},
+            "ports": {"type": "array", "items": {"type": ["string", "integer"]},
+                      "description": "Touchstone : patte de chaque port, dans l'ordre du fichier"},
+            "masse": {"type": ["string", "integer"], "description": "Touchstone : patte de masse des ports"},
+            "onglet": ONGLET}},
+        "fn": lib_simulation_lier,
     },
 }

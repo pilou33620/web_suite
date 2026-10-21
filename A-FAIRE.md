@@ -1,13 +1,14 @@
 # Ce qui reste à faire — web_suite
 
-Le serveur MCP (`lanceur/mcp_web_suite.py`, 64 outils) et ses modules sont faits jusqu'à
-retrait-gemini inclus (carte des modules : [lanceur/docs/SPEC-mcp.md](lanceur/docs/SPEC-mcp.md),
+Le serveur MCP (`lanceur/mcp_web_suite.py`, 71 outils) et ses modules sont faits jusqu'à
+retrait-gemini inclus, plus chemin-auto (branche `mcp`, 21/10/2026) (carte des modules : [lanceur/docs/SPEC-mcp.md](lanceur/docs/SPEC-mcp.md),
 détail de chaque module dans `tasks/`). Ce qui reste, au 21/10/2026 :
 
 ## Modules
 
-- [ ] **chemin-auto** : le routage automatique (A*) qui proposerait lui-même les points de
-  passage de `cao_router` ; spec à écrire (décision du 19/10/2026 : « Oui, mais spec plus tard »).
+- [x] **chemin-auto** (21/10/2026, branche `mcp`) : `cao_chemin` propose les points de passage
+  de `cao_router` par A* sur grille ([SPEC-mcp-chemin-auto.md](lanceur/docs/SPEC-mcp-chemin-auto.md)).
+  Reste : l'essai réel sur le Pi et la revue des choix pris d'office (`tasks/todo-chemin-auto.md`).
 
 ## Essais réels en attente
 
@@ -16,7 +17,7 @@ détail de chaque module dans `tasks/`). Ce qui reste, au 21/10/2026 :
   `web-suite` n'est pas chargé et passe par `savoir_lire`. Fait le 21/10/2026 sous Linux, outils
   sur le même poste : `claude -p` avec le MCP lit la page WEB_ANTENNA ouverte (onglets,
   `antenna_lire`) ; restent le Pi et Windows par SSH.
-- [ ] **WEB_CAO** : `cao_paire` et `cao_placement_auto` dans la vraie page (voir son A-FAIRE).
+- [ ] **WEB_CAO** : `cao_paire`, `cao_placement_auto` et `cao_chemin` dans la vraie page (voir son A-FAIRE).
 - [x] **WEB_ANTENNA** (21/10/2026) : vrai calcul openEMS (exemple patch, openEMS 0.0.37 compilé
   sous Linux) lancé depuis la page, puis lu par le MCP : `antenna_lire` resultats (f0 2,45 GHz,
   S11 −23,4 dB, bande −10 dB 2,421–2,479 GHz) et courbe, `antenna_vue` onglets S11 et impédance,
@@ -31,16 +32,19 @@ détail de chaque module dans `tasks/`). Ce qui reste, au 21/10/2026 :
   juste ; puis depuis le PC Windows par SSH (`tasks/todo-mcp-noyau.md`).
 - [ ] **api-outils** : relecture des passages cités dans la spec (`tasks/todo-api-outils.md`).
 - [ ] **registre-3d** : revue des deux checkpoints (`tasks/todo-registre-3d.md`).
+- [ ] **chemin-auto** : revue des choix pris d'office (coût d'une via, d'un virage, pas de 0,25 mm,
+  zones de cuivre ignorées) après un essai réel (`tasks/todo-chemin-auto.md`).
+- [x] **Branche `mcp`** (21/10/2026) : fusionnée dans main, ici et dans WEB_CAO.
 
 ## Laissé par les modules, en connaissance de cause
 
-- [ ] **ecriture-cao** : un flot de cartes appliquées directement (interrupteur allumé) peut
-  vider l'historique de l'éditeur (80 étapes) ; « affecter » une classe ne connaît pas les
-  classes publiées par le schéma.
-- [ ] **dessin-schema** : les étiquettes et alimentations posées n'ont pas de repère ; seul
-  Ctrl+Z les retire.
-- [ ] **routage** : `cao_placement_auto` n'a pas d'aperçu dessiné (la carte dit ce qui bouge) ;
-  la méthode « blocs » n'a pas d'essai positif au banc.
+- [x] **ecriture-cao** (21/10/2026, branche `mcp`) : les lots de Claude se fondent entre eux
+  quand l'historique est plein, les étapes de l'utilisateur restent ; « affecter » crée une
+  classe que le schéma connaît (Horloge, RF, interfaces…).
+- [x] **dessin-schema** (21/10/2026, branche `mcp`) : étiquettes et alimentations désignées par
+  « #id » (rendu par etiqueter, lecture `etiquettes`) pour déplacer, tourner, supprimer.
+- [x] **routage** (21/10/2026, branche `mcp`) : aperçu dessiné de `cao_placement_auto` ; la
+  méthode « blocs » a son essai réussi au harnais.
 - [x] **registre-antenna** (21/10/2026) : l'étape montrée par `antenna_vue` n'est plus celle
   qu'enregistre le projet, ni un panneau montré celui de la disposition, tant que l'utilisateur
   n'y touche pas (`pilote-antenna.js`, banc-interface section 10).
@@ -54,12 +58,12 @@ détail de chaque module dans `tasks/`). Ce qui reste, au 21/10/2026 :
 - [x] Simulation RF : un Touchstone à N ports sur une puce qui a plus de broches (« ! broches »,
   « ! masse » dans le fichier) et plusieurs états d'une pièce au catalogue ; les deux états de
   l'AS179 sont dans la LIB (21/10/2026, A-FAIRE de WEB_CAO).
-- [ ] **Outil MCP pour lier un modèle de simulation** à une référence de la LIB (demandé le
-  21/10/2026) : le pendant de « 📎 Lier un fichier » de la Gestion LIB. Claude donne la référence,
-  le fichier (.sNp ou SPICE) et, pour un Touchstone, la patte de chaque port et la masse (numéro
-  ou nom du brochage) ; carte de confirmation, puis le fichier rangé dans `lib_simulation` et
-  ajouté à la colonne « Modèle Simulation ». Réutiliser `COMPOSANTS_LIB.brancherTouchstone`
-  (`commun/composants-lib.js` de WEB_CAO), comme `lib_composant_creer` réutilise ses contrôles.
+- [x] **Outil MCP pour lier un modèle de simulation** (21/10/2026, branche `mcp`) :
+  `lib_simulation_lier`, carte toujours cliquée ; le serveur WEB_CAO ne réécrit que la case
+  « Modèle Simulation » de la référence. 4 Mo au plus par fichier.
+- [x] **Canal de pilotage élargi** (21/10/2026, sur main dans les quatre dépôts) : une commande
+  porte jusqu'à 8 Mo (`pilote.py`, comme une réponse) ; seul le MCP du poste en donne.
+  `lib_kicad_convertir` (200 Ko) passe, `lib_simulation_lier` monte à 4 Mo.
 
 ## Défauts des outils vus pendant les essais (antérieurs au MCP)
 

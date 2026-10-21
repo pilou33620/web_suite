@@ -3,8 +3,9 @@
 Spec : lanceur/docs/SPEC-mcp-routage.md. Chaque outil vérifie la forme de ses arguments, puis les
 dépose à la page PCB par le canal de pilotage (WEB_CAO/editeur-pcb/js/37-routage-pilote.js). La page
 joue le lot pour de vrai, relève le résultat, remet la carte et montre la carte d'action avec un
-aperçu ; au clic, elle charge le résultat relevé en une étape d'historique. cao_score est une
-lecture. Ne s'importe que par mcp_web_suite.
+aperçu ; au clic, elle charge le résultat relevé en une étape d'historique. cao_score et cao_chemin
+(module chemin-auto, SPEC-mcp-chemin-auto.md : des points de passage proposés par A*, 40-chemin-auto.js)
+sont des lectures. Ne s'importe que par mcp_web_suite.
 """
 import mcp_pilote as pilote
 from mcp_api_outils import facultatif, resumer
@@ -76,6 +77,18 @@ def cao_placement_auto(a):
     return envoyer("cao_placement_auto", args, a)
 
 
+def cao_chemin(a):
+    args = {"liaisons": liste(a, "liaisons", ROUTES_MAX, {"depart": POINT, "arrivee": POINT, "largeur": NOMBRE},
+                              ("depart", "arrivee"))}
+    if not args["liaisons"]:
+        refuser("Argument « liaisons » manquant : de 1 à %d liaisons {depart, arrivee, largeur?}." % ROUTES_MAX)
+    if a.get("pas") is not None:
+        if not (NOMBRE[0](a["pas"]) and 0.05 <= a["pas"] <= 2):
+            refuser("Argument « pas » invalide : de 0,05 à 2 mm.")
+        args["pas"] = a["pas"]
+    return envoyer("cao_chemin", args, a, False)
+
+
 def cao_score(a):
     return envoyer("cao_score", {"quoi": choix(a.get("quoi"), "quoi", ("routage", "placement"))}, a, False)
 
@@ -119,8 +132,9 @@ OUTILS_ROUTAGE = {
                        "découplages contre leur broche), satellites (découplages et composants série contre leur "
                        "circuit), blocs (agence un motif ou une zone publiés par le schéma : « motif »)."
                        + " Le placement est joué par la page puis défait ; la carte dit combien d'empreintes bougent "
-                         "et lesquelles (pas d'aperçu dessiné : capture après le clic). Au clic, une étape "
-                         "d'historique (Ctrl+Z la défait)."
+                         "et lesquelles, et l'aperçu dessine chacune à sa nouvelle place en pointillés, avec son "
+                         "trajet depuis l'ancienne (pilote_capture le montre). Au clic, une étape d'historique "
+                         "(Ctrl+Z la défait)."
                        + pilote.ATTENTE_DOC + pilote.DONNEES,
         "inputSchema": {"type": "object", "required": ["methode"], "properties": {
             "methode": {"type": "string", "enum": ["forces", "satellites", "blocs"]}, "motif": T, "onglet": ONGLET}},
@@ -134,5 +148,22 @@ OUTILS_ROUTAGE = {
         "inputSchema": {"type": "object", "required": ["quoi"], "properties": {
             "quoi": {"type": "string", "enum": ["routage", "placement"]}, "onglet": ONGLET}},
         "fn": cao_score,
+    },
+    "cao_chemin": {
+        "description": "Propose des points de passage pour des liaisons de la carte PCB ouverte (module "
+                       "chemin-auto) : un chercheur de chemin A* sur une grille par couche (pas de 0,25 mm par "
+                       "défaut), angles de 45°, vias là où toutes les couches traversées sont libres. Il évite le "
+                       "cuivre des autres nets à l'isolation de leurs classes, le bord de carte, les découpes et "
+                       "les trous ; les zones de cuivre ne gênent pas (elles se recoulent). Les liaisons se "
+                       "cherchent dans l'ordre, chaque chemin trouvé gênant les suivantes. Rend, par liaison, "
+                       "trouvée ou la raison, et « routes » à donner tel quel à cao_router (qui fait le détail et "
+                       "montre sa carte). Ne modifie rien. 20 liaisons et 8 s au plus par appel." + pilote.DONNEES,
+        "inputSchema": {"type": "object", "required": ["liaisons"], "properties": {
+            "liaisons": {"type": "array", "minItems": 1, "maxItems": ROUTES_MAX, "items": {
+                "type": "object", "required": ["depart", "arrivee"], "properties": {
+                    "depart": PT, "arrivee": PT, "largeur": {"type": "number", "description": "mm ; absente : la classe du net"}}}},
+            "pas": {"type": "number", "description": "pas de la grille en mm (0,05 à 2), 0,25 par défaut"},
+            "onglet": ONGLET}},
+        "fn": cao_chemin,
     },
 }
