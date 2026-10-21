@@ -17,7 +17,10 @@ détail de chaque module dans `tasks/`). Ce qui reste, au 21/10/2026 :
   sur le même poste : `claude -p` avec le MCP lit la page WEB_ANTENNA ouverte (onglets,
   `antenna_lire`) ; restent le Pi et Windows par SSH.
 - [ ] **WEB_CAO** : `cao_paire` et `cao_placement_auto` dans la vraie page (voir son A-FAIRE).
-- [ ] **WEB_ANTENNA** : un vrai calcul openEMS pour les courbes (voir son A-FAIRE).
+- [x] **WEB_ANTENNA** (21/10/2026) : vrai calcul openEMS (exemple patch, openEMS 0.0.37 compilé
+  sous Linux) lancé depuis la page, puis lu par le MCP : `antenna_lire` resultats (f0 2,45 GHz,
+  S11 −23,4 dB, bande −10 dB 2,421–2,479 GHz) et courbe, `antenna_vue` onglets S11 et impédance,
+  capture de la courbe juste.
 - [ ] **WEB_3D** : un fichier introuvable ou illisible doit rendre « echouee » avec le message de
   la page (`ui.charger` rend {ok, erreur}) : à éprouver en vrai (`tasks/todo-registre-3d.md`).
 
