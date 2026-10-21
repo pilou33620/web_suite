@@ -109,10 +109,27 @@ MCP :    python3 lanceur/banc_mcp.py
 
 - **Toujours** : contrôler avant la carte et au clic ; ajouter sans réécrire les autres
   lignes.
-- **Demander d'abord** : modifier un composant existant ; écrire un fichier `schsym-1` ou
-  un modèle de simulation.
+- **Demander d'abord** : modifier un composant existant ; écrire un fichier `schsym-1`.
+  Un modèle de simulation se lie par `lib_simulation_lier` (ajouté le 21/10/2026, ci-dessous).
 - **Jamais** : écraser un fichier de la LIB ; déplacer la LIB ; écrire hors des
   sous-dossiers de la LIB.
+
+## Ajout du 21/10/2026 : `lib_simulation_lier`
+
+Le pendant de « 📎 Lier un fichier » de la fiche d'une référence (Gestion LIB), demandé le
+21/10/2026. Arguments : `reference` (Part Name), `fichier`, `texte`, et pour un Touchstone
+`ports` (patte de chaque port, numéro ou nom du brochage) et `masse`.
+
+- Préparation et contrôles de la fiche : `COMPOSANTS_LIB.brancherTouchstone` écrit les lignes
+  « ! broches » et « ! masse » que lit la simulation RF.
+- Carte toujours cliquée, comme `lib_composant_creer` ; au clic, le fichier est écrit
+  `si_absent` (un fichier de même nom n'est repris que s'il est identique), puis
+  `POST /api/lib/composants {lier_simulation: {part, modele}}` ajoute le modèle à la case
+  « Modèle Simulation » de cette seule ligne (les autres restent octet pour octet). Une
+  liaison refusée retire le fichier que la carte vient d'écrire.
+- 60 Ko au plus : une commande du canal de pilotage est bornée à 64 Ko.
+- Bancs : `banc-composants.js` (commande), `banc-serveur-routes.py` (opération du serveur),
+  `banc_mcp.py` (arguments).
 
 ## Questions ouvertes
 

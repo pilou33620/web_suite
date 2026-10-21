@@ -239,8 +239,11 @@ Outils MCP (`etat` dans `mcp_web_suite.py`, les autres dans `mcp_api_outils.py`,
   (kicad_mod de 200 Ko au plus) et `lib_brochage_verifier` calculent sans rien écrire ;
   `lib_composant_creer` montre une carte avec l'aperçu de l'empreinte et n'écrit qu'au
   clic, même interrupteur allumé : l'empreinte neuve (jamais d'écrasement) puis une ligne
-  ajoutée au catalogue, sans réécrire les autres. Pas d'annulation par la carte. Code de
-  page : `WEB_CAO/gestion-lib/js/08-pilote-lib.js`, `WEB_CAO/commun/composants-lib.js`.
+  ajoutée au catalogue, sans réécrire les autres. Pas d'annulation par la carte.
+  `lib_simulation_lier` fait de même pour un modèle de simulation (Touchstone avec la patte
+  de chaque port et la masse, ou SPICE, 60 Ko au plus) : rangé dans lib_simulation, puis
+  ajouté à la case « Modèle Simulation » de la référence ; seule cette case est réécrite.
+  Code de page : `WEB_CAO/gestion-lib/js/08-pilote-lib.js`, `WEB_CAO/commun/composants-lib.js`.
 
 **L'ancien assistant IA.** Les assistants IA intégrés aux pages de WEB_CAO
 (schéma, PCB, visionneuse, Gestion LIB) et de WEB_ANTENNA sont retirés (voir

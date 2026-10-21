@@ -20,6 +20,22 @@ La LIB est partagée par tous les projets. On n'y fait que **créer** : jamais m
    (`cao_schema_dessiner`, opération poser avec « catalogue »).
 6. Expliquer en une ou deux lignes d'où viennent les cotes (pas, pastilles, densité).
 
+## Lier un modèle de simulation
+
+`lib_simulation_lier` range un fichier dans lib_simulation et l'ajoute à la colonne
+« Modèle Simulation » d'une référence existante (carte toujours cliquée) :
+
+- Touchstone (.s1p à .s9p, paramètres S du fabricant) : `ports` donne la patte de chaque port
+  **dans l'ordre du fichier** (numéro, ou nom du brochage de la référence), `masse` la patte
+  à laquelle les ports se rapportent (absente : la masse de la carte). C'est ce branchement
+  que lit la simulation RF ; le relever sur la datasheet ou dans l'en-tête du fichier.
+- SPICE (.sub, .cir, .lib, .mod, .sp) : rangé tel quel, sans ports.
+- Plusieurs modèles sur une référence : les états d'un commutateur, le premier par défaut.
+- 60 Ko au plus (limite du canal) : au-delà, l'utilisateur le lie lui-même (« 📎 Lier un
+  fichier » de la fiche dans Gestion LIB).
+- Un fichier de même nom déjà dans la LIB n'est repris que s'il est identique : sinon,
+  choisir un autre nom.
+
 ## Densités IPC-7351B
 
 N (nominale) par défaut ; M (large) ou L (serrée) au choix. Une densité autre que N entre dans le nom (« 0402-M »).
