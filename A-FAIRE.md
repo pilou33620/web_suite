@@ -20,7 +20,7 @@ Chaque essai a sa spec, un fichier par essai, la plupart à donner à Claude in 
   `web-suite` n'est pas chargé et passe par `savoir_lire`. Fait le 21/10/2026 sous Linux, outils
   sur le même poste : `claude -p` avec le MCP lit la page WEB_ANTENNA ouverte (onglets,
   `antenna_lire`) ; restent le Pi et Windows par SSH.
-- [x] **WEB_CAO** (21/10/2026) : `cao_paire`, `cao_placement_auto` et `cao_chemin` dans la vraie page sous Linux (Chromium, serveur WEB_CAO sur un PROJETS vide, exemple 2, vrai serveur MCP en JSON-RPC, cartes cliquées) : `cao_chemin` 20 liaisons en 0,5 s (19 trouvées), `cao_router` pose les 19 ; `cao_paire` USB posée de J1 à U1 sans erreur DRC ; `cao_placement_auto` satellites et forces appliqués ; aucune erreur JavaScript. Trouvé : le routeur, en finissant la route U3.1 → U3.3 (+5V) que `cao_chemin` fait contourner U3.2, coupe en diagonale et entre de 0,13 mm dans la pastille U3.2 (GND) ; la carte le dit (« DRC : 0 erreur avant → 1 après »). Le routeur (`11-pns-*` à `13-pns-shove.js`) ne se change qu'avec ton accord.
+- [x] **WEB_CAO** (21/10/2026) : `cao_paire`, `cao_placement_auto` et `cao_chemin` dans la vraie page sous Linux (Chromium, serveur WEB_CAO sur un PROJETS vide, exemple 2, vrai serveur MCP en JSON-RPC, cartes cliquées) : `cao_chemin` 20 liaisons en 0,5 s (19 trouvées), `cao_router` pose les 19 ; `cao_paire` USB posée de J1 à U1 sans erreur DRC ; `cao_placement_auto` satellites et forces appliqués ; aucune erreur JavaScript. Trouvé puis corrigé (21/10/2026, avec ton accord) : la route U3.1 → U3.3 (+5V) entrait dans la pastille U3.2 (GND). La faute était dans le chanfrein posé au dépôt (`mitreAt`, `05-tools.js` de WEB_CAO), pas dans `11-pns-*` à `13-pns-shove.js` : il vérifie maintenant l'isolation et recule s'il le faut.
   Reste la durée sur le Pi.
 - [x] **WEB_ANTENNA** (21/10/2026) : vrai calcul openEMS (exemple patch, openEMS 0.0.37 compilé
   sous Linux) lancé depuis la page, puis lu par le MCP : `antenna_lire` resultats (f0 2,45 GHz,
@@ -71,8 +71,11 @@ Chaque essai a sa spec, un fichier par essai, la plupart à donner à Claude in 
 
 ## Défauts des outils vus pendant les essais (antérieurs au MCP)
 
-- [ ] Gestion LIB : son tutoriel ne passe pas en Chromium headless sur le Pi (la mémoire au
-  chargement, environ 890 Mo, est retirée de la liste le 21/10/2026).
+- [x] Gestion LIB (corrigé le 21/10/2026, WEB_CAO) : environ 890 Mo au chargement sur le Pi.
+  Chaque ligne du catalogue (250) portait trois listes avec toute la LIB : 1500 empreintes et
+  1500 symboles faisaient 5 millions de nœuds ; une liste se remplit maintenant à l'ouverture
+  (23 000 nœuds). Le tutoriel visait des boutons hors de l'écran (étapes 7 à 9) : il fait
+  défiler la barre. Reste à le confirmer sur le Pi (`tasks/essais/ESSAI-pi-tutoriel-gestion-lib.md`).
 - [x] WEB_ANTENNA : 422 de `/api/openems` pendant le tutoriel (21/10/2026) : la pose de
   l'exemple revérifiait avant que le gabarit ait dessiné son cuivre ; un document sans cuivre
   est maintenant refusé dans la page, sans appel au serveur.
