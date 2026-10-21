@@ -2,7 +2,7 @@
 
 Le serveur MCP (`lanceur/mcp_web_suite.py`, 64 outils) et ses modules sont faits jusqu'à
 retrait-gemini inclus (carte des modules : [lanceur/docs/SPEC-mcp.md](lanceur/docs/SPEC-mcp.md),
-détail de chaque module dans `tasks/`). Ce qui reste, au 19/10/2026 :
+détail de chaque module dans `tasks/`). Ce qui reste, au 21/10/2026 :
 
 ## Modules
 
@@ -45,9 +45,12 @@ détail de chaque module dans `tasks/`). Ce qui reste, au 19/10/2026 :
 
 - [x] `cao_sim_ecrire` : condensateurs (ESR, ESL, capacité) et bornes de la chute DC, par une
   « cible » ; `cao_calcul` : l'analyse « Bus synchrone » (`analyse=bus`) (21/10/2026).
+- [x] Simulation RF : un Touchstone à N ports sur une puce qui a plus de broches (« ! broches »,
+  « ! masse » dans le fichier) et plusieurs états d'une pièce au catalogue ; les deux états de
+  l'AS179 sont dans la LIB (21/10/2026, A-FAIRE de WEB_CAO).
 
 ## Défauts des outils vus pendant les essais (antérieurs au MCP)
 
-- [ ] Gestion LIB : environ 890 Mo au chargement sur le Pi (OOM possible) ; son tutoriel ne
-  passe pas en Chromium headless sur le Pi.
+- [ ] Gestion LIB : son tutoriel ne passe pas en Chromium headless sur le Pi (la mémoire au
+  chargement, environ 890 Mo, est retirée de la liste le 21/10/2026).
 - [ ] WEB_ANTENNA : 422 de `/api/openems` pendant le tutoriel sur une page vide.
