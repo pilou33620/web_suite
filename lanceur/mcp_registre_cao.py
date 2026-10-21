@@ -12,7 +12,7 @@ from mcp_api_outils import facultatif, resumer
 from mcp_registre_3d import booleen, choix, refuser
 
 QUOI = {
-    "schema": ("feuilles", "composants", "composant", "nets", "net"),
+    "schema": ("feuilles", "composants", "composant", "etiquettes", "nets", "net"),
     "pcb": ("empilage", "classes", "composants", "composant", "nets", "net", "drc", "liaisons", "zone",
             "carte", "zones", "serigraphie"),
     "ipc": ("empilage", "composants", "composant", "nets", "net"),
@@ -123,6 +123,7 @@ OUTILS_CAO = {
     "cao_schema_lire": {
         "description": "Lit l'éditeur schématique ouvert (toutes les feuilles) : feuilles, composants (repère, valeur, "
                        "boîtier, référence fabricant, feuille, position en mm), composant (net de chaque broche), "
+                       "etiquettes (étiquettes de net et alimentations : #id, genre, net, feuille, position), "
                        "nets (global ou local, broches, feuilles), net (broches REPÈRE.patte). Ne modifie rien." + DONNEES,
         "inputSchema": schema_lire("schema", {"feuille": {"type": "integer", "minimum": 1,
                                                           "description": "Feuille (1, 2…) : départage deux nets locaux de même nom."}}),

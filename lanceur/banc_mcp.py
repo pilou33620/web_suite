@@ -741,6 +741,9 @@ verifier("commandes déposées aux bonnes pages, sans écriture", [(d["nom"], d[
          [("cao_schema_lire", ["schema"], False), ("cao_pcb_lire", ["pcb"], False),
           ("cao_ipc_lire", ["visionneuse-ipc"], False), ("cao_sim_lire", ["pcb", "visionneuse-ipc"], False),
           ("cao_vue", ["pcb"], False), ("cao_drc", ["pcb"], False)])
+FauxApi.recues.clear()
+verifier("cao_schema_lire etiquettes accepté", outil("cao_schema_lire", quoi="etiquettes", filtre="VCC")[0], False)
+verifier("etiquettes transmis", FauxApi.recues[0][2]["args"], {"quoi": "etiquettes", "filtre": "VCC"})
 verifier("arguments transmis", [deposees[0]["args"], deposees[1]["args"], deposees[4]["args"]],
          [{"quoi": "net", "nom": "LOCAL", "feuille": 2}, {"quoi": "nets", "filtre": "USB", "a_router": True},
           {"cadrer": "U1", "couches": ["Top"], "ajuster": True}])

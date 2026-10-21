@@ -357,7 +357,8 @@ OUTILS_ECRITURE_CAO = {
                        "un cadre de note}. Texte libre : poser {type: annot_text (ou annot_note, encadrée), valeur ; "
                        "« | » sépare les lignes}. "
                        "Les autres opérations peuvent viser une « feuille » (n°), sinon la feuille affichée. Les "
-                       "étiquettes et alimentations n'ont pas de repère : seul Ctrl+Z les retire. Un repère posé sert aux "
+                       "étiquettes et alimentations n'ont pas de repère : « #id » les désigne (rendu par etiqueter, ou "
+                       "cao_schema_lire etiquettes) pour deplacer, tourner, miroir, supprimer. Un repère posé sert aux "
                        "opérations suivantes. Un fil qui relierait d'autres broches que celles demandées est "
                        "refusé : étiquette alors. Un seul refus et rien ne change."
                        + pilote.ATTENTE_DOC + pilote.DONNEES,
