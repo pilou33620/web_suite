@@ -724,6 +724,12 @@ FauxApi.table.clear()
 os.environ["WEB_SUITE_MCP_PORTS"] = json.dumps(dict(PORTS, web_cao=api.server_address[1]))
 OC = ["cao_schema_lire", "cao_pcb_lire", "cao_ipc_lire", "cao_sim_lire", "cao_vue", "cao_drc"]
 verifier("outils de registre-cao listés", set(OC) <= set(noms), True)
+# l'aide de la page (WEB_CAO/commun/pilote-aide.json, Pilote.aide) est tirée de ces définitions
+import aide_pilote
+_aide = os.path.normpath(aide_pilote.FICHIER)
+if os.path.exists(os.path.dirname(_aide)):
+    with open(_aide, encoding="utf-8") as _f:
+        verifier("pilote-aide.json à jour (sinon : python3 lanceur/aide_pilote.py)", _f.read() == aide_pilote.contenu(), True)
 verifier("70 outils en tout (registre-cao, ecriture-cao, dessin-schema, registre-antenna, routage, composants, savoir_lire)", len(noms), 70)
 verifier("registre-cao : ce que rend la page est une donnée",
          all("donnée" in o["description"] for o in outils if o["name"] in OC), True)
