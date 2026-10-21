@@ -92,5 +92,6 @@ T1 socle « carte en lot » (commun/ecriture-cao.js) + composants du schéma
 
 ## Questions ouvertes
 
-Aucune pour le plan. La question de la spec (le panneau Propriétés du schéma écrit sans
-étape d'historique) reste notée, hors de ce module.
+Aucune pour le plan. La question de la spec (le panneau Propriétés du schéma écrivait sans
+étape d'historique) : repère, valeur et boîtier corrigés le 21/10/2026 dans WEB_CAO
+(`editeur-schematique/js/12-panneaux.js`, `push()` à la première frappe), hors de ce module.

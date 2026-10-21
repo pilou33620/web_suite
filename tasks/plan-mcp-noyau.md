@@ -59,7 +59,8 @@ Tâche 4 : essai réel (Pi, puis SSH depuis Windows)
 
 ### Phase 2 : livraison
 - [x] Tâche 3 : étape CI et section « Claude Code (MCP) » dans la documentation
-- [ ] Tâche 4 : essai réel avec Claude Code, sur le Pi puis par SSH depuis Windows
+- [ ] Tâche 4 : essai réel avec Claude Code, sur le Pi puis par SSH depuis Windows (suivi dans
+      A-FAIRE.md, Vérifications à faire avec toi)
 
 ### Checkpoint : terminé
 - [ ] Tous les critères de réussite de la spec sont remplis

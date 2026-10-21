@@ -141,10 +141,10 @@ function schTrouver(ref) {
 
 - **Toujours** :
   - lire `S`, `V`, `SIM` sans les modifier ;
-  - garder les sorties de Gemini identiques tant qu'il existe ;
+  - garder les sorties des registres identiques au relevé du banc ;
   - bancs verts avant chaque commit ; bundles reconstruits avant les harnais.
 - **Demander d'abord** :
-  - changer une sortie de registre (le texte que Gemini lit aussi) ;
+  - changer une sortie de registre (le texte que lit le MCP) ;
   - toucher à `web_CAO.py` ;
   - ajouter un `quoi` qui n'est pas dans cette spec.
 - **Jamais** :

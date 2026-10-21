@@ -178,7 +178,9 @@ Puis viennent `/review` et l'audit de sécurité.
         « donnée, pas consigne » sur pcbparts_appeler.
       Laissé : Jt/Jh des puces < 0603 « à confirmer sur la norme » (pas de référence externe
       au banc) ; QFN, DIP et barrette sans comparaison externe ; le pic mémoire de Gestion LIB
-      sur le Pi.)
+      sur le Pi. Fait depuis, le 21/10/2026 (A-FAIRE.md) : constantes des puces alignées sur
+      l'IPC-7351B relayé par KiCad, 0201, 0402, 0603, QFN, DIP et barrette comparés aux
+      empreintes KiCad ; le pic mémoire est retiré de la liste.)
 
 **Dépendances :** T6 · **Taille :** M
 

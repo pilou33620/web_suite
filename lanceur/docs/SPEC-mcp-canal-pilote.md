@@ -238,7 +238,6 @@ Pilote.commande("cao_valeur_composant", {
 - **Demander d'abord** :
   - ajouter une commande d'écriture hors de la liste ci-dessus ;
   - toucher à `appairage.py` ;
-  - changer le comportement de l'assistant Gemini (son retrait est le module `retrait-gemini`).
 - **Jamais** :
   - exécuter du code reçu (`eval`, `Function`, `innerHTML` avec une valeur venant de
     Claude sans échappement) ;

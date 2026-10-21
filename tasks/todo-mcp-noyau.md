@@ -92,7 +92,8 @@ tournent ? », avec un outil arrêté et deux lancés.
 - [ ] Depuis le PC Windows par SSH : même résultat
 
 **Vérification :**
-- [ ] À la main, par toi (la partie Windows ne peut pas être faite d'ici)
+- [ ] À la main, par toi (la partie Windows ne peut pas être faite d'ici ; suivi dans A-FAIRE.md,
+      Vérifications à faire avec toi)
 
 **Dépendances :** tâche 3
 

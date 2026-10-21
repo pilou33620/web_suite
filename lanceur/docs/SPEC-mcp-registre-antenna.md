@@ -92,8 +92,7 @@ MCP :    python3 lanceur/banc_mcp.py ; node lanceur/banc_pilote.js
 
 ## Limites
 
-- **Toujours** : lire sans écrire ; garder les sorties de Gemini identiques tant qu'il
-  existe.
+- **Toujours** : lire sans écrire ; garder les sorties des registres identiques.
 - **Demander d'abord** : changer `pilote.js` / `pilote.py` (copies dans trois dépôts).
 - **Jamais** : lancer un calcul openEMS ; enregistrer le projet ; changer les préférences.
 
