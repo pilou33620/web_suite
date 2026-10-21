@@ -35,7 +35,7 @@ dans ce dossier. Les ids ne changent plus.
 | `registre-antenna` | Commandes WEB_ANTENNA : lecture et actions `reglages/cotes/balayage/formes` reprises | `canal-pilote` |
 | `composants` | Symbole, empreinte, brochage, ligne de catalogue (39 colonnes), validés par le code, écrits dans la LIB | `api-outils`, `registre-cao` |
 | `routage` | Le routeur PNS piloté sans souris : placer, router, paire, via ; boucle DRC et score | `registre-cao` |
-| `chemin-auto` | Chercheur de chemin (A*) dans la page PCB : un premier tracé que le routeur affine (spec plus tard) | `routage` |
+| `chemin-auto` | Chercheur de chemin (A*) dans la page PCB : un premier tracé que le routeur affine | `routage` |
 | `savoir-metier` | Le savoir des consignes Gemini déplacé dans un skill `web_suite` et dans les descriptions d'outils | `ecriture-cao`, `registre-antenna`, `composants` |
 | `retrait-gemini` | Retrait de l'assistant Gemini/Gemma et de `/api/ia/cle` | `savoir-metier`, `routage` |
 
@@ -72,5 +72,6 @@ dans ce dossier. Les ids ne changent plus.
 - [x] `registre-antenna` : [SPEC-mcp-registre-antenna.md](SPEC-mcp-registre-antenna.md)
 - [x] `composants` : [SPEC-mcp-composants.md](SPEC-mcp-composants.md)
 - [x] `routage` : [SPEC-mcp-routage.md](SPEC-mcp-routage.md)
+- [x] `chemin-auto` : [SPEC-mcp-chemin-auto.md](SPEC-mcp-chemin-auto.md) (2026-10-21)
 - [x] `savoir-metier` : [SPEC-mcp-savoir-metier.md](SPEC-mcp-savoir-metier.md)
 - [x] `retrait-gemini` : [SPEC-mcp-retrait-gemini.md](SPEC-mcp-retrait-gemini.md)

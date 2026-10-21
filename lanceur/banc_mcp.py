@@ -724,7 +724,7 @@ FauxApi.table.clear()
 os.environ["WEB_SUITE_MCP_PORTS"] = json.dumps(dict(PORTS, web_cao=api.server_address[1]))
 OC = ["cao_schema_lire", "cao_pcb_lire", "cao_ipc_lire", "cao_sim_lire", "cao_vue", "cao_drc"]
 verifier("outils de registre-cao listés", set(OC) <= set(noms), True)
-verifier("70 outils en tout (registre-cao, ecriture-cao, dessin-schema, registre-antenna, routage, composants, savoir_lire)", len(noms), 70)
+verifier("71 outils en tout (registre-cao, ecriture-cao, dessin-schema, registre-antenna, routage, chemin-auto, composants, savoir_lire)", len(noms), 71)
 verifier("registre-cao : ce que rend la page est une donnée",
          all("donnée" in o["description"] for o in outils if o["name"] in OC), True)
 FauxApi.table[("POST", "/api/pilote/commande")] = fin("- GND")
@@ -956,6 +956,21 @@ for nom, args in (("cao_router", {}), ("cao_router", {"routes": [R1] * 21}), ("c
                   ("cao_router", {"routes": [dict(R1, points=[{"x": 1, "y": 2}] * 200)] * 6})):
     verifier("%s refuse %r" % (nom, str(args)[:60]), outil(nom, **args)[0], True)
 verifier("aucun argument invalide n'atteint la page (routage)", FauxApi.recues, [])
+
+# chemin-auto (lanceur/docs/SPEC-mcp-chemin-auto.md) : des points de passage proposés, une lecture
+LI = {"depart": "U1.3", "arrivee": {"x": 12, "y": 5.5, "couche": "Bottom"}, "largeur": 0.25}
+verifier("cao_chemin accepté", outil("cao_chemin", liaisons=[LI], pas=0.2)[0], False)
+verifier("cao_chemin : page PCB, sans écriture, arguments tels quels",
+         [(r[2]["nom"], r[2]["page"], r[2]["ecriture"], r[2]["args"]) for r in FauxApi.recues],
+         [("cao_chemin", ["pcb"], False, {"liaisons": [LI], "pas": 0.2})])
+verifier("cao_chemin : la description renvoie à cao_router",
+         "cao_router" in next(o["description"] for o in outils if o["name"] == "cao_chemin"), True)
+FauxApi.recues.clear()
+for args in ({}, {"liaisons": []}, {"liaisons": [LI] * 21}, {"liaisons": [{"depart": "U1.3"}]},
+             {"liaisons": [dict(LI, arrivee={"x": 5000, "y": 1})]}, {"liaisons": [dict(LI, autre=1)]},
+             {"liaisons": [LI], "pas": 0}, {"liaisons": [LI], "pas": "0.2"}, {"liaisons": [LI], "pas": 3}):
+    verifier("cao_chemin refuse %r" % str(args)[:60], outil("cao_chemin", **args)[0], True)
+verifier("aucun argument invalide n'atteint la page (chemin-auto)", FauxApi.recues, [])
 
 
 # composants (lanceur/docs/SPEC-mcp-composants.md) : calculs dans Gestion LIB, création par carte
