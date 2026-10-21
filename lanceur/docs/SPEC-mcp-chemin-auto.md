@@ -36,7 +36,7 @@ fonctionnement.
 
 ### Outil MCP
 
-Dans `lanceur/mcp_routage.py` ; code de page dans `WEB_CAO/editeur-pcb/js/38-chemin-auto.js`,
+Dans `lanceur/mcp_routage.py` ; code de page dans `WEB_CAO/editeur-pcb/js/40-chemin-auto.js`,
 commande déclarée avec celles du routage (`routagePiloteCommandes`).
 
 | Argument | Contenu |

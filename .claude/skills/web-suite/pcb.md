@@ -101,4 +101,11 @@ une étape d'historique :
   repère d'une pastille ; auto pour couper la sérigraphie d'office). Les valeurs ne sont pas
   imprimées. Relire : `cao_pcb_lire` (quoi=serigraphie).
 - Une via seule (de couture, de plot thermique) : `cao_router` avec `vias` et sans `routes`.
-
+- Intégration mécanique (carte dans un boîtier, un bouchon, une face contre une LED) :
+  `cao_interdits_ecrire` — zones interdites par face (aucune patte traversante qui en
+  ressorte, composants sous une hauteur permise) et hauteur maximale par face. Une patte
+  traversante ressort sur la face opposée à son composant. Relire : `cao_pcb_lire`
+  (quoi=interdits) ; le DRC dit ce qui déborde.
+- Chaleur : donner à chaque composant qui dissipe sa puissance (`cao_composants_ecrire`, champ
+  puissance en W), puis `cao_thermique`. C'est un ordre de grandeur (±30 %) : pour faire
+  baisser ΔT, relier plus de cuivre (liaison directe du plot, zone, vias vers un plan).

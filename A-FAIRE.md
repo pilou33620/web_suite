@@ -56,11 +56,10 @@ détail de chaque module dans `tasks/`). Ce qui reste, au 21/10/2026 :
   l'AS179 sont dans la LIB (21/10/2026, A-FAIRE de WEB_CAO).
 - [x] **Outil MCP pour lier un modèle de simulation** (21/10/2026, branche `mcp`) :
   `lib_simulation_lier`, carte toujours cliquée ; le serveur WEB_CAO ne réécrit que la case
-  « Modèle Simulation » de la référence. 60 Ko au plus par fichier.
-- [ ] **Canal de pilotage borné à 64 Ko par commande** (`pilote.py`, `max_petit`), relevé le
-  21/10/2026 en lisant le code : `lib_kicad_convertir` accepte 200 Ko côté MCP, mais un
-  kicad_mod de plus de 64 Ko serait refusé par le canal (à éprouver). Élargir demande de
-  changer `pilote.py` dans les trois outils (copies identiques vérifiées par la CI).
+  « Modèle Simulation » de la référence. 4 Mo au plus par fichier.
+- [x] **Canal de pilotage élargi** (21/10/2026, sur main dans les quatre dépôts) : une commande
+  porte jusqu'à 8 Mo (`pilote.py`, comme une réponse) ; seul le MCP du poste en donne.
+  `lib_kicad_convertir` (200 Ko) passe, `lib_simulation_lier` monte à 4 Mo.
 
 ## Défauts des outils vus pendant les essais (antérieurs au MCP)
 

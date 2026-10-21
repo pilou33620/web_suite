@@ -4,7 +4,7 @@ Spec : lanceur/docs/SPEC-mcp-routage.md. Chaque outil vérifie la forme de ses a
 dépose à la page PCB par le canal de pilotage (WEB_CAO/editeur-pcb/js/37-routage-pilote.js). La page
 joue le lot pour de vrai, relève le résultat, remet la carte et montre la carte d'action avec un
 aperçu ; au clic, elle charge le résultat relevé en une étape d'historique. cao_score et cao_chemin
-(module chemin-auto, SPEC-mcp-chemin-auto.md : des points de passage proposés par A*, 38-chemin-auto.js)
+(module chemin-auto, SPEC-mcp-chemin-auto.md : des points de passage proposés par A*, 40-chemin-auto.js)
 sont des lectures. Ne s'importe que par mcp_web_suite.
 """
 import mcp_pilote as pilote

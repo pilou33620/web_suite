@@ -31,8 +31,8 @@ La LIB est partagée par tous les projets. On n'y fait que **créer** : jamais m
   que lit la simulation RF ; le relever sur la datasheet ou dans l'en-tête du fichier.
 - SPICE (.sub, .cir, .lib, .mod, .sp) : rangé tel quel, sans ports.
 - Plusieurs modèles sur une référence : les états d'un commutateur, le premier par défaut.
-- 60 Ko au plus (limite du canal) : au-delà, l'utilisateur le lie lui-même (« 📎 Lier un
-  fichier » de la fiche dans Gestion LIB).
+- 4 Mo au plus : au-delà, l'utilisateur le lie lui-même (« 📎 Lier un fichier » de la
+  fiche dans Gestion LIB).
 - Un fichier de même nom déjà dans la LIB n'est repris que s'il est identique : sinon,
   choisir un autre nom.
 

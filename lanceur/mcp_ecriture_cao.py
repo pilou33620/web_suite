@@ -51,7 +51,7 @@ def parmi(*choix):
 CHAMPS_SCH = {"ref": NOM, "valeur": TEXTE_, "boitier": TEXTE_, "fabricant": TEXTE_, "mpn": TEXTE_,
               "specs": SPECS, "non_monte": BOOLEEN}
 CHAMPS_PCB = {"ref": NOM, "valeur": TEXTE_, "boitier": NOM, "face": parmi("dessus", "dessous"),
-              "x": NOMBRE, "y": NOMBRE, "rotation": NOMBRE}
+              "x": NOMBRE, "y": NOMBRE, "rotation": NOMBRE, "puissance": NOMBRE_OU_NUL}
 PISTE = {"net": NOM, "largeur": NOMBRE, "couche": NOM, "realigner": BOOLEEN}
 CLASSE = {"action": parmi("creer", "modifier", "supprimer", "affecter"), "nom": NOM, "net": NOM, "classe": NOM,
           "largeur": NOMBRE, "isolation": NOMBRE, "via": NOMBRE, "percage": NOMBRE, "largeur_couches": LARGEURS}
@@ -69,6 +69,9 @@ FORME = {"x": NOMBRE, "y": NOMBRE, "largeur": NOMBRE, "hauteur": NOMBRE, "rayon"
 CONTOUR = dict(FORME, forme=parmi("rectangle", "disque", "polygone"))
 DECOUPE = dict(FORME, action=parmi("creer", "supprimer"), forme=parmi("rectangle", "disque", "polygone"),
                numero=(lambda v: type(v) is int and v >= 1, "entier, le numéro lu par cao_pcb_lire carte"))
+HAUTEUR = (lambda v: v is None or (_nombre(v) and 0.1 <= v <= 100), "de 0,1 à 100 mm, ou null")
+INTERDIT = dict(FORME, action=parmi("creer", "modifier", "supprimer", "hauteurs"), id=ID, face=parmi("dessus", "dessous"),
+                forme=parmi("rectangle", "disque", "polygone"), nom=NOM, hauteur_max=HAUTEUR, dessus=HAUTEUR, dessous=HAUTEUR)
 ZONE = dict(FORME, action=parmi("creer", "modifier", "supprimer"), id=ID, couche=NOM, net=TEXTE_,
             liaison=parmi("thermique", "directe", "cms-directe", "aucune"), forme=parmi("carte", "rectangle", "disque", "polygone"))
 SERIGRAPHIE = {"action": parmi("texte", "trait", "rectangle", "repere", "auto", "supprimer"),
@@ -172,6 +175,10 @@ def cao_decoupes_ecrire(a):
     return envoyer(["pcb"], "cao_decoupes_ecrire", lot(a, DECOUPE, ("action",)), a)
 
 
+def cao_interdits_ecrire(a):
+    return envoyer(["pcb"], "cao_interdits_ecrire", lot(a, INTERDIT, ("action",)), a)
+
+
 def cao_zones_ecrire(a):
     return envoyer(["pcb"], "cao_zones_ecrire", lot(a, ZONE, ("action",)), a)
 
@@ -219,7 +226,8 @@ OUTILS_ECRITURE_CAO = {
         "description": "Change des propriétés de composants. Schéma : ref, valeur, boitier, fabricant, mpn, "
                        "specs (objet clé → texte, null efface), non_monte. PCB : ref, valeur, boitier (doit "
                        "exister dans les empreintes), face (dessus/dessous), x, y (mm, même repère que "
-                       "cao_pcb_lire), rotation (degrés) ; le cuivre accroché suit selon la préférence de "
+                       "cao_pcb_lire), rotation (degrés), puissance (W dissipés, pour cao_thermique ; null l'efface) ; "
+                       "le cuivre accroché suit selon la préférence de "
                        "la page. Un repère est unique dans le document, à chaque étape du lot : pour échanger R1 et R2, "
                        "passe par un repère libre dans deux cartes."
                        + CARTE + DRC + pilote.ATTENTE_DOC + pilote.DONNEES,
@@ -282,6 +290,24 @@ OUTILS_ECRITURE_CAO = {
                                    "points": {"type": "array", "items": {"type": "object", "properties": {"x": N, "y": N}}}},
                                   ("action",)),
         "fn": cao_decoupes_ecrire,
+    },
+    "cao_interdits_ecrire": {
+        "description": "Intégration mécanique, actions dans l'ordre : creer {forme (rectangle, disque, polygone), face "
+                       "(dessus/dessous), hauteur_max? (mm ; absente ou null : aucun composant), nom?} — une zone "
+                       "interdite d'une face : le DRC y signale toute patte traversante qui en ressort et tout "
+                       "composant posé sur cette face au-delà de la hauteur permise ; modifier {id, …} ; supprimer "
+                       "{id} ; hauteurs {dessus?, dessous? : hauteur maximale des composants de la face, null = pas "
+                       "de limite}. Hauteur d'un composant : celle du dossier mécanique (saisie, fichier, sinon "
+                       "« Maximun Height » de la LIB). Relire : cao_pcb_lire interdits."
+                       + CARTE + DRC + pilote.ATTENTE_DOC + pilote.DONNEES,
+        "inputSchema": schema_lot({"action": {"type": "string", "enum": ["creer", "modifier", "supprimer", "hauteurs"]},
+                                   "id": {"type": "integer"}, "face": {"type": "string", "enum": ["dessus", "dessous"]},
+                                   "forme": {"type": "string", "enum": ["rectangle", "disque", "polygone"]}, "nom": T,
+                                   **{k: {"type": ["number", "null"]} for k in ("hauteur_max", "dessus", "dessous")},
+                                   "x": N, "y": N, "largeur": N, "hauteur": N, "rayon": N,
+                                   "points": {"type": "array", "items": {"type": "object", "properties": {"x": N, "y": N}}}},
+                                  ("action",)),
+        "fn": cao_interdits_ecrire,
     },
     "cao_zones_ecrire": {
         "description": "Zones de cuivre, actions jouées dans l'ordre : creer {couche, net (vide = cuivre isolé), forme "

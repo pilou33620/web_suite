@@ -5,7 +5,7 @@ Carte : [lanceur/docs/SPEC-mcp.md](../lanceur/docs/SPEC-mcp.md)
 
 ## Tâche 1 : ✅ chercheur A* dans la page PCB
 
-`WEB_CAO/editeur-pcb/js/38-chemin-auto.js` : grille par couche, obstacles gonflés (`clrK`),
+`WEB_CAO/editeur-pcb/js/40-chemin-auto.js` : grille par couche, obstacles gonflés (`clrK`),
 bord, découpes, trous, vias libres sur toutes les couches traversées ; points de passage au
 format de `cao_router`. Commande `cao_chemin` (lecture) avec celles du routage.
 

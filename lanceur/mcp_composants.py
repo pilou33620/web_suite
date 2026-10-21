@@ -17,9 +17,7 @@ FAMILLES = ("chip", "sot", "soic", "tssop", "msop", "qfn", "dfn", "dip", "barret
 PARAMETRES = ("code", "variante", "densite", "nom", "broches", "pas", "rangee", "rangees", "diametre",
               "longueur", "largeur", "terminaison", "empattement", "pied", "languette", "corps", "thermique")
 KICAD_MAX = 200 * 1024        # octets
-# shortcut: le canal de pilotage n'accepte qu'une commande de 64 Ko (pilote.py, max_petit) ; un modèle
-# plus gros passe par « 📎 Lier un fichier » de la fiche, ou demanderait d'élargir le canal des trois outils.
-MODELE_MAX = 60 * 1024        # octets du texte, une fois en JSON
+MODELE_MAX = 4 * 1024 * 1024  # octets du texte, une fois en JSON (le canal porte 8 Mo par commande)
 MODELE = re.compile(r"\.(s[1-9]p|sub|cir|lib|mod|sp|spi|spice)$", re.I)
 EMPREINTE_MAX = 512 * 1024    # octets de JSON (4096 pastilles tiennent largement)
 
@@ -122,8 +120,8 @@ def lib_simulation_lier(a):
     if not isinstance(texte, str) or not texte.strip():
         refuser("Argument « texte » invalide : le contenu du fichier.")
     if len(json.dumps(texte)) > MODELE_MAX:
-        refuser("Modèle de plus de 60 Ko : trop gros pour le canal de pilotage. Lie-le dans Gestion LIB "
-                "(fiche de la référence, « 📎 Lier un fichier »), ou réduis les points de fréquence.")
+        refuser("Modèle de plus de 4 Mo : lie-le dans Gestion LIB (fiche de la référence, « 📎 Lier un "
+                "fichier »), ou réduis les points de fréquence.")
     args = {"reference": reference, "fichier": fichier, "texte": texte}
     ports, masse = a.get("ports"), a.get("masse")
     if ports is not None:
@@ -223,7 +221,7 @@ OUTILS_COMPOSANTS = {
                        "chaque port dans l'ordre du fichier (numéro, ou nom du brochage de la référence : J1, RF1…), "
                        "et « masse », la patte à laquelle les ports se rapportent (absente : la masse de la carte) ; "
                        "la simulation RF lit ce branchement. Modèle SPICE (.sub, .cir, .lib, .mod, .sp) : rangé tel "
-                       "quel, sans ports. « texte » : le contenu du fichier, 60 Ko au plus. JAMAIS d'écrasement : un "
+                       "quel, sans ports. « texte » : le contenu du fichier, 4 Mo au plus. JAMAIS d'écrasement : un "
                        "fichier de même nom n'est repris que s'il a le même contenu. Une carte dans Gestion LIB ; rien "
                        "n'est écrit avant le clic, MÊME interrupteur allumé ; pas d'annulation par la carte."
                        + METHODE + DONNEES,

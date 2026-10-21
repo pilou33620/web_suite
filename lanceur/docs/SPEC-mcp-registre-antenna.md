@@ -44,7 +44,9 @@ Dans `lanceur/mcp_registre_antenna.py`, page `antenna`.
 2. **Rien n'est écrit** : aucune lecture ni commande de vue ne change les réglages d'`ANT`,
    `CON`, `PRJ.modifie`, l'historique de conception (`CON_HIST`) ni les préférences
    (`antReglagesEcrire`). La vue ne change que l'état de vue (`ANT.vue`, `ANT.vueMaillage`,
-   `ANT.etape`, comme un clic ; l'étape part avec le prochain enregistrement du projet) et
+   `ANT.etape`, comme un clic ; depuis le 21/10/2026, le projet enregistre l'étape de
+   l'utilisateur et la disposition un panneau montré tel qu'il était, tant que
+   l'utilisateur n'y a pas touché : `pilote-antenna.js`) et
    n'enregistre pas de préférence. Le texte rendu commence par un en-tête qui le dit donnée,
    et les noms venus d'un fichier y restent chacun sur sa ligne.
 3. **Bornes** : 150 lignes par liste, 200 points par courbe, puis « … (N de plus) ». Le

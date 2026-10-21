@@ -127,7 +127,7 @@ Le pendant de « 📎 Lier un fichier » de la fiche d'une référence (Gestion 
   `POST /api/lib/composants {lier_simulation: {part, modele}}` ajoute le modèle à la case
   « Modèle Simulation » de cette seule ligne (les autres restent octet pour octet). Une
   liaison refusée retire le fichier que la carte vient d'écrire.
-- 60 Ko au plus : une commande du canal de pilotage est bornée à 64 Ko.
+- 4 Mo au plus (le canal de pilotage porte 8 Mo par commande depuis le 21/10/2026).
 - Bancs : `banc-composants.js` (commande), `banc-serveur-routes.py` (opération du serveur),
   `banc_mcp.py` (arguments).
 

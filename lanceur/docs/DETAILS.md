@@ -230,7 +230,7 @@ Outils MCP (`etat` dans `mcp_web_suite.py`, les autres dans `mcp_api_outils.py`,
   par points de passage, changement de couche par via, vias seules ; 20 routes par carte),
   `cao_paire` (paire différentielle déclarée), `cao_placement_auto` (forces, satellites, blocs)
   et `cao_score` (routage, placement). `cao_pcb_lire` donne aussi `liaisons` et `zone` pour
-  préparer les points ; `cao_chemin` (module chemin-auto, `38-chemin-auto.js`) les propose,
+  préparer les points ; `cao_chemin` (module chemin-auto, `40-chemin-auto.js`) les propose,
   par un chercheur A* sur grille, sans rien écrire. La page joue le lot puis le défait, montre un aperçu en pointillés et,
   au clic, charge le résultat vu en une étape Ctrl+Z. Une route bloquée ne laisse rien.
   Code de page : `WEB_CAO/editeur-pcb/js/37-routage-pilote.js`.
@@ -242,7 +242,7 @@ Outils MCP (`etat` dans `mcp_web_suite.py`, les autres dans `mcp_api_outils.py`,
   clic, même interrupteur allumé : l'empreinte neuve (jamais d'écrasement) puis une ligne
   ajoutée au catalogue, sans réécrire les autres. Pas d'annulation par la carte.
   `lib_simulation_lier` fait de même pour un modèle de simulation (Touchstone avec la patte
-  de chaque port et la masse, ou SPICE, 60 Ko au plus) : rangé dans lib_simulation, puis
+  de chaque port et la masse, ou SPICE, 4 Mo au plus) : rangé dans lib_simulation, puis
   ajouté à la case « Modèle Simulation » de la référence ; seule cette case est réécrite.
   Code de page : `WEB_CAO/gestion-lib/js/08-pilote-lib.js`, `WEB_CAO/commun/composants-lib.js`.
 
