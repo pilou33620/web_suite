@@ -83,10 +83,11 @@ OUTILS_ANTENNA = {
     "antenna_vue": {
         "description": "Règle la vue de la page WEB_ANTENNA, sans rien changer au projet ni aux préférences : vue "
                        "(2d, 3d), maillage (montré ou caché), ajuster (2D), resultats (onglet de résultats : bal, ts, "
-                       "s11, s21, roe, z, ff), point_balayage (n°), etape (n° de l'étape de l'assistant ; elle part "
-                       "avec le prochain enregistrement du projet), panneau (assistant, resultats, couches…), toile "
+                       "s11, s21, roe, z, ff), point_balayage (n°), etape (n° de l'étape de l'assistant ; le projet "
+                       "enregistre celle de l'utilisateur), panneau (assistant, resultats, couches…), toile "
                        "à capturer (carte ou 3d : la vue affichée ; courbe : ouvre le panneau des résultats s'il est caché). "
-                       "Un panneau montré reste si tu changes ensuite la disposition. capturer=true rend l'image dans la foulée. Tout est vérifié "
+                       "Un panneau montré ne s'enregistre pas dans la disposition tant que l'utilisateur n'y touche pas. capturer=true rend "
+                       "l'image dans la foulée. Tout est vérifié "
                        "avant le premier changement. Jamais de calcul lancé." + pilote.DONNEES,
         "inputSchema": {"type": "object", "properties": {
             "vue": {"type": "string", "enum": ["2d", "3d"]}, "maillage": {"type": "boolean"}, "ajuster": {"type": "boolean"},

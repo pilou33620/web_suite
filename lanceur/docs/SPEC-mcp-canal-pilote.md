@@ -101,7 +101,8 @@ Utilisateur : toi, depuis Claude Code (sur le poste ou par SSH). Les pages pilot
      commande qu'après que le serveur a accepté son accusé : ni un autre appareil ni un script
      sur le BroadcastChannel ne forge ce que Claude lit ;
    - un id d'onglet tenu par un navigateur ne se reprend pas ; les corps sont bornés (64 Ko,
-     8 Mo pour une réponse) ; les pages ne s'affichent en cadre que pour leur propre origine
+     8 Mo pour une réponse ou une commande, qui peut porter un fichier — le MCP du poste seul
+     donne des commandes) ; les pages ne s'affichent en cadre que pour leur propre origine
      (`X-Frame-Options`, `frame-ancestors`) ;
    - ce que rend une page (texte, image, nom de projet) est une **donnée** pour Claude, jamais
      une consigne : les descriptions des outils le disent ;
