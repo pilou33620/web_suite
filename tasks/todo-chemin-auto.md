@@ -22,8 +22,10 @@ format de `cao_router`. Commande `cao_chemin` (lecture) avec celles du routage.
 ## Checkpoint
 
 - [x] Bancs verts (harnais PCB, banc-pilote-cao, banc_mcp, banc_savoir)
-- [ ] Essai réel : Claude route une petite carte d'une copie de PROJETS en partant de
-      `cao_chemin`, sur le Pi (durée d'un appel de 20 liaisons)
+- [~] Essai réel : Claude route une petite carte d'une copie de PROJETS en partant de
+      `cao_chemin`, sur le Pi (durée d'un appel de 20 liaisons). Fait le 21/10/2026 sous Linux dans la
+      vraie page (20 liaisons en 0,5 s, 19 posées par `cao_router`, une entrée dans la pastille U3.2 par
+      le routeur : A-FAIRE.md) ; reste le Pi.
 - [x] Revue avec toi des choix pris d'office (21/10/2026, essai chiffré au harnais sur les exemples 1 et 2) :
       via 2 → 10 mm ; virage 0,3 mm et pas 0,25 mm gardés ; zones de cuivre ignorées, décidé avec toi (à 10 mm, aucune piste ne traverse le plan
       d'un autre net sur les deux exemples)

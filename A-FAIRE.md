@@ -17,7 +17,8 @@ détail de chaque module dans `tasks/`). Ce qui reste, au 21/10/2026 :
   `web-suite` n'est pas chargé et passe par `savoir_lire`. Fait le 21/10/2026 sous Linux, outils
   sur le même poste : `claude -p` avec le MCP lit la page WEB_ANTENNA ouverte (onglets,
   `antenna_lire`) ; restent le Pi et Windows par SSH.
-- [ ] **WEB_CAO** : `cao_paire`, `cao_placement_auto` et `cao_chemin` dans la vraie page (voir son A-FAIRE).
+- [x] **WEB_CAO** (21/10/2026) : `cao_paire`, `cao_placement_auto` et `cao_chemin` dans la vraie page sous Linux (Chromium, serveur WEB_CAO sur un PROJETS vide, exemple 2, vrai serveur MCP en JSON-RPC, cartes cliquées) : `cao_chemin` 20 liaisons en 0,5 s (19 trouvées), `cao_router` pose les 19 ; `cao_paire` USB posée de J1 à U1 sans erreur DRC ; `cao_placement_auto` satellites et forces appliqués ; aucune erreur JavaScript. Trouvé : le routeur, en finissant la route U3.1 → U3.3 (+5V) que `cao_chemin` fait contourner U3.2, coupe en diagonale et entre de 0,13 mm dans la pastille U3.2 (GND) ; la carte le dit (« DRC : 0 erreur avant → 1 après »). Le routeur (`11-pns-*` à `13-pns-shove.js`) ne se change qu'avec ton accord.
+  Reste la durée sur le Pi.
 - [x] **WEB_ANTENNA** (21/10/2026) : vrai calcul openEMS (exemple patch, openEMS 0.0.37 compilé
   sous Linux) lancé depuis la page, puis lu par le MCP : `antenna_lire` resultats (f0 2,45 GHz,
   S11 −23,4 dB, bande −10 dB 2,421–2,479 GHz) et courbe, `antenna_vue` onglets S11 et impédance,
