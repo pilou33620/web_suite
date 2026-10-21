@@ -81,3 +81,24 @@ chiffre l'échauffement obtenu.
    (comme dans [routage.md](routage.md)).
 3. `cao_calcul` (analyse=verif) pour l'audit de la carte avant fabrication.
 4. Corriger ce qui reste, une cause à la fois.
+
+## Contour, zones, sérigraphie, pastilles
+
+Ne jamais modifier l'état de la page (`S`) depuis la console : il n'entre pas dans
+l'historique, et Ctrl+Z se comporte mal ensuite. Chaque geste a sa commande, une carte et
+une étape d'historique :
+
+- Contour : `cao_contour_ecrire` (rectangle, disque — écrit en arcs au Gerber —, polygone).
+  Relire : `cao_pcb_lire` (quoi=carte).
+- Zones de cuivre : `cao_zones_ecrire` (creer, modifier, supprimer ; forme « carte » pour un
+  plan pleine carte). Relire : `cao_pcb_lire` (quoi=zones), qui donne les id.
+- Plot thermique d'une LED de puissance, d'un QFN, d'un régulateur : liaison **directe** à
+  la zone, pas des bras thermiques. Soit la zone entière (`liaison` : cms-directe = directe
+  pour les CMS, bras pour les traversantes), soit la pastille seule
+  (`cao_pastille_regler`, liaison directe). Les bras restent l'usage pour une pastille
+  qu'on brase à la main ou une traversante.
+- Sérigraphie : `cao_serigraphie_ecrire` (texte, trait, rectangle ; repere pour éloigner un
+  repère d'une pastille ; auto pour couper la sérigraphie d'office). Les valeurs ne sont pas
+  imprimées. Relire : `cao_pcb_lire` (quoi=serigraphie).
+- Une via seule (de couture, de plot thermique) : `cao_router` avec `vias` et sans `routes`.
+

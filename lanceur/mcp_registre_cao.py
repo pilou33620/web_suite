@@ -13,7 +13,8 @@ from mcp_registre_3d import booleen, choix, refuser
 
 QUOI = {
     "schema": ("feuilles", "composants", "composant", "nets", "net"),
-    "pcb": ("empilage", "classes", "composants", "composant", "nets", "net", "drc", "liaisons", "zone"),
+    "pcb": ("empilage", "classes", "composants", "composant", "nets", "net", "drc", "liaisons", "zone",
+            "carte", "zones", "serigraphie"),
     "ipc": ("empilage", "composants", "composant", "nets", "net"),
     "sim": ("simulations", "simulation", "catalogue"),
 }
@@ -132,7 +133,9 @@ OUTILS_CAO = {
                        "broche), nets (état du routage), net (longueur et largeurs par couche, vias, zones, paire), "
                        "drc (dernier DRC lancé ; cao_drc le relance), liaisons (ce qui reste à router, de REF.pastille "
                        "à REF.pastille, avec positions et couches), zone (pastilles, pistes, vias, zones et contour "
-                       "dans la fenêtre x1, y1, x2, y2 en mm). Positions en mm, le repère de tous les outils CAO. "
+                       "dans la fenêtre x1, y1, x2, y2 en mm), carte (contour : rectangle, disque ou polygone et ses "
+                       "sommets, découpes), zones (id, couche, net, liaison des pastilles, emprise), serigraphie (id "
+                       "des dessins, repères déplacés). Positions en mm, le repère de tous les outils CAO. "
                        "Ne modifie rien." + DONNEES,
         "inputSchema": schema_lire("pcb", {"a_router": {"type": "boolean", "description": "nets : seulement ceux qui restent à router."},
                                            **{k: {"type": "number", "description": "zone : fenêtre en mm"} for k in ("x1", "y1", "x2", "y2")}}),

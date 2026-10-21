@@ -724,7 +724,7 @@ FauxApi.table.clear()
 os.environ["WEB_SUITE_MCP_PORTS"] = json.dumps(dict(PORTS, web_cao=api.server_address[1]))
 OC = ["cao_schema_lire", "cao_pcb_lire", "cao_ipc_lire", "cao_sim_lire", "cao_vue", "cao_drc"]
 verifier("outils de registre-cao listés", set(OC) <= set(noms), True)
-verifier("64 outils en tout (registre-cao, ecriture-cao, dessin-schema, registre-antenna, routage, composants, savoir_lire)", len(noms), 64)
+verifier("68 outils en tout (registre-cao, ecriture-cao, dessin-schema, registre-antenna, routage, composants, savoir_lire)", len(noms), 68)
 verifier("registre-cao : ce que rend la page est une donnée",
          all("donnée" in o["description"] for o in outils if o["name"] in OC), True)
 FauxApi.table[("POST", "/api/pilote/commande")] = fin("- GND")
@@ -775,7 +775,8 @@ verifier("la capture vise l'onglet de la vue (cao)", (FauxApi.recues[-1][2]["nom
 
 # ecriture-cao (lanceur/docs/SPEC-mcp-ecriture-cao.md) : écritures en lot, par cartes
 os.environ["WEB_SUITE_MCP_PORTS"] = json.dumps(dict(PORTS, web_cao=api.server_address[1]))
-OE = ["cao_composants_ecrire", "cao_pistes_ecrire", "cao_classes_ecrire", "cao_contraintes_ecrire", "cao_sim_ecrire"]
+OE = ["cao_composants_ecrire", "cao_pistes_ecrire", "cao_classes_ecrire", "cao_contraintes_ecrire", "cao_sim_ecrire",
+      "cao_contour_ecrire", "cao_zones_ecrire", "cao_serigraphie_ecrire", "cao_pastille_regler"]
 verifier("outils d'ecriture-cao listés", set(OE) <= set(noms), True)
 verifier("ecriture-cao : donnée, carte, lot", all("donnée" in o["description"] and "carte" in o["description"] and "50" in o["description"]
                                                  for o in outils if o["name"] in OE), True)
@@ -793,13 +794,24 @@ for nom, args in (("cao_composants_ecrire", {"page": "schema", "lot": [{"ref": "
                                               {"groupe": "condensateurs", "cle": "esl_nh", "valeur": 0.3, "unite": "nH",
                                                "cible": {"refs": ["C1", "C2"]}},
                                               {"groupe": "bornes_dc", "cle": "courant_ma", "valeur": 80, "unite": "mA",
-                                               "cible": {"composant": "U1"}}]})):
+                                               "cible": {"composant": "U1"}}]}),
+                  ("cao_contour_ecrire", {"lot": [{"forme": "disque", "x": 13, "y": 13, "rayon": 13}]}),
+                  ("cao_zones_ecrire", {"lot": [{"action": "creer", "couche": "Top", "net": "GND", "forme": "carte", "liaison": "cms-directe"},
+                                                {"action": "modifier", "id": 3, "forme": "polygone",
+                                                 "points": [{"x": 0, "y": 0}, {"x": 5, "y": 0}, {"x": 0, "y": 5}]},
+                                                {"action": "supprimer", "id": 4}]}),
+                  ("cao_serigraphie_ecrire", {"lot": [{"action": "texte", "face": "dessus", "texte": "LED_UV", "x": 1, "y": 2, "hauteur": 1},
+                                                      {"action": "repere", "ref": "D1", "dx": 0, "dy": -1.5},
+                                                      {"action": "auto", "ref": "J1", "actif": False}, {"action": "supprimer", "id": 9}]}),
+                  ("cao_pastille_regler", {"lot": [{"pastille": "LED1.2", "liaison": "directe", "bras_largeur": None, "masque": 0.05}]})):
     verifier(nom + " accepté", outil(nom, **args)[0], False)
 deposees = [r[2] for r in FauxApi.recues]
 verifier("écritures déposées aux bonnes pages, en écriture", [(d["nom"], d["page"], d["ecriture"]) for d in deposees],
          [("cao_composants_ecrire", ["schema"], True), ("cao_composants_ecrire", ["pcb"], True),
           ("cao_pistes_ecrire", ["pcb"], True), ("cao_classes_ecrire", ["pcb"], True),
-          ("cao_contraintes_ecrire", ["pcb"], True), ("cao_sim_ecrire", ["pcb", "visionneuse-ipc"], True)])
+          ("cao_contraintes_ecrire", ["pcb"], True), ("cao_sim_ecrire", ["pcb", "visionneuse-ipc"], True),
+          ("cao_contour_ecrire", ["pcb"], True), ("cao_zones_ecrire", ["pcb"], True),
+          ("cao_serigraphie_ecrire", ["pcb"], True), ("cao_pastille_regler", ["pcb"], True)])
 verifier("le lot passe tel quel", deposees[1]["args"], {"lot": [{"ref": "U1", "champs": {"x": 12.5, "rotation": 90, "face": "dessous"}}]})
 
 FauxApi.recues.clear()
@@ -827,6 +839,16 @@ for nom, args in (("cao_composants_ecrire", L({"ref": "R1", "champs": {"valeur":
                   ("cao_sim_ecrire", L({"groupe": "condensateurs", "cle": "esl_nh", "valeur": 1, "cible": {"refs": []}})),
                   ("cao_sim_ecrire", L({"groupe": "condensateurs", "cle": "esl_nh", "valeur": 1, "cible": {"ref": "C1"}})),
                   ("cao_sim_ecrire", L({"groupe": "bornes_dc", "cle": "courant_ma", "valeur": 1, "cible": "U1"})),
+                  ("cao_contour_ecrire", {"lot": [{"forme": "disque", "x": 0, "y": 0, "rayon": 5}] * 2}),
+                  ("cao_contour_ecrire", L({"forme": "ovale"})),
+                  ("cao_contour_ecrire", L({"forme": "polygone", "points": [{"x": 0, "y": 0}, {"x": 1, "y": 1}]})),
+                  ("cao_contour_ecrire", L({"forme": "polygone", "points": [{"x": 0, "y": 0}, {"x": 1}, {"x": 0, "y": 1}]})),
+                  ("cao_zones_ecrire", L({"action": "deplacer", "id": 1})), ("cao_zones_ecrire", L({"action": "supprimer", "id": "1"})),
+                  ("cao_zones_ecrire", L({"action": "creer", "liaison": "soudee"})),
+                  ("cao_serigraphie_ecrire", L({"action": "texte", "face": "cote"})),
+                  ("cao_serigraphie_ecrire", L({"action": "texte", "texte": "a\nb"})),
+                  ("cao_pastille_regler", L({"liaison": "directe"})), ("cao_pastille_regler", L({"pastille": "U1.1", "bras_nombre": 9})),
+                  ("cao_pastille_regler", L({"pastille": "U1.1", "soudure": 1})),
                   ("cao_sim_ecrire", "pas un objet")):
     verifier("%s refuse %r" % (nom, str(args)[:60]), outil(nom, **args)[0] if isinstance(args, dict) else
              mcp.appeler({"name": nom, "arguments": {"lot": args}}).get("isError", False), True)

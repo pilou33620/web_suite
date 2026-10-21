@@ -60,6 +60,21 @@ CONTRAINTE = {"action": parmi("paire", "net"), "nom": NOM, "portee": TEXTE_, "im
               "ecart_pref": NOMBRE, "ecart_max": NOMBRE, "decouple_max": NOMBRE,
               "net": NOM, "z": NOMBRE_OU_NUL, "z_tol": NOMBRE_OU_NUL, "l_min": NOMBRE_OU_NUL, "l_max": NOMBRE_OU_NUL,
               "vias_max": NOMBRE_OU_NUL, "couches": COUCHES}
+# géométrie de la carte : la page vérifie les valeurs (bornes, polygone simple, nets et couches connus)
+POINTS = (lambda v: isinstance(v, list) and 3 <= len(v) <= 1000 and all(
+              isinstance(p, dict) and set(p) == {"x", "y"} and _nombre(p["x"]) and _nombre(p["y"]) for p in v),
+          "liste de 3 à 1000 sommets {x, y} en mm")
+ID = (lambda v: type(v) is int and v >= 1, "entier, l'id lu par cao_pcb_lire")
+FORME = {"x": NOMBRE, "y": NOMBRE, "largeur": NOMBRE, "hauteur": NOMBRE, "rayon": NOMBRE, "points": POINTS}
+CONTOUR = dict(FORME, forme=parmi("rectangle", "disque", "polygone"))
+ZONE = dict(FORME, action=parmi("creer", "modifier", "supprimer"), id=ID, couche=NOM, net=TEXTE_,
+            liaison=parmi("thermique", "directe", "cms-directe"), forme=parmi("carte", "rectangle", "disque", "polygone"))
+SERIGRAPHIE = {"action": parmi("texte", "trait", "rectangle", "repere", "auto", "supprimer"),
+               "face": parmi("dessus", "dessous"), "texte": TEXTE_, "ref": NOM, "actif": BOOLEEN, "id": ID,
+               **{k: NOMBRE for k in ("x", "y", "x1", "y1", "x2", "y2", "hauteur", "rotation", "largeur", "dx", "dy")}}
+PASTILLE = {"pastille": NOM, "liaison": parmi("zone", "thermique", "directe"),
+            "bras_nombre": (lambda v: v is None or (type(v) is int and 1 <= v <= 8), "entier de 1 à 8, ou null"),
+            **{k: NOMBRE_OU_NUL for k in ("bras_largeur", "bras_angle", "masque", "pate")}}
 # condensateurs : {refs} | {mpn} | {valeur, boitier} ; bornes_dc : {composant} (la page contrôle laquelle)
 CIBLE = {"refs": (lambda v: isinstance(v, list) and 1 <= len(v) <= 200 and all(_nom(x) for x in v), "liste de 1 à 200 repères"),
          "mpn": NOM, "valeur": NOM, "boitier": TEXTE_, "composant": NOM}
@@ -143,6 +158,25 @@ def cao_contraintes_ecrire(a):
     return envoyer(["pcb"], "cao_contraintes_ecrire", lot(a, CONTRAINTE, ("action",)), a)
 
 
+def cao_contour_ecrire(a):
+    liste = lot(a, CONTOUR, ("forme",))
+    if len(liste) != 1:
+        refuser("Argument « lot » invalide : un seul contour par carte (un élément).")
+    return envoyer(["pcb"], "cao_contour_ecrire", liste, a)
+
+
+def cao_zones_ecrire(a):
+    return envoyer(["pcb"], "cao_zones_ecrire", lot(a, ZONE, ("action",)), a)
+
+
+def cao_serigraphie_ecrire(a):
+    return envoyer(["pcb"], "cao_serigraphie_ecrire", lot(a, SERIGRAPHIE, ("action",)), a)
+
+
+def cao_pastille_regler(a):
+    return envoyer(["pcb"], "cao_pastille_regler", lot(a, PASTILLE, ("pastille",)), a)
+
+
 def cao_schema_dessiner(a):
     ops = a.get("operations")
     if not isinstance(ops, list) or not 1 <= len(ops) <= DESSIN_MAX:
@@ -215,6 +249,60 @@ OUTILS_ECRITURE_CAO = {
                                    "impedance": T, "net": T, "couches": {"type": ["array", "null"], "items": T}},
                                   ("action",)),
         "fn": cao_contraintes_ecrire,
+    },
+    "cao_contour_ecrire": {
+        "description": "Contour de la carte, un seul élément : {forme: rectangle, x, y (coin), largeur, hauteur} ; "
+                       "{forme: disque, x, y (centre), rayon} — écrit en arcs au Gerber, au DXF et à l'IPC-2581 ; "
+                       "{forme: polygone, points: [{x, y}…]} (3 à 1000 sommets, côtés qui ne se coupent pas). "
+                       "En mm, côtés de 5 mm au moins. Les découpes intérieures restent ; les plans de couche "
+                       "suivent le contour. Relire : cao_pcb_lire carte." + CARTE + DRC + pilote.ATTENTE_DOC + pilote.DONNEES,
+        "inputSchema": schema_lot({"forme": {"type": "string", "enum": ["rectangle", "disque", "polygone"]},
+                                   "x": N, "y": N, "largeur": N, "hauteur": N, "rayon": N,
+                                   "points": {"type": "array", "items": {"type": "object", "properties": {"x": N, "y": N}}}},
+                                  ("forme",)),
+        "fn": cao_contour_ecrire,
+    },
+    "cao_zones_ecrire": {
+        "description": "Zones de cuivre, actions jouées dans l'ordre : creer {couche, net (vide = cuivre isolé), forme "
+                       "(carte : la carte entière ; rectangle {x, y, largeur, hauteur} ; disque {x, y, rayon} ; polygone "
+                       "{points}), liaison?} ; modifier {id, et ce qui change : couche, net, forme…, liaison} ; "
+                       "supprimer {id}. liaison des pastilles du net : thermique (bras, défaut), directe, cms-directe "
+                       "(directe pour les CMS, bras pour les traversantes : plot thermique de LED, QFN, régulateur). "
+                       "Les id viennent de cao_pcb_lire zones ; la réponse donne ceux des zones créées."
+                       + CARTE + DRC + pilote.ATTENTE_DOC + pilote.DONNEES,
+        "inputSchema": schema_lot({"action": {"type": "string", "enum": ["creer", "modifier", "supprimer"]}, "id": {"type": "integer"},
+                                   "couche": T, "net": T, "liaison": {"type": "string", "enum": ["thermique", "directe", "cms-directe"]},
+                                   "forme": {"type": "string", "enum": ["carte", "rectangle", "disque", "polygone"]},
+                                   "x": N, "y": N, "largeur": N, "hauteur": N, "rayon": N,
+                                   "points": {"type": "array", "items": {"type": "object", "properties": {"x": N, "y": N}}}},
+                                  ("action",)),
+        "fn": cao_zones_ecrire,
+    },
+    "cao_serigraphie_ecrire": {
+        "description": "Sérigraphie, actions dans l'ordre : texte {face (dessus/dessous), texte, x, y (centre), hauteur "
+                       "(mm, 1 par défaut), rotation, largeur (trait, 0,15)} ; trait / rectangle {face, x1, y1, x2, y2, "
+                       "largeur} ; repere {ref, dx, dy : décalage du repère depuis sa place d'office au-dessus du "
+                       "boîtier, en mm} ; auto {ref, actif : sérigraphie automatique du composant} ; supprimer {id "
+                       "d'un dessin, cao_pcb_lire serigraphie}. Ce qui est posé est ce que le Gerber imprime ; les "
+                       "valeurs des composants ne sont pas imprimées." + CARTE + pilote.ATTENTE_DOC + pilote.DONNEES,
+        "inputSchema": schema_lot({"action": {"type": "string", "enum": ["texte", "trait", "rectangle", "repere", "auto", "supprimer"]},
+                                   "face": {"type": "string", "enum": ["dessus", "dessous"]}, "texte": T, "ref": T,
+                                   "actif": {"type": "boolean"}, "id": {"type": "integer"},
+                                   **{k: N for k in ("x", "y", "x1", "y1", "x2", "y2", "hauteur", "rotation", "largeur", "dx", "dy")}},
+                                  ("action",)),
+        "fn": cao_serigraphie_ecrire,
+    },
+    "cao_pastille_regler": {
+        "description": "Réglages d'une pastille {pastille: « U1.3 » (toutes celles de ce numéro), liaison (zone : celle "
+                       "de la zone ; thermique ; directe), bras_largeur (mm), bras_nombre (1 à 8), bras_angle (°), "
+                       "masque (ouverture, mm), pate (retrait, mm)} ; null rend la règle de la carte. Une empreinte "
+                       "calculée est figée en pastilles explicites. Relire : cao_pcb_lire composant."
+                       + CARTE + DRC + pilote.ATTENTE_DOC + pilote.DONNEES,
+        "inputSchema": schema_lot({"pastille": T, "liaison": {"type": "string", "enum": ["zone", "thermique", "directe"]},
+                                   "bras_nombre": {"type": ["integer", "null"]},
+                                   **{k: {"type": ["number", "null"]} for k in ("bras_largeur", "bras_angle", "masque", "pate")}},
+                                  ("pastille",)),
+        "fn": cao_pastille_regler,
     },
     "cao_sim_ecrire": {
         "description": "Paramètres de simulation de la page PCB ou de la visionneuse : {groupe (pdn_fiche, "
