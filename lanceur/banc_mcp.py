@@ -865,7 +865,8 @@ OPS = [{"op": "feuille", "creer": "Alim"}, {"op": "poser", "type": "regulator", 
        {"op": "poser", "catalogue": "C0402_100NF", "feuille": 3}, {"op": "relier", "de": "U1.IN", "a": "C1.1"},
        {"op": "etiqueter", "broche": "U1.GND", "net": "GND", "genre": "gnd"}, {"op": "deplacer", "ref": "U1", "dx": 5, "dy": 0},
        {"op": "tourner", "ref": "U1", "angle": 180}, {"op": "miroir", "ref": "C1"}, {"op": "supprimer_fil", "de": "U1.IN", "a": "C1.1"},
-       {"op": "supprimer", "ref": "C1"}, {"op": "feuille", "renommer": 1, "nom": "Entrée"}, {"op": "renumeroter"}]
+       {"op": "supprimer", "ref": "C1"}, {"op": "feuille", "renommer": 1, "nom": "Entrée"}, {"op": "renumeroter"},
+       {"op": "cadre", "x1": 0, "y1": 0, "x2": 30, "y2": 20, "titre": "Note", "zone": False}]
 FauxApi.recues.clear()
 verifier("cao_schema_dessiner accepté", outil("cao_schema_dessiner", operations=OPS)[0], False)
 d = FauxApi.recues[-1][2]

@@ -100,6 +100,7 @@ OPERATIONS = {
     "etiqueter": dict(F, broche=NOM, net=NOM, genre=parmi("local", "global", "vcc", "gnd")),
     "feuille": {"creer": NOM, "renommer": ENTIER, "nom": NOM},
     "renumeroter": {},
+    "cadre": dict(F, x1=NOMBRE, y1=NOMBRE, x2=NOMBRE, y2=NOMBRE, titre=TEXTE_, zone=BOOLEEN),
 }
 
 
@@ -349,7 +350,10 @@ OUTILS_ECRITURE_CAO = {
                        "valeur, x, y (mm ; sans position, place libre), rotation, miroir} ; deplacer {ref, x, y "
                        "ou dx, dy} ; tourner {ref, angle} ; miroir {ref} ; supprimer {ref} ; relier {de, a : "
                        "« R1.2 » ou « U1.OUT »} ; supprimer_fil {de, a} ; etiqueter {broche, net, genre : local, "
-                       "global, vcc, gnd} ; feuille {creer} ou {renommer, nom} ; renumeroter (tout le document). "
+                       "global, vcc, gnd} ; feuille {creer} ou {renommer, nom} ; renumeroter (tout le document) ; "
+                       "cadre {x1, y1, x2, y2, titre?, zone? : true = zone fonctionnelle, une room au PCB ; sinon "
+                       "un cadre de note}. Texte libre : poser {type: annot_text (ou annot_note, encadrée), valeur ; "
+                       "« | » sépare les lignes}. "
                        "Les autres opérations peuvent viser une « feuille » (n°), sinon la feuille affichée. Les "
                        "étiquettes et alimentations n'ont pas de repère : seul Ctrl+Z les retire. Un repère posé sert aux "
                        "opérations suivantes. Un fil qui relierait d'autres broches que celles demandées est "
