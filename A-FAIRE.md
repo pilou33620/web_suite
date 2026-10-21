@@ -13,7 +13,9 @@ détail de chaque module dans `tasks/`). Ce qui reste, au 21/10/2026 :
 
 - [ ] **iPad** : le canal de pilotage depuis un appareil appairé (cartes, interrupteur, capture).
 - [ ] **Claude Code relancé avec le MCP** : sur le Pi, puis sous Windows par SSH, où le skill
-  `web-suite` n'est pas chargé et passe par `savoir_lire`.
+  `web-suite` n'est pas chargé et passe par `savoir_lire`. Fait le 21/10/2026 sous Linux, outils
+  sur le même poste : `claude -p` avec le MCP lit la page WEB_ANTENNA ouverte (onglets,
+  `antenna_lire`) ; restent le Pi et Windows par SSH.
 - [ ] **WEB_CAO** : `cao_paire` et `cao_placement_auto` dans la vraie page (voir son A-FAIRE).
 - [ ] **WEB_ANTENNA** : un vrai calcul openEMS pour les courbes (voir son A-FAIRE).
 - [ ] **WEB_3D** : un fichier introuvable ou illisible doit rendre « echouee » avec le message de
@@ -35,9 +37,9 @@ détail de chaque module dans `tasks/`). Ce qui reste, au 21/10/2026 :
   Ctrl+Z les retire.
 - [ ] **routage** : `cao_placement_auto` n'a pas d'aperçu dessiné (la carte dit ce qui bouge) ;
   la méthode « blocs » n'a pas d'essai positif au banc.
-- [ ] **registre-antenna** : une vue changée par `antenna_vue` part avec le prochain
-  enregistrement du projet ; un panneau montré reste si l'utilisateur change ensuite la
-  disposition.
+- [x] **registre-antenna** (21/10/2026) : l'étape montrée par `antenna_vue` n'est plus celle
+  qu'enregistre le projet, ni un panneau montré celui de la disposition, tant que l'utilisateur
+  n'y touche pas (`pilote-antenna.js`, banc-interface section 10).
 - [x] **composants** : constantes des puces alignées sur l'IPC-7351B relayé par KiCad ; 0201, 0402,
   0603 et QFN comparés aux empreintes KiCad, DIP et barrette aussi (21/10/2026, A-FAIRE de WEB_CAO).
 
@@ -59,4 +61,8 @@ détail de chaque module dans `tasks/`). Ce qui reste, au 21/10/2026 :
 
 - [ ] Gestion LIB : son tutoriel ne passe pas en Chromium headless sur le Pi (la mémoire au
   chargement, environ 890 Mo, est retirée de la liste le 21/10/2026).
-- [ ] WEB_ANTENNA : 422 de `/api/openems` pendant le tutoriel sur une page vide.
+- [x] WEB_ANTENNA : 422 de `/api/openems` pendant le tutoriel (21/10/2026) : la pose de
+  l'exemple revérifiait avant que le gabarit ait dessiné son cuivre ; un document sans cuivre
+  est maintenant refusé dans la page, sans appel au serveur.
+- [x] **Canal de pilotage** (21/10/2026) : une commande porte jusqu'à 8 Mo (`pilote.py`, copies des
+  quatre dépôts) ; avant, 64 Ko : un kicad_mod de plus de 64 Ko aurait été refusé.
