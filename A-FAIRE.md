@@ -48,6 +48,12 @@ détail de chaque module dans `tasks/`). Ce qui reste, au 21/10/2026 :
 - [x] Simulation RF : un Touchstone à N ports sur une puce qui a plus de broches (« ! broches »,
   « ! masse » dans le fichier) et plusieurs états d'une pièce au catalogue ; les deux états de
   l'AS179 sont dans la LIB (21/10/2026, A-FAIRE de WEB_CAO).
+- [ ] **Outil MCP pour lier un modèle de simulation** à une référence de la LIB (demandé le
+  21/10/2026) : le pendant de « 📎 Lier un fichier » de la Gestion LIB. Claude donne la référence,
+  le fichier (.sNp ou SPICE) et, pour un Touchstone, la patte de chaque port et la masse (numéro
+  ou nom du brochage) ; carte de confirmation, puis le fichier rangé dans `lib_simulation` et
+  ajouté à la colonne « Modèle Simulation ». Réutiliser `COMPOSANTS_LIB.brancherTouchstone`
+  (`commun/composants-lib.js` de WEB_CAO), comme `lib_composant_creer` réutilise ses contrôles.
 
 ## Défauts des outils vus pendant les essais (antérieurs au MCP)
 
