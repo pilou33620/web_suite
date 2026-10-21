@@ -51,7 +51,7 @@ def parmi(*choix):
 CHAMPS_SCH = {"ref": NOM, "valeur": TEXTE_, "boitier": TEXTE_, "fabricant": TEXTE_, "mpn": TEXTE_,
               "specs": SPECS, "non_monte": BOOLEEN}
 CHAMPS_PCB = {"ref": NOM, "valeur": TEXTE_, "boitier": NOM, "face": parmi("dessus", "dessous"),
-              "x": NOMBRE, "y": NOMBRE, "rotation": NOMBRE}
+              "x": NOMBRE, "y": NOMBRE, "rotation": NOMBRE, "puissance": NOMBRE_OU_NUL}
 PISTE = {"net": NOM, "largeur": NOMBRE, "couche": NOM, "realigner": BOOLEEN}
 CLASSE = {"action": parmi("creer", "modifier", "supprimer", "affecter"), "nom": NOM, "net": NOM, "classe": NOM,
           "largeur": NOMBRE, "isolation": NOMBRE, "via": NOMBRE, "percage": NOMBRE, "largeur_couches": LARGEURS}
@@ -226,7 +226,8 @@ OUTILS_ECRITURE_CAO = {
         "description": "Change des propriétés de composants. Schéma : ref, valeur, boitier, fabricant, mpn, "
                        "specs (objet clé → texte, null efface), non_monte. PCB : ref, valeur, boitier (doit "
                        "exister dans les empreintes), face (dessus/dessous), x, y (mm, même repère que "
-                       "cao_pcb_lire), rotation (degrés) ; le cuivre accroché suit selon la préférence de "
+                       "cao_pcb_lire), rotation (degrés), puissance (W dissipés, pour cao_thermique ; null l'efface) ; "
+                       "le cuivre accroché suit selon la préférence de "
                        "la page. Un repère est unique dans le document, à chaque étape du lot : pour échanger R1 et R2, "
                        "passe par un repère libre dans deux cartes."
                        + CARTE + DRC + pilote.ATTENTE_DOC + pilote.DONNEES,

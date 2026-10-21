@@ -102,6 +102,10 @@ def cao_vue(a):
     return image
 
 
+def cao_thermique(a):
+    return envoyer(["pcb"], "cao_thermique", {}, a)
+
+
 def cao_drc(a):
     return resumer(envoyer(["pcb"], "cao_drc", {}, a), "Trop d'erreurs : corrige les premières, puis relance.")
 
@@ -175,6 +179,16 @@ OUTILS_CAO = {
             "feuille": {"type": "integer", "minimum": 1}, "couches": {"type": "array", "items": {"type": "string"}},
             "ajuster": {"type": "boolean"}, "capturer": {"type": "boolean"}, "onglet": ONGLET}},
         "fn": cao_vue,
+    },
+    "cao_thermique": {
+        "description": "Estime l'échauffement des composants du PCB ouvert qui dissipent (puissance réglée par "
+                       "cao_composants_ecrire, champ puissance en W) : le cuivre relié à leurs pastilles (îlots de zone "
+                       "touchés par un cuivre réel, pistes de leurs nets) est mesuré par la page, puis le modèle "
+                       "d'étalement de la chute DC (dc_solver) rend ΔT, la résistance thermique et ce qui est supposé. "
+                       "Un ordre de grandeur (±30 %), pas une simulation. Le DRC signale ensuite ce qui dépasse "
+                       "l'échauffement max de la carte, tant qu'elle n'a pas bougé. N'entre pas dans l'historique." + DONNEES,
+        "inputSchema": {"type": "object", "properties": {"onglet": ONGLET}},
+        "fn": cao_thermique,
     },
     "cao_drc": {
         "description": "Lance le DRC de l'éditeur PCB ouvert (comme le bouton DRC) et rend les erreurs puis les "

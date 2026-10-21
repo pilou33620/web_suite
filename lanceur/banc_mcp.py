@@ -730,7 +730,9 @@ _aide = os.path.normpath(aide_pilote.FICHIER)
 if os.path.exists(os.path.dirname(_aide)):
     with open(_aide, encoding="utf-8") as _f:
         verifier("pilote-aide.json à jour (sinon : python3 lanceur/aide_pilote.py)", _f.read() == aide_pilote.contenu(), True)
-verifier("70 outils en tout (registre-cao, ecriture-cao, dessin-schema, registre-antenna, routage, composants, savoir_lire)", len(noms), 70)
+verifier("cao_thermique listé, une lecture de la page PCB (donnée)", "cao_thermique" in noms and
+         "donnée" in next(o["description"] for o in outils if o["name"] == "cao_thermique"), True)
+verifier("71 outils en tout (registre-cao, ecriture-cao, dessin-schema, registre-antenna, routage, composants, savoir_lire)", len(noms), 71)
 verifier("registre-cao : ce que rend la page est une donnée",
          all("donnée" in o["description"] for o in outils if o["name"] in OC), True)
 FauxApi.table[("POST", "/api/pilote/commande")] = fin("- GND")
