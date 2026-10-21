@@ -70,11 +70,11 @@ CONTOUR = dict(FORME, forme=parmi("rectangle", "disque", "polygone"))
 DECOUPE = dict(FORME, action=parmi("creer", "supprimer"), forme=parmi("rectangle", "disque", "polygone"),
                numero=(lambda v: type(v) is int and v >= 1, "entier, le numéro lu par cao_pcb_lire carte"))
 ZONE = dict(FORME, action=parmi("creer", "modifier", "supprimer"), id=ID, couche=NOM, net=TEXTE_,
-            liaison=parmi("thermique", "directe", "cms-directe"), forme=parmi("carte", "rectangle", "disque", "polygone"))
+            liaison=parmi("thermique", "directe", "cms-directe", "aucune"), forme=parmi("carte", "rectangle", "disque", "polygone"))
 SERIGRAPHIE = {"action": parmi("texte", "trait", "rectangle", "repere", "auto", "supprimer"),
                "face": parmi("dessus", "dessous"), "texte": TEXTE_, "ref": NOM, "actif": BOOLEEN, "id": ID,
                **{k: NOMBRE for k in ("x", "y", "x1", "y1", "x2", "y2", "hauteur", "rotation", "largeur", "dx", "dy")}}
-PASTILLE = {"pastille": NOM, "liaison": parmi("zone", "thermique", "directe"),
+PASTILLE = {"pastille": NOM, "liaison": parmi("zone", "thermique", "directe", "aucune"),
             "bras_nombre": (lambda v: v is None or (type(v) is int and 1 <= v <= 8), "entier de 1 à 8, ou null"),
             **{k: NOMBRE_OU_NUL for k in ("bras_largeur", "bras_angle", "masque", "pate")}}
 # condensateurs : {refs} | {mpn} | {valeur, boitier} ; bornes_dc : {composant} (la page contrôle laquelle)
@@ -285,11 +285,12 @@ OUTILS_ECRITURE_CAO = {
                        "(carte : la carte entière ; rectangle {x, y, largeur, hauteur} ; disque {x, y, rayon} ; polygone "
                        "{points}), liaison?} ; modifier {id, et ce qui change : couche, net, forme…, liaison} ; "
                        "supprimer {id}. liaison des pastilles du net : thermique (bras, défaut), directe, cms-directe "
-                       "(directe pour les CMS, bras pour les traversantes : plot thermique de LED, QFN, régulateur). "
+                       "(directe pour les CMS, bras pour les traversantes : plot thermique de LED, QFN, régulateur), "
+                       "aucune (pastilles dégagées, non reliées). Un bras qui toucherait un autre net n'est pas tracé. "
                        "Les id viennent de cao_pcb_lire zones ; la réponse donne ceux des zones créées."
                        + CARTE + DRC + pilote.ATTENTE_DOC + pilote.DONNEES,
         "inputSchema": schema_lot({"action": {"type": "string", "enum": ["creer", "modifier", "supprimer"]}, "id": {"type": "integer"},
-                                   "couche": T, "net": T, "liaison": {"type": "string", "enum": ["thermique", "directe", "cms-directe"]},
+                                   "couche": T, "net": T, "liaison": {"type": "string", "enum": ["thermique", "directe", "cms-directe", "aucune"]},
                                    "forme": {"type": "string", "enum": ["carte", "rectangle", "disque", "polygone"]},
                                    "x": N, "y": N, "largeur": N, "hauteur": N, "rayon": N,
                                    "points": {"type": "array", "items": {"type": "object", "properties": {"x": N, "y": N}}}},
@@ -312,11 +313,11 @@ OUTILS_ECRITURE_CAO = {
     },
     "cao_pastille_regler": {
         "description": "Réglages d'une pastille {pastille: « U1.3 » (toutes celles de ce numéro), liaison (zone : celle "
-                       "de la zone ; thermique ; directe), bras_largeur (mm), bras_nombre (1 à 8), bras_angle (°), "
+                       "de la zone ; thermique ; directe ; aucune), bras_largeur (mm), bras_nombre (1 à 8), bras_angle (°), "
                        "masque (ouverture, mm), pate (retrait, mm)} ; null rend la règle de la carte. Une empreinte "
                        "calculée est figée en pastilles explicites. Relire : cao_pcb_lire composant."
                        + CARTE + DRC + pilote.ATTENTE_DOC + pilote.DONNEES,
-        "inputSchema": schema_lot({"pastille": T, "liaison": {"type": "string", "enum": ["zone", "thermique", "directe"]},
+        "inputSchema": schema_lot({"pastille": T, "liaison": {"type": "string", "enum": ["zone", "thermique", "directe", "aucune"]},
                                    "bras_nombre": {"type": ["integer", "null"]},
                                    **{k: {"type": ["number", "null"]} for k in ("bras_largeur", "bras_angle", "masque", "pate")}},
                                   ("pastille",)),
