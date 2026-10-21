@@ -41,7 +41,7 @@ peut rendre.
 |---|---|---|
 | Dessiner ou modifier un schéma | `cao_schema_dessiner`, `cao_composants_ecrire` | [schema.md](schema.md) |
 | Règles PCB : largeurs, classes, paires, contraintes | `cao_pistes_ecrire`, `cao_classes_ecrire`, `cao_contraintes_ecrire` | [pcb.md](pcb.md) |
-| Carte : contour, zones de cuivre, sérigraphie, réglages de pastille | `cao_contour_ecrire`, `cao_zones_ecrire`, `cao_serigraphie_ecrire`, `cao_pastille_regler` | [pcb.md](pcb.md) |
+| Carte : contour, zones de cuivre, sérigraphie, réglages de pastille | `cao_contour_ecrire`, `cao_decoupes_ecrire`, `cao_zones_ecrire`, `cao_serigraphie_ecrire`, `cao_pastille_regler` | [pcb.md](pcb.md) |
 | Placer, router | `cao_placement_auto`, `cao_router`, `cao_paire`, `cao_score` | [routage.md](routage.md) |
 | Simuler, régler depuis une datasheet | `cao_calcul`, `cao_sim_lire`, `cao_sim_ecrire` | [simulation.md](simulation.md) |
 | Créer un composant dans la LIB | `lib_empreinte_generer`, `lib_kicad_convertir`, `lib_composant_creer` | [composants.md](composants.md) |

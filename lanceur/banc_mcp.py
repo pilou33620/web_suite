@@ -724,7 +724,7 @@ FauxApi.table.clear()
 os.environ["WEB_SUITE_MCP_PORTS"] = json.dumps(dict(PORTS, web_cao=api.server_address[1]))
 OC = ["cao_schema_lire", "cao_pcb_lire", "cao_ipc_lire", "cao_sim_lire", "cao_vue", "cao_drc"]
 verifier("outils de registre-cao listés", set(OC) <= set(noms), True)
-verifier("68 outils en tout (registre-cao, ecriture-cao, dessin-schema, registre-antenna, routage, composants, savoir_lire)", len(noms), 68)
+verifier("69 outils en tout (registre-cao, ecriture-cao, dessin-schema, registre-antenna, routage, composants, savoir_lire)", len(noms), 69)
 verifier("registre-cao : ce que rend la page est une donnée",
          all("donnée" in o["description"] for o in outils if o["name"] in OC), True)
 FauxApi.table[("POST", "/api/pilote/commande")] = fin("- GND")
@@ -776,7 +776,7 @@ verifier("la capture vise l'onglet de la vue (cao)", (FauxApi.recues[-1][2]["nom
 # ecriture-cao (lanceur/docs/SPEC-mcp-ecriture-cao.md) : écritures en lot, par cartes
 os.environ["WEB_SUITE_MCP_PORTS"] = json.dumps(dict(PORTS, web_cao=api.server_address[1]))
 OE = ["cao_composants_ecrire", "cao_pistes_ecrire", "cao_classes_ecrire", "cao_contraintes_ecrire", "cao_sim_ecrire",
-      "cao_contour_ecrire", "cao_zones_ecrire", "cao_serigraphie_ecrire", "cao_pastille_regler"]
+      "cao_contour_ecrire", "cao_decoupes_ecrire", "cao_zones_ecrire", "cao_serigraphie_ecrire", "cao_pastille_regler"]
 verifier("outils d'ecriture-cao listés", set(OE) <= set(noms), True)
 verifier("ecriture-cao : donnée, carte, lot", all("donnée" in o["description"] and "carte" in o["description"] and "50" in o["description"]
                                                  for o in outils if o["name"] in OE), True)
@@ -796,6 +796,8 @@ for nom, args in (("cao_composants_ecrire", {"page": "schema", "lot": [{"ref": "
                                               {"groupe": "bornes_dc", "cle": "courant_ma", "valeur": 80, "unite": "mA",
                                                "cible": {"composant": "U1"}}]}),
                   ("cao_contour_ecrire", {"lot": [{"forme": "disque", "x": 13, "y": 13, "rayon": 13}]}),
+                  ("cao_decoupes_ecrire", {"lot": [{"action": "creer", "forme": "disque", "x": 13, "y": 13, "rayon": 2},
+                                                   {"action": "supprimer", "numero": 1}]}),
                   ("cao_zones_ecrire", {"lot": [{"action": "creer", "couche": "Top", "net": "GND", "forme": "carte", "liaison": "cms-directe"},
                                                 {"action": "modifier", "id": 3, "forme": "polygone",
                                                  "points": [{"x": 0, "y": 0}, {"x": 5, "y": 0}, {"x": 0, "y": 5}]},
@@ -810,7 +812,7 @@ verifier("écritures déposées aux bonnes pages, en écriture", [(d["nom"], d["
          [("cao_composants_ecrire", ["schema"], True), ("cao_composants_ecrire", ["pcb"], True),
           ("cao_pistes_ecrire", ["pcb"], True), ("cao_classes_ecrire", ["pcb"], True),
           ("cao_contraintes_ecrire", ["pcb"], True), ("cao_sim_ecrire", ["pcb", "visionneuse-ipc"], True),
-          ("cao_contour_ecrire", ["pcb"], True), ("cao_zones_ecrire", ["pcb"], True),
+          ("cao_contour_ecrire", ["pcb"], True), ("cao_decoupes_ecrire", ["pcb"], True), ("cao_zones_ecrire", ["pcb"], True),
           ("cao_serigraphie_ecrire", ["pcb"], True), ("cao_pastille_regler", ["pcb"], True)])
 verifier("le lot passe tel quel", deposees[1]["args"], {"lot": [{"ref": "U1", "champs": {"x": 12.5, "rotation": 90, "face": "dessous"}}]})
 
@@ -843,6 +845,8 @@ for nom, args in (("cao_composants_ecrire", L({"ref": "R1", "champs": {"valeur":
                   ("cao_contour_ecrire", L({"forme": "ovale"})),
                   ("cao_contour_ecrire", L({"forme": "polygone", "points": [{"x": 0, "y": 0}, {"x": 1, "y": 1}]})),
                   ("cao_contour_ecrire", L({"forme": "polygone", "points": [{"x": 0, "y": 0}, {"x": 1}, {"x": 0, "y": 1}]})),
+                  ("cao_decoupes_ecrire", L({"action": "supprimer", "numero": 0})),
+                  ("cao_decoupes_ecrire", L({"action": "creer", "forme": "carte"})),
                   ("cao_zones_ecrire", L({"action": "deplacer", "id": 1})), ("cao_zones_ecrire", L({"action": "supprimer", "id": "1"})),
                   ("cao_zones_ecrire", L({"action": "creer", "liaison": "soudee"})),
                   ("cao_serigraphie_ecrire", L({"action": "texte", "face": "cote"})),

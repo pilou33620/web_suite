@@ -89,7 +89,7 @@ l'historique, et Ctrl+Z se comporte mal ensuite. Chaque geste a sa commande, une
 une étape d'historique :
 
 - Contour : `cao_contour_ecrire` (rectangle, disque — écrit en arcs au Gerber —, polygone).
-  Relire : `cao_pcb_lire` (quoi=carte).
+  Relire : `cao_pcb_lire` (quoi=carte). Fenêtres fraisées dans la carte : `cao_decoupes_ecrire`.
 - Zones de cuivre : `cao_zones_ecrire` (creer, modifier, supprimer ; forme « carte » pour un
   plan pleine carte). Relire : `cao_pcb_lire` (quoi=zones), qui donne les id.
 - Plot thermique d'une LED de puissance, d'un QFN, d'un régulateur : liaison **directe** à

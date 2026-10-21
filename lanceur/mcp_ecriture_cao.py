@@ -67,6 +67,8 @@ POINTS = (lambda v: isinstance(v, list) and 3 <= len(v) <= 1000 and all(
 ID = (lambda v: type(v) is int and v >= 1, "entier, l'id lu par cao_pcb_lire")
 FORME = {"x": NOMBRE, "y": NOMBRE, "largeur": NOMBRE, "hauteur": NOMBRE, "rayon": NOMBRE, "points": POINTS}
 CONTOUR = dict(FORME, forme=parmi("rectangle", "disque", "polygone"))
+DECOUPE = dict(FORME, action=parmi("creer", "supprimer"), forme=parmi("rectangle", "disque", "polygone"),
+               numero=(lambda v: type(v) is int and v >= 1, "entier, le numéro lu par cao_pcb_lire carte"))
 ZONE = dict(FORME, action=parmi("creer", "modifier", "supprimer"), id=ID, couche=NOM, net=TEXTE_,
             liaison=parmi("thermique", "directe", "cms-directe"), forme=parmi("carte", "rectangle", "disque", "polygone"))
 SERIGRAPHIE = {"action": parmi("texte", "trait", "rectangle", "repere", "auto", "supprimer"),
@@ -165,6 +167,10 @@ def cao_contour_ecrire(a):
     return envoyer(["pcb"], "cao_contour_ecrire", liste, a)
 
 
+def cao_decoupes_ecrire(a):
+    return envoyer(["pcb"], "cao_decoupes_ecrire", lot(a, DECOUPE, ("action",)), a)
+
+
 def cao_zones_ecrire(a):
     return envoyer(["pcb"], "cao_zones_ecrire", lot(a, ZONE, ("action",)), a)
 
@@ -261,6 +267,18 @@ OUTILS_ECRITURE_CAO = {
                                    "points": {"type": "array", "items": {"type": "object", "properties": {"x": N, "y": N}}}},
                                   ("forme",)),
         "fn": cao_contour_ecrire,
+    },
+    "cao_decoupes_ecrire": {
+        "description": "Découpes intérieures de la carte (fenêtres fraisées), actions dans l'ordre : creer {forme : "
+                       "rectangle {x, y, largeur, hauteur}, disque {x, y, rayon}, polygone {points}} — dans le "
+                       "contour ; supprimer {numero : 1 = la première, cao_pcb_lire carte ; numéros d'avant le lot}. "
+                       "Le cuivre s'en tient à la marge de bord, comme du contour." + CARTE + DRC + pilote.ATTENTE_DOC + pilote.DONNEES,
+        "inputSchema": schema_lot({"action": {"type": "string", "enum": ["creer", "supprimer"]}, "numero": {"type": "integer"},
+                                   "forme": {"type": "string", "enum": ["rectangle", "disque", "polygone"]},
+                                   "x": N, "y": N, "largeur": N, "hauteur": N, "rayon": N,
+                                   "points": {"type": "array", "items": {"type": "object", "properties": {"x": N, "y": N}}}},
+                                  ("action",)),
+        "fn": cao_decoupes_ecrire,
     },
     "cao_zones_ecrire": {
         "description": "Zones de cuivre, actions jouées dans l'ordre : creer {couche, net (vide = cuivre isolé), forme "

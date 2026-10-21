@@ -47,6 +47,7 @@ fichier voisin `commun/ecriture-cao.js` si `pilote-cao.js` dépasse ~400 lignes)
 | `cao_contraintes_ecrire` | PCB | Règles de paires (`S.dpRules` : largeurs min/préf/max, écarts, impédance, découplé max, portée ; les retouches couche par couche restent dans la page) et contraintes par net (`S.contraintes.nets` : longueurs min/max, vias max, couches, impédance et tolérance) |
 | `cao_sim_ecrire` | PCB, visionneuse | Lot `[{groupe, cle, valeur, unite}]` contrôlé par `simDsGroupes()` |
 | `cao_contour_ecrire` | PCB | Un élément : `{forme: rectangle, x, y, largeur, hauteur}`, `{forme: disque, x, y, rayon}` (`setBoardDisque`, arcs au Gerber), `{forme: polygone, points}` (simple, 3 à 1000 sommets). Les découpes restent |
+| `cao_decoupes_ecrire` | PCB | Lot `creer {forme : rectangle, disque, polygone}` (dans le contour) et `supprimer {numero}` sur `S.board.cutouts` |
 | `cao_zones_ecrire` | PCB | Lot d'actions `creer {couche, net, forme, liaison?}`, `modifier {id, …}`, `supprimer {id}` ; formes `carte`, `rectangle`, `disque`, `polygone` ; `liaison` thermique / directe / cms-directe (`z.connexion`) |
 | `cao_serigraphie_ecrire` | PCB | Lot `texte`, `trait`, `rectangle` (`S.drawings`), `repere {ref, dx, dy}` (`refOffX/Y`), `auto {ref, actif}` (`fp.silk`), `supprimer {id}` |
 | `cao_pastille_regler` | PCB | Lot `{pastille: "U1.3", liaison, bras_largeur, bras_nombre, bras_angle, masque, pate}` (`fpSetPad`) ; null rend la règle de la carte |
