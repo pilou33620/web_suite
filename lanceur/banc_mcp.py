@@ -789,7 +789,11 @@ for nom, args in (("cao_composants_ecrire", {"page": "schema", "lot": [{"ref": "
                   ("cao_contraintes_ecrire", {"lot": [{"action": "paire", "nom": "USB", "impedance": "D90"},
                                                       {"action": "net", "net": "CLK", "l_max": 40, "z": None, "couches": ["Top"]}]}),
                   ("cao_sim_ecrire", {"lot": [{"groupe": "pdn", "cle": "rVrmMOhm", "valeur": 12, "unite": "mΩ"},
-                                              {"groupe": "bus", "cle": "protocole", "valeur": "I2C"}]})):
+                                              {"groupe": "bus", "cle": "protocole", "valeur": "I2C"},
+                                              {"groupe": "condensateurs", "cle": "esl_nh", "valeur": 0.3, "unite": "nH",
+                                               "cible": {"refs": ["C1", "C2"]}},
+                                              {"groupe": "bornes_dc", "cle": "courant_ma", "valeur": 80, "unite": "mA",
+                                               "cible": {"composant": "U1"}}]})):
     verifier(nom + " accepté", outil(nom, **args)[0], False)
 deposees = [r[2] for r in FauxApi.recues]
 verifier("écritures déposées aux bonnes pages, en écriture", [(d["nom"], d["page"], d["ecriture"]) for d in deposees],
@@ -820,6 +824,9 @@ for nom, args in (("cao_composants_ecrire", L({"ref": "R1", "champs": {"valeur":
                   ("cao_contraintes_ecrire", L({"action": "net", "net": "CLK", "l_max": "40"})),
                   ("cao_sim_ecrire", L({"groupe": "pdn", "cle": "rVrmMOhm"})),
                   ("cao_sim_ecrire", L({"groupe": "pdn", "cle": "rVrmMOhm", "valeur": None})),
+                  ("cao_sim_ecrire", L({"groupe": "condensateurs", "cle": "esl_nh", "valeur": 1, "cible": {"refs": []}})),
+                  ("cao_sim_ecrire", L({"groupe": "condensateurs", "cle": "esl_nh", "valeur": 1, "cible": {"ref": "C1"}})),
+                  ("cao_sim_ecrire", L({"groupe": "bornes_dc", "cle": "courant_ma", "valeur": 1, "cible": "U1"})),
                   ("cao_sim_ecrire", "pas un objet")):
     verifier("%s refuse %r" % (nom, str(args)[:60]), outil(nom, **args)[0] if isinstance(args, dict) else
              mcp.appeler({"name": nom, "arguments": {"lot": args}}).get("isError", False), True)

@@ -38,7 +38,7 @@ et `WEB_ANTENNA@24ba852f80ac21d0efc97a997d08ffe6f8f72c9e`, avant le retrait de G
 | C15 | WEB_CAO/commun/ia-assistant.js:1802 | Convertir dans l'unité exacte du catalogue (12,5 mA pour pdn_fiche.iActifMa) | simulation.md |
 | C16 | WEB_CAO/commun/ia-assistant.js:1803 | Bonne cible : pdn_fiche = charge du rail ; une datasheet de régulateur règle pdn.rVrmMOhm et pdn.fVrmKhz | simulation.md |
 | C17 | WEB_CAO/commun/ia-assistant.js:1804 | Répondre d'abord par un tableau court (paramètre, valeur, page, citation), avec une confiance | simulation.md |
-| C18 | WEB_CAO/commun/ia-assistant.js:1806 | Bloc sim_params (valeurs, condensateurs ESR/ESL, bornes_dc) | écartée : remplacé par l'outil `cao_sim_ecrire` pour les groupes pdn_fiche, pdn, si, bus, dc ; condensateurs et bornes_dc n'ont pas encore d'écriture MCP (simulation.md le dit : valeurs données à l'utilisateur) |
+| C18 | WEB_CAO/commun/ia-assistant.js:1806 | Bloc sim_params (valeurs, condensateurs ESR/ESL, bornes_dc) | écartée : remplacé par l'outil `cao_sim_ecrire` pour les groupes pdn_fiche, pdn, si, bus, dc ; condensateurs et bornes_dc aussi, par une « cible » (21/10/2026) |
 | C19 | WEB_CAO/commun/ia-assistant.js:1811 | Le catalogue des paramètres réglables (clé, unité, bornes, valeur actuelle, où la lire) joint à la consigne | généré : cao_sim_lire (quoi=catalogue) |
 | C20 | WEB_CAO/commun/ia-assistant.js:253 | Le contexte n'est qu'un résumé : demander le détail avant de répondre, du plus ciblé au plus large ; ne jamais inventer une donnée qu'on peut lire | SKILL.md |
 | C21 | WEB_CAO/commun/ia-assistant.js:538 | Bus de pistes : skew acceptable à 100 MHz et plus, règle des 3W, diaphonie | pcb.md |

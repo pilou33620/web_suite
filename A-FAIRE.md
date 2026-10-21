@@ -43,8 +43,8 @@ détail de chaque module dans `tasks/`). Ce qui reste, au 19/10/2026 :
 
 ## Capacités manquantes, relevées en route
 
-- [ ] `cao_sim_ecrire` : condensateurs (ESR, ESL) et bornes de la chute DC ; `cao_calcul` :
-  l'analyse « Bus synchrone » (détail dans l'A-FAIRE de WEB_CAO).
+- [x] `cao_sim_ecrire` : condensateurs (ESR, ESL, capacité) et bornes de la chute DC, par une
+  « cible » ; `cao_calcul` : l'analyse « Bus synchrone » (`analyse=bus`) (21/10/2026).
 
 ## Défauts des outils vus pendant les essais (antérieurs au MCP)
 

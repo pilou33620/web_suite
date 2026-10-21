@@ -11,14 +11,14 @@ Les simulations vivent dans l'éditeur PCB et la visionneuse IPC-2581 ouverts.
 | Par où revient le courant d'une via, inductance de boucle | (analyse=retour) |
 | Bruit qu'une victime reçoit de ses voisines | (analyse=crosstalk) |
 | Un lien série rapide vu du récepteur (œil, gabarit USB, PCIe, HDMI, LVDS, MIPI) | (analyse=oeil) |
+| Setup / hold d'un bus synchrone (SPI, I²C, parallèle), temps de vol, skews | (analyse=bus) |
 | Chute de tension continue (IR drop), échauffement | (analyse=dc) |
 | Impédance du réseau d'alimentation Z(ω), découplage, impédance cible | (analyse=pdn) |
 | Transmission entre deux ports (puce → connecteur ou antenne) | (analyse=s21) |
 | Audit de toute la carte avant fabrication | (analyse=verif) |
 
-La fermeture setup / hold d'un bus synchrone (« Bus synchrone ») existe dans la page mais ne
-se lance pas encore par `cao_calcul` : ses paramètres se règlent (groupe bus), l'utilisateur
-lance le calcul.
+Le bus prend les nets désignés dans l'onglet « Bus synchrone » (sinon les nets sélectionnés,
+ou l'horloge trouvée par son nom) ; ses paramètres se règlent par le groupe bus.
 
 Chaque calcul prend les réglages du panneau et la sélection de l'éditeur : cadrer ou
 surligner d'abord ce qu'il faut (`cao_vue`).
@@ -47,9 +47,11 @@ Claude Code lit le PDF lui-même. Ensuite :
 7. Montrer d'abord un tableau court (paramètre, valeur, unité, page, citation, confiance),
    puis proposer le lot par `cao_sim_ecrire` : une carte, Annuler sur la carte la défait.
 
-Les parasites des condensateurs (ESR, ESL, capacité effective) et les bornes de la chute DC
-(courant d'une charge, tension d'une source) figurent au catalogue mais ne s'écrivent pas
-encore par le MCP : les donner à l'utilisateur, avec page et citation, pour qu'il les saisisse.
+Les parasites des condensateurs (ESR, ESL, capacité effective sous la tension du rail) et les
+bornes de la chute DC (courant total d'une charge, tension d'une source) s'écrivent aussi par
+`cao_sim_ecrire`, avec une « cible » : groupe condensateurs, cible {refs}, {mpn} ou {valeur,
+boitier} ; groupe bornes_dc, cible {composant}. Une borne doit déjà être posée dans la page
+(Chute DC → ⚡ Du schéma) : sinon le dire à l'utilisateur.
 
 ## Lire un résultat
 

@@ -60,7 +60,12 @@ CONTRAINTE = {"action": parmi("paire", "net"), "nom": NOM, "portee": TEXTE_, "im
               "ecart_pref": NOMBRE, "ecart_max": NOMBRE, "decouple_max": NOMBRE,
               "net": NOM, "z": NOMBRE_OU_NUL, "z_tol": NOMBRE_OU_NUL, "l_min": NOMBRE_OU_NUL, "l_max": NOMBRE_OU_NUL,
               "vias_max": NOMBRE_OU_NUL, "couches": COUCHES}
-SIM = {"groupe": NOM, "cle": NOM, "valeur": VALEUR_SIM, "unite": TEXTE_}
+# condensateurs : {refs} | {mpn} | {valeur, boitier} ; bornes_dc : {composant} (la page contrôle laquelle)
+CIBLE = {"refs": (lambda v: isinstance(v, list) and 1 <= len(v) <= 200 and all(_nom(x) for x in v), "liste de 1 à 200 repères"),
+         "mpn": NOM, "valeur": NOM, "boitier": TEXTE_, "composant": NOM}
+CIBLE_SIM = (lambda v: isinstance(v, dict) and bool(v) and all(k in CIBLE and CIBLE[k][0](x) for k, x in v.items()),
+             "objet : refs (liste de repères), mpn, valeur, boitier (condensateurs) ou composant (bornes_dc)")
+SIM = {"groupe": NOM, "cle": NOM, "valeur": VALEUR_SIM, "unite": TEXTE_, "cible": CIBLE_SIM}
 
 # dessin-schema : les clés de chaque opération (la page vérifie les valeurs)
 DESSIN_MAX = 40
@@ -214,12 +219,18 @@ OUTILS_ECRITURE_CAO = {
     "cao_sim_ecrire": {
         "description": "Paramètres de simulation de la page PCB ou de la visionneuse : {groupe (pdn_fiche, "
                        "pdn, si, bus, dc), cle, valeur, unite}. L'unité doit être celle du catalogue de la "
-                       "page (pas de conversion) ; bornes et choix sont ceux du catalogue. Hors historique : "
+                       "page (pas de conversion) ; bornes et choix sont ceux du catalogue. Parasites des "
+                       "condensateurs : {groupe: condensateurs, cle (esr_mohm, esl_nh, cap_nf), valeur, unite "
+                       "(mΩ, nH, nF), cible: {refs: [repères]} ou {mpn} ou {valeur: 100nF, boitier?}}. Bornes "
+                       "de la chute DC déjà posées : {groupe: bornes_dc, cle (courant_ma : courant TOTAL de la "
+                       "charge, réparti sur ses broches ; tension_v : la source), valeur, unite (mA, V), cible: "
+                       "{composant: repère}}. Hors historique : "
                        "Annuler sur la carte remet les valeurs d'avant. La réponse donne aussi ce que la page "
                        "en dit (calcul à relancer, assistant ΔI)." + CARTE.replace(
                            " ; appliqué, le lot fait une seule étape d'historique (Ctrl+Z le défait).", ".")
                        + pilote.ATTENTE_DOC + pilote.DONNEES,
-        "inputSchema": schema_lot({"groupe": T, "cle": T, "valeur": {"type": ["number", "string"]}, "unite": T},
+        "inputSchema": schema_lot({"groupe": T, "cle": T, "valeur": {"type": ["number", "string"]}, "unite": T,
+                                   "cible": {"type": "object"}},
                                   ("groupe", "cle", "valeur")),
         "fn": cao_sim_ecrire,
     },

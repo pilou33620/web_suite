@@ -16,7 +16,7 @@ PAGES = {"web_cao": ["schema", "pcb", "visionneuse-ipc", "gestion-lib", "accueil
          "web_antenna": ["antenna"], "web_3d": ["3d"]}
 # Pages qui ont un canevas : une capture sans onglet nommé ne vise qu'elles
 CAPTURABLES = {"web_cao": ["schema", "pcb", "visionneuse-ipc"], "web_antenna": ["antenna"], "web_3d": ["3d"]}
-ANALYSES = ("impedance", "diff", "retour", "crosstalk", "oeil", "dc", "pdn", "s21", "verif")
+ANALYSES = ("impedance", "diff", "retour", "crosstalk", "oeil", "bus", "dc", "pdn", "s21", "verif")
 CARTES_ANTENNA = ("reglages", "cotes", "balayage", "formes")
 MAX_IMAGE = 2 * 1024 * 1024   # octets de PNG rendus à Claude
 PNG = "data:image/png;base64,"
@@ -157,7 +157,8 @@ OUTILS_PILOTE = {
     "cao_calcul": {
         "description": "Lance un calcul WEB_CAO dans l'onglet PCB (ou visionneuse IPC), avec les réglages du "
                        "panneau de simulation et la sélection de l'éditeur, puis rend son rapport : "
-                       "impedance, diff, retour, crosstalk, oeil, dc, pdn, s21, verif (audit de la carte). "
+                       "impedance, diff, retour, crosstalk, oeil, bus (setup / hold d'un bus synchrone), dc, pdn, s21, "
+                       "verif (audit de la carte). "
                        "Ne modifie pas le document. Au-delà de 2 min, « en_attente » : voir pilote_suivre.",
         "inputSchema": {"type": "object", "properties": {
             "analyse": {"type": "string", "enum": list(ANALYSES)}, "onglet": ONGLET}, "required": ["analyse"]},
