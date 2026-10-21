@@ -1,7 +1,11 @@
 """Relevé d'un essai WEB_ANTENNA, au format des croisement-*.json de la racine.
 
-Usage, depuis le dossier de WEB·SUITE (celui qui contient WEB_ANTENNA/ et PROJETS/) :
-    python tasks/essais/ESSAI-antenna-releve.py SORTIE.json "note" "nom du cas=PROJETS/ANTENNA/<projet>/resultats.json" [...]
+Les essais se font sur le PC Windows par Claude in Chrome, qui recopie le relevé
+dans son rapport (commande J3 des specs, lue dans la page). Ce script sert à
+Claude Code à CONTRÔLER cette recopie quand les projets essai-claude-* sont
+arrivés jusqu'à lui (envoyés sur GitHub par l'utilisateur : PROJETS = dépôt
+WEB_SUITE_PROJETS ; les calculs/ n'y vont pas, resultats.json si) :
+    python tasks/essais/ESSAI-antenna-releve.py SORTIE.json "note" "nom du cas=<PROJETS>/ANTENNA/<projet>/resultats.json" [...]
 
 Lit le `resultat` de chaque resultats.json (balayage, croisement ou simulation seule),
 garde les nombres (f0, S11 min, Z au port et au pied, bande, MSLPort, rendement et gain)
