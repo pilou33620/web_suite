@@ -21,7 +21,10 @@ broches et nets existants. On ne pose rien sans savoir ce qui est déjà là.
   `miroir` et `supprimer` la désignent par `ref: "#id"`, sur la feuille affichée.
 - Fils courts entre broches voisines (relier) ; au-delà, une étiquette de net (local dans la
   feuille, global entre feuilles). Un fil qui toucherait d'autres broches est refusé : on
-  étiquette alors.
+  étiquette alors. Un tracé précis se donne par `fil` (points en mm, segments horizontaux ou
+  verticaux) : il ne relie que par ses deux bouts.
+- Classes et contraintes d'un net nommé se posent dès le schéma (le PCB les reprend) :
+  `cao_classes_ecrire` et `cao_contraintes_ecrire` avec `page: "schema"`.
 - Une feuille par sous-système (alimentation, microcontrôleur, connecteurs, RF…) ; à
   l'intérieur, un bloc par fonction, les signaux de gauche à droite.
 - Un bloc fonctionnel s'encadre : `cadre` avec `zone: true` (il devient une room au PCB) ;

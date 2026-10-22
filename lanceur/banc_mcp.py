@@ -874,6 +874,26 @@ for nom, args in (("cao_composants_ecrire", L({"ref": "R1", "champs": {"valeur":
              mcp.appeler({"name": nom, "arguments": {"lot": args}}).get("isError", False), True)
 verifier("aucun lot invalide n'atteint la page", FauxApi.recues, [])
 
+# classes et contraintes au schéma (page « schema »)
+FauxApi.recues.clear()
+KS = [{"action": "affecter", "net": "CLK", "classe": "Horloge"}, {"action": "affecter", "net": "SDA", "classe": ""}]
+CS = [{"action": "net", "net": "CLK", "z": 50, "couches": [1, 4], "topologie": "chaine", "ordre": ["U1", "U2"],
+       "stub_max": None}]
+verifier("classes au schéma acceptées", outil("cao_classes_ecrire", page="schema", lot=KS)[0], False)
+verifier("contraintes au schéma acceptées", outil("cao_contraintes_ecrire", page="schema", lot=CS)[0], False)
+verifier("déposées au schéma, telles quelles", [(r[2]["nom"], r[2]["page"], r[2]["args"]) for r in FauxApi.recues],
+         [("cao_classes_ecrire", ["schema"], {"lot": KS}), ("cao_contraintes_ecrire", ["schema"], {"lot": CS})])
+FauxApi.recues.clear()
+for nom, args in (("cao_classes_ecrire", {"page": "schema", "lot": [{"action": "creer", "nom": "P"}]}),
+                  ("cao_classes_ecrire", {"page": "schema", "lot": [{"action": "affecter", "classe": "RF"}]}),
+                  ("cao_classes_ecrire", {"page": "sch", "lot": KS}),
+                  ("cao_contraintes_ecrire", {"page": "schema", "lot": [{"action": "paire", "nom": "USB"}]}),
+                  ("cao_contraintes_ecrire", {"page": "schema", "lot": [dict(CS[0], couches=["Top"])]}),
+                  ("cao_contraintes_ecrire", {"page": "schema", "lot": [dict(CS[0], topologie="anneau")]}),
+                  ("cao_contraintes_ecrire", {"page": "schema", "lot": [dict(CS[0], largeur_min=0.1)]})):
+    verifier("%s refuse %r" % (nom, str(args)[:60]), outil(nom, **args)[0], True)
+verifier("aucun lot invalide n'atteint la page du schéma", FauxApi.recues, [])
+
 # dessin-schema (lanceur/docs/SPEC-mcp-dessin-schema.md) : une liste d'opérations, une carte
 d_outil = next(o for o in outils if o["name"] == "cao_schema_dessiner")
 verifier("cao_schema_dessiner : donnée, carte, 40", all(t in d_outil["description"] for t in ("donnée", "carte", "40")), True)
@@ -882,7 +902,8 @@ OPS = [{"op": "feuille", "creer": "Alim"}, {"op": "poser", "type": "regulator", 
        {"op": "etiqueter", "broche": "U1.GND", "net": "GND", "genre": "gnd"}, {"op": "deplacer", "ref": "U1", "dx": 5, "dy": 0},
        {"op": "tourner", "ref": "U1", "angle": 180}, {"op": "miroir", "ref": "C1"}, {"op": "supprimer_fil", "de": "U1.IN", "a": "C1.1"},
        {"op": "supprimer", "ref": "C1"}, {"op": "feuille", "renommer": 1, "nom": "Entrée"}, {"op": "renumeroter"},
-       {"op": "cadre", "x1": 0, "y1": 0, "x2": 30, "y2": 20, "titre": "Note", "zone": False}]
+       {"op": "cadre", "x1": 0, "y1": 0, "x2": 30, "y2": 20, "titre": "Note", "zone": False},
+       {"op": "fil", "points": [{"x": 2, "y": 0}, {"x": 8, "y": 0}, {"x": 8, "y": 5}]}]
 FauxApi.recues.clear()
 verifier("cao_schema_dessiner accepté", outil("cao_schema_dessiner", operations=OPS)[0], False)
 d = FauxApi.recues[-1][2]
@@ -894,7 +915,8 @@ for ops in ([], [{"op": "poser", "type": "resistor"}] * 41, [{"op": "voler"}], [
             [{"op": "tourner", "ref": "R1", "angle": 90.0}], [{"op": "relier", "de": "R1.1", "a": 2}],
             [{"op": "etiqueter", "broche": "R1.1", "net": "X", "genre": "bleu"}], [{"op": "poser", "type": "r", "feuille": 0}],
             [{"op": "poser", "type": "r", "x": float("inf"), "y": 0}], [{"op": "renumeroter", "feuille": 1}],
-            [{"op": "relier", "de": "R1.1\nR2.1", "a": "R3.1"}]):
+            [{"op": "relier", "de": "R1.1\nR2.1", "a": "R3.1"}], [{"op": "fil", "points": [{"x": 0, "y": 0}]}],
+            [{"op": "fil", "points": [{"x": 0, "y": 0}, {"x": 1}]}], [{"op": "fil", "points": "0,0 1,0"}]):
     verifier("cao_schema_dessiner refuse %r" % str(ops)[:50], outil("cao_schema_dessiner", operations=ops)[0], True)
 verifier("aucune opération invalide n'atteint la page", FauxApi.recues, [])
 

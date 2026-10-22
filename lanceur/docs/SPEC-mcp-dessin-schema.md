@@ -16,7 +16,7 @@ repères. Chaque dessin est un lot sur une carte, comme les écritures d'`ecritu
    (`resistor`, `opamp`, `gnd`, `port`…).
 2. **Relier** : broche à broche (« R1.2 → U1.3 », la page trace le fil en L comme la
    souris) et par étiquettes de net (port local, global, VCC, GND posés sur une broche).
-   Pas de fils par coordonnées.
+   Fils par coordonnées : ajoutés le 22/10/2026 (opération `fil`, ci-dessous).
 3. **Placement** : position donnée par Claude (mm, calée sur la grille) ; sans position, la
    page cherche une place libre à côté du dernier composant posé. Un chevauchement est
    refusé.
@@ -95,8 +95,8 @@ MCP :     python3 lanceur/banc_mcp.py
 ## Limites
 
 - **Toujours** : simuler le lot avant la carte ; refuser plutôt que relier par accident.
-- **Demander d'abord** : fils par coordonnées ; symboles de la LIB (`schsym-1`) dessinés
-  par le schéma.
+- **Demander d'abord** : rien de plus ; fils par coordonnées et symboles de la LIB décidés le
+  22/10/2026.
 - **Jamais** : enregistrer le projet ; toucher au PCB depuis ce module.
 
 ## Ajout du 21/10/2026 : étiquettes désignées par « #id »
@@ -111,3 +111,13 @@ fil, comme à la souris.
 
 1. `supprimer_fil` est ajoutée : sans elle, Claude ne pourrait défaire un fil d'un lot appliqué
    qu'en annulant tout le lot.
+
+## Ajout du 22/10/2026 : `fil`, un fil par coordonnées
+
+`{op: fil, points: [{x, y}…], feuille?}` : 2 à 50 points en mm, calés sur la grille ; chaque
+segment est horizontal ou vertical. Le fil ne relie que par ses **deux bouts** : chacun touche
+une broche, un fil existant ou rien. Le net touché à chaque bout est relevé avant le fil ; la
+garde de `relier` (`dessinEcart`) refuse toute autre fusion ou tout nom de net pris en chemin,
+et la carte dit ce que les bouts touchent. Banc : `harness.js` du schéma, « un fil par
+coordonnées ne relie que par ses bouts ».
+

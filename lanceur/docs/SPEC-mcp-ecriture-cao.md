@@ -122,8 +122,8 @@ MCP :          python3 lanceur/banc_mcp.py ; node lanceur/banc_pilote.js
 
 - **Toujours** : une carte par lot ; tout vérifier avant de toucher au document ; DRC après
   écriture au PCB.
-- **Demander d'abord** : écrire les classes et contraintes du **schéma** (`setNetClassSch`,
-  `schCmPoser`) ; toucher à `web_CAO.py`.
+- **Demander d'abord** : toucher à `web_CAO.py`. Les classes et contraintes du **schéma** sont
+  décidées le 22/10/2026 (ci-dessous).
 - **Jamais** : écrire sans carte quand l'interrupteur est éteint ; écrire la bibliothèque
   (c'est le module `composants`) ; enregistrer le projet à la place de l'utilisateur.
 
@@ -132,3 +132,19 @@ MCP :          python3 lanceur/banc_mcp.py ; node lanceur/banc_pilote.js
 1. Le panneau Propriétés du schéma écrivait repère, valeur et boîtier **sans** étape
    d'historique. Corrigé le 21/10/2026 dans WEB_CAO, boîtier compris
    (`editeur-schematique/js/12-panneaux.js`, `push()` à la première frappe).
+
+## Ajout du 22/10/2026 : classes et contraintes du schéma
+
+`cao_classes_ecrire` et `cao_contraintes_ecrire` gagnent `page` (`pcb` par défaut, ou
+`schema`). Au schéma, sur les **nets nommés** (seuls eux passent au PCB) :
+
+- classes : `{action: affecter, net, classe}` ; classe de `NET_CLASSES` (Masse, Alimentation,
+  Horloge, Rapide, RF, Analogique, Antenne, les interfaces, Lent), `""` la rend à l'analyse ;
+  la page republie les classes (`SCHEMA_PATTERNS.publierClasses`) pour le PCB ;
+- contraintes : `{action: net, net, z, z_tol, l_min, l_max, vias_max, couches (rangs, 1 =
+  dessus), topologie, ordre, stub_max, via_stub_max, etoile_tol}`, null efface ; mêmes bornes
+  que le PCB (`cmNormRegle`) ; pas de règles de paire (elles sont au PCB).
+
+Une carte, un lot, une étape d'historique (`ECRITURE_CAO.lot`). Bancs : `harness.js` du
+schéma, `banc_mcp.py`.
+

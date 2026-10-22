@@ -60,6 +60,16 @@ CONTRAINTE = {"action": parmi("paire", "net"), "nom": NOM, "portee": TEXTE_, "im
               "ecart_pref": NOMBRE, "ecart_max": NOMBRE, "decouple_max": NOMBRE,
               "net": NOM, "z": NOMBRE_OU_NUL, "z_tol": NOMBRE_OU_NUL, "l_min": NOMBRE_OU_NUL, "l_max": NOMBRE_OU_NUL,
               "vias_max": NOMBRE_OU_NUL, "couches": COUCHES}
+# au schéma : la classe d'un net, et ses contraintes (couches par rang, 1 = dessus ; topologie, ordre, moignons)
+CLASSE_SCH = {"action": parmi("affecter"), "net": NOM, "classe": TEXTE_}
+RANGS = (lambda v: v is None or (isinstance(v, list) and 1 <= len(v) <= 64 and all(type(x) is int and 1 <= x <= 64 for x in v)),
+         "liste de rangs de couche (1 = dessus), ou null")
+REPERES = (lambda v: v is None or (isinstance(v, list) and 1 <= len(v) <= 64 and all(_nom(x) for x in v)),
+           "liste de repères dans l'ordre du net, ou null")
+CONTRAINTE_SCH = {"action": parmi("net"), "net": NOM, "couches": RANGS, "ordre": REPERES,
+                  "topologie": (lambda v: v is None or v in ("p2p", "chaine", "etoile", "flyby"), "p2p, chaine, etoile, flyby, ou null"),
+                  **{k: NOMBRE_OU_NUL for k in ("z", "z_tol", "l_min", "l_max", "vias_max", "stub_max", "via_stub_max",
+                                                 "etoile_tol")}}
 # géométrie de la carte : la page vérifie les valeurs (bornes, polygone simple, nets et couches connus)
 POINTS = (lambda v: isinstance(v, list) and 3 <= len(v) <= 1000 and all(
               isinstance(p, dict) and set(p) == {"x", "y"} and _nombre(p["x"]) and _nombre(p["y"]) for p in v),
@@ -99,6 +109,9 @@ OPERATIONS = {
     "miroir": dict(F, ref=NOM),
     "supprimer": dict(F, ref=NOM),
     "relier": dict(F, de=NOM, a=NOM),
+    "fil": dict(F, points=(lambda v: isinstance(v, list) and 2 <= len(v) <= 50 and all(
+        isinstance(p, dict) and set(p) == {"x", "y"} and _nombre(p["x"]) and _nombre(p["y"]) for p in v),
+        "liste de 2 à 50 points {x, y} en mm")),
     "supprimer_fil": dict(F, de=NOM, a=NOM),
     "etiqueter": dict(F, broche=NOM, net=NOM, genre=parmi("local", "global", "vcc", "gnd")),
     "feuille": {"creer": NOM, "renommer": ENTIER, "nom": NOM},
@@ -156,12 +169,23 @@ def cao_pistes_ecrire(a):
     return envoyer(["pcb"], "cao_pistes_ecrire", lot(a, PISTE, ("net",)), a)
 
 
+def page_de(a):
+    page = a.get("page", "pcb")
+    if page not in ("schema", "pcb"):
+        refuser("Argument « page » invalide : pcb (défaut) ou schema.")
+    return page
+
+
 def cao_classes_ecrire(a):
-    return envoyer(["pcb"], "cao_classes_ecrire", lot(a, CLASSE, ("action",)), a)
+    page = page_de(a)
+    return envoyer([page], "cao_classes_ecrire",
+                   lot(a, CLASSE_SCH if page == "schema" else CLASSE, ("action", "net") if page == "schema" else ("action",)), a)
 
 
 def cao_contraintes_ecrire(a):
-    return envoyer(["pcb"], "cao_contraintes_ecrire", lot(a, CONTRAINTE, ("action",)), a)
+    page = page_de(a)
+    return envoyer([page], "cao_contraintes_ecrire",
+                   lot(a, CONTRAINTE_SCH if page == "schema" else CONTRAINTE, ("action", "net") if page == "schema" else ("action",)), a)
 
 
 def cao_contour_ecrire(a):
@@ -212,8 +236,8 @@ CARTE = (" Un lot = une carte (50 éléments au plus) : la page vérifie tout, u
 DRC = " Au PCB, la réponse donne le DRC avant → après et les nouvelles erreurs."
 
 
-def schema_lot(element, requis, **autres):
-    return {"type": "object", "required": list(autres) + ["lot"], "properties": dict(autres, **{
+def schema_lot(element, requis, facultatifs=None, **autres):
+    return {"type": "object", "required": list(autres) + ["lot"], "properties": dict(autres, **(facultatifs or {}), **{
         "lot": {"type": "array", "minItems": 1, "maxItems": LOT_MAX,
                 "items": {"type": "object", "required": list(requis), "properties": element}},
         "onglet": ONGLET})}
@@ -248,11 +272,15 @@ OUTILS_ECRITURE_CAO = {
                        "classe par défaut, ni une classe qui garde des nets), affecter {net, classe}. Affecter à une "
                        "classe que le schéma connaît et que la carte n'a pas encore (Masse, Horloge, Rapide, RF, "
                        "Analogique, Antenne, USB FS, CAN…) la crée avec ses règles d'office, comme le menu des "
-                       "classes du PCB. Le routage posé ne bouge pas : cao_pistes_ecrire realigner le fait."
-                       + CARTE + DRC + pilote.ATTENTE_DOC + pilote.DONNEES,
+                       "classes du PCB. Le routage posé ne bouge pas : cao_pistes_ecrire realigner le fait. "
+                       "page « schema » : la classe d'un net nommé du schéma, {action: affecter, net, classe} "
+                       "seulement (classes du schéma : Masse, Alimentation, Horloge, Rapide, RF, Analogique, "
+                       "Antenne, les interfaces, Lent ; \"\" la rend à l'analyse automatique) ; le PCB l'applique à "
+                       "la synchronisation." + CARTE + DRC + pilote.ATTENTE_DOC + pilote.DONNEES,
         "inputSchema": schema_lot({"action": {"type": "string", "enum": ["creer", "modifier", "supprimer", "affecter"]},
                                    "nom": T, "net": T, "classe": T, "largeur": N, "isolation": N, "via": N,
-                                   "percage": N, "largeur_couches": {"type": "object"}}, ("action",)),
+                                   "percage": N, "largeur_couches": {"type": "object"}}, ("action",),
+                                  facultatifs={"page": {"type": "string", "enum": ["pcb", "schema"], "description": "pcb par défaut"}}),
         "fn": cao_classes_ecrire,
     },
     "cao_contraintes_ecrire": {
@@ -260,11 +288,16 @@ OUTILS_ECRITURE_CAO = {
                        "ecart_min/pref/max, decouple_max (mm), portee (nom de paire, vide = toutes), "
                        "impedance (profil : D90, D100, D85, D120)} et contraintes de net {action: net, net, "
                        "z (Ω), z_tol (%), l_min, l_max (mm), vias_max, couches ; null efface}. Les "
-                       "contraintes saisies au schéma ne sont pas touchées."
+                       "contraintes saisies au schéma ne sont pas touchées. page « schema » : les contraintes "
+                       "d'un net nommé, que le PCB reprend {action: net, net, z, z_tol, l_min, l_max, vias_max, "
+                       "couches (rangs, 1 = dessus), topologie (p2p, chaine, etoile, flyby), ordre (repères, la "
+                       "source d'abord), stub_max, via_stub_max, etoile_tol ; null efface} ; pas de règles de paire."
                        + CARTE + DRC + pilote.ATTENTE_DOC + pilote.DONNEES,
         "inputSchema": schema_lot({"action": {"type": "string", "enum": ["paire", "net"]}, "nom": T, "portee": T,
-                                   "impedance": T, "net": T, "couches": {"type": ["array", "null"], "items": T}},
-                                  ("action",)),
+                                   "impedance": T, "net": T, "couches": {"type": ["array", "null"]},
+                                   "ordre": {"type": ["array", "null"], "items": T}, "topologie": {"type": ["string", "null"]}},
+                                  ("action",),
+                                  facultatifs={"page": {"type": "string", "enum": ["pcb", "schema"], "description": "pcb par défaut"}}),
         "fn": cao_contraintes_ecrire,
     },
     "cao_contour_ecrire": {
@@ -377,7 +410,8 @@ OUTILS_ECRITURE_CAO = {
                        "capacitor, ic, opamp, regulator…) ou catalogue (Part Name de lib_composants), ref, "
                        "valeur, x, y (mm ; sans position, place libre), rotation, miroir} ; deplacer {ref, x, y "
                        "ou dx, dy} ; tourner {ref, angle} ; miroir {ref} ; supprimer {ref} ; relier {de, a : "
-                       "« R1.2 » ou « U1.OUT »} ; supprimer_fil {de, a} ; etiqueter {broche, net, genre : local, "
+                       "« R1.2 » ou « U1.OUT »} ; fil {points : [{x, y}…] en mm, segments horizontaux ou "
+                       "verticaux ; il ne relie que par ses deux bouts (broche, fil ou rien)} ; supprimer_fil {de, a} ; etiqueter {broche, net, genre : local, "
                        "global, vcc, gnd} ; feuille {creer} ou {renommer, nom} ; renumeroter (tout le document) ; "
                        "cadre {x1, y1, x2, y2, titre?, zone? : true = zone fonctionnelle, une room au PCB ; sinon "
                        "un cadre de note}. Texte libre : poser {type: annot_text (ou annot_note, encadrée), valeur ; "
