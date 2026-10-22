@@ -2,6 +2,20 @@
 
 Qui : les deux (Claude in Chrome : relever la chaîne TX dans la visionneuse et chercher Zopt et les `.s2p` sur le web ; toi : les décisions, le firmware, les fichiers à lier, la mesure de l'antenne) · Où : PC Windows du boulot (et le banc si l'antenne est à mesurer) · Durée : 30 min pour Claude in Chrome, 30 min pour toi ; la mesure de l'antenne en plus · Source : `web_cao/A-FAIRE.md:246` (contexte l.238-245 ; rappel l.44)
 
+## Réponses du 22/10/2026 (à lire d'abord)
+
+- **Port 1** : l'impédance n'est pas une décision de code, c'est un réglage de chaque simulation
+  (panneau S21, 50 Ω par défaut, partie réelle et imaginaire modifiables, pour toute carte).
+  Pour cette carte : **50 Ω**, comme l'appareil du banc. La Zopt n'est plus à chercher.
+- **Port 2** : **U.FL (J400.3)**. L'impédance de l'IFA n'est plus à fournir.
+- **Branche RX** : **exclue** de la simulation TX ; un S21 en réception viendra plus tard (il
+  demande un port différentiel, noté dans `WEB_CAO/A-FAIRE.md`).
+- **Modèles des selfs et condensateurs** : ils viennent de la LIB (modèles Murata déjà liés aux
+  références du catalogue). L'étape 4 de la consigne ne sert que pour une référence de la chaîne
+  sans modèle dans la LIB.
+- **Reste une question** : la variante de montage vers J400 (R416 0 Ω, ou R425 / J401) — c'est
+  elle qui dit si le signal va à l'U.FL.
+
 ## Pourquoi
 Le S21 TX de `IPC2581_Exemple/P01x274PCB-C.xml` (U400 SX1261 → antenne, 868 MHz) est prêt côté code : chaîne décrite `A-FAIRE.md:241`, Touchstone Skyworks des deux AS179 liés (l.243, question 1 réglée). Il manque ce que toi seul peux décider ou fournir :
 - **Port 1** sur U400.23 (RFO). Son impédance se saisit dans le panneau S21 (`commun/simulation-em.js:17260-17274` : partie réelle, signe ± j, partie imaginaire ; l'aide dit « impédance de *sortie* de la puce »). Le bon choix est le conjugué de la Zopt du PA — absente du datasheet (§ 13.1.14.1 : elle dépend de `paDutyCycle`) — sinon 50 Ω, qui ne donne que la perte d'insertion (l.244).

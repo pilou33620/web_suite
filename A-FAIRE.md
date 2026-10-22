@@ -11,19 +11,21 @@ Aucun bug connu ouvert.
 
 ## Fonctionnalités
 
-Rien n'est commencé : ce sont les limites que les specs des modules ont laissées en connaissance
-de cause, à reprendre si le besoin vient. Chacune demande ton accord avant d'être commencée
-(section « Demander d'abord » de sa spec).
+Décidées le 22/10/2026 : les quatre sont à coder. Chacune touche une partie que sa spec met en
+« Demander d'abord » : ton choix vaut cet accord.
 
 - [ ] **Mode réseau chiffré (HTTPS)** : en mode réseau, commandes, captures et cookie du jeton
   circulent en clair ; quelqu'un qui écoute le Wi-Fi récupère le jeton et devient un appareil
-  appairé. Touche `appairage.py` (copié dans chaque outil) et l'appairage de l'iPad
-  ([SPEC-mcp-canal-pilote.md](lanceur/docs/SPEC-mcp-canal-pilote.md), « Limites connues »).
+  appairé. Touche `appairage.py` (copié dans chaque outil) et l'appairage de l'iPad, à refaire
+  une fois ([SPEC-mcp-canal-pilote.md](lanceur/docs/SPEC-mcp-canal-pilote.md), « Limites connues »).
+  Le plus gros chantier des quatre.
 - [ ] **Paires différentielles proposées par `cao_chemin`** : aujourd'hui `cao_paire` prend ses
   points donnés à la main ([SPEC-mcp-chemin-auto.md](lanceur/docs/SPEC-mcp-chemin-auto.md)).
-- [ ] **Classes et contraintes du schéma écrites par le MCP** (`setNetClassSch`, `schCmPoser`) :
-  seules celles du PCB s'écrivent ([SPEC-mcp-ecriture-cao.md](lanceur/docs/SPEC-mcp-ecriture-cao.md)).
-- [ ] **Fils du schéma posés par coordonnées**, et **symboles de la LIB (`schsym-1`) dessinés**
-  par le MCP ([SPEC-mcp-dessin-schema.md](lanceur/docs/SPEC-mcp-dessin-schema.md)).
-- [ ] **Modifier un composant existant de la LIB**, et écrire un fichier `schsym-1` : le MCP ne
-  sait qu'ajouter ([SPEC-mcp-composants.md](lanceur/docs/SPEC-mcp-composants.md)).
+- [ ] **Schéma piloté plus loin** : Claude écrit les classes et contraintes du schéma
+  (`setNetClassSch`, `schCmPoser`, comme au PCB), tire des fils par coordonnées, et dessine les
+  symboles de la LIB (`schsym-1`)
+  ([SPEC-mcp-ecriture-cao.md](lanceur/docs/SPEC-mcp-ecriture-cao.md),
+  [SPEC-mcp-dessin-schema.md](lanceur/docs/SPEC-mcp-dessin-schema.md)).
+- [ ] **Modifier un composant existant de la LIB**, toujours par une carte à cliquer (le MCP ne
+  sait qu'ajouter), et écrire un fichier `schsym-1`
+  ([SPEC-mcp-composants.md](lanceur/docs/SPEC-mcp-composants.md)).
