@@ -12,9 +12,10 @@ rien n'est écrit sans ta validation dans la page Gestion LIB.
 
 ### Décisions (2026-10-19)
 
-1. **Symbole** : le schéma ne dessine que ses symboles intégrés. Claude choisit donc le
-   symbole intégré (`ic`, `opamp`, `regulator`…) et écrit le **brochage** (`OUT=1,IN-=2…`),
-   ce que le schéma utilise vraiment. Pas de fichier `schsym-1` dans ce module.
+1. **Symbole** : Claude choisit le symbole intégré (`ic`, `opamp`, `regulator`…) et écrit le
+   **brochage** (`OUT=1,IN-=2…`). Depuis le 22/10/2026, le schéma dessine aussi les symboles
+   `schsym-1` de la LIB, et la création comme la modification peuvent en écrire un neuf
+   (ci-dessous).
 2. **Empreintes** : des **générateurs IPC-7351** par paramètres pour les familles courantes
    (chip, SOT, SOIC/TSSOP, QFN, DIP, barrette) ; sinon un `pcbfp-1` écrit par Claude et
    **vérifié par le code**.
@@ -109,8 +110,8 @@ MCP :    python3 lanceur/banc_mcp.py
 
 - **Toujours** : contrôler avant la carte et au clic ; ajouter sans réécrire les autres
   lignes.
-- **Demander d'abord** : écrire un fichier `schsym-1`. Modifier un composant existant : décidé
-  le 22/10/2026, par `lib_composant_modifier` (ci-dessous).
+- **Demander d'abord** : rien de plus. Modifier un composant existant et écrire un fichier
+  `schsym-1` : décidés le 22/10/2026 (ci-dessous).
   Un modèle de simulation se lie par `lib_simulation_lier` (ajouté le 21/10/2026, ci-dessous).
 - **Jamais** : écraser un fichier de la LIB ; déplacer la LIB ; écrire hors des
   sous-dossiers de la LIB.
@@ -149,6 +150,21 @@ Corriger une référence existante, demandé le 22/10/2026. Arguments : `referen
 - Carte toujours cliquée, avant / après par case ; pas d'annulation par la carte.
 - Bancs : `banc-composants.js` (commande), `banc-serveur-routes.py` (opération du serveur),
   `banc_mcp.py` (arguments).
+
+## Ajout du 22/10/2026 : les symboles de la LIB (`schsym-1`)
+
+- **Schéma** (`editeur-schematique/js/29-symboles-lib.js`) : au chargement du catalogue, chaque
+  symbole qu'il cite et qui n'est pas intégré est lu dans `lib_empreinte_schematique` et
+  ajouté à la table des symboles ; `schTypeDuCatalogue` le trouve alors comme un intégré
+  (explorateur, `cao_schema_dessiner` poser catalogue). Un symbole posé est recopié dans le
+  document (`symboles`) : il se rouvre et se dessine pareil sans la LIB. Un intégré garde la
+  priorité. Seules des primitives connues aux nombres finis sont dessinées.
+- **Écriture** : `lib_composant_creer` et `lib_composant_modifier` prennent `symbole`, un
+  schsym-1 neuf (`COMPOSANTS_LIB.verifierSymbole` : broches 1 à N sans trou, nom de fichier,
+  pas un nom d'intégré), écrit `si_absent` puis désigné par la ligne ; retiré si la ligne est
+  refusée. Le brochage se contrôle sur les noms de ses broches.
+- Bancs : `harness.js` du schéma (pose, document rouvert sans la LIB), `banc-composants.js`
+  (contrôles, carte), `banc_mcp.py` (arguments).
 
 ## Questions ouvertes
 

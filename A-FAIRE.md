@@ -22,9 +22,9 @@ Décidées le 22/10/2026 : les quatre sont à coder. Chacune touche une partie q
 - [x] **Paires différentielles proposées par `cao_chemin`** (22/10/2026) : l'axe de la paire,
   aussi large que ses deux pistes et leur écart, rendu pour `cao_paire` ; une seule couche
   ([SPEC-mcp-chemin-auto.md](lanceur/docs/SPEC-mcp-chemin-auto.md)).
-- [ ] **Schéma piloté plus loin** : faits le 22/10/2026, les classes et contraintes du schéma
-  (`page: "schema"`) et les fils par coordonnées (`fil`). Reste : dessiner les symboles de la
-  LIB (`schsym-1`)
+- [x] **Schéma piloté plus loin** (22/10/2026) : les classes et contraintes du schéma
+  (`page: "schema"`), les fils par coordonnées (`fil`), et les symboles de la LIB (`schsym-1`)
+  dessinés par le schéma et écrits par `lib_composant_creer` / `lib_composant_modifier`
   ([SPEC-mcp-ecriture-cao.md](lanceur/docs/SPEC-mcp-ecriture-cao.md),
   [SPEC-mcp-dessin-schema.md](lanceur/docs/SPEC-mcp-dessin-schema.md)).
 - [x] **Modifier un composant existant de la LIB** (22/10/2026) : `lib_composant_modifier`,

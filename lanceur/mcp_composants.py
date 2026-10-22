@@ -105,8 +105,9 @@ def lib_composant_creer(a):
         if not _texte(k, 80) or not (_texte(v, 500) or _nombre(v)):
             refuser("Colonne « %s » invalide : texte d'une ligne (500 caractères au plus) ou nombre." % str(k)[:80])
     args = {"ligne": ligne}
-    if a.get("empreinte") is not None:
-        args["empreinte"] = objet(a, "empreinte")
+    for cle in ("empreinte", "symbole"):
+        if a.get(cle) is not None:
+            args[cle] = objet(a, cle)
     return envoyer("lib_composant_creer", args, a, True)
 
 
@@ -120,11 +121,12 @@ def lib_composant_modifier(a):
     for k, v in champs.items():
         if not _texte(k, 80) or not (_texte(v, 500) or _nombre(v)):
             refuser("Colonne « %s » invalide : texte d'une ligne (500 caractères au plus) ou nombre." % str(k)[:80])
-    if not champs and a.get("empreinte") is None:
-        refuser("Rien à modifier : donne « champs », ou « empreinte » (une empreinte neuve).")
+    if not champs and a.get("empreinte") is None and a.get("symbole") is None:
+        refuser("Rien à modifier : donne « champs », « empreinte » (une empreinte neuve) ou « symbole » (un symbole neuf).")
     args = {"reference": reference, "champs": champs}
-    if a.get("empreinte") is not None:
-        args["empreinte"] = objet(a, "empreinte")
+    for cle in ("empreinte", "symbole"):
+        if a.get(cle) is not None:
+            args[cle] = objet(a, cle)
     return envoyer("lib_composant_modifier", args, a, True)
 
 
@@ -154,6 +156,11 @@ def lib_simulation_lier(a):
     return envoyer("lib_simulation_lier", args, a, True)
 
 
+SYMBOLE = (" « symbole » (facultatif) : un symbole NEUF au format schsym-1 {format: \"schsym-1\", id (= nom du fichier), "
+           "name, prefix, defaultValue, pins: [{n de 1 à N sans trou, x, y en px (20 px = 1 mm, broches au pas de 20), "
+           "name}], ext?: [x1, y1, x2, y2], primitives: [{op: line | rect | arc | circle | poly | text | arrow, …}]}, écrit "
+           "dans lib_empreinte_schematique sans jamais écraser, et que la ligne désigne (Empreinte Schématique) : le "
+           "schéma le dessine comme un intégré ; le brochage se contrôle sur ses noms de broches.")
 ONGLET = pilote.ONGLET
 NOMBRE_OU_PAIRE = {"description": "nombre (mm), ou [min, max] en mm relevés sur la datasheet"}
 METHODE = (" Méthode : générer (lib_empreinte_generer) ou convertir (lib_kicad_convertir) l'empreinte, ou "
@@ -224,11 +231,13 @@ OUTILS_COMPOSANTS = {
                        "Gestion LIB montre la ligne, les remarques et l'aperçu de l'empreinte (pilote_capture, "
                        "page gestion-lib) ; rien n'est écrit avant le clic, MÊME interrupteur allumé. Pas "
                        "d'annulation par la carte. L'appel attend jusqu'à 2 min, puis rend « en_attente » avec un "
-                       "id pour pilote_suivre." + METHODE + DONNEES,
+                       "id pour pilote_suivre. Empreinte Schématique : un symbole intégré, un symbole de la LIB, ou "
+                       "le symbole neuf." + SYMBOLE + METHODE + DONNEES,
         "inputSchema": {"type": "object", "required": ["ligne"], "properties": {
             "ligne": {"type": "object", "description": "colonne du catalogue → valeur"},
             "empreinte": {"type": "object", "description": "pcbfp-1 à créer ; absent : la ligne désigne une "
                                                            "empreinte déjà dans la LIB"},
+            "symbole": {"type": "object", "description": "schsym-1 à créer ; absent : un symbole intégré ou de la LIB"},
             "onglet": ONGLET}},
         "fn": lib_composant_creer,
     },
@@ -242,11 +251,12 @@ OUTILS_COMPOSANTS = {
                        "qu'une remarque. La page relit la ligne et le serveur refuse si elle a changé depuis : "
                        "JAMAIS d'écrasement à l'aveugle. Une carte dans Gestion LIB montre l'avant et l'après de "
                        "chaque case ; rien n'est écrit avant le clic, MÊME interrupteur allumé ; pas d'annulation "
-                       "par la carte (l'avant y est écrit pour le remettre)." + METHODE + DONNEES,
+                       "par la carte (l'avant y est écrit pour le remettre)." + SYMBOLE + METHODE + DONNEES,
         "inputSchema": {"type": "object", "required": ["reference"], "properties": {
             "reference": {"type": "string", "description": "Part Name de la référence à corriger"},
             "champs": {"type": "object", "description": "colonne du catalogue → nouvelle valeur"},
             "empreinte": {"type": "object", "description": "pcbfp-1 neuf, sous un nom absent de la LIB"},
+            "symbole": {"type": "object", "description": "schsym-1 neuf, sous un nom absent de la LIB"},
             "onglet": ONGLET}},
         "fn": lib_composant_modifier,
     },

@@ -107,7 +107,12 @@ Les autres symboles prennent les numéros de broche ; « ic » en accepte autant
   - Reference designator Prefix (R, C, U, J…) ;
   - Number Of pins ;
   - Empreinte PCB : une empreinte de la LIB, ou celle que la carte crée ;
-  - Empreinte Schématique : un symbole intégré du schéma (regulator, opamp, ic…).
-- Le symbole est un symbole intégré : pas de fichier de symbole (schsym-1) à écrire.
+  - Empreinte Schématique : un symbole intégré du schéma (regulator, opamp, ic…), un symbole
+    de la LIB, ou le symbole neuf que la carte crée.
+- Un symbole intégré suffit le plus souvent (avec le brochage). Pour un boîtier qui n'en a pas
+  (un microcontrôleur, un module), `symbole` donne un schsym-1 neuf : broches numérotées de 1
+  à N sans trou, nommées (`name`), au pas de 20 px (1 mm), et des primitives line, rect, arc,
+  circle, poly, text, arrow. Le schéma le dessine comme un intégré, et le recopie dans le
+  document où il est posé.
 - Une cellule tient sur une ligne et ne commence pas comme une formule de tableur
   (=, @, +lettre, -lettre) : « -40 » et « +/-20% » restent permis.

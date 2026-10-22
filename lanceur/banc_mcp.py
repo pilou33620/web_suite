@@ -1029,6 +1029,7 @@ for n in ("lib_composant_creer", "lib_simulation_lier", "lib_composant_modifier"
 FauxApi.table[("POST", "/api/pilote/commande")] = fin("ok", "appliquee")
 FauxApi.recues.clear()
 FP = {"format": "pcbfp-1", "name": "SOT-23-5-LDO", "pads": [{"n": 1, "x": 0, "y": 0, "w": 1, "h": 1}]}
+SYMB = {"format": "schsym-1", "id": "LDO_SYM", "pins": [{"n": 1, "x": -40, "y": 0, "name": "VIN"}], "primitives": []}
 LIGNE = {"Part Name": "LDO_3V3", "Reference designator Prefix": "U", "Number Of pins": 5,
          "Empreinte PCB": "SOT-23-5-LDO", "Empreinte Schématique": "regulator", "Brochage": "IN=1,GND=2,OUT=5"}
 for nom, args in (("lib_empreinte_generer", {"famille": "soic", "parametres": {"broches": 8, "empattement": [5.8, 6.2], "corps": [3.9, 4.9], "densite": "N"}}),
@@ -1039,11 +1040,14 @@ for nom, args in (("lib_empreinte_generer", {"famille": "soic", "parametres": {"
                   ("lib_simulation_lier", {"reference": "AS179", "fichier": "as179.s3p", "texte": "# GHz S DB R 50\n",
                                            "ports": ["J1", 3, "J3"], "masse": "GND"}),
                   ("lib_composant_modifier", {"reference": "LDO_3V3", "champs": {"Value": "3V3 500 mA", "Description": ""},
-                                              "empreinte": FP})):
+                                              "empreinte": FP}),
+                  ("lib_composant_creer", {"ligne": dict(LIGNE, **{"Empreinte Schématique": "LDO_SYM"}), "symbole": SYMB}),
+                  ("lib_composant_modifier", {"reference": "LDO_3V3", "symbole": SYMB})):
     verifier(nom + " accepté", outil(nom, **args)[0], False)
 deposees = [r[2] for r in FauxApi.recues]
-verifier("composants : page Gestion LIB, seule la création écrit", [(d["nom"], d["page"], d["ecriture"]) for d in deposees],
+verifier("composants : page Gestion LIB, seule la création écrit", [(d["nom"], d["page"], d["ecriture"]) for d in deposees[:7]],
          [(n, ["gestion-lib"], n in ("lib_composant_creer", "lib_simulation_lier", "lib_composant_modifier")) for n in OC])
+verifier("le symbole neuf arrive tel quel", (deposees[7]["args"]["symbole"], deposees[8]["args"]["symbole"]), (SYMB, SYMB))
 verifier("la modification arrive telle quelle", deposees[6]["args"],
          {"reference": "LDO_3V3", "champs": {"Value": "3V3 500 mA", "Description": ""}, "empreinte": FP})
 verifier("le modèle et ses pattes arrivent tels quels", deposees[5]["args"],
@@ -1077,7 +1081,9 @@ for nom, args in (("lib_empreinte_generer", {"famille": "bga"}), ("lib_empreinte
                   ("lib_composant_modifier", {"reference": "R1", "champs": {"Value": "a\nb"}}),
                   ("lib_composant_modifier", {"reference": "R1", "champs": {"Value": ["1"]}}),
                   ("lib_composant_modifier", {"reference": "R1", "champs": "Value=1"}),
-                  ("lib_composant_modifier", {"reference": "R1", "empreinte": "SOT-23-5"})):
+                  ("lib_composant_modifier", {"reference": "R1", "empreinte": "SOT-23-5"}),
+                  ("lib_composant_modifier", {"reference": "R1", "symbole": "LDO_SYM"}),
+                  ("lib_composant_creer", {"ligne": LIGNE, "symbole": ["schsym-1"]})):
     verifier("%s refuse %r" % (nom, str(args)[:60]), outil(nom, **args)[0], True)
 verifier("aucun argument invalide n'atteint la page (composants)", FauxApi.recues, [])
 
