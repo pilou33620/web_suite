@@ -41,6 +41,9 @@ Décidées le 22/10/2026 : les quatre sont à coder, et sont faites. Chacune tou
   lanceur à Claude Code du poste (`claude_pages.py`), avec le MCP web_suite seul ; conversation
   continue, réponses dans le panneau, écritures en cartes
   ([SPEC-claude-pages.md](lanceur/docs/SPEC-claude-pages.md)).
+- [x] **Pièces jointes dans le panneau « Claude »** (22/10/2026) : images, captures, PDF, fichiers
+  texte, par trombone, coller, glisser-déposer et « Vue » ; lues par Claude, rien d'écrit sur
+  disque par les outils.
 
 ### Limites connues, à coder si besoin
 

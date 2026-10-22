@@ -476,7 +476,7 @@ function onglet(serveur, stockage, page, nomCanal) {
   assert.strictEqual(bouton("Claude travaille…").disabled, true, "pas de seconde demande pendant la première");
   await attendreQue(() => bouton("Envoyer"), 3000, "conversation finie");
   assert.deepStrictEqual(serveur.demandes[0], { navigateur: serveur.nav, onglet: D.id, texte: "longueur de USB_DP ?",
-                                                 nouvelle: false });
+                                                 nouvelle: false, pieces: [] });
   assert.deepStrictEqual(serveur.lectures.map(l => l.depuis), ["0", "1", "1", "2"], "lecture reprise après la coupure");
   assert.ok(serveur.lectures.every(l => l.id === "d1" && l.navigateur === serveur.nav));
   const lu = texteDe(doc.body);
@@ -492,6 +492,88 @@ function onglet(serveur, stockage, page, nomCanal) {
   await D.demander("encore");
   assert.ok(/Demande non aboutie : Claude travaille déjà/.test(texteDe(doc.body)) && bouton("Envoyer"));
   serveur.refusDemande = null;
+
+  // Pièces jointes : trombone, coller, déposer, « Vue » ; un binaire est refusé, une photo HEIC
+  // de 4000 px redessinée en JPEG de 2000 px, un × retire, la demande les emporte puis les oublie
+  const toileJ = (w, h) => ({ width: w, height: h, getContext: () => ({ fillRect() {}, drawImage() {} }),
+                              toDataURL(t) { return "data:" + t + ";base64,QUJD" + this.width + "x" + this.height; } });
+  const creerEl = doc.createElement;
+  doc.createElement = t => (t === "canvas" ? toileJ(0, 0) : creerEl(t));
+  D._env.decoderImage = async f => (f.type === "image/heic" ? { width: 4000, height: 3000 }
+                                   : f.type === "image/png" ? { width: 100, height: 80 } : Promise.reject(new Error("illisible")));
+  const choix = trouver(doc.body, e => e.tagName === "input" && e.type === "file")[0];
+  const puces = () => trouver(doc.body, e => e.classes.has("pilote-piece"));
+  assert.ok(choix && choix.multiple && choix.hidden, "sélecteur de fichiers caché, plusieurs fichiers");
+  D.capture(null);
+  assert.ok(bouton("Joindre") && bouton("Vue").hidden, "« Joindre » ; « Vue » caché sans canevas");
+  choix.files = [new File(["# Note\nUSB_DP : 90 ohms"], "notes.md", { type: "text/markdown" }),
+                 new File(["%PDF-1.4"], "ds.pdf", { type: "application/pdf" }),
+                 new File([new Uint8Array([0x50, 0x4b, 0x03, 0x04, 0xff, 0x00])], "projet.zip", { type: "application/zip" }),
+                 new File(["x"], "photo.heic", { type: "image/heic" }),
+                 new File(["x"], "bizarre.tiff", { type: "image/tiff" }),
+                 new File(["<svg/>"], "schema.svg", { type: "image/svg+xml" })];   // du texte, pas une image à décoder
+  choix.dispatch("change");
+  await attendreQue(() => puces().length === 4, 2000, "quatre pièces jointes");
+  const lu2 = texteDe(doc.body);
+  assert.ok(/projet\.zip » : fichier binaire/.test(lu2) && /bizarre\.tiff » : image que ce navigateur ne sait pas lire/.test(lu2), lu2);
+  const png = new File([new Uint8Array([0x89, 0x50, 0x4e, 0x47])], "image.png", { type: "image/png" });
+  let colle = false;
+  zone.ecoutes.paste.forEach(f => f({ clipboardData: { files: [png] }, preventDefault: () => { colle = true; } }));
+  zone.ecoutes.paste.forEach(f => f({ clipboardData: { files: [] }, preventDefault: () => assert.fail("texte collé") }));
+  await attendreQue(() => puces().length === 5, 2000, "image collée");
+  assert.ok(colle);
+  const panneauJ = trouver(doc.body, e => e.classes.has("pilote"))[0];
+  let arrete = false;                                  // la page, qui ouvre ce qu'on lui dépose, ne le voit pas
+  panneauJ.ecoutes.drop.forEach(f => f({ dataTransfer: { files: [new File(["a,b"], "mesures.csv", { type: "text/csv" })] },
+                                         preventDefault() {}, stopPropagation() { arrete = true; } }));
+  assert.ok(arrete, "dépôt arrêté au panneau");
+  await attendreQue(() => puces().length === 6, 2000, "fichier déposé");
+  D.capture(() => toileJ(800, 600));
+  assert.ok(!bouton("Vue").hidden, "« Vue » apparaît avec un canevas");
+  bouton("Vue").click();
+  assert.strictEqual(puces().length, 7);
+  // × retire le CSV
+  trouver(puces().find(p => /mesures\.csv/.test(p.textContent)), e => e.tagName === "button")[0].click();
+  assert.strictEqual(puces().length, 6);
+  serveur.conversation = [{ etat: "finie", messages: [{ genre: "info", texte: "Nouvelle conversation : trop de fichiers." }] }];
+  await D.demander("lis tout ça");
+  assert.ok(trouver(doc.body, e => e.classes.has("pilote-trace") && e.textContent === "Nouvelle conversation : trop de fichiers.").length,
+            "une information du lanceur s'affiche en trace");
+  const avec = serveur.demandes[serveur.demandes.length - 1];
+  assert.deepStrictEqual(avec.pieces, [
+    { nom: "notes.md", texte: "# Note\nUSB_DP : 90 ohms" },
+    { nom: "ds.pdf", type: "application/pdf", donnees: "JVBERi0xLjQ=" },
+    { nom: "photo.heic", type: "image/jpeg", donnees: "QUJD2000x1500" },          // 4000 px ramenée à 2000
+    { nom: "schema.svg", texte: "<svg/>" },
+    { nom: "image.png", type: "image/png", donnees: "iVBORw==" },                // gardée telle quelle
+    { nom: "vue-antenna.png", type: "image/png", donnees: "QUJD800x600" }]);
+  assert.ok(/lis tout ça\nJoint : notes\.md, ds\.pdf, photo\.heic, schema\.svg, image\.png, vue-antenna\.png/.test(texteDe(doc.body)));
+  assert.strictEqual(puces().length, 0, "pièces oubliées une fois parties");
+  // Une demande refusée garde ses pièces ; les limites préviennent avant l'envoi
+  choix.files = [new File(["a"], "a.md")];
+  choix.dispatch("change");
+  await attendreQue(() => puces().length === 1, 2000, "a.md");
+  serveur.refusDemande = "Pièces jointes de plus de 20 Mo au total.";
+  await D.demander("encore");
+  assert.ok(/Demande non aboutie : Pièces jointes de plus/.test(texteDe(doc.body)) && puces().length === 1);
+  serveur.refusDemande = null;
+  choix.files = Array.from({ length: 10 }, (_, i) => new File(["x"], i + ".md"));
+  choix.dispatch("change");
+  await attendreQue(() => /au plus 10 pièces jointes/.test(texteDe(doc.body)), 2000, "11e pièce refusée");
+  assert.strictEqual(puces().length, 10);
+  trouver(doc.body, e => e.classes.has("pilote-pieces"))[0].enfants.slice().forEach(p => p.enfants[0].click());
+  choix.files = [new File(["x".repeat(400001)], "long.md")];
+  choix.dispatch("change");
+  await attendreQue(() => /dépasse les 400000 caractères/.test(texteDe(doc.body)), 2000, "texte trop long");
+  assert.strictEqual(puces().length, 0);
+  // Envoyer tout de suite après un dépôt : la demande attend la fin de la lecture et emporte le fichier
+  D._env.decoderImage = async () => { await pause(150); return { width: 10, height: 10 }; };
+  choix.files = [new File(["x"], "lente.png", { type: "image/png" })];
+  choix.dispatch("change");
+  await D.demander("tout de suite");
+  assert.deepStrictEqual(serveur.demandes[serveur.demandes.length - 1].pieces.map(p => p.nom), ["lente.png"],
+                         "Envoyer attend la fin des lectures");
+  doc.createElement = creerEl;
 
   restants.concat(D).forEach(o => o.arreter());
   await pause(REGLAGES.attenteServeur + 50);

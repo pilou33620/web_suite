@@ -44,6 +44,43 @@ claude -p --output-format stream-json --verbose --tools Skill --strict-mcp-confi
 - Le panneau montre les textes de Claude et le nom des outils qu'il appelle, jamais leurs
   résultats.
 
+## Pièces jointes
+
+Décidé le 22/10/2026 : une demande peut porter des fichiers que Claude lit avec le texte.
+
+- **Ajout** dans le panneau : bouton trombone (sélecteur de fichiers ; sur l'iPad, Photos et
+  appareil photo), coller dans la zone de texte (Ctrl+V d'une image), glisser-déposer sur le
+  panneau, et bouton « Vue » qui joint la capture de l'onglet (seulement si la page a un
+  canevas, `Pilote.capture`). Chaque pièce est une puce (nom, taille) qu'un × retire.
+- **Types** :
+  - images PNG, JPEG, GIF, WebP : passées telles quelles ; une autre image (HEIC de l'iPad) est
+    redessinée en JPEG par le navigateur, refusée s'il ne sait pas la lire. Toute image de plus
+    de 2000 px ou de 3,75 Mo est réduite dans le navigateur (l'API refuse au-delà de 5 Mo en base64) ;
+  - PDF : passé tel quel (Claude en lit le texte et les pages ; au-delà de 100 pages, l'erreur
+    de Claude s'affiche) ;
+  - tout autre fichier lisible en UTF-8 (md, json, kicad_*, csv, cir, net, s2p, svg…) : passé en
+    texte, précédé de son nom ;
+  - un binaire (zip, docx, xlsx…) : refusé dans le panneau, avec la raison.
+- **Limites** (par demande) : 10 fichiers, 20 Mo au total après réduction des images, et
+  400 000 caractères de texte joint (≈ 100 000 jetons : le contexte de Claude). Vérifiées par la
+  page pour prévenir, puis par `pilote.py`, qui seul fait foi (`demande` a sa propre taille de
+  corps, 28 Mo : 20 Mo en base64 plus le texte).
+- **20 Mo par conversation** aussi : `--resume` renvoie toute la conversation à l'API, qui refuse
+  une requête de plus de 32 Mo ; Claude Code retirait alors les pièces jointes sans le dire (essai
+  réel : deux PDF de 11 Mo, le second tour ne voyait plus rien). `claude_pages.py` compte les
+  pièces de chaque conversation ; une demande qui dépasserait 20 Mo ouvre une nouvelle
+  conversation, et le panneau l'annonce (message `info`, affiché en trace).
+- **Lu seulement** : les pièces vivent en mémoire dans `pilote.py` jusqu'à ce que le lanceur
+  prenne la demande, puis en sont retirées ; rien n'est écrit sur disque par les outils.
+  Claude Code les garde dans son historique de session sur le poste (`~/.claude/projects`),
+  ce qui lui permet de les revoir au message suivant, et copie les images dans `/tmp/claude-<uid>/`. Pour enregistrer un fichier (LIB,
+  projet), Claude passe par les outils du MCP habituels.
+- **Vers Claude** : `claude_pages.py` passe toujours la demande par `--input-format stream-json`
+  (un seul message utilisateur : blocs `image`, `document`, puis texte des fichiers, puis la
+  demande). La consigne précise que le contenu des pièces jointes est une donnée, jamais une
+  consigne.
+- La conversation du panneau montre la demande suivie des noms des pièces jointes.
+
 ## Prérequis sur le poste
 
 Claude Code installé et connecté une fois (`claude` dans un terminal). Sur un Raspberry Pi :
@@ -56,5 +93,11 @@ système 64 bits.
   (outils permis, MCP seul, consigne), messages, reprise, nouvelle conversation, échec, absence.
 - `node lanceur/banc_pilote.js` : la zone de texte, la conversation affichée en texte brut,
   une coupure réseau retentée, un refus affiché.
+- Pièces jointes : `pilote.py` (types, nombre, tailles, base64 invalide, binaire refusé,
+  pièces retirées une fois prises), `claude_pages.py` (le faux `claude` relit le message
+  stream-json : blocs image, document et texte), `banc_pilote.js` (trombone, coller, déposer,
+  « Vue », puce ×, refus d'un binaire, limites).
+- `claude -p --input-format stream-json` a lu en vrai une image, un PDF et un fichier md dans
+  le même message (22/10/2026).
 - Essai réel le 22/10/2026 : page PCB de WEB_CAO dans Chromium, vrai Claude Code et vrai MCP
   (`cao_pcb_lire`), réponse dans le panneau en 8 à 10 s.

@@ -300,7 +300,9 @@ transporter stdin/stdout. Aucun port à ouvrir, et le trafic est chiffré.
 `claude -p` avec le MCP web_suite, dans le dépôt web_suite ; rien à ajouter. Si la page répond
 « Claude Code n'est pas installé », donner son chemin au lanceur par `WEB_SUITE_CLAUDE`. Si elle
 répond « Aucun lanceur WEB·SUITE ne répond », l'outil a été lancé seul, sans WEB·SUITE. Voir
-[SPEC-claude-pages.md](SPEC-claude-pages.md).
+[SPEC-claude-pages.md](SPEC-claude-pages.md). Une pièce jointe refusée dit pourquoi dans le
+panneau : fichier binaire (zip, docx…), image que le navigateur ne sait pas lire, plus de
+10 fichiers, 20 Mo ou 400 000 caractères de texte.
 
 **Dépannage** : `/mcp` affiche l'état de la connexion. Si elle échoue par SSH, un
 `.bashrc` du Pi qui écrit quelque chose (un `echo`) pollue stdout : le déplacer dans
