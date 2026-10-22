@@ -18,7 +18,7 @@ const pause = ms => new Promise(r => setTimeout(r, ms));
    rend les commandes au navigateur de l'onglet visé, comme pilote.py. */
 function fauxServeur() {
   const s = { battements: [], file: [], reponses: [], enCours: 0, maxEnCours: 0, polls: [], balises: [],
-              inconnues: new Set(), tropGros: new Set() };
+              inconnues: new Set(), tropGros: new Set(), demandes: [], lectures: [], conversation: [] };
   s.fetch = async (url, opts = {}) => {
     const u = new URL(url, "http://outil");
     const corps = opts.body ? JSON.parse(opts.body) : null;
@@ -44,6 +44,19 @@ function fauxServeur() {
         }
         return rendre({ commandes: [] });
       } finally { s.enCours--; }
+    }
+    // Demandes écrites : le faux serveur rend la conversation préparée, une réponse par lecture
+    if (u.pathname === "/api/pilote/demande") {
+      s.demandes.push(corps);
+      if (s.refusDemande) return { ok: false, status: 409, json: async () => ({ detail: s.refusDemande }) };
+      return rendre({ id: "d" + s.demandes.length });
+    }
+    if (u.pathname === "/api/pilote/conversation") {
+      s.lectures.push(Object.fromEntries(u.searchParams));
+      await pause(20);
+      const suite = s.conversation.shift();
+      if (suite === "coupure") throw new Error("réseau coupé");
+      return rendre(suite || { etat: "finie", messages: [] });
     }
     return { ok: false, status: 404, json: async () => ({ detail: "inconnue" }) };
   };
@@ -445,6 +458,40 @@ function onglet(serveur, stockage, page, nomCanal) {
   const liste = trouver(doc.body, e => e.classes.has("pilote-liste"))[0];
   assert.ok(liste.enfants.length <= 30, "panneau borné : " + liste.enfants.length);
   assert.strictEqual(liste.attributs["aria-live"], "polite");
+
+  // La zone « Demander à Claude » : la demande part avec l'onglet et le navigateur, la
+  // conversation s'affiche au fil de l'eau (texte, outils, fin), une coupure réseau se retente
+  await attendreQue(() => /Claude a lancé : l39/.test(texteDe(doc.body)), 3000, "fin des 40 lectures");
+  const zone = trouver(doc.body, e => e.tagName === "textarea")[0];
+  assert.ok(zone && zone.maxLength === 8000, "zone de texte présente");
+  serveur.conversation = [
+    { etat: "prise", messages: [{ genre: "texte", texte: "Je lis <b>la carte</b>." }] },
+    "coupure",
+    { etat: "prise", messages: [{ genre: "outil", texte: "cao_doc_lire" }] },
+    { etat: "finie", messages: [{ genre: "texte", texte: "USB_DP fait 42 mm." }] }];
+  zone.value = "  longueur de USB_DP ?  ";
+  let entree = false;
+  zone.ecoutes.keydown.forEach(f => f({ key: "Enter", shiftKey: false, preventDefault: () => { entree = true; } }));
+  assert.ok(entree && zone.value === "", "Entrée envoie et vide la zone");
+  assert.strictEqual(bouton("Claude travaille…").disabled, true, "pas de seconde demande pendant la première");
+  await attendreQue(() => bouton("Envoyer"), 3000, "conversation finie");
+  assert.deepStrictEqual(serveur.demandes[0], { navigateur: serveur.nav, onglet: D.id, texte: "longueur de USB_DP ?",
+                                                 nouvelle: false });
+  assert.deepStrictEqual(serveur.lectures.map(l => l.depuis), ["0", "1", "1", "2"], "lecture reprise après la coupure");
+  assert.ok(serveur.lectures.every(l => l.id === "d1" && l.navigateur === serveur.nav));
+  const lu = texteDe(doc.body);
+  assert.ok(/longueur de USB_DP \?/.test(lu) && /Je lis <b>la carte<\/b>\./.test(lu) && /→ cao_doc_lire/.test(lu)
+            && /USB_DP fait 42 mm\./.test(lu), "conversation affichée en texte brut");
+  // « Nouvelle conversation » : la demande suivante le dit au lanceur, une seule fois
+  bouton("Nouvelle conversation").click();
+  await D.demander("on repart");
+  await D.demander("et ensuite");
+  assert.deepStrictEqual(serveur.demandes.slice(1).map(d => d.nouvelle), [true, false]);
+  // Un refus du serveur (Claude occupé, onglet inconnu) s'affiche, et la zone reste utilisable
+  serveur.refusDemande = "Claude travaille déjà sur ta demande précédente.";
+  await D.demander("encore");
+  assert.ok(/Demande non aboutie : Claude travaille déjà/.test(texteDe(doc.body)) && bouton("Envoyer"));
+  serveur.refusDemande = null;
 
   restants.concat(D).forEach(o => o.arreter());
   await pause(REGLAGES.attenteServeur + 50);

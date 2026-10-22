@@ -123,6 +123,14 @@ claude mcp add -s user web_suite -- ssh -T -o BatchMode=yes <utilisateur>@<poste
 
 Puis `/mcp` dans Claude Code. Windows, clé SSH, dépannage : [DETAILS](lanceur/docs/DETAILS.md#claude-code-mcp).
 
+**Depuis la page, sur n'importe quel appareil** : dans un outil lancé par WEB·SUITE, le bouton
+« Claude » en bas à droite ouvre une zone « Demander à Claude ». Ce qu'on y écrit part au lanceur,
+qui le passe à Claude Code **de ce poste**, avec le MCP web_suite seul (ni terminal ni fichiers) ;
+la réponse s'affiche dans le panneau et les modifications arrivent en cartes. Il suffit que Claude
+Code soit installé sur le poste et connecté une fois (`claude` dans un terminal ; sur un Pi,
+système 64 bits) : pas besoin de `claude mcp add` pour cela.
+[SPEC-claude-pages](lanceur/docs/SPEC-claude-pages.md).
+
 ## Sécurité
 
 - En mode réseau, tout autre appareil doit être appairé (jeton stocké dans un cookie).

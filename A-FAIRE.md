@@ -7,7 +7,9 @@ module). Chaque outil web a les deux mêmes fichiers dans son dépôt.
 
 ## Bugs
 
-Aucun bug connu ouvert.
+Aucun bug connu ouvert. Corrigé le 22/10/2026 : `pilote.py` refusait (403) les pages servies en
+HTTPS, donc toute page d'un autre appareil en mode réseau chiffré ; il accepte maintenant
+`https://<hôte>` comme `http://<hôte>`.
 
 ## Fonctionnalités
 
@@ -33,6 +35,12 @@ Décidées le 22/10/2026 : les quatre sont à coder, et sont faites. Chacune tou
   carte toujours cliquée, avant / après par case, refus si la ligne a changé depuis sa lecture
   ([SPEC-mcp-composants.md](lanceur/docs/SPEC-mcp-composants.md)). Le fichier `schsym-1` va
   avec les symboles de la LIB dessinés, ci-dessus.
+
+- [x] **Écrire à Claude depuis la page** (22/10/2026) : zone « Demander à Claude » dans le
+  panneau de chaque outil (`pilote.js`), demandes gardées par `pilote.py` et passées par le
+  lanceur à Claude Code du poste (`claude_pages.py`), avec le MCP web_suite seul ; conversation
+  continue, réponses dans le panneau, écritures en cartes
+  ([SPEC-claude-pages.md](lanceur/docs/SPEC-claude-pages.md)).
 
 ### Limites connues, à coder si besoin
 

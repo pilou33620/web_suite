@@ -568,6 +568,8 @@ def main(argv=None):
     if en_retard:
         annoncer_plus_tard(Lanceur.gestionnaire, en_retard)
     threading.Thread(target=relayer_connexions, args=(Lanceur.gestionnaire,), daemon=True).start()
+    import claude_pages   # le panneau « Claude » des pages écrit à Claude Code de ce poste
+    claude_pages.demarrer()
     try:
         serveur.serve_forever()
     except KeyboardInterrupt:

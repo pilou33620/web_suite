@@ -296,6 +296,12 @@ transporter stdin/stdout. Aucun port à ouvrir, et le trafic est chiffré.
 4. Ajouter :
    `claude mcp add -s user web_suite -- ssh -T -o BatchMode=yes pilou@<pi> python3 /home/pilou/Documents/web_suite/lanceur/mcp_web_suite.py`
 
+**Depuis la page** (zone « Demander à Claude » du panneau) : le lanceur lance lui-même
+`claude -p` avec le MCP web_suite, dans le dépôt web_suite ; rien à ajouter. Si la page répond
+« Claude Code n'est pas installé », donner son chemin au lanceur par `WEB_SUITE_CLAUDE`. Si elle
+répond « Aucun lanceur WEB·SUITE ne répond », l'outil a été lancé seul, sans WEB·SUITE. Voir
+[SPEC-claude-pages.md](SPEC-claude-pages.md).
+
 **Dépannage** : `/mcp` affiche l'état de la connexion. Si elle échoue par SSH, un
 `.bashrc` du Pi qui écrit quelque chose (un `echo`) pollue stdout : le déplacer dans
 `.profile` ou le limiter aux shells interactifs. Essai à la main :
