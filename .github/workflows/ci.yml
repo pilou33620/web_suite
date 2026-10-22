@@ -95,6 +95,20 @@ jobs:
           done
           echo "canal de pilotage identique dans les trois outils"
 
+      # L'aide des commandes de la page (Pilote.aide) est tirée des définitions du MCP : banc_mcp.py
+      # ne la voit pas ici (WEB_CAO n'est pas dans le dépôt), elle se vérifie sur le clone.
+      - name: Outils — WEB_CAO/commun/pilote-aide.json suit les définitions du MCP
+        run: |
+          python - <<'EOF'
+          import sys
+          sys.path.insert(0, "lanceur")
+          import aide_pilote
+          with open("../WEB_CAO/commun/pilote-aide.json", encoding="utf-8") as f:
+              assert f.read() == aide_pilote.contenu(), (
+                  "pilote-aide.json périmé : python3 lanceur/aide_pilote.py, puis pousser WEB_CAO d'abord")
+          print("pilote-aide.json à jour")
+          EOF
+
       # après le clone des outils : le banc relit les anciennes consignes que le relevé cite
       - name: Skill web-suite — outils et lectures cités, relevé des consignes, rien de privé
         run: python lanceur/banc_savoir.py

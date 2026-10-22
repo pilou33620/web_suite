@@ -4,7 +4,8 @@ Un script qui pilote une page depuis sa console (sans le MCP branché) ne voit p
 descriptions ni les schémas d'arguments des outils : `Pilote.aide("cao_schema_dessiner")`
 (WEB_CAO/commun/pilote-cao.js) les lit dans ce fichier. Il est TIRÉ des définitions du MCP
 (OUTILS_MCP), une seule source : relancer ce script après avoir changé un outil cao_* ou lib_*.
-lanceur/banc_mcp.py échoue tant que le fichier n'est pas à jour.
+lanceur/banc_mcp.py échoue tant que le fichier n'est pas à jour, et la CI de web_suite aussi
+(sur son clone de WEB_CAO) : pousser WEB_CAO avant web_suite.
 
     python3 lanceur/aide_pilote.py
 """
