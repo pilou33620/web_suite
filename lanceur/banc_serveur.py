@@ -31,6 +31,12 @@ class Factice:
 
 class Distant(web_suite.Lanceur):
     distant = False
+    client = None                                      # une adresse de client simulée
+
+    def parse_request(self):
+        if Distant.client:
+            self.client_address = (Distant.client, 0)
+        return super().parse_request()
 
     def _de_ce_poste(self):
         return not Distant.distant and super()._de_ce_poste()
@@ -97,6 +103,11 @@ verifier("biscuit -> action", req("/api/arreter", "POST", entetes={"Cookie": bis
                                   corps=b'{"id":"web_3d"}').status, 200)
 verifier("action reçue", Factice.arrete, "web_3d")
 verifier("biscuit illisible -> page du code", req("/", entetes={"Cookie": '";;=='}).getheader("Location"), "/appairage")
+# Client Internet (le lanceur écoute « :: », donc l'IPv6 publique du poste) : refusé, jeton ou pas
+for ip in ("8.8.8.8", "2a01:cb19:690:a100::1", "::ffff:8.8.8.8"):
+    Distant.client = ip
+    verifier("Internet %s refusé" % ip, req("/?jeton=" + Distant.jeton).status, 403)
+Distant.client = None
 
 
 # Code d'appairage : le bon donne le cookie du jeton, une seule fois.

@@ -196,6 +196,10 @@ class Lanceur(SimpleHTTPRequestHandler):
         if not hote_permis(self.headers.get("Host")):
             self.send_error(HTTPStatus.FORBIDDEN, "Host non autorise (protection DNS rebinding)")
             return False
+        if appairage_commun.Garde.internet(self):       # « :: » écoute aussi l'IPv6 publique du poste
+            self.send_error(HTTPStatus.FORBIDDEN, "Acces depuis Internet refuse : "
+                            "passez par le reseau local ou Tailscale")
+            return False
         if not appairage_commun.filtrer_tls(self, lambda h: h._de_ce_poste()):
             return False                               # la CA du poste, ou le renvoi vers https://
         self.autorise = not (self.jeton and not self._de_ce_poste() and not self._jeton_recu())
@@ -385,10 +389,12 @@ class ServeurDoublePile(Serveur):
     address_family = socket.AF_INET6
 
     def server_bind(self):
+        # sans double pile, la socket n'écouterait qu'en IPv6 : l'OSError fait passer à 0.0.0.0
+        # (TCPServer ferme la socket ratée)
         try:
             self.socket.setsockopt(socket.IPPROTO_IPV6, socket.IPV6_V6ONLY, 0)
-        except (AttributeError, OSError):
-            pass
+        except AttributeError as exc:
+            raise OSError("IPV6_V6ONLY absent : pas de double pile") from exc
         super().server_bind()
 
 
