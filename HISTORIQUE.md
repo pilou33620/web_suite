@@ -80,6 +80,11 @@ Chaque essai a sa spec, un fichier par essai, la plupart à donner à Claude in 
 - [x] **Canal de pilotage élargi** (21/10/2026, sur main dans les quatre dépôts) : une commande
   porte jusqu'à 8 Mo (`pilote.py`, comme une réponse ; avant, 64 Ko) ; seul le MCP du poste en donne.
   `lib_kicad_convertir` (200 Ko) passe, `lib_simulation_lier` monte à 4 Mo.
+- [x] **HTTPS en IPv6** (22/10/2026, sur main dans les quatre dépôts) : `appairage.py` met au
+  certificat les IPv6 privées du poste (Tailscale `fd7a:…`, ULA `fc00::/7`, pas le lien local
+  `fe80::`) et les ajoute aux contraintes de la CA ; une CA d'avant (sans `ca.json`) est refaite
+  une fois, à réinstaller sur chaque appareil. Le lanceur et WEB_3D écoutent en double pile,
+  IPv4 seule si IPv6 manque ([SPEC-mcp-canal-pilote.md](lanceur/docs/SPEC-mcp-canal-pilote.md)).
 
 ## Défauts des outils vus pendant les essais (antérieurs au MCP)
 

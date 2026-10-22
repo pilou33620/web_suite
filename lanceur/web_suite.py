@@ -380,12 +380,43 @@ class Serveur(ThreadingHTTPServer):
         super().handle_error(request, client_address)
 
 
-def ouvrir_serveur(port, hote="127.0.0.1"):
-    for essai in range(port, port + 10):
+class ServeurDoublePile(Serveur):
+    """IPv4 et IPv6 sur la même socket (Tailscale fd7a::, ULA) quand le système le permet."""
+    address_family = socket.AF_INET6
+
+    def server_bind(self):
         try:
-            return Serveur((hote, essai), Lanceur)
+            self.socket.setsockopt(socket.IPPROTO_IPV6, socket.IPV6_V6ONLY, 0)
+        except (AttributeError, OSError):
+            pass
+        super().server_bind()
+
+
+def ipv4_libre(port):
+    """Sous Windows, une socket en double pile se lie au port même si un autre programme
+    tient déjà son IPv4, et les clients IPv4 iraient chez lui : on le demande avant.
+    Ailleurs le bind échoue franchement (et une sonde sans SO_REUSEADDR buterait sur TIME_WAIT)."""
+    if os.name != "nt":
+        return True
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+        try:
+            s.bind(("0.0.0.0", port))
+            return True
         except OSError:
+            return False
+
+
+def ouvrir_serveur(port, hote="127.0.0.1"):
+    # Réseau : double pile d'abord, IPv4 seule si IPv6 manque (Pyto, conteneurs)
+    piles = [(ServeurDoublePile, "::"), (Serveur, hote)] if hote == "0.0.0.0" else [(Serveur, hote)]
+    for essai in range(port, port + 10):
+        if hote == "0.0.0.0" and not ipv4_libre(essai):
             continue
+        for classe, h in piles:
+            try:
+                return classe((h, essai), Lanceur)
+            except OSError:
+                continue
     raise OSError("aucun port libre entre %d et %d" % (port, port + 9))
 
 

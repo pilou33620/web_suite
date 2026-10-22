@@ -251,6 +251,12 @@ Pilote.commande("cao_valeur_composant", {
     autre appareil arrivé en HTTP est renvoyé vers https://. Reste en clair : la boucle locale
     (le MCP, le navigateur du poste), et un poste sans `openssl` ou lancé avec
     `WEB_TOOLS_HTTP=1`, ce que son terminal dit ;
+  - ~~HTTPS en IPv4 seulement~~ : corrigé le 22/10/2026, le certificat et les contraintes de
+    la CA couvrent aussi les IPv6 privées (ULA `fc00::/7`, qui contient Tailscale
+    `fd7a:115c:a1e0::/48`) ; le lanceur et WEB_3D écoutent en double pile comme WEB_CAO et
+    WEB_ANTENNA (IPv4 seule si IPv6 manque). Une CA d'avant (sans `ca.json`) est refaite une
+    fois : chaque appareil doit la réinstaller (`/appairage/ca.pem`). Le lien local `fe80::`
+    n'est pas couvert (avertissement du navigateur) ;
   - un mandataire local (`tailscale serve`, `ssh -R`, socat) ferait passer des requêtes
     distantes pour la boucle locale : n'en installer aucun devant les outils ;
   - un appareil appairé reste de confiance pour ses propres onglets : il peut afficher un faux
