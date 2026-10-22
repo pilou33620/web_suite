@@ -5,6 +5,10 @@
 > est gardé ici tel quel : c'est lui que visent les renvois « A-FAIRE.md:ligne » des specs
 > d'essai (`tasks/essais/`). Ses cases encore vides ont été reprises dans les deux nouveaux
 > fichiers.
+>
+> Le 22/10/2026, les essais à faire (`TESTS-A-FAIRE.md` et les specs de `tasks/essais/`) ont été retirés : on ne s'occupe pour
+> l'instant que des fonctionnalités, les essais se feront plus tard et autrement. Ils restent
+> dans l'historique git, au commit `2154478`.
 
 ## Ce qui restait au 21/10/2026
 

@@ -1,7 +1,7 @@
 # À faire — fonctionnalités et bugs
 
 Ce qui reste à coder dans web_suite (lanceur et serveur MCP), au 22/10/2026 : nouvelles
-fonctionnalités et bugs, rien d'autre. Les essais sont dans [TESTS-A-FAIRE.md](TESTS-A-FAIRE.md) ;
+fonctionnalités et bugs, rien d'autre. Les essais sont repoussés à plus tard ;
 ce qui est fait, dans [HISTORIQUE.md](HISTORIQUE.md) et `tasks/` (un plan et une todo par
 module). Chaque outil web a les deux mêmes fichiers dans son dépôt.
 
