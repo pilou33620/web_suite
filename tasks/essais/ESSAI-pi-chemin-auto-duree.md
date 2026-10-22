@@ -12,8 +12,12 @@ au-delà, chaque liaison restante est refusée « temps épuisé (8 s pour l'app
 
 Fait le 21/10/2026 sous Linux (`A-FAIRE.md:23-24`) : exemple 2, 20 liaisons en **0,5 s**, 19
 trouvées, 19 posées par `cao_router` ; en finissant la route U3.1 → U3.3 (+5V), le routeur
-entre de **0,13 mm** dans la pastille U3.2 (GND) (`WEB_CAO/A-FAIRE.md:136-140`). Le routeur
-(`11-pns-*` à `13-pns-shove.js`) ne se change pas sans ton accord.
+entrait de **0,13 mm** dans la pastille U3.2 (GND). Corrigé le 21/10/2026 (le chanfrein posé au
+dépôt, `mitreAt`) : la piste passe maintenant à 0,25 mm de U3.2.
+
+**Fait sur le PC le 22/10/2026** (Chrome 155, 12 cœurs, 16 Go) : 493 / 462 / 543 ms, 19 routes,
+routeur 274 ms, DRC 0 → 1 (la seule « Paire USB »), `entree_mm` −0,25. Ce sont les chiffres de
+référence pour le Pi.
 
 Claude in Chrome mesure la même chose dans le Chrome du PC, sans MCP : il appelle dans la page
 `cheminCommande` (ce que fait `cao_chemin`) et la commande `cao_router` de la page
@@ -23,8 +27,8 @@ besoin de remplacer `window.Pilote` : les définitions des commandes s'appellent
 Rien n'est enregistré : l'exemple est chargé en mémoire, hors projet.
 
 Rejoué le 21/10/2026 avec ces commandes mot pour mot, au harnais (node) et dans Chromium headless
-(Playwright) : 0,3 à 0,5 s, 19 trouvées sur 20 (la 10, GND, sans chemin), 19 posées, DRC 0 → 2
-(U3.2, et la paire USB découplée), entrée de 0,129 mm dans U3.2.
+(Playwright) : 0,3 à 0,5 s, 19 trouvées sur 20 (la 10, GND, sans chemin), 19 posées. Depuis le
+correctif du chanfrein : DRC 0 → 1 (la paire USB découplée), plus d'entrée dans U3.2.
 
 ## Ce que tu prépares
 
@@ -91,9 +95,8 @@ dans l'outil JavaScript, dans l'onglet de l'éditeur PCB ; n'en écris pas d'aut
 })()
 
    → attendu : « routeur : … ms », 19 lignes « route k (net) : posée », puis « DRC : 0 erreur
-   avant → 2 après. », avec « Isolation piste/pastille U3.2 : 0.000 mm : la règle en exige
-   0.200 mm » et « Paire USB : … mm découplés pour … mm admis » (D+ et D− posées chacune de leur
-   côté : attendu ici). Capture de la carte routée.
+   avant → 1 après. », avec « Paire USB : … mm découplés pour … mm admis » (D+ et D− posées
+   chacune de leur côté : attendu ici). Capture de la carte routée.
 6. Mesure l'entrée de la piste dans U3.2 (positif : la piste mord la pastille de tant de mm ;
    négatif : elle passe à cette distance) :
 
@@ -112,13 +115,14 @@ dans l'outil JavaScript, dans l'onglet de l'éditeur PCB ; n'en écris pas d'aut
     entree_mm: Math.round(prof * 1000) / 1000, liaisons_restantes: conn(true).unrouted});
 })()
 
-   → attendu : {"pastille":"U3.2","net":"GND","piste_la_plus_proche":"+5V","entree_mm":0.129,"liaisons_restantes":19}.
+   → attendu : {"pastille":"U3.2","net":"GND","piste_la_plus_proche":"+5V","entree_mm":-0.25,"liaisons_restantes":19}
+   (négatif : la piste passe à 0,25 mm de la pastille, sans y entrer).
 7. Cadre U3 (commande de lecture de la page, comme cao_vue) :
 
 piloteVue("pcb", {cadrer: "U3"})
 
    → attendu : « Vue : cadré sur U3. », U3 sélectionné. Fais une capture resserrée sur U3 (zoom
-   de capture, ou molette au-dessus de U3) : la piste +5V en diagonale qui mord sa pastille 2.
+   de capture, ou molette au-dessus de U3) : la piste +5V qui contourne sa pastille 2.
 8. Relève le poste :
 
 JSON.stringify({ua: navigator.userAgent, coeurs: navigator.hardwareConcurrency, memoire_go: navigator.deviceMemory})
@@ -129,9 +133,10 @@ rendu à l'étape 5 ; le JSON de l'étape 6 ; celui de l'étape 8.
 
 ## C'est réussi si
 
-- [ ] PC : un appel de 20 liaisons dure moins de 8 s (trois durées notées), sans « temps épuisé »
-- [ ] PC : 19 routes posées par le routeur de la page, DRC relevé
-- [ ] PC : l'entrée dans U3.2 est notée (reproduite, avec sa profondeur, ou non)
+- [x] PC : un appel de 20 liaisons dure moins de 8 s (trois durées notées), sans « temps épuisé »
+  (22/10/2026 : 493 / 462 / 543 ms)
+- [x] PC : 19 routes posées par le routeur de la page, DRC relevé (274 ms, DRC 0 → 1)
+- [x] PC : l'entrée dans U3.2 est notée (plus d'entrée : −0,25 mm)
 - [ ] Pi : les mêmes chiffres, dans le Chromium du Pi (« Ce qui reste à toi »)
 
 ## Ce qui reste à toi
