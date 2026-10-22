@@ -64,6 +64,8 @@ def commande(claude, outil, d, session):
     args = [claude, "-p", "--output-format", "stream-json", "--verbose",
             "--tools", "Skill", "--strict-mcp-config", "--mcp-config", json.dumps(mcp),
             "--allowedTools", "mcp__web_suite", "--permission-mode", "dontAsk",
+            # les hooks du poste (git pull des dépôts, plugins) ralentiraient chaque demande
+            "--settings", json.dumps({"disableAllHooks": True}),
             "--append-system-prompt", consigne(outil, d)]
     if session:
         args += ["--resume", session]
@@ -262,6 +264,7 @@ if __name__ == "__main__":
     assert a[a.index("--tools") + 1] == "Skill" and a[a.index("--allowedTools") + 1] == "mcp__web_suite", a
     assert a[a.index("--permission-mode") + 1] == "dontAsk" and "--strict-mcp-config" in a, a
     assert list(json.loads(a[a.index("--mcp-config") + 1])["mcpServers"]) == ["web_suite"], a
+    assert json.loads(a[a.index("--settings") + 1]) == {"disableAllHooks": True}, a
     assert "onglet O1" in a[a.index("--append-system-prompt") + 1] and "carte-usb" in a[a.index("--append-system-prompt") + 1]
     # La demande suivante continue la conversation ; « Nouvelle conversation » repart de zéro
     assert "--resume" in conversation("et USB_DM ?")[2]["args"]

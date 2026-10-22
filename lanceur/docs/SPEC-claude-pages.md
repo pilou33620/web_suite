@@ -29,6 +29,7 @@ lanceur web_suite (claude_pages.py) ──GET /api/pilote/demandes (long-poll)
 claude -p --output-format stream-json --verbose --tools Skill --strict-mcp-config
        --mcp-config '{"mcpServers":{"web_suite":{…mcp_web_suite.py}}}'
        --allowedTools mcp__web_suite --permission-mode dontAsk
+       --settings '{"disableAllHooks":true}'
        --append-system-prompt "<outil, page, onglet, projet, appareil>"  [--resume <session>]
 ```
 
