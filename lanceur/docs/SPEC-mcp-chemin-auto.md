@@ -78,7 +78,9 @@ MCP :     python3 lanceur/banc_mcp.py
   router des paires différentielles (`cao_paire` garde ses points donnés à la main).
 - **Jamais** : écrire dans le document.
 - Laissé : une pastille fine (pas de 0,5 mm et moins) peut demander un pas plus fin que
-  0,25 mm ; les zones interdites (rooms, keepouts) ne sont pas lues ; le chemin est le plus
+  0,25 mm (« pas » le règle) ; rooms et zones interdites ne sont pas lues, et n'ont pas à
+  l'être : les unes sont un repère de placement, les autres mécaniques (hauteurs, pattes),
+  aucune n'interdit le cuivre (revu le 21/10/2026) ; le chemin est le plus
   court sur la grille, pas le plus joli : le routeur le lisse.
 
 ## Questions ouvertes
