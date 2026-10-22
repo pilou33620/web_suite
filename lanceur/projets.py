@@ -34,7 +34,10 @@ SECTIONS = (("WEB_CAO", "CAO"), ("WEB_ANTENNA", "ANTENNA"), ("WEB_3D", "3D"))
 # Les résultats d'openEMS se recalculent et pèsent vite des centaines de Mo.
 # Les zip des packs Murata sont déballés à côté (lier_modeles_murata.py), et
 # c'est le déballé qui est suivi : un zip ne se compresse pas en différences.
-GITIGNORE = "ANTENNA/*/calculs/\nLIB_CAO/**/*.zip\n"
+# Les brouillons de WEB_CAO (sauvegarde automatique des éditeurs, effacée à
+# l'enregistrement) restent sur le poste : un brouillon n'est pas un document.
+BROUILLON = "*.brouillon.json"
+GITIGNORE = "ANTENNA/*/calculs/\nLIB_CAO/**/*.zip\n" + BROUILLON + "\n"
 # Fins de ligne normalisées dans le dépôt : un PC Windows (autocrlf) et le Pi
 # ne doivent pas se renvoyer des fichiers modifiés de la première à la dernière ligne.
 GITATTRIBUTES = "* text=auto\n"
@@ -114,7 +117,18 @@ def preparer(racine, depot=DEPOT):
             if not os.path.isfile(os.path.join(p, nom)):
                 with open(os.path.join(p, nom), "w", encoding="utf-8", newline="\n") as f:
                     f.write(texte)
+        _ignorer(os.path.join(p, ".gitignore"), BROUILLON)
         return (note + " " + etat).strip()
+
+
+def _ignorer(chemin, motif):
+    """Ajoute `motif` à un .gitignore d'avant qui ne l'a pas, sans toucher au reste."""
+    with open(chemin, encoding="utf-8") as f:
+        texte = f.read()
+    if motif in (l.strip() for l in texte.splitlines()):
+        return
+    with open(chemin, "a", encoding="utf-8", newline="\n") as f:
+        f.write(("\n" if texte and not texte.endswith("\n") else "") + motif + "\n")
 
 
 def _squelette(p, gitkeep=False):
@@ -371,6 +385,16 @@ if __name__ == "__main__":
         assert envoyer(a, "web_cao", "pack")[0]
         suivis = _git(dossier(a), "ls-files", "LIB_CAO")[1]
         assert "pack/m.mod" in suivis and ".zip" not in suivis, suivis
+        # Le brouillon d'un éditeur ne part pas ; un .gitignore d'avant le reçoit, une fois.
+        open(os.path.join(dossier(a), "CAO", "carte_alim", "c-SCH.brouillon.json"), "w").close()
+        assert envoyer(a, "web_cao", "brouillon")[0] is True
+        assert "brouillon" not in _git(dossier(a), "ls-files", "CAO")[1]
+        gi = os.path.join(tmp, "gitignore-ancien")
+        with open(gi, "w", encoding="utf-8") as f:
+            f.write("ANTENNA/*/calculs/")
+        _ignorer(gi, BROUILLON), _ignorer(gi, BROUILLON)
+        with open(gi, encoding="utf-8") as f:
+            assert f.read() == "ANTENNA/*/calculs/\n*.brouillon.json\n"
         # Envoi hors ligne : rien à commiter ensuite, mais un commit à pousser.
         fa = os.path.join(dossier(a), "CAO", "carte_alim", "projet.cao.json")
         fb = os.path.join(dossier(b), "CAO", "carte_alim", "projet.cao.json")

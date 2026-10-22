@@ -89,6 +89,10 @@ Chaque essai a sa spec, un fichier par essai, la plupart à donner à Claude in 
   change de couche par une via de paire (les deux vias côte à côte que `cao_paire` pose), jamais
   à portée d'accroche de ses pastilles ; les pastilles de départ et d'arrivée n'ont plus à
   partager une couche ([SPEC-mcp-chemin-auto.md](lanceur/docs/SPEC-mcp-chemin-auto.md)).
+- [x] **Brouillons de WEB_CAO hors de GitHub** (22/10/2026) : la sauvegarde automatique des
+  éditeurs écrit `<nom>-SCH.brouillon.json` / `-PCB.brouillon.json` à côté du document ;
+  `lanceur/projets.py` met `*.brouillon.json` au `.gitignore` de PROJETS, et l'ajoute à un
+  `.gitignore` existant qui ne l'a pas (au prochain `preparer`).
 
 ## Défauts des outils vus pendant les essais (antérieurs au MCP)
 
