@@ -74,14 +74,31 @@ MCP :     python3 lanceur/banc_mcp.py
 ## Limites
 
 - **Toujours** : proposer seulement ; la pose passe par `cao_router` et sa carte.
-- **Demander d'abord** : changer le routeur lui-même (`11-pns-*.js` à `13-pns-shove.js`) ;
-  router des paires différentielles (`cao_paire` garde ses points donnés à la main).
+- **Demander d'abord** : changer le routeur lui-même (`11-pns-*.js` à `13-pns-shove.js`).
+  Les paires différentielles sont décidées le 22/10/2026 (ci-dessous).
 - **Jamais** : écrire dans le document.
 - Laissé : une pastille fine (pas de 0,5 mm et moins) peut demander un pas plus fin que
   0,25 mm (« pas » le règle) ; rooms et zones interdites ne sont pas lues, et n'ont pas à
   l'être : les unes sont un repère de placement, les autres mécaniques (hauteurs, pattes),
   aucune n'interdit le cuivre (revu le 21/10/2026) ; le chemin est le plus
   court sur la grille, pas le plus joli : le routeur le lisse.
+
+## Ajout du 22/10/2026 : les paires différentielles
+
+Une liaison `{paire, depart: [P, N], arrivee: [P, N]}` (deux « REF.pastille » de chaque côté,
+celles des deux nets de la paire déclarée) :
+
+- l'axe se cherche du milieu des deux pastilles de départ au milieu de celles d'arrivée, aussi
+  large que les deux pistes et leur écart (`dpGeom` : 2 w + écart), les deux nets « à soi » ;
+- une seule couche, celle que les quatre pastilles ont en commun : pas de vias de paire
+  (`shortcut:` dans le code) ;
+- les points qui passeraient à portée d'accroche d'un couple de pastilles de la paire (1,25 mm,
+  `dpPrimPair`, le critère de `cao_paire`) sont retirés : sinon `cao_paire` terminerait la
+  paire avant l'arrivée ;
+- la réponse gagne `paires` : pour chacune, les arguments de `cao_paire` (une carte par paire),
+  qui fait les éventails jusqu'aux pastilles. `largeur` est refusée pour une paire (sa règle).
+- Banc : `harness.js`, « chemin-auto : une paire déclarée… » (ligne droite, puis un mur à
+  contourner) ; `banc_mcp.py` (arguments).
 
 ## Questions ouvertes
 

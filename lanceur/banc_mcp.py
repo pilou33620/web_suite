@@ -979,6 +979,14 @@ verifier("cao_chemin : page PCB, sans écriture, arguments tels quels",
 verifier("cao_chemin : la description renvoie à cao_router",
          "cao_router" in next(o["description"] for o in outils if o["name"] == "cao_chemin"), True)
 FauxApi.recues.clear()
+LP = {"paire": "USB", "depart": ["J1.2", "J1.3"], "arrivee": ["U1.5", "U1.6"]}
+verifier("cao_chemin accepte une paire", outil("cao_chemin", liaisons=[LI, LP])[0], False)
+verifier("la paire arrive telle quelle", FauxApi.recues[0][2]["args"], {"liaisons": [LI, LP]})
+FauxApi.recues.clear()
+for args in ({"liaisons": [dict(LP, depart="J1.2")]}, {"liaisons": [dict(LP, depart=["J1.2"])]},
+             {"liaisons": [dict(LP, depart=["J1.2", {"x": 1, "y": 2}])]}, {"liaisons": [dict(LP, largeur=0.2)]},
+             {"liaisons": [dict(LP, paire="")]}, {"liaisons": [{"paire": "USB", "depart": ["J1.2", "J1.3"]}]}):
+    verifier("cao_chemin refuse la paire %r" % str(args)[:60], outil("cao_chemin", **args)[0], True)
 for args in ({}, {"liaisons": []}, {"liaisons": [LI] * 21}, {"liaisons": [{"depart": "U1.3"}]},
              {"liaisons": [dict(LI, arrivee={"x": 5000, "y": 1})]}, {"liaisons": [dict(LI, autre=1)]},
              {"liaisons": [LI], "pas": 0}, {"liaisons": [LI], "pas": "0.2"}, {"liaisons": [LI], "pas": 3}):

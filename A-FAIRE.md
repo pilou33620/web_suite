@@ -19,8 +19,9 @@ Décidées le 22/10/2026 : les quatre sont à coder. Chacune touche une partie q
   appairé. Touche `appairage.py` (copié dans chaque outil) et l'appairage de l'iPad, à refaire
   une fois ([SPEC-mcp-canal-pilote.md](lanceur/docs/SPEC-mcp-canal-pilote.md), « Limites connues »).
   Le plus gros chantier des quatre.
-- [ ] **Paires différentielles proposées par `cao_chemin`** : aujourd'hui `cao_paire` prend ses
-  points donnés à la main ([SPEC-mcp-chemin-auto.md](lanceur/docs/SPEC-mcp-chemin-auto.md)).
+- [x] **Paires différentielles proposées par `cao_chemin`** (22/10/2026) : l'axe de la paire,
+  aussi large que ses deux pistes et leur écart, rendu pour `cao_paire` ; une seule couche
+  ([SPEC-mcp-chemin-auto.md](lanceur/docs/SPEC-mcp-chemin-auto.md)).
 - [ ] **Schéma piloté plus loin** : Claude écrit les classes et contraintes du schéma
   (`setNetClassSch`, `schCmPoser`, comme au PCB), tire des fils par coordonnées, et dessine les
   symboles de la LIB (`schsym-1`)

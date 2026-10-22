@@ -77,9 +77,22 @@ def cao_placement_auto(a):
     return envoyer("cao_placement_auto", args, a)
 
 
+BOUTS_PAIRE = (lambda v: isinstance(v, list) and len(v) == 2 and all(isinstance(x, str) and NOM[0](x) for x in v),
+               "[« REF.pastille » de P, « REF.pastille » de N]")
+
+
 def cao_chemin(a):
-    args = {"liaisons": liste(a, "liaisons", ROUTES_MAX, {"depart": POINT, "arrivee": POINT, "largeur": NOMBRE},
-                              ("depart", "arrivee"))}
+    liaisons = a.get("liaisons")
+    if not isinstance(liaisons, list) or len(liaisons) > ROUTES_MAX:
+        refuser("Argument « liaisons » invalide : liste de %d éléments au plus." % ROUTES_MAX)
+    for i, e in enumerate(liaisons, 1):
+        if isinstance(e, dict) and "paire" in e:     # une paire : son axe, de deux pastilles à deux pastilles
+            valider(e, {"paire": NOM, "depart": BOUTS_PAIRE, "arrivee": BOUTS_PAIRE}, ("paire", "depart", "arrivee"),
+                    "liaisons, élément %d" % i)
+        else:
+            valider(e, {"depart": POINT, "arrivee": POINT, "largeur": NOMBRE}, ("depart", "arrivee"),
+                    "liaisons, élément %d" % i)
+    args = {"liaisons": liaisons}
     if not args["liaisons"]:
         refuser("Argument « liaisons » manquant : de 1 à %d liaisons {depart, arrivee, largeur?}." % ROUTES_MAX)
     if a.get("pas") is not None:
@@ -157,11 +170,20 @@ OUTILS_ROUTAGE = {
                        "les trous ; les zones de cuivre ne gênent pas (elles se recoulent). Les liaisons se "
                        "cherchent dans l'ordre, chaque chemin trouvé gênant les suivantes. Rend, par liaison, "
                        "trouvée ou la raison, et « routes » à donner tel quel à cao_router (qui fait le détail et "
-                       "montre sa carte). Ne modifie rien. 20 liaisons et 8 s au plus par appel." + pilote.DONNEES,
+                       "montre sa carte). Une PAIRE différentielle déclarée (cao_pcb_lire classes) : {paire, "
+                       "depart: [pastille de P, pastille de N], arrivee: [idem]} ; son axe est cherché aussi large "
+                       "que ses deux pistes et leur écart (règle de paire), sur une seule couche (pas de vias de "
+                       "paire), et « paires » rend, pour chacune, les arguments de cao_paire (une carte par paire, "
+                       "qui fait les éventails jusqu'aux pastilles). Ne modifie rien. 20 liaisons et 8 s au plus "
+                       "par appel." + pilote.DONNEES,
         "inputSchema": {"type": "object", "required": ["liaisons"], "properties": {
             "liaisons": {"type": "array", "minItems": 1, "maxItems": ROUTES_MAX, "items": {
                 "type": "object", "required": ["depart", "arrivee"], "properties": {
-                    "depart": PT, "arrivee": PT, "largeur": {"type": "number", "description": "mm ; absente : la classe du net"}}}},
+                    "paire": {"type": "string", "description": "nom d'une paire déclarée : depart et arrivee sont alors "
+                                                               "deux « REF.pastille », celle de P et celle de N"},
+                    "depart": {"description": PT["description"] + " ; pour une paire, [P, N]"},
+                    "arrivee": {"description": PT["description"] + " ; pour une paire, [P, N]"},
+                    "largeur": {"type": "number", "description": "mm ; absente : la classe du net (pas pour une paire)"}}}},
             "pas": {"type": "number", "description": "pas de la grille en mm (0,05 à 2), 0,25 par défaut"},
             "onglet": ONGLET}},
         "fn": cao_chemin,
