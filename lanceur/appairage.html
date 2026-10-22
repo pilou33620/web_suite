@@ -56,12 +56,17 @@
     <button id="ok" type="submit">Valider</button>
   </form>
   <div id="etat" role="status"></div>
+  <p id="ca" hidden>Connexion chiffrée. Le navigateur vous a averti ? Installez une fois
+     <a href="/appairage/ca.pem">le certificat de ce poste</a> (iPad : Réglages › Profil
+     téléchargé, puis Général › Informations › Réglages des certificats). Comparez son
+     empreinte SHA-256 avec celle du terminal.</p>
 </main>
 <script>
 const champ = document.getElementById('code');
 const etat = document.getElementById('etat');
 const bouton = document.getElementById('ok');
 let envoi = false;
+if (location.protocol === 'https:') document.getElementById('ca').hidden = false;
 
 function dire(texte, classe) { etat.textContent = texte; etat.className = classe || ''; }
 

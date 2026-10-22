@@ -11,14 +11,16 @@ Aucun bug connu ouvert.
 
 ## Fonctionnalités
 
-Décidées le 22/10/2026 : les quatre sont à coder. Chacune touche une partie que sa spec met en
+Décidées le 22/10/2026 : les quatre sont à coder, et sont faites. Chacune touche une partie que sa spec met en
 « Demander d'abord » : ton choix vaut cet accord.
 
-- [ ] **Mode réseau chiffré (HTTPS)** : en mode réseau, commandes, captures et cookie du jeton
-  circulent en clair ; quelqu'un qui écoute le Wi-Fi récupère le jeton et devient un appareil
-  appairé. Touche `appairage.py` (copié dans chaque outil) et l'appairage de l'iPad, à refaire
-  une fois ([SPEC-mcp-canal-pilote.md](lanceur/docs/SPEC-mcp-canal-pilote.md), « Limites connues »).
-  Le plus gros chantier des quatre.
+- [x] **Mode réseau chiffré (HTTPS)** (22/10/2026) : `appairage.py` (copie identique dans
+  chaque outil) crée une fois une CA propre au poste (`~/.web_tools/tls/`, commande `openssl`,
+  limitée aux adresses privées et noms locaux) et sert HTTPS sur le port de chaque outil et du
+  lanceur ; la boucle locale garde HTTP, un autre appareil en HTTP est renvoyé vers https://, le
+  cookie du jeton devient `Secure`. Chaque appareil installe la CA une fois
+  (`/appairage/ca.pem`, lien sur la page du code) ; le cookie déjà posé reste valable
+  ([SPEC-mcp-canal-pilote.md](lanceur/docs/SPEC-mcp-canal-pilote.md), « Limites connues »).
 - [x] **Paires différentielles proposées par `cao_chemin`** (22/10/2026) : l'axe de la paire,
   aussi large que ses deux pistes et leur écart, rendu pour `cao_paire` ; une seule couche
   ([SPEC-mcp-chemin-auto.md](lanceur/docs/SPEC-mcp-chemin-auto.md)).

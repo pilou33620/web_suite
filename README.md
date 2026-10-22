@@ -47,9 +47,11 @@ Dépendances des outils, proposées par l'installateur :
 Sur Raspberry Pi et Termux, le lanceur écoute sur le réseau local et n'ouvre pas de
 navigateur (ailleurs : `--reseau`). Depuis la tablette, le téléphone ou le PC :
 
-1. ouvrir l'adresse **Réseau** affichée dans le terminal (`http://<adresse>:8100/`) ;
+1. ouvrir l'adresse **Réseau** affichée dans le terminal (`https://<adresse>:8100/`) ;
 2. saisir le **code d'appairage** à 6 chiffres affiché juste en dessous (une fois par
    appareil et par adresse du serveur).
+
+En mode réseau, la connexion est **chiffrée (HTTPS)** quand la commande `openssl` est présente sur le poste (Raspberry Pi, Linux, macOS ; sous Windows, celle de Git) : une autorité propre au poste, créée une fois dans `~/.web_tools/tls/`, signe le certificat du serveur. Chaque appareil l'installe une fois, depuis le lien de la page du code (`/appairage/ca.pem`) ; sur iPad : Réglages › Profil téléchargé › Installer, puis Général › Informations › Réglages des certificats › activer. Comparer son empreinte SHA-256 avec celle du terminal. Sans `openssl` (ou avec `WEB_TOOLS_HTTP=1`), tout reste en HTTP et le terminal le dit.
 
 Sous Termux, garder `termux-wake-lock` actif.
 

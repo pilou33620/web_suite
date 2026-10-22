@@ -196,6 +196,8 @@ class Lanceur(SimpleHTTPRequestHandler):
         if not hote_permis(self.headers.get("Host")):
             self.send_error(HTTPStatus.FORBIDDEN, "Host non autorise (protection DNS rebinding)")
             return False
+        if not appairage_commun.filtrer_tls(self, lambda h: h._de_ce_poste()):
+            return False                               # la CA du poste, ou le renvoi vers https://
         self.autorise = not (self.jeton and not self._de_ce_poste() and not self._jeton_recu())
         chemin = urlparse(self.path).path
         if not self.autorise and self.appairage and (
@@ -260,8 +262,8 @@ class Lanceur(SimpleHTTPRequestHandler):
         self.end_headers()
 
     def _biscuit_jeton(self):
-        return ("%s=%s; Path=/; Max-Age=31536000; HttpOnly; SameSite=Strict"
-                % (BISCUIT, self.jeton))
+        return ("%s=%s; Path=/; Max-Age=31536000; HttpOnly; SameSite=Strict%s"
+                % (BISCUIT, self.jeton, "; Secure" if appairage_commun.en_https(self) else ""))
 
     def do_GET(self):
         url = urlparse(self.path)
@@ -490,6 +492,11 @@ def main(argv=None):
         print("  [X] %s" % exc)
         return 1
     url = "http://127.0.0.1:%d/" % serveur.server_address[1]
+    # En réseau : HTTPS sur le même port (la boucle locale garde HTTP), voir appairage.py.
+    tls, sans_tls = appairage_commun.contexte_tls() if reseau else (None, "")
+    if tls:
+        appairage_commun.brancher_tls(serveur, tls)
+    schema = "https" if tls else "http"
     etats_outils, en_retard = bilans_outils(Lanceur.gestionnaire, racine, args.verifier_maj)
     Lanceur.gestionnaire.lanceur = url.rstrip("/")
     Lanceur.gestionnaire.jeton = Lanceur.jeton
@@ -502,16 +509,20 @@ def main(argv=None):
     print("  " + "-" * 48)
     print("  Adresse   %s" % url)
     ip = adresse_reseau() if reseau else None
-    url_reseau = ("http://%s:%d/?jeton=%s" % (ip, serveur.server_address[1], Lanceur.jeton)
+    url_reseau = ("%s://%s:%d/?jeton=%s" % (schema, ip, serveur.server_address[1], Lanceur.jeton)
                   if ip else None)
     if url_reseau:
-        print("  Réseau    http://%s:%d/" % (ip, serveur.server_address[1]))
+        print("  Réseau    %s://%s:%d/" % (schema, ip, serveur.server_address[1]))
         if appairage_commun.ip_tailscale():
-            print("  Tailscale http://%s:%d/" % (appairage_commun.ip_tailscale(), serveur.server_address[1]))
+            print("  Tailscale %s://%s:%d/" % (schema, appairage_commun.ip_tailscale(), serveur.server_address[1]))
         print("            tablette, téléphone, autre poste : ouvrir cette adresse,")
         print("            puis saisir le code d'appairage affiché ci-dessous")
         print("            (ou directement, sans code : %s ;" % url_reseau)
         print("             supprimer %s pour changer de jeton)" % appairage_commun.fichier_jeton())
+        if tls:
+            print(appairage_commun.ligne_https(ip, serveur.server_address[1]))
+        elif sans_tls:
+            print("  HTTP en clair sur le réseau (%s) : le jeton peut être lu sur le Wi-Fi." % sans_tls)
     elif reseau:
         print("  Réseau    écoute sur le réseau, adresse IP du poste introuvable")
         print("            jeton à ajouter à l'adresse : ?jeton=%s" % Lanceur.jeton)
@@ -530,7 +541,7 @@ def main(argv=None):
     ouvrir = not args.sans_navigateur and (args.navigateur or not serveur_dedie)
     if not ouvrir:
         print("  Navigateur non ouvert : aller sur %s"
-              % ("http://%s:%d/" % (ip, serveur.server_address[1]) if url_reseau else url))
+              % ("%s://%s:%d/" % (schema, ip, serveur.server_address[1]) if url_reseau else url))
         if Lanceur.appairage:
             # en dernier, là où l'œil tombe ; un nouveau code s'affiche ici aussi
             Lanceur.appairage.preparer()

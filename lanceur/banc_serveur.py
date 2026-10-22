@@ -148,6 +148,40 @@ verifier("et remplacé", "nouveau code" in json.loads(r.corps)["message"], True)
 Distant.distant = False
 verifier("ce poste sans jeton", req("/").status, 200)
 
+# HTTPS en réseau : même port, la boucle locale garde HTTP, un autre appareil en
+# HTTP est renvoyé vers https://, le cookie y est Secure.
+ap = web_suite.appairage_commun
+if ap._openssl():
+    import ssl
+    with tempfile.TemporaryDirectory() as tmp:
+        os.environ["WEB_TOOLS_JETON_FICHIER"] = os.path.join(tmp, "jeton.txt")
+        ctx, raison = ap.contexte_tls()
+        verifier("certificat créé", raison, None)
+        ap.brancher_tls(serveur, ctx)
+        client = ssl.create_default_context(cafile=os.path.join(ap.dossier_tls(), "ca.pem"))
+
+        def reqs(chemin):
+            c = http.client.HTTPSConnection("127.0.0.1", PORT, timeout=10, context=client)
+            c.request("GET", chemin)
+            r = c.getresponse()
+            r.corps = r.read()
+            c.close()
+            return r
+        verifier("ce poste en HTTP", req("/").status, 200)
+        verifier("ce poste en HTTPS", reqs("/").status, 200)
+        Distant.distant = True
+        r = req("/api/etat")
+        verifier("distant en HTTP : vers https", (r.status, r.getheader("Location")),
+                 (307, "https://127.0.0.1:%d/api/etat" % PORT))
+        verifier("la CA, sans jeton", req(ap.CA).corps.startswith(b"-----BEGIN"), True)
+        r = reqs("/?jeton=" + Distant.jeton)
+        verifier("cookie Secure", (r.status, "; Secure" in r.getheader("Set-Cookie")), (303, True))
+        verifier("page du code en HTTPS", 'id="ca"' in reqs("/appairage").corps.decode(), True)
+        Distant.distant = False
+        del os.environ["WEB_TOOLS_JETON_FICHIER"]
+else:
+    print("  (openssl absent : HTTPS non vérifié)")
+
 serveur.shutdown()
 
 # Journaux : un journal trop gros passe en .log.1 au lancement suivant.

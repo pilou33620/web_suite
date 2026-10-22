@@ -246,9 +246,11 @@ Pilote.commande("cao_valeur_composant", {
   - laisser une page envoyer des ordres à une autre ;
   - garder l'interrupteur allumé d'un chargement à l'autre.
 - **Limites connues** (audit du 2026-10-18) :
-  - en mode réseau, tout circule en HTTP clair (commandes, captures, cookie du jeton) :
-    quelqu'un qui écoute le Wi-Fi récupère le jeton et devient un appareil appairé. C'est une
-    limite de l'appairage, antérieure à ce module ;
+  - ~~en mode réseau, tout circule en HTTP clair~~ : corrigé le 22/10/2026, le mode réseau
+    sert HTTPS sur le même port (CA propre au poste, `appairage.py`, cookie `Secure`) ; un
+    autre appareil arrivé en HTTP est renvoyé vers https://. Reste en clair : la boucle locale
+    (le MCP, le navigateur du poste), et un poste sans `openssl` ou lancé avec
+    `WEB_TOOLS_HTTP=1`, ce que son terminal dit ;
   - un mandataire local (`tailscale serve`, `ssh -R`, socat) ferait passer des requêtes
     distantes pour la boucle locale : n'en installer aucun devant les outils ;
   - un appareil appairé reste de confiance pour ses propres onglets : il peut afficher un faux

@@ -266,6 +266,7 @@ function statutDe(o) {
 function urlOutil(o) {
   const u = new URL(o.url);
   u.hostname = location.hostname;
+  u.protocol = location.protocol;   // en réseau, les outils servent aussi HTTPS sur leur port
   return u.href;
 }
 
