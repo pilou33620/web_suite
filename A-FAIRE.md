@@ -24,8 +24,9 @@ Décidées le 22/10/2026 : les quatre sont à coder, et sont faites. Chacune tou
   (`/appairage/ca.pem`, lien sur la page du code) ; le cookie déjà posé reste valable
   ([SPEC-mcp-canal-pilote.md](lanceur/docs/SPEC-mcp-canal-pilote.md), « Limites connues »).
 - [x] **Paires différentielles proposées par `cao_chemin`** (22/10/2026) : l'axe de la paire,
-  aussi large que ses deux pistes et leur écart, rendu pour `cao_paire` ; une seule couche
-  ([SPEC-mcp-chemin-auto.md](lanceur/docs/SPEC-mcp-chemin-auto.md)).
+  aussi large que ses deux pistes et leur écart, rendu pour `cao_paire` ;
+  sur plusieurs couches depuis le même jour
+  (ci-dessous, [SPEC-mcp-chemin-auto.md](lanceur/docs/SPEC-mcp-chemin-auto.md)).
 - [x] **Schéma piloté plus loin** (22/10/2026) : les classes et contraintes du schéma
   (`page: "schema"`), les fils par coordonnées (`fil`), et les symboles de la LIB (`schsym-1`)
   dessinés par le schéma et écrits par `lib_composant_creer` / `lib_composant_modifier`
@@ -45,15 +46,15 @@ Décidées le 22/10/2026 : les quatre sont à coder, et sont faites. Chacune tou
   texte, par trombone, coller, glisser-déposer et « Vue » ; lues par Claude, rien d'écrit sur
   disque par les outils.
 
-### Limites connues, à coder si besoin
+### Limites connues
 
-Relevées le 22/10/2026 sur les fonctionnalités ci-dessus ; non décidées.
+Relevées le 22/10/2026 sur les fonctionnalités ci-dessus ; décidées et faites le même jour.
 
-- [ ] **Paires différentielles de `cao_chemin` sur plusieurs couches** : l'axe proposé reste sur
-  une seule couche, sans via de paire (deux vias côte à côte, au pas de la paire). Touche
-  `editeur-pcb/js/40-chemin-auto.js` de WEB_CAO et `mcp_routage.py`
+- [x] **Paires différentielles de `cao_chemin` sur plusieurs couches** (22/10/2026) : l'axe
+  change de couche par une via de paire (deux vias côte à côte au pas de la paire), que
+  `cao_paire` pose ; pas de via de paire contre les pastilles des bouts
   ([SPEC-mcp-chemin-auto.md](lanceur/docs/SPEC-mcp-chemin-auto.md)).
-- [ ] **HTTPS en IPv6** : le certificat ne couvre que les adresses IPv4 privées (et les noms
-  `localhost`, `<poste>`, `<poste>.local`) ; un appareil qui passe par une adresse IPv6 (Tailscale
-  `fd7a:…`, lien local) voit un avertissement. Ajouter les IPv6 privées au certificat et aux
-  contraintes de la CA, qui serait alors à réinstaller sur chaque appareil (`appairage.py`).
+- [x] **HTTPS en IPv6** (22/10/2026) : le certificat et les contraintes de la CA couvrent
+  Tailscale `fd7a:…` et les ULA `fc00::/7` (pas le lien local `fe80::`) ; le lanceur et WEB_3D
+  écoutent en double pile. La CA est refaite une fois : chaque appareil la réinstalle
+  ([SPEC-mcp-canal-pilote.md](lanceur/docs/SPEC-mcp-canal-pilote.md), « Limites connues »).
