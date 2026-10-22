@@ -9,6 +9,12 @@ dit en tête **qui** fait quoi ; quand Claude in Chrome a une part, la spec a un
 Les consignes renvoient aux fichiers de `main` sur GitHub : ils doivent y être (et le PC du
 boulot à jour) avant le premier essai. Les renvois `fichier:ligne` valent au 21/10/2026.
 
+Depuis le 22/10/2026, chaque outil (web_suite, WEB_CAO, WEB_ANTENNA, WEB_3D) liste ses essais
+ouverts dans son `TESTS-A-FAIRE.md` : un essai fait s'y coche, et ce qu'il demande à coder va
+dans son `A-FAIRE.md`. Les renvois `A-FAIRE.md:ligne` des specs visent les A-FAIRE d'avant cette
+séparation, gardés tels quels dans `HISTORIQUE.md` (web_suite, WEB_ANTENNA) et à la fin de
+`docs/HISTORIQUE_DEVELOPPEMENT.md` (WEB_CAO).
+
 ## Claude in Chrome seul
 
 | Essai | Note |
