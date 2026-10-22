@@ -33,3 +33,16 @@ Décidées le 22/10/2026 : les quatre sont à coder, et sont faites. Chacune tou
   carte toujours cliquée, avant / après par case, refus si la ligne a changé depuis sa lecture
   ([SPEC-mcp-composants.md](lanceur/docs/SPEC-mcp-composants.md)). Le fichier `schsym-1` va
   avec les symboles de la LIB dessinés, ci-dessus.
+
+### Limites connues, à coder si besoin
+
+Relevées le 22/10/2026 sur les fonctionnalités ci-dessus ; non décidées.
+
+- [ ] **Paires différentielles de `cao_chemin` sur plusieurs couches** : l'axe proposé reste sur
+  une seule couche, sans via de paire (deux vias côte à côte, au pas de la paire). Touche
+  `editeur-pcb/js/40-chemin-auto.js` de WEB_CAO et `mcp_routage.py`
+  ([SPEC-mcp-chemin-auto.md](lanceur/docs/SPEC-mcp-chemin-auto.md)).
+- [ ] **HTTPS en IPv6** : le certificat ne couvre que les adresses IPv4 privées (et les noms
+  `localhost`, `<poste>`, `<poste>.local`) ; un appareil qui passe par une adresse IPv6 (Tailscale
+  `fd7a:…`, lien local) voit un avertissement. Ajouter les IPv6 privées au certificat et aux
+  contraintes de la CA, qui serait alors à réinstaller sur chaque appareil (`appairage.py`).
