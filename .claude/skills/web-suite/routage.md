@@ -25,7 +25,7 @@ passage donnés. Pour les règles électriques (largeurs, paires, retour), voir 
 
 1. Alimentations et masses : larges pistes ou zones, selon leur classe.
 2. Paires différentielles : `cao_chemin` avec `{paire, depart: [P, N], arrivee: [P, N]}`
-   propose l'axe (une seule couche), puis `cao_paire` avec l'élément de « paires » rendu ;
+   propose l'axe (vias de paire comprises), puis `cao_paire` avec l'élément de « paires » rendu ;
    ou `cao_paire` d'un bout libre de la paire (ou du milieu de ses deux pastilles) à la main.
 3. Signaux critiques : horloges, RF, liens rapides, au plus court, sur un plan de référence
    continu.
@@ -53,7 +53,8 @@ passage donnés. Pour les règles électriques (largeurs, paires, retour), voir 
   `cao_router`. Une liaison « sans chemin » : pas plus fin (pastilles à pas fin), autre
   ordre, ou points à la main.
 - Les zones de cuivre ne gênent pas le chercheur. Une paire : « paires » va à `cao_paire`, une
-  carte par paire ; elle ne change pas de couche (pas de vias de paire).
+  carte par paire ; elle change de couche par une via de paire (deux vias côte à côte), posée
+  au point qui précède celui qui porte « couche ».
 
 ## La boucle
 

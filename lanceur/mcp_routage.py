@@ -172,8 +172,9 @@ OUTILS_ROUTAGE = {
                        "trouvée ou la raison, et « routes » à donner tel quel à cao_router (qui fait le détail et "
                        "montre sa carte). Une PAIRE différentielle déclarée (cao_pcb_lire classes) : {paire, "
                        "depart: [pastille de P, pastille de N], arrivee: [idem]} ; son axe est cherché aussi large "
-                       "que ses deux pistes et leur écart (règle de paire), sur une seule couche (pas de vias de "
-                       "paire), et « paires » rend, pour chacune, les arguments de cao_paire (une carte par paire, "
+                       "que ses deux pistes et leur écart (règle de paire) ; il change de couche par une via de "
+                       "paire (deux vias côte à côte, au point qui précède le point portant « couche »), jamais à "
+                       "portée de ses pastilles, et « paires » rend, pour chacune, les arguments de cao_paire (une carte par paire, "
                        "qui fait les éventails jusqu'aux pastilles). Ne modifie rien. 20 liaisons et 8 s au plus "
                        "par appel." + pilote.DONNEES,
         "inputSchema": {"type": "object", "required": ["liaisons"], "properties": {

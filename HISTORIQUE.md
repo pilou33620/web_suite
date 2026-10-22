@@ -85,6 +85,10 @@ Chaque essai a sa spec, un fichier par essai, la plupart à donner à Claude in 
   `fe80::`) et les ajoute aux contraintes de la CA ; une CA d'avant (sans `ca.json`) est refaite
   une fois, à réinstaller sur chaque appareil. Le lanceur et WEB_3D écoutent en double pile,
   IPv4 seule si IPv6 manque ([SPEC-mcp-canal-pilote.md](lanceur/docs/SPEC-mcp-canal-pilote.md)).
+- [x] **Paires de `cao_chemin` sur plusieurs couches** (22/10/2026, WEB_CAO) : l'axe d'une paire
+  change de couche par une via de paire (les deux vias côte à côte que `cao_paire` pose), jamais
+  à portée d'accroche de ses pastilles ; les pastilles de départ et d'arrivée n'ont plus à
+  partager une couche ([SPEC-mcp-chemin-auto.md](lanceur/docs/SPEC-mcp-chemin-auto.md)).
 
 ## Défauts des outils vus pendant les essais (antérieurs au MCP)
 

@@ -90,8 +90,8 @@ celles des deux nets de la paire déclarée) :
 
 - l'axe se cherche du milieu des deux pastilles de départ au milieu de celles d'arrivée, aussi
   large que les deux pistes et leur écart (`dpGeom` : 2 w + écart), les deux nets « à soi » ;
-- une seule couche, celle que les quatre pastilles ont en commun : pas de vias de paire
-  (`shortcut:` dans le code) ;
+- elle change de couche par une via de paire (ajout du 22/10/2026, ci-dessous) ; avant, une
+  seule couche, celle que les quatre pastilles avaient en commun ;
 - les points qui passeraient à portée d'accroche d'un couple de pastilles de la paire (1,25 mm,
   `dpPrimPair`, le critère de `cao_paire`) sont retirés : sinon `cao_paire` terminerait la
   paire avant l'arrivée ;
@@ -99,6 +99,23 @@ celles des deux nets de la paire déclarée) :
   qui fait les éventails jusqu'aux pastilles. `largeur` est refusée pour une paire (sa règle).
 - Banc : `harness.js`, « chemin-auto : une paire déclarée… » (ligne droite, puis un mur à
   contourner) ; `banc_mcp.py` (arguments).
+
+## Ajout du 22/10/2026 : les vias de paire
+
+- L'axe d'une paire change de couche comme une liaison simple, mais sa via est une via de paire :
+  les deux vias côte à côte que `cao_paire` pose (`dpVia`, écartés de `dpViaSpread`, avancés par
+  l'éventail de ce qu'il rattrape sur le pas des pistes). Sur la grille, elle tient dans un disque
+  qui couvre les deux vias dans tous les sens (`shortcut:` dans le code : pas deux vias orientés).
+- Pas de via de paire à portée d'accroche de ses pastilles (disque + 1,25 mm) : `dpVia` veut un
+  segment avant elle pour savoir où ouvrir l'éventail, et `cao_paire` s'accrocherait aux
+  pastilles. Départ et arrivée gardent chacun leurs couches : plus besoin d'une couche commune.
+- Le point qui précède la via n'est jamais repris deux fois (un demi-tour sur place croiserait les
+  deux pistes de `cao_paire`). Le filtre d'accroche juge chaque point sur sa couche ; le « couche »
+  d'un point retiré passe au suivant, ou à l'arrivée : `cao_paire` pose la via là où il en est.
+- `resultats` donne aussi `vias` (le nombre de vias de paire) pour une paire.
+- Banc : `harness.js`, « chemin-auto : une paire passe sous un mur par deux vias de paire… »
+  (deux 0603 sur 2 couches, mur sur le dessus : 4 vias posées par `cao_paire`, aucune erreur DRC
+  nouvelle, la paire reliée).
 
 ## Questions ouvertes
 
