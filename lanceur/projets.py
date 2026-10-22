@@ -114,7 +114,7 @@ def preparer(racine, depot=DEPOT):
         etat = _tirer(p)
         _squelette(p, gitkeep=True)
         for nom, texte in ((".gitignore", GITIGNORE), (".gitattributes", GITATTRIBUTES)):
-            if not os.path.isfile(os.path.join(p, nom)):
+            if not os.path.exists(os.path.join(p, nom)):     # un dossier à ce nom : on n'y touche pas
                 with open(os.path.join(p, nom), "w", encoding="utf-8", newline="\n") as f:
                     f.write(texte)
         _ignorer(os.path.join(p, ".gitignore"), BROUILLON)
@@ -122,13 +122,18 @@ def preparer(racine, depot=DEPOT):
 
 
 def _ignorer(chemin, motif):
-    """Ajoute `motif` à un .gitignore d'avant qui ne l'a pas, sans toucher au reste."""
-    with open(chemin, encoding="utf-8") as f:
-        texte = f.read()
-    if motif in (l.strip() for l in texte.splitlines()):
-        return
-    with open(chemin, "a", encoding="utf-8", newline="\n") as f:
-        f.write(("\n" if texte and not texte.endswith("\n") else "") + motif + "\n")
+    """Ajoute `motif` à un .gitignore d'avant qui ne l'a pas, sans toucher au reste.
+    Illisible (dossier, droits) : on renonce, le démarrage continue."""
+    try:
+        # surrogateescape : un .gitignore en Latin-1 se lit aussi ; on n'y ajoute que de l'ASCII
+        with open(chemin, encoding="utf-8", errors="surrogateescape") as f:
+            texte = f.read()
+        if motif in (l.strip() for l in texte.splitlines()):
+            return
+        with open(chemin, "a", encoding="utf-8", newline="\n") as f:
+            f.write(("\n" if texte and not texte.endswith("\n") else "") + motif + "\n")
+    except OSError:
+        pass
 
 
 def _squelette(p, gitkeep=False):
@@ -395,6 +400,14 @@ if __name__ == "__main__":
         _ignorer(gi, BROUILLON), _ignorer(gi, BROUILLON)
         with open(gi, encoding="utf-8") as f:
             assert f.read() == "ANTENNA/*/calculs/\n*.brouillon.json\n"
+        with open(gi, "wb") as f:                                # Latin-1, pas UTF-8
+            f.write(b"# r\xe9sultats\n")
+        _ignorer(gi, BROUILLON), _ignorer(gi, BROUILLON)
+        with open(gi, "rb") as f:
+            assert f.read() == b"# r\xe9sultats\n*.brouillon.json\n"
+        os.remove(gi)
+        os.mkdir(gi)                                             # un dossier : on renonce sans planter
+        _ignorer(gi, BROUILLON)
         # Envoi hors ligne : rien à commiter ensuite, mais un commit à pousser.
         fa = os.path.join(dossier(a), "CAO", "carte_alim", "projet.cao.json")
         fb = os.path.join(dossier(b), "CAO", "carte_alim", "projet.cao.json")
