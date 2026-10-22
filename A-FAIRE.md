@@ -26,6 +26,7 @@ Décidées le 22/10/2026 : les quatre sont à coder. Chacune touche une partie q
   symboles de la LIB (`schsym-1`)
   ([SPEC-mcp-ecriture-cao.md](lanceur/docs/SPEC-mcp-ecriture-cao.md),
   [SPEC-mcp-dessin-schema.md](lanceur/docs/SPEC-mcp-dessin-schema.md)).
-- [ ] **Modifier un composant existant de la LIB**, toujours par une carte à cliquer (le MCP ne
-  sait qu'ajouter), et écrire un fichier `schsym-1`
-  ([SPEC-mcp-composants.md](lanceur/docs/SPEC-mcp-composants.md)).
+- [x] **Modifier un composant existant de la LIB** (22/10/2026) : `lib_composant_modifier`,
+  carte toujours cliquée, avant / après par case, refus si la ligne a changé depuis sa lecture
+  ([SPEC-mcp-composants.md](lanceur/docs/SPEC-mcp-composants.md)). Le fichier `schsym-1` va
+  avec les symboles de la LIB dessinés, ci-dessus.

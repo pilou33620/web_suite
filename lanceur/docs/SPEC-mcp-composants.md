@@ -109,7 +109,8 @@ MCP :    python3 lanceur/banc_mcp.py
 
 - **Toujours** : contrôler avant la carte et au clic ; ajouter sans réécrire les autres
   lignes.
-- **Demander d'abord** : modifier un composant existant ; écrire un fichier `schsym-1`.
+- **Demander d'abord** : écrire un fichier `schsym-1`. Modifier un composant existant : décidé
+  le 22/10/2026, par `lib_composant_modifier` (ci-dessous).
   Un modèle de simulation se lie par `lib_simulation_lier` (ajouté le 21/10/2026, ci-dessous).
 - **Jamais** : écraser un fichier de la LIB ; déplacer la LIB ; écrire hors des
   sous-dossiers de la LIB.
@@ -128,6 +129,24 @@ Le pendant de « 📎 Lier un fichier » de la fiche d'une référence (Gestion 
   « Modèle Simulation » de cette seule ligne (les autres restent octet pour octet). Une
   liaison refusée retire le fichier que la carte vient d'écrire.
 - 4 Mo au plus (le canal de pilotage porte 8 Mo par commande depuis le 21/10/2026).
+- Bancs : `banc-composants.js` (commande), `banc-serveur-routes.py` (opération du serveur),
+  `banc_mcp.py` (arguments).
+
+## Ajout du 22/10/2026 : `lib_composant_modifier`
+
+Corriger une référence existante, demandé le 22/10/2026. Arguments : `reference` (Part Name),
+`champs` {colonne: nouvelle valeur}, `empreinte` (pcbfp-1 neuf, facultatif).
+
+- La page relit la ligne et fusionne : les cases données remplacent les siennes, les autres
+  restent. La Part Name ne change pas. Contrôles de `verifierLigne` sur la ligne fusionnée ;
+  une faute que la ligne avait déjà devient une remarque (« déjà avant »), une faute nouvelle
+  refuse. Seules les cases qui changent vraiment partent au serveur.
+- Une empreinte donnée est neuve : écrite `si_absent` sous son nom, et désignée par la ligne ;
+  retirée si le serveur refuse la ligne (même règle que la création).
+- Serveur : `POST /api/lib/composants {modifier: {part, champs, avant}}` ; `avant` est ce que la
+  page a lu : une case changée depuis rend 409. Colonnes inconnues, Part Name, formules de
+  tableur et caractères invisibles refusés ; les autres lignes restent octet pour octet.
+- Carte toujours cliquée, avant / après par case ; pas d'annulation par la carte.
 - Bancs : `banc-composants.js` (commande), `banc-serveur-routes.py` (opération du serveur),
   `banc_mcp.py` (arguments).
 

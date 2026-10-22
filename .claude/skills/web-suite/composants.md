@@ -1,7 +1,8 @@
 # Composants de la LIB : empreintes, brochage, catalogue
 
-La LIB est partagée par tous les projets. On n'y fait que **créer** : jamais modifier ni
-écraser un composant existant sans que l'utilisateur le demande.
+La LIB est partagée par tous les projets. On y **crée** ; on ne **corrige** une référence
+existante (`lib_composant_modifier`) que si l'utilisateur le demande, et aucun fichier n'est
+jamais écrasé.
 
 ## La méthode
 
@@ -19,6 +20,15 @@ La LIB est partagée par tous les projets. On n'y fait que **créer** : jamais m
    l'utilisateur clique, toujours. Puis poser le composant au schéma depuis le catalogue
    (`cao_schema_dessiner`, opération poser avec « catalogue »).
 6. Expliquer en une ou deux lignes d'où viennent les cotes (pas, pastilles, densité).
+
+## Corriger une référence existante
+
+`lib_composant_modifier` : `reference` (la Part Name), `champs` {colonne: nouvelle valeur}
+(les autres cases restent ; "" vide une case), et au besoin `empreinte`, une empreinte neuve
+sous un nom absent de la LIB que la ligne désignera. La Part Name ne change pas. Lire d'abord
+la ligne (`lib_composants`, filtre sur la référence) : la carte montre l'avant et l'après de
+chaque case, et le serveur refuse si la ligne a changé entre la lecture et le clic. Une
+faute que la ligne avait déjà n'est qu'une remarque ; une faute nouvelle refuse.
 
 ## Lier un modèle de simulation
 

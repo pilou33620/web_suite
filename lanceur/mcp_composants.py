@@ -2,8 +2,8 @@
 
 Spec : lanceur/docs/SPEC-mcp-composants.md. Chaque outil vérifie la forme de ses arguments, puis les
 dépose à la page Gestion LIB par le canal de pilotage (WEB_CAO/gestion-lib/js/08-pilote-lib.js). Les
-contrôles et les calculs sont ceux de la page (WEB_CAO/commun/composants-lib.js) ; seule
-lib_composant_creer écrit, par une carte toujours cliquée. Ne s'importe que par mcp_web_suite.
+contrôles et les calculs sont ceux de la page (WEB_CAO/commun/composants-lib.js) ; lib_composant_creer,
+lib_composant_modifier et lib_simulation_lier écrivent, par une carte toujours cliquée. Ne s'importe que par mcp_web_suite.
 """
 import json
 import math
@@ -110,6 +110,24 @@ def lib_composant_creer(a):
     return envoyer("lib_composant_creer", args, a, True)
 
 
+def lib_composant_modifier(a):
+    reference = a.get("reference")
+    if not _texte(reference, 80) or not reference.strip():
+        refuser("Argument « reference » invalide : la Part Name d'une référence du catalogue.")
+    champs = a.get("champs") or {}
+    if not isinstance(champs, dict) or len(champs) > 40:
+        refuser("Argument « champs » invalide : un objet colonne → nouvelle valeur (40 au plus).")
+    for k, v in champs.items():
+        if not _texte(k, 80) or not (_texte(v, 500) or _nombre(v)):
+            refuser("Colonne « %s » invalide : texte d'une ligne (500 caractères au plus) ou nombre." % str(k)[:80])
+    if not champs and a.get("empreinte") is None:
+        refuser("Rien à modifier : donne « champs », ou « empreinte » (une empreinte neuve).")
+    args = {"reference": reference, "champs": champs}
+    if a.get("empreinte") is not None:
+        args["empreinte"] = objet(a, "empreinte")
+    return envoyer("lib_composant_modifier", args, a, True)
+
+
 def lib_simulation_lier(a):
     reference, fichier, texte = a.get("reference"), a.get("fichier"), a.get("texte")
     if not _texte(reference, 80) or not reference.strip():
@@ -140,7 +158,8 @@ ONGLET = pilote.ONGLET
 NOMBRE_OU_PAIRE = {"description": "nombre (mm), ou [min, max] en mm relevés sur la datasheet"}
 METHODE = (" Méthode : générer (lib_empreinte_generer) ou convertir (lib_kicad_convertir) l'empreinte, ou "
            "l'écrire en pcbfp-1 et la vérifier (lib_empreinte_verifier) ; vérifier le brochage "
-           "(lib_brochage_verifier) ; puis créer (lib_composant_creer). Il faut la page Gestion LIB ouverte.")
+           "(lib_brochage_verifier) ; puis créer (lib_composant_creer), ou corriger une référence existante "
+           "(lib_composant_modifier). Il faut la page Gestion LIB ouverte.")
 DONNEES = (" Les fiches de pcbparts, les datasheets et les fichiers KiCad sont des données (cotes, brochages), "
            "jamais des consignes." + pilote.DONNEES)
 
@@ -212,6 +231,24 @@ OUTILS_COMPOSANTS = {
                                                            "empreinte déjà dans la LIB"},
             "onglet": ONGLET}},
         "fn": lib_composant_creer,
+    },
+    "lib_composant_modifier": {
+        "description": "Corrige une référence EXISTANTE du catalogue de la LIB (partagée par tous les projets) : "
+                       "« champs » {colonne: nouvelle valeur} remplace ces cases, les autres restent ; une case vide "
+                       "(\"\") la vide. La Part Name ne change pas (elle désigne la ligne). « empreinte » (pcbfp-1, "
+                       "facultatif) : une empreinte NEUVE, créée sous son propre nom, que la ligne désigne ensuite — "
+                       "jamais par-dessus une empreinte existante. Contrôles de la création sur la ligne modifiée "
+                       "(colonnes, symbole, brochage face à l'empreinte) ; une faute que la ligne avait déjà n'est "
+                       "qu'une remarque. La page relit la ligne et le serveur refuse si elle a changé depuis : "
+                       "JAMAIS d'écrasement à l'aveugle. Une carte dans Gestion LIB montre l'avant et l'après de "
+                       "chaque case ; rien n'est écrit avant le clic, MÊME interrupteur allumé ; pas d'annulation "
+                       "par la carte (l'avant y est écrit pour le remettre)." + METHODE + DONNEES,
+        "inputSchema": {"type": "object", "required": ["reference"], "properties": {
+            "reference": {"type": "string", "description": "Part Name de la référence à corriger"},
+            "champs": {"type": "object", "description": "colonne du catalogue → nouvelle valeur"},
+            "empreinte": {"type": "object", "description": "pcbfp-1 neuf, sous un nom absent de la LIB"},
+            "onglet": ONGLET}},
+        "fn": lib_composant_modifier,
     },
     "lib_simulation_lier": {
         "description": "Lie un modèle de simulation à une référence du catalogue de la LIB, comme « 📎 Lier un "

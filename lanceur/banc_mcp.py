@@ -732,7 +732,7 @@ if os.path.exists(os.path.dirname(_aide)):
         verifier("pilote-aide.json à jour (sinon : python3 lanceur/aide_pilote.py)", _f.read() == aide_pilote.contenu(), True)
 verifier("cao_thermique listé, une lecture de la page PCB (donnée)", "cao_thermique" in noms and
          "donnée" in next(o["description"] for o in outils if o["name"] == "cao_thermique"), True)
-verifier("73 outils en tout (registre-cao, ecriture-cao, dessin-schema, registre-antenna, routage, chemin-auto, composants, savoir_lire)", len(noms), 73)
+verifier("74 outils en tout (registre-cao, ecriture-cao, dessin-schema, registre-antenna, routage, chemin-auto, composants, savoir_lire)", len(noms), 74)
 verifier("registre-cao : ce que rend la page est une donnée",
          all("donnée" in o["description"] for o in outils if o["name"] in OC), True)
 FauxApi.table[("POST", "/api/pilote/commande")] = fin("- GND")
@@ -988,12 +988,12 @@ verifier("aucun argument invalide n'atteint la page (chemin-auto)", FauxApi.recu
 
 # composants (lanceur/docs/SPEC-mcp-composants.md) : calculs dans Gestion LIB, création par carte
 OC = ["lib_empreinte_generer", "lib_empreinte_verifier", "lib_kicad_convertir", "lib_brochage_verifier", "lib_composant_creer",
-      "lib_simulation_lier"]
+      "lib_simulation_lier", "lib_composant_modifier"]
 verifier("outils des composants listés", set(OC) <= set(noms), True)
 desc = {o["name"]: o["description"] for o in outils if o["name"] in OC}
 verifier("composants : méthode et donnée dans chaque description",
          all("lib_empreinte_generer" in d and "lib_composant_creer" in d and "données" in d for d in desc.values()), True)
-for n in ("lib_composant_creer", "lib_simulation_lier"):
+for n in ("lib_composant_creer", "lib_simulation_lier", "lib_composant_modifier"):
     verifier(n + " : jamais d'écrasement, toujours au clic", ("JAMAIS" in desc[n], "MÊME interrupteur allumé" in desc[n]),
              (True, True))
 FauxApi.table[("POST", "/api/pilote/commande")] = fin("ok", "appliquee")
@@ -1007,11 +1007,15 @@ for nom, args in (("lib_empreinte_generer", {"famille": "soic", "parametres": {"
                   ("lib_brochage_verifier", {"brochage": "IN=1,GND=2,OUT=5", "empreinte": "SOT-23-5", "symbole": "regulator"}),
                   ("lib_composant_creer", {"ligne": LIGNE, "empreinte": FP}),
                   ("lib_simulation_lier", {"reference": "AS179", "fichier": "as179.s3p", "texte": "# GHz S DB R 50\n",
-                                           "ports": ["J1", 3, "J3"], "masse": "GND"})):
+                                           "ports": ["J1", 3, "J3"], "masse": "GND"}),
+                  ("lib_composant_modifier", {"reference": "LDO_3V3", "champs": {"Value": "3V3 500 mA", "Description": ""},
+                                              "empreinte": FP})):
     verifier(nom + " accepté", outil(nom, **args)[0], False)
 deposees = [r[2] for r in FauxApi.recues]
 verifier("composants : page Gestion LIB, seule la création écrit", [(d["nom"], d["page"], d["ecriture"]) for d in deposees],
-         [(n, ["gestion-lib"], n in ("lib_composant_creer", "lib_simulation_lier")) for n in OC])
+         [(n, ["gestion-lib"], n in ("lib_composant_creer", "lib_simulation_lier", "lib_composant_modifier")) for n in OC])
+verifier("la modification arrive telle quelle", deposees[6]["args"],
+         {"reference": "LDO_3V3", "champs": {"Value": "3V3 500 mA", "Description": ""}, "empreinte": FP})
 verifier("le modèle et ses pattes arrivent tels quels", deposees[5]["args"],
          {"reference": "AS179", "fichier": "as179.s3p", "texte": "# GHz S DB R 50\n", "ports": ["J1", 3, "J3"], "masse": "GND"})
 verifier("la ligne et l'empreinte arrivent telles quelles", deposees[4]["args"], {"ligne": LIGNE, "empreinte": FP})
@@ -1037,7 +1041,13 @@ for nom, args in (("lib_empreinte_generer", {"famille": "bga"}), ("lib_empreinte
                   ("lib_simulation_lier", {"reference": "R1", "fichier": "r.s2p", "texte": "x", "ports": "1 2"}),
                   ("lib_simulation_lier", {"reference": "R1", "fichier": "r.s2p", "texte": "x", "ports": [True, 2]}),
                   ("lib_simulation_lier", {"reference": "R1", "fichier": "r.s2p", "texte": "x", "ports": list(range(10))}),
-                  ("lib_simulation_lier", {"reference": "R1", "fichier": "r.s2p", "texte": "x", "masse": ["2"]})):
+                  ("lib_simulation_lier", {"reference": "R1", "fichier": "r.s2p", "texte": "x", "masse": ["2"]}),
+                  ("lib_composant_modifier", {"reference": "R1"}),
+                  ("lib_composant_modifier", {"reference": "", "champs": {"Value": "1"}}),
+                  ("lib_composant_modifier", {"reference": "R1", "champs": {"Value": "a\nb"}}),
+                  ("lib_composant_modifier", {"reference": "R1", "champs": {"Value": ["1"]}}),
+                  ("lib_composant_modifier", {"reference": "R1", "champs": "Value=1"}),
+                  ("lib_composant_modifier", {"reference": "R1", "empreinte": "SOT-23-5"})):
     verifier("%s refuse %r" % (nom, str(args)[:60]), outil(nom, **args)[0], True)
 verifier("aucun argument invalide n'atteint la page (composants)", FauxApi.recues, [])
 

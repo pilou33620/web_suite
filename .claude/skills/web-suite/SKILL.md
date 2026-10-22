@@ -44,7 +44,7 @@ peut rendre.
 | Carte : contour, zones de cuivre, sérigraphie, réglages de pastille | `cao_contour_ecrire`, `cao_decoupes_ecrire`, `cao_interdits_ecrire`, `cao_zones_ecrire`, `cao_serigraphie_ecrire`, `cao_pastille_regler` | [pcb.md](pcb.md) |
 | Placer, router | `cao_placement_auto`, `cao_chemin`, `cao_router`, `cao_paire`, `cao_score` | [routage.md](routage.md) |
 | Simuler, régler depuis une datasheet | `cao_calcul`, `cao_sim_lire`, `cao_sim_ecrire` | [simulation.md](simulation.md) |
-| Créer un composant dans la LIB, lier son modèle de simulation | `lib_empreinte_generer`, `lib_kicad_convertir`, `lib_composant_creer`, `lib_simulation_lier` | [composants.md](composants.md) |
+| Créer ou corriger un composant de la LIB, lier son modèle de simulation | `lib_empreinte_generer`, `lib_kicad_convertir`, `lib_composant_creer`, `lib_composant_modifier`, `lib_simulation_lier` | [composants.md](composants.md) |
 | Antenne | `antenna_lire`, `antenna_proposer`, `antenna_openems_chiffrer` | [antenne.md](antenne.md) |
 | 3D : scène, mesures, collisions | `web3d_scene`, `web3d_mesurer`, `web3d_collisions` | — |
 
@@ -52,10 +52,11 @@ peut rendre.
 
 - Dans une page, toute écriture est une **carte** : rien ne change avant le clic de
   l'utilisateur, sauf si l'interrupteur « Appliquer directement » de l'onglet est allumé.
-  Les écritures dans la LIB (création de composant, liaison d'un modèle) attendent toujours le clic.
+  Les écritures dans la LIB (création ou correction de composant, liaison d'un modèle) attendent toujours le clic.
 - Une carte = un lot = une étape Ctrl+Z. Préférer un lot cohérent à dix petites cartes.
   Exceptions : `cao_sim_ecrire` est hors historique (Annuler sur la carte) ;
-  `lib_composant_creer` et `lib_simulation_lier` ne s'annulent pas (retirer à la main dans Gestion LIB).
+  `lib_composant_creer`, `lib_composant_modifier` et `lib_simulation_lier` ne s'annulent pas (à la main dans Gestion LIB ;
+  la carte d'une correction montre l'ancienne valeur de chaque case).
 - Un appel qui rend « en_attente » se suit par `pilote_suivre`.
 - Écritures de fichiers par l'API, **sans carte ni clic**, avec effet immédiat :
   `cao_doc_ecrire`, `antenna_projet_enregistrer`, `lib_fichier_ecrire`, `cao_profil_ecrire`.
