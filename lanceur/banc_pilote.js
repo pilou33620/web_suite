@@ -491,8 +491,19 @@ function onglet(serveur, stockage, page, nomCanal) {
   const lu = texteDe(doc.body);
   assert.ok(/longueur de USB_DP \?/.test(lu) && /Je lis <b>la carte<\/b>\./.test(lu) && /→ cao_doc_lire/.test(lu)
             && /USB_DP fait 42 mm\./.test(lu), "conversation affichée en texte brut");
-  // « Nouvelle conversation » : la demande suivante le dit au lanceur, une seule fois
+  // « Nouvelle conversation » : le panneau se vide (sauf une carte qui attend un clic), et la
+  // demande suivante le dit au lanceur, une seule fois
+  const idCarte = serveur.deposer(D.id, "regler", { v: "7" }, true);
+  await attendreQue(() => serveur.reponsesDe(idCarte).includes("proposee"), 2000, "carte avant la nouvelle conversation");
   bouton("Nouvelle conversation").click();
+  const listeD = trouver(doc.body, e => e.classes.has("pilote-liste"))[0];
+  assert.ok(!/longueur de USB_DP|USB_DP fait 42 mm|cao_doc_lire/.test(texteDe(listeD)), "l'ancienne conversation est effacée");
+  const restees = trouver(listeD, e => e.classes.has("pilote-carte"));
+  assert.ok(restees.filter(c => c.classes.has("proposee")).length === 1 && restees.every(c => c.aGarder),
+            "restent la carte à valider et celles qu'on peut encore annuler, rien d'autre");
+  assert.ok(/Nouvelle conversation : Claude repart de zéro/.test(texteDe(listeD)));
+  bouton("Refuser").click();
+  await attendreQue(() => serveur.finale(idCarte), 2000, "carte refusée");
   await D.demander("on repart");
   await D.demander("et ensuite");
   assert.deepStrictEqual(serveur.demandes.slice(1).map(d => d.nouvelle), [true, false]);
