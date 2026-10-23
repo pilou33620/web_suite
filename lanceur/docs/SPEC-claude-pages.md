@@ -81,6 +81,26 @@ Décidé le 22/10/2026 : une demande peut porter des fichiers que Claude lit ave
   consigne.
 - La conversation du panneau montre la demande suivie des noms des pièces jointes.
 
+## Modèle et test de connexion
+
+Décidé le 23/10/2026.
+
+- **Modèle** : un menu du panneau propose Opus (défaut), Sonnet et Haiku ; le choix est gardé
+  par appareil (localStorage). La demande porte `modele` (`opus`, `sonnet` ou `haiku`, vérifié
+  par `pilote.py`) et `claude_pages.py` le passe par `--model` (alias du dernier modèle de
+  chaque famille). Changer de modèle garde la conversation (`--resume`).
+- **Test de connexion, sans requête au modèle** : à chaque ouverture du panneau, la page lit
+  `GET /api/pilote/statut`. Le serveur de l'outil sait si le lanceur l'écoute (un long-poll
+  `/demandes` depuis moins de 35 s) et quel était l'état de Claude Code au dernier test.
+  Un état de plus de 30 s fait demander un nouveau test : le long-poll du lanceur rend
+  `{"tester": true}`, le lanceur lance `claude --version` et `claude auth status`, puis
+  repasse aussitôt sur `/demandes?claude=<état>` ; la page attend ce nouvel état (8 s au plus).
+- **Ligne d'état** en haut du panneau : point vert « Claude Code 2.1.301 connecté », ou point
+  rouge avec la raison et quoi faire (lanceur absent, Claude Code introuvable, pas connecté) ;
+  « Envoyer » est alors désactivé. L'état ne porte ni e-mail ni organisation.
+- **Windows** : l'installeur officiel crée `%USERPROFILE%\.local\bin\claude.exe`, cherché aussi
+  quand ce dossier n'est pas dans le PATH du lanceur.
+
 ## Prérequis sur le poste
 
 Claude Code installé et connecté une fois (`claude` dans un terminal). Sur un Raspberry Pi :

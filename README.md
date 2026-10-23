@@ -128,7 +128,9 @@ Puis `/mcp` dans Claude Code. Windows, clé SSH, dépannage : [DETAILS](lanceur/
 qui le passe à Claude Code **de ce poste**, avec le MCP web_suite seul (ni terminal ni fichiers) ;
 la réponse s'affiche dans le panneau et les modifications arrivent en cartes. On peut joindre des
 fichiers (trombone, coller, glisser-déposer, bouton « Vue » pour l'image de l'onglet) : images,
-PDF, fichiers texte (md, json, KiCad, csv…), 10 fichiers et 20 Mo par demande. Il suffit que Claude
+PDF, fichiers texte (md, json, KiCad, csv…), 10 fichiers et 20 Mo par demande. Un menu choisit le
+modèle (Opus, Sonnet, Haiku) et, à chaque ouverture, une ligne d'état dit si le lanceur et Claude
+Code sont prêts (sans requête au modèle). Il suffit que Claude
 Code soit installé sur le poste et connecté une fois (`claude` dans un terminal ; sur un Pi,
 système 64 bits) : pas besoin de `claude mcp add` pour cela.
 [SPEC-claude-pages](lanceur/docs/SPEC-claude-pages.md).

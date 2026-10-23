@@ -45,6 +45,9 @@ Décidées le 22/10/2026 : les quatre sont à coder, et sont faites. Chacune tou
 - [x] **Pièces jointes dans le panneau « Claude »** (22/10/2026) : images, captures, PDF, fichiers
   texte, par trombone, coller, glisser-déposer et « Vue » ; lues par Claude, rien d'écrit sur
   disque par les outils.
+- [x] **Modèle et test de connexion dans le panneau « Claude »** (23/10/2026) : menu Opus, Sonnet,
+  Haiku gardé par appareil ; ligne d'état à chaque ouverture (lanceur, Claude Code installé et
+  connecté, sans requête au modèle) ; `claude.exe` de l'installeur Windows trouvé hors du PATH.
 
 ### Limites connues
 

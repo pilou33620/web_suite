@@ -18,7 +18,8 @@ const pause = ms => new Promise(r => setTimeout(r, ms));
    rend les commandes au navigateur de l'onglet visé, comme pilote.py. */
 function fauxServeur() {
   const s = { battements: [], file: [], reponses: [], enCours: 0, maxEnCours: 0, polls: [], balises: [],
-              inconnues: new Set(), tropGros: new Set(), demandes: [], lectures: [], conversation: [] };
+              inconnues: new Set(), tropGros: new Set(), demandes: [], lectures: [], conversation: [],
+              statut: { lanceur: true, claude: { pret: true, message: "Claude Code 9.9 connecté.", version: "9.9" } } };
   s.fetch = async (url, opts = {}) => {
     const u = new URL(url, "http://outil");
     const corps = opts.body ? JSON.parse(opts.body) : null;
@@ -51,6 +52,7 @@ function fauxServeur() {
       if (s.refusDemande) return { ok: false, status: 409, json: async () => ({ detail: s.refusDemande }) };
       return rendre({ id: "d" + s.demandes.length });
     }
+    if (u.pathname === "/api/pilote/statut") { s.lectures.push({ statut: true }); return rendre(s.statut); }
     if (u.pathname === "/api/pilote/conversation") {
       s.lectures.push(Object.fromEntries(u.searchParams));
       await pause(20);
@@ -476,7 +478,7 @@ function onglet(serveur, stockage, page, nomCanal) {
   assert.strictEqual(bouton("Claude travaille…").disabled, true, "pas de seconde demande pendant la première");
   await attendreQue(() => bouton("Envoyer"), 3000, "conversation finie");
   assert.deepStrictEqual(serveur.demandes[0], { navigateur: serveur.nav, onglet: D.id, texte: "longueur de USB_DP ?",
-                                                 nouvelle: false, pieces: [] });
+                                                 nouvelle: false, pieces: [], modele: "opus" });
   assert.deepStrictEqual(serveur.lectures.map(l => l.depuis), ["0", "1", "1", "2"], "lecture reprise après la coupure");
   assert.ok(serveur.lectures.every(l => l.id === "d1" && l.navigateur === serveur.nav));
   const lu = texteDe(doc.body);
@@ -492,6 +494,38 @@ function onglet(serveur, stockage, page, nomCanal) {
   await D.demander("encore");
   assert.ok(/Demande non aboutie : Claude travaille déjà/.test(texteDe(doc.body)) && bouton("Envoyer"));
   serveur.refusDemande = null;
+
+  // Modèle : Opus par défaut, le choix part avec la demande et reste sur l'appareil
+  const modele = trouver(doc.body, e => e.tagName === "select")[0];
+  assert.deepStrictEqual(modele.enfants.map(o => o.value), ["opus", "sonnet", "haiku"]);
+  modele.value = "haiku";
+  modele.dispatch("change");
+  await D.demander("vite");
+  assert.strictEqual(serveur.demandes[serveur.demandes.length - 1].modele, "haiku");
+  assert.strictEqual(stockage.getItem("websuite.pilote.modele"), "haiku", "choix gardé sur l'appareil");
+  modele.value = "opus";
+  modele.dispatch("change");
+
+  // Test de connexion à chaque ouverture : vert, Envoyer actif ; rouge (lanceur absent, Claude Code
+  // pas connecté), Envoyer désactivé et la raison affichée
+  const tete = trouver(doc.body, e => e.classes.has("pilote-tete"))[0];
+  const ligne = trouver(doc.body, e => e.classes.has("pilote-etat"))[0];
+  const rouvrir = async attendu => {
+    if (panneauOuvert(doc)) tete.click();
+    tete.click();
+    await attendreQue(() => ligne.textContent === attendu, 2000, attendu);
+  };
+  await rouvrir("Claude Code 9.9 connecté.");
+  assert.ok(ligne.classes.has("ok") && !bouton("Envoyer").disabled);
+  serveur.statut = { lanceur: false, claude: null };
+  await rouvrir("Le lanceur WEB·SUITE ne répond pas : lance l'outil depuis WEB·SUITE pour écrire à Claude.");
+  assert.ok(ligne.classes.has("ko") && bouton("Envoyer").disabled, "Envoyer désactivé en rouge");
+  serveur.statut = { lanceur: true, claude: { pret: false, message: "Claude Code 9.9 n'est pas connecté." } };
+  await rouvrir("Claude Code 9.9 n'est pas connecté.");
+  assert.ok(bouton("Envoyer").disabled);
+  serveur.statut = { lanceur: true, claude: { pret: true, message: "Claude Code 9.9 connecté.", version: "9.9" } };
+  await rouvrir("Claude Code 9.9 connecté.");
+  assert.ok(!bouton("Envoyer").disabled, "de nouveau vert à la réouverture");
 
   // Pièces jointes : trombone, coller, déposer, « Vue » ; un binaire est refusé, une photo HEIC
   // de 4000 px redessinée en JPEG de 2000 px, un × retire, la demande les emporte puis les oublie

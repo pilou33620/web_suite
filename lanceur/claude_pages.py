@@ -23,9 +23,11 @@ import subprocess
 import sys
 import threading
 import time
+import urllib.parse
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import mcp_web_suite as noyau   # noqa: E402  (ports des outils, appels en boucle locale)
+import outils                   # noqa: E402  (SANS_FENETRE : pas de console qui clignote sous Windows)
 import pilote                   # noqa: E402  (limites des pièces jointes)
 
 ICI = os.path.dirname(os.path.abspath(__file__))
@@ -43,16 +45,51 @@ BUDGET_PIECES = pilote.MAX_PIECES_OCTETS
 _sessions = {}                            # (outil, navigateur) -> session de Claude Code
 _poids = {}                               # (outil, navigateur) -> octets de pièces jointes dans la session
 _verrou = threading.Lock()
+ATTENTE_TEST = 15                         # s : claude --version, claude auth status
+_test = {"t": -1e9, "etat": None}         # dernier test de Claude Code, partagé par les fils des outils
+_verrou_test = threading.Lock()
 
 
 def trouver_claude():
     """Le claude de ce poste : le PATH, puis les emplacements de l'installeur (un lanceur
     démarré par le bureau n'a pas toujours ~/.local/bin dans son PATH)."""
     for chemin in (os.environ.get("WEB_SUITE_CLAUDE"), shutil.which("claude"),
-                   os.path.expanduser("~/.local/bin/claude"), os.path.expanduser("~/.claude/local/claude")):
+                   os.path.expanduser("~/.local/bin/claude"), os.path.expanduser("~/.local/bin/claude.exe"),
+                   os.path.expanduser("~/.claude/local/claude")):    # claude.exe : l'installeur Windows
         if chemin and os.path.isfile(chemin) and os.access(chemin, os.X_OK):
             return chemin
     return None
+
+
+def tester_claude():
+    """L'état de Claude Code sur ce poste, sans requête au modèle. Ni e-mail ni organisation :
+    la page n'a besoin que de savoir s'il est prêt."""
+    claude = trouver_claude()
+    if claude is None:
+        return {"pret": False, "message": "Claude Code introuvable sur ce poste : installe-le (Windows : "
+                "« irm https://claude.ai/install.ps1 | iex » dans PowerShell ; Linux, macOS : "
+                "« curl -fsSL https://claude.ai/install.sh | bash »), ou donne son chemin par WEB_SUITE_CLAUDE."}
+    lancer = lambda *a: subprocess.run([claude, *a], capture_output=True, text=True, encoding="utf-8",
+                                       errors="replace", timeout=ATTENTE_TEST, stdin=subprocess.DEVNULL,
+                                       creationflags=outils.SANS_FENETRE).stdout
+    try:
+        version = (lancer("--version").split() or ["?"])[0]          # « 2.1.301 (Claude Code) »
+        connecte = json.loads(lancer("auth", "status", "--json") or "{}").get("loggedIn") is True
+    except (OSError, subprocess.SubprocessError, ValueError, AttributeError) as exc:
+        return {"pret": False, "message": "Claude Code ne répond pas (%s) : lance « claude » dans un terminal "
+                "du poste pour voir ce qui cloche." % exc}
+    if not connecte:
+        return {"pret": False, "version": version, "message": "Claude Code %s n'est pas connecté : lance « claude » "
+                "une fois dans un terminal du poste et connecte-toi." % version}
+    return {"pret": True, "version": version, "message": "Claude Code %s connecté." % version}
+
+
+def etat_claude():
+    """Trois outils demandent souvent ensemble (un panneau ouvert dans chacun) : un seul test."""
+    with _verrou_test:
+        if time.monotonic() - _test["t"] > 10:
+            _test.update(t=time.monotonic(), etat=tester_claude())
+        return _test["etat"]
 
 
 def consigne(outil, d):
@@ -73,6 +110,8 @@ def commande(claude, outil, d, session):
             # les hooks du poste (git pull des dépôts, plugins) ralentiraient chaque demande
             "--settings", json.dumps({"disableAllHooks": True}),
             "--append-system-prompt", consigne(outil, d)]
+    if d.get("modele") in pilote.MODELES:
+        args += ["--model", d["modele"]]
     if session:
         args += ["--resume", session]
     return args
@@ -145,7 +184,7 @@ def traiter(outil, d):
     try:
         proc = subprocess.Popen(commande(claude, outil, d, session), cwd=RACINE, stdin=subprocess.PIPE,
                                 stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, encoding="utf-8",
-                                errors="replace")
+                                errors="replace", creationflags=outils.SANS_FENETRE)
     except OSError as exc:
         progres(outil, d["id"], {"genre": "erreur", "texte": "Claude Code ne démarre pas : %s" % exc}, "echouee")
         return
@@ -190,14 +229,20 @@ def traiter(outil, d):
 
 
 def boucle(outil, arret):
+    etat = None                           # à joindre au prochain long-poll, juste après un test
     while not arret.is_set():
+        route = "/api/pilote/demandes" + ("?claude=" + urllib.parse.quote(json.dumps(etat)) if etat else "")
+        etat = None
         try:
-            r = noyau.appeler_outil_web(outil, "/api/pilote/demandes", delai=ATTENTE_POLL)
+            r = noyau.appeler_outil_web(outil, route, delai=ATTENTE_POLL)
         except noyau.OutilArrete:
             arret.wait(REPOS)
             continue
         except noyau.ErreurOutil as exc:
             arret.wait(REPOS_ANCIEN if exc.code == 404 else REPOS)
+            continue
+        if isinstance(r, dict) and r.get("tester"):
+            etat = etat_claude()
             continue
         d = r.get("demande") if isinstance(r, dict) else None
         if isinstance(d, dict) and isinstance(d.get("id"), str) and isinstance(d.get("texte"), str):
@@ -242,8 +287,13 @@ if __name__ == "__main__":
     faux = os.path.join(dossier, "claude")
     with open(faux, "w", encoding="utf-8") as f:
         f.write("#!%s\n" % sys.executable + "\n".join([
-            "import json, sys",
+            "import json, os, sys",
             "args = sys.argv[1:]",
+            "if args == ['--version']:",
+            "    print('2.1.301 (Claude Code)'); sys.exit(0)",
+            "if args[:2] == ['auth', 'status']:",
+            "    print(json.dumps({'loggedIn': os.path.exists(%r), 'email': 'moi@exemple.fr'})); sys.exit(0)"
+            % os.path.join(dossier, "connecte"),
             "blocs = json.loads(sys.stdin.readline())['message']['content']",
             "texte = blocs[-1]['text']",
             "json.dump({'args': args, 'texte': texte, 'blocs': blocs}, open(%r, 'w'))" % journal_args,
@@ -271,11 +321,12 @@ if __name__ == "__main__":
         c.close()
         return r.status, rendu
 
-    def conversation(texte, nouvelle=False, pieces=None):
+    def conversation(texte, nouvelle=False, pieces=None, modele=None):
         requete("POST", "/api/pilote/battement", {"navigateur": "ipad", "onglets": [
             {"id": "O1", "page": "pcb", "projet": "carte-usb", "focus_il_y_a": 0}]})
         code, d = requete("POST", "/api/pilote/demande", {"navigateur": "ipad", "onglet": "O1", "texte": texte,
-                                                          "nouvelle": nouvelle, "pieces": pieces})
+                                                          "nouvelle": nouvelle, "pieces": pieces,
+                                                          **({"modele": modele} if modele else {})})
         assert code == 200, d
         vus, fin = [], time.monotonic() + 15
         while time.monotonic() < fin:
@@ -321,6 +372,21 @@ if __name__ == "__main__":
     assert "--resume" not in recu["args"] and vus[0]["genre"] == "info" and "20 Mo" in vus[0]["texte"], vus
     assert "--resume" in conversation("et après ?")[2]["args"]
     BUDGET_PIECES = pilote.MAX_PIECES_OCTETS
+    # Le modèle choisi dans le panneau part en --model (opus par défaut)
+    a = conversation("et avec haiku ?", modele="haiku")[2]["args"]
+    assert a[a.index("--model") + 1] == "haiku", a
+    a = conversation("et par défaut ?")[2]["args"]
+    assert a[a.index("--model") + 1] == "opus", a
+    # Test de connexion, sans requête au modèle : la page l'obtient par pilote.py (statut), le
+    # lanceur répond par son long-poll ; ni e-mail ni organisation ne sortent
+    open(os.path.join(dossier, "connecte"), "w").close()
+    st = requete("GET", "/api/pilote/statut")[1]
+    assert st == {"lanceur": True, "claude": {"pret": True, "message": "Claude Code 2.1.301 connecté.",
+                                              "version": "2.1.301"}}, st
+    os.remove(os.path.join(dossier, "connecte"))
+    _test["t"] = P.claude_t = -1e9                              # état périmé des deux côtés
+    st = requete("GET", "/api/pilote/statut")[1]
+    assert st["claude"]["pret"] is False and "pas connecté" in st["claude"]["message"], st
     # Claude qui échoue (non connecté) : la page le lit
     etat, vus, _ = conversation("plante")
     assert etat == "echouee" and "pas connecte" in vus[-1]["texte"], vus
@@ -332,6 +398,13 @@ if __name__ == "__main__":
     os.environ["HOME"] = dossier
     etat, vus, _ = conversation("bonjour")
     assert etat == "echouee" and "pas installé" in vus[-1]["texte"], vus
+    t = tester_claude()
+    assert t["pret"] is False and "introuvable" in t["message"], t
+    # Windows : l'installeur officiel crée ~/.local/bin/claude.exe, hors du PATH d'un lanceur de bureau
+    os.makedirs(os.path.join(dossier, ".local", "bin"))
+    exe = os.path.join(dossier, ".local", "bin", "claude.exe")
+    shutil.copy(faux, exe)
+    assert trouver_claude() == exe
     shutil.which = vrai_which
     if vrai_home is not None:
         os.environ["HOME"] = vrai_home

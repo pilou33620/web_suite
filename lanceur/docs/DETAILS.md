@@ -302,7 +302,10 @@ transporter stdin/stdout. Aucun port à ouvrir, et le trafic est chiffré.
 répond « Aucun lanceur WEB·SUITE ne répond », l'outil a été lancé seul, sans WEB·SUITE. Voir
 [SPEC-claude-pages.md](SPEC-claude-pages.md). Une pièce jointe refusée dit pourquoi dans le
 panneau : fichier binaire (zip, docx…), image que le navigateur ne sait pas lire, plus de
-10 fichiers, 20 Mo ou 400 000 caractères de texte.
+10 fichiers, 20 Mo ou 400 000 caractères de texte. La ligne d'état en haut du panneau, testée à
+chaque ouverture, dit ce qui manque (lanceur, installation, connexion). Sous Windows,
+l'installeur officiel (`irm https://claude.ai/install.ps1 | iex`) met `claude.exe` dans
+`%USERPROFILE%\.local\bin`, que le lanceur cherche même hors de son PATH.
 
 **Dépannage** : `/mcp` affiche l'état de la connexion. Si elle échoue par SSH, un
 `.bashrc` du Pi qui écrit quelque chose (un `echo`) pollue stdout : le déplacer dans
