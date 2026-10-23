@@ -52,7 +52,7 @@ function fauxServeur() {
       if (s.refusDemande) return { ok: false, status: 409, json: async () => ({ detail: s.refusDemande }) };
       return rendre({ id: "d" + s.demandes.length });
     }
-    if (u.pathname === "/api/pilote/statut") { s.lectures.push({ statut: true }); return rendre(s.statut); }
+    if (u.pathname === "/api/pilote/statut") return rendre(s.statut);
     if (u.pathname === "/api/pilote/conversation") {
       s.lectures.push(Object.fromEntries(u.searchParams));
       await pause(20);
@@ -267,6 +267,13 @@ function onglet(serveur, stockage, page, nomCanal) {
   bouton("×").click();
   assert.ok(panneauD.classes.has("masque"), "× masque le panneau");
   assert.strictEqual(stockage.getItem("websuite.pilote.masque"), "1", "masquage gardé");
+  // Masqué, il reste une pastille « Claude » : un clic le rouvre (vu à l'essai sous Windows : sans elle,
+  // le panneau ne revenait plus)
+  trouver(doc.body, e => e.classes.has("pilote-tete"))[0].click();
+  assert.ok(!panneauD.classes.has("masque") && panneauOuvert(doc), "la pastille rouvre le panneau");
+  assert.strictEqual(stockage.getItem("websuite.pilote.masque"), "0");
+  bouton("×").click();
+  assert.ok(panneauD.classes.has("masque") && !panneauOuvert(doc), "× replie et réduit");
 
   // Proposée : rien n'est appliqué avant le clic ; la carte montre le texte tel quel
   id = serveur.deposer(D.id, "regler", { v: "2" }, true);
