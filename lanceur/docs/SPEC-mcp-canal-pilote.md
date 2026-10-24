@@ -68,6 +68,18 @@ Utilisateur : toi, depuis Claude Code (sur le poste ou par SSH). Les pages pilot
    - largeur réduite à 1600 px au plus ;
    - pages couvertes : schéma, PCB, visionneuse IPC, WEB_ANTENNA 2D, WEB_3D ;
    - une page sans canevas répond par une erreur lisible.
+2 bis. **`pilote_interface_lire`** et **`pilote_interface`** couvrent ce qu'aucun outil propre à
+   la page ne fait, dans toutes les pages (commandes `interface_lire` et `interface`, servies par
+   `pilote.js` lui-même, comme `capture`) :
+   - la lecture numérote les contrôles visibles `[n]` (bouton, champ et valeur, liste et choix,
+     case, `#id`) et donne la taille du canevas en pixels de capture ; elle n'écrit rien ;
+   - le geste (`cliquer`, `saisir`, `touche`, `souris` : clic, double, droit, molette, glisser)
+     est une **écriture à carte** (`irreversible`) : rien avant ton clic, sauf interrupteur
+     allumé ; il est recalculé au clic, le contrôle a pu bouger depuis la carte ;
+   - le panneau « Claude » n'est jamais lu ni visé : Claude n'appuie pas sur ses cartes ni sur
+     l'interrupteur ;
+   - un événement synthétique ne choisit pas de fichier sur le disque et ne tape pas de texte
+     (`saisir` pose la valeur) ; une fenêtre confirm/prompt de la page attend l'utilisateur.
 3. **`cao_calcul`** lance dans l'onglet PCB (ou visionneuse IPC) une analyse parmi
    `impedance`, `diff`, `retour`, `crosstalk`, `oeil`, `dc`, `pdn`, `s21`, `verif` :
    - avec les réglages du panneau et la sélection de l'éditeur ;

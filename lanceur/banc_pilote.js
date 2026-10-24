@@ -7,7 +7,7 @@
    Affiche OK si tout passe. */
 "use strict";
 const assert = require("assert");
-const { creer } = require("./pilote.js");
+const { creer, touches } = require("./pilote.js");
 
 /* silence bien plus long que l'amorce, comme en vrai (90 s contre 5 s) : l'élection ne doit
    attendre que l'amorce, et un relais qui se ferme proprement (« bye ») est remplacé aussitôt. */
@@ -210,6 +210,18 @@ function onglet(serveur, stockage, page, nomCanal) {
   id = serveur.deposer(B.id, "capture");
   await attendreQue(() => serveur.finale(id), 2000, "capture sans canevas");
   assert.ok(/canevas/.test(serveur.finale(id).resultat) && serveur.finale(id).etat === "echouee");
+
+  // Geste « interface » : les touches se lisent comme on les écrit ; un geste inconnu échoue avant toute carte
+  const k = t => { const o = touches(t); return [o.key, o.code, o.ctrlKey, o.shiftKey]; };
+  assert.deepStrictEqual(k("Ctrl+Z"), ["z", "KeyZ", true, false]);
+  assert.deepStrictEqual(k("Ctrl+Shift+z"), ["Z", "KeyZ", true, true]);
+  assert.deepStrictEqual(k("Delete"), ["Delete", "Delete", false, false]);
+  assert.deepStrictEqual(k("Ctrl++"), ["+", "+", true, false]);
+  assert.deepStrictEqual(k("2"), ["2", "Digit2", false, false]);
+  assert.throws(() => touches("Hyper+x"), /Modificateur/);
+  id = serveur.deposer(A.id, "interface", { geste: "voler" }, true);
+  await attendreQue(() => serveur.finale(id), 2000, "geste inconnu");
+  assert.ok(serveur.finale(id).etat === "echouee" && /geste/.test(serveur.finale(id).resultat));
 
   // Une écriture se déclare avec un moyen d'annuler : historique de l'éditeur, ou annuler + etat
   assert.throws(() => A.commande("ecrire", { ecriture: true, appliquer() {} }), /annuler/);

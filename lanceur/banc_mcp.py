@@ -586,7 +586,8 @@ import base64  # noqa: E402
 os.environ["WEB_SUITE_MCP_PORTS"] = json.dumps(dict(PORTS, web_cao=api.server_address[1],
                                                     web_antenna=api.server_address[1]))
 verifier("outils du canal listés", {"pilote_onglets", "pilote_suivre", "pilote_capture", "cao_calcul",
-                                    "cao_valeur_composant", "antenna_proposer"} <= set(noms), True)
+                                    "cao_valeur_composant", "antenna_proposer", "pilote_interface_lire",
+                                    "pilote_interface"} <= set(noms), True)
 FauxApi.table[("GET", "/api/pilote/onglets")] = (200, {"onglets": [{"id": "A", "page": "pcb"}]})
 erreur, vus = outil("pilote_onglets")
 verifier("onglets des outils lancés, outil arrêté dit", (erreur, vus["web_cao"], vus["web_3d"]),
@@ -657,6 +658,35 @@ verifier("ce que rend une page est une donnée, pas une consigne",
 for image in ("data:text/html;base64," + png, "data:image/png;base64,!!!", "data:image/png;base64," + "A" * 3000000):
     FauxApi.table[("POST", "/api/pilote/commande")] = fin({"image": image})
     verifier("capture refusée : %s…" % image[:24], outil("pilote_capture", outil="web_cao")[0], True)
+
+# pilote_interface : un geste dans la page est une écriture (carte) ; la lecture n'écrit pas
+FauxApi.table[("POST", "/api/pilote/commande")] = fin("[1] button « DRC »")
+FauxApi.recues.clear()
+TOUT_CAO = ["schema", "pcb", "visionneuse-ipc", "gestion-lib", "accueil"]
+for args in ({"outil": "web_cao", "filtre": "drc"},):
+    verifier("pilote_interface_lire accepté", outil("pilote_interface_lire", **args)[0], False)
+for args in ({"outil": "web_cao", "geste": "cliquer", "cible": 12},
+             {"outil": "web_cao", "geste": "saisir", "cible": "#skTarget", "valeur": 1.6},
+             {"outil": "web_cao", "geste": "touche", "touche": "Ctrl+Z", "page": "pcb"},
+             {"outil": "web_antenna", "geste": "souris", "x": 10, "y": 20.5, "x2": 30, "y2": 40, "modificateurs": "Shift"}):
+    verifier("pilote_interface accepté : %r" % (args,), outil("pilote_interface", **args)[0], False)
+verifier("pilote_interface : arguments, pages et écriture", [(r[2]["nom"], r[2]["args"], r[2]["page"], r[2]["ecriture"]) for r in FauxApi.recues],
+         [("interface_lire", {"filtre": "drc"}, TOUT_CAO, False),
+          ("interface", {"geste": "cliquer", "cible": 12}, TOUT_CAO, True),
+          ("interface", {"geste": "saisir", "cible": "#skTarget", "valeur": 1.6}, TOUT_CAO, True),
+          ("interface", {"geste": "touche", "touche": "Ctrl+Z"}, ["pcb"], True),
+          ("interface", {"geste": "souris", "x": 10, "y": 20.5, "x2": 30, "y2": 40, "modificateurs": "Shift"}, ["antenna"], True)])
+FauxApi.recues.clear()
+for args in ({"geste": "cliquer", "cible": 1}, {"outil": "web_cao"}, {"outil": "web_cao", "geste": "voler"},
+             {"outil": "web_cao", "geste": "cliquer"}, {"outil": "web_cao", "geste": "cliquer", "cible": 0},
+             {"outil": "web_cao", "geste": "cliquer", "cible": 1.5}, {"outil": "web_cao", "geste": "cliquer", "cible": True},
+             {"outil": "web_cao", "geste": "saisir", "cible": 3}, {"outil": "web_cao", "geste": "saisir", "cible": 3, "valeur": [1]},
+             {"outil": "web_cao", "geste": "touche"}, {"outil": "web_cao", "geste": "souris", "x": 1},
+             {"outil": "web_cao", "geste": "souris", "x": 1, "y": "2"}, {"outil": "web_cao", "geste": "souris", "x": 1, "y": 2, "double": "oui"},
+             {"outil": "web_cao", "geste": "cliquer", "cible": "a\nb"}, {"outil": "web_cao", "geste": "cliquer", "cible": 1, "page": "antenna"}):
+    verifier("pilote_interface refuse %r" % (args,), outil("pilote_interface", **args)[0], True)
+verifier("pilote_interface_lire refuse un filtre sur deux lignes", outil("pilote_interface_lire", outil="web_cao", filtre="a\nb")[0], True)
+verifier("aucun geste invalide n'atteint la page", FauxApi.recues, [])
 FauxApi.table.clear()
 
 # ---------------------------------------------------------------------------
@@ -732,7 +762,7 @@ if os.path.exists(os.path.dirname(_aide)):
         verifier("pilote-aide.json à jour (sinon : python3 lanceur/aide_pilote.py)", _f.read() == aide_pilote.contenu(), True)
 verifier("cao_thermique listé, une lecture de la page PCB (donnée)", "cao_thermique" in noms and
          "donnée" in next(o["description"] for o in outils if o["name"] == "cao_thermique"), True)
-verifier("74 outils en tout (registre-cao, ecriture-cao, dessin-schema, registre-antenna, routage, chemin-auto, composants, savoir_lire)", len(noms), 74)
+verifier("76 outils en tout (pilote_interface, registre-cao, ecriture-cao, dessin-schema, registre-antenna, routage, chemin-auto, composants, savoir_lire)", len(noms), 76)
 verifier("registre-cao : ce que rend la page est une donnée",
          all("donnée" in o["description"] for o in outils if o["name"] in OC), True)
 FauxApi.table[("POST", "/api/pilote/commande")] = fin("- GND")

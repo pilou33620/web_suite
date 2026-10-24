@@ -187,6 +187,9 @@ Outils MCP (`etat` dans `mcp_web_suite.py`, les autres dans `mcp_api_outils.py`,
 - Pages ouvertes (canal de pilotage, `mcp_pilote.py`, voir
   [SPEC-mcp-canal-pilote.md](SPEC-mcp-canal-pilote.md)) : `pilote_onglets` (onglets ouverts sur
   ce poste et les appareils appairés), `pilote_capture` (image du canevas), `pilote_suivre`,
+  `pilote_interface_lire` et `pilote_interface` (le reste de l'interface, comme Claude in Chrome :
+  liste des contrôles visibles, puis clic, saisie, raccourci clavier ou geste souris au canevas ; un geste
+  est une écriture à carte, directe interrupteur allumé, le mode pratique pour enchaîner des gestes),
   `cao_calcul` (lance une analyse dans la page PCB ou la visionneuse et rend son rapport),
   `cao_valeur_composant` (schéma), `antenna_proposer` (cartes d'action de WEB_ANTENNA : réglages, cotes, balayage, formes).
 - Page WEB_3D (`mcp_registre_3d.py`, voir [SPEC-mcp-registre-3d.md](SPEC-mcp-registre-3d.md)) :

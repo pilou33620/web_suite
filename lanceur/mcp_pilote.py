@@ -122,6 +122,75 @@ def antenna_proposer(args):
                    facultatif(args, "onglet", str, None))
 
 
+GESTES = ("cliquer", "saisir", "touche", "souris")
+
+
+def pages_outil(id_outil, args):
+    page = facultatif(args, "page", str, None)
+    if page is not None and page not in PAGES[id_outil]:
+        raise noyau.ErreurOutil("Page « %s » inconnue de %s : %s." % (page, id_outil, ", ".join(PAGES[id_outil])))
+    return [page] if page else PAGES[id_outil]
+
+
+def ligne(args, nom, maxi=200):
+    v = args.get(nom)
+    if v is not None and (not isinstance(v, str) or not 1 <= len(v) <= maxi or any(ord(c) < 32 for c in v)):
+        raise noyau.ErreurOutil("Argument « %s » invalide : texte d'une ligne, %d caractères au plus." % (nom, maxi))
+    return v
+
+
+def pilote_interface_lire(args):
+    id_outil = outil_web(args)
+    corps = {"filtre": ligne(args, "filtre")} if args.get("filtre") is not None else {}
+    return envoyer(id_outil, pages_outil(id_outil, args), "interface_lire", corps, False,
+                   facultatif(args, "onglet", str, None))
+
+
+def pilote_interface(args):
+    """Un geste dans la page (clic, saisie, touche, souris au canevas) : une écriture, donc une carte."""
+    id_outil = outil_web(args)
+    geste = exiger(args, geste=str)
+    if geste not in GESTES:
+        raise noyau.ErreurOutil("Argument « geste » invalide : %s attendu." % ", ".join(GESTES))
+    corps = {"geste": geste}
+    cible = args.get("cible")
+    if geste in ("cliquer", "saisir") or cible is not None:
+        if isinstance(cible, str):
+            corps["cible"] = ligne(args, "cible")
+        elif type(cible) is int and 1 <= cible <= 100000:
+            corps["cible"] = cible
+        else:
+            raise noyau.ErreurOutil("Argument « cible » : numéro rendu par pilote_interface_lire, ou sélecteur CSS.")
+    if geste == "saisir":
+        v = args.get("valeur")
+        if type(v) not in (str, int, float, bool) or (isinstance(v, str) and len(v) > 5000):
+            raise noyau.ErreurOutil("« saisir » : « valeur », texte (5000 caractères au plus), nombre ou booléen.")
+        corps["valeur"] = v
+    if geste == "touche":
+        corps["touche"] = ligne(args, "touche", 40)
+        if corps["touche"] is None:
+            raise noyau.ErreurOutil("« touche » : donne « touche » (Ctrl+Z, Delete, Escape, r…).")
+    if geste == "souris":
+        for cle in ("x", "y", "x2", "y2", "molette"):
+            v = args.get(cle)
+            if v is None:
+                continue
+            if type(v) not in (int, float) or v != v or not -10000 <= v <= 10000:
+                raise noyau.ErreurOutil("Argument « %s » invalide : pixels de la capture, à ±10000." % cle)
+            corps[cle] = v
+        if "x" not in corps or "y" not in corps:
+            raise noyau.ErreurOutil("« souris » : donne x et y, en pixels de la capture.")
+        for cle in ("double", "droit"):
+            v = args.get(cle, False)
+            if type(v) is not bool:
+                raise noyau.ErreurOutil("Argument « %s » invalide : true ou false." % cle)
+            if v:
+                corps[cle] = True
+        if args.get("modificateurs") is not None:
+            corps["modificateurs"] = ligne(args, "modificateurs", 40)
+    return envoyer(id_outil, pages_outil(id_outil, args), "interface", corps, True, facultatif(args, "onglet", str, None))
+
+
 OUTIL = {"type": "string", "enum": list(PAGES), "description": "Outil web : web_cao, web_antenna ou web_3d."}
 ONGLET = {"type": "string", "description": "Id d'onglet rendu par pilote_onglets ; facultatif (sinon le "
                                            "dernier utilisé du bon type)."}
@@ -153,6 +222,45 @@ OUTILS_PILOTE = {
             "page": {"type": "string", "description": "Restreindre à une page de l'outil (pcb, schema…)."}},
             "required": ["outil"]},
         "fn": pilote_capture,
+    },
+    "pilote_interface_lire": {
+        "description": "Liste les contrôles visibles d'une page d'outil (WEB_CAO, WEB_ANTENNA, WEB_3D), comme "
+                       "l'utilisateur les voit : boutons, menus ouverts, onglets, champs, cases, listes (avec leur "
+                       "valeur et leurs choix), chacun numéroté [n] pour pilote_interface, avec son #id quand il en a "
+                       "un, et la taille du canevas dans les pixels de pilote_capture. Pour tout ce qu'aucun outil "
+                       "propre à la page ne fait. Les numéros changent quand l'interface change (menu ouvert, panneau "
+                       "redessiné) : relire après un geste. Le panneau « Claude » n'y figure jamais. Ne modifie rien.",
+        "inputSchema": {"type": "object", "required": ["outil"], "properties": {
+            "outil": OUTIL, "onglet": ONGLET,
+            "page": {"type": "string", "description": "Restreindre à une page de l'outil (pcb, schema…)."},
+            "filtre": {"type": "string", "description": "Sous-chaîne du libellé, de la valeur ou de l'#id, sans tenir compte de la casse."}}},
+        "fn": pilote_interface_lire,
+    },
+    "pilote_interface": {
+        "description": "Fait un geste dans une page d'outil, comme l'utilisateur : cliquer un contrôle (cible = "
+                       "numéro de pilote_interface_lire, ou sélecteur CSS comme #bDrc, même dans un menu fermé), "
+                       "saisir une valeur (champ, liste par valeur ou texte du choix, case par true/false), touche "
+                       "(raccourci au nom du DOM : Ctrl+Z, Delete, Escape, r… ; ne tape pas de texte : saisir), souris "
+                       "sur le canevas (x, y en pixels de pilote_capture ; double, droit, molette = deltaY, x2/y2 pour "
+                       "glisser, modificateurs = Shift, Ctrl…). Pour ce qu'aucun outil propre à la page ne fait : "
+                       "préfère-les quand ils existent (vérifiés, annulables). Ne choisit pas de fichier sur le disque "
+                       "(le navigateur exige un vrai clic) ; une fenêtre confirm/prompt attend la réponse de "
+                       "l'utilisateur. Rend ce qui a été fait ; relis l'interface ou capture ensuite pour voir l'effet."
+                       + ATTENTE_DOC + " La carte n'annule pas le geste (Ctrl+Z dans l'éditeur s'il y fait une étape). "
+                       "Avec la carte, le clic de l'utilisateur sur « Appliquer » peut refermer un menu ouvert : pour "
+                       "enchaîner des gestes, l'interrupteur de l'onglet doit être allumé.",
+        "inputSchema": {"type": "object", "required": ["outil", "geste"], "properties": {
+            "outil": OUTIL, "onglet": ONGLET,
+            "page": {"type": "string", "description": "Restreindre à une page de l'outil (pcb, schema…)."},
+            "geste": {"type": "string", "enum": list(GESTES)},
+            "cible": {"type": ["integer", "string"], "description": "Numéro [n] de pilote_interface_lire, ou sélecteur CSS."},
+            "valeur": {"type": ["string", "number", "boolean"], "description": "saisir : la valeur."},
+            "touche": {"type": "string", "description": "touche : Ctrl+Z, Ctrl+Shift+S, Delete, Escape, Enter, F2, r…"},
+            "x": {"type": "number"}, "y": {"type": "number"}, "x2": {"type": "number"}, "y2": {"type": "number"},
+            "double": {"type": "boolean"}, "droit": {"type": "boolean"},
+            "molette": {"type": "number", "description": "souris : deltaY d'un cran de molette (négatif : vers le haut)."},
+            "modificateurs": {"type": "string", "description": "souris : Shift, Ctrl, Alt, ou Ctrl+Shift…"}}},
+        "fn": pilote_interface,
     },
     "cao_calcul": {
         "description": "Lance un calcul WEB_CAO dans l'onglet PCB (ou visionneuse IPC), avec les réglages du "
