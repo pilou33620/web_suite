@@ -6,6 +6,7 @@ Restent permis :
 - ce qui cite l'assistant pour s'en garder : les routes interdites du MCP (mcp_web_suite.py) et
   leurs tests (banc_mcp.py), les tests de 404 des serveurs (python/test/), les .gitignore du
   fichier de clé ;
+- graphify-out/, l'analyse générée du code d'un outil (elle garde les noms de l'ancien code) ;
 - le banc du savoir, qui relit les anciennes consignes à une révision figée, et ce banc-ci.
     python3 lanceur/banc_traces_ia.py
 """
@@ -22,7 +23,7 @@ TRACE = re.compile(r"generativelanguage|gemma|gemini|/api/ia/cle|ia-assistant|06
 PERMIS = {
     "web_suite": (r"^lanceur/docs/(SPEC-|savoir-trace)", r"^tasks/", r"^lanceur/mcp_web_suite\.py$",
                   r"^lanceur/banc_mcp\.py$", r"^lanceur/banc_savoir\.py$", r"^lanceur/banc_traces_ia\.py$", r"\.gitignore$"),
-    "outil": (r"^tasks/", r"^python/test/banc-(serveur|lib-routes|serveur-routes)\.py$", r"\.gitignore$"),
+    "outil": (r"^tasks/", r"^graphify-out/", r"^python/test/banc-(serveur|lib-routes|serveur-routes)\.py$", r"\.gitignore$"),
 }
 
 
