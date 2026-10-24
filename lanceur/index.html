@@ -94,6 +94,12 @@
 
   .cartes { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(16px, 2vw, 34px); }
   @media (max-width: 900px) { .cartes { grid-template-columns: 1fr; } .slogan { display: none; } }
+  /* téléphone en paysage : les trois cartes côte à côte, sans le grand titre */
+  @media (orientation: landscape) and (max-height: 500px) {
+    .cartes { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+    .carte { min-height: 0; padding: 14px 14px 12px; }
+    .titre { margin: 12px 0 14px; }
+  }
 
   .carte {
     --c: #fff;
