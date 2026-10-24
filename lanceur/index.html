@@ -134,6 +134,7 @@
   .message { min-height: 2.9em; color: var(--muted); font-size: 12px; overflow-wrap: anywhere;
              display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
 
+  .code { padding: 8px 10px; border: 1px dashed var(--c); font: 500 13px/1.4 var(--mono); }
   .actions { margin-top: auto; display: flex; gap: 10px; flex-wrap: wrap; }
   button, .bouton {
     font: 500 12px/1 var(--mono); letter-spacing: .12em; text-transform: uppercase;
@@ -327,6 +328,7 @@ function rendre() {
         <div class="sous">${o.sous_titre}</div>
         <div class="statut"></div>
         <div class="message"></div>
+        <div class="code" hidden></div>
         <div class="actions"></div>`;
       cartes.appendChild(c);
     }
@@ -337,6 +339,10 @@ function rendre() {
     if (o.installe && !o.phase && o.openems === false) msg = 'Simulations : openEMS pas encore installé (bouton « Installer openEMS »).';
     c.querySelector('.message').textContent = msg;
     c.querySelector('.message').title = msg;
+    // le code que l'outil écrit dans son journal : pour appairer le téléphone à cet outil aussi
+    const code = c.querySelector('.code');
+    code.hidden = !o.code_appairage;
+    code.textContent = o.code_appairage ? `Code d'appairage ${o.nom} : ${o.code_appairage} (valable 10 min)` : '';
     const html = boutons(o);
     const act = c.querySelector('.actions');
     if (act.dataset.html !== html) { act.innerHTML = html; act.dataset.html = html; }

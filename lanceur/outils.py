@@ -111,6 +111,8 @@ OPENEMS_VERIF = (
     "print('openEMS', version('openEMS'), '/ Python', sys.version.split()[0])\n"
 )
 RE_URL = re.compile(r"https?://([\w.\-]+|\[[0-9a-fA-F:]+\]):(\d{2,5})")
+RE_CODE = re.compile(r"Code d'appairage[^:\n]*:\s*(\d{3} \d{3})")   # appairage.py, ligne du terminal
+DUREE_CODE = 600                       # s : un code d'appairage vit 10 min (appairage.Appairage.DUREE)
 
 
 # ---------------------------------------------------------------------------
@@ -700,6 +702,7 @@ class Gestionnaire:
                     "dossier": dossier(o, self.racine),
                     "phase": e["phase"], "message": e["message"],
                     "url": e["url"], "port": e["port"], "a_envoyer": a_envoyer,
+                    "code_appairage": self._code(o["id"], e),
                 })
         return sortie
 
@@ -720,6 +723,26 @@ class Gestionnaire:
             e.update(phase="actif", url=url, message="En cours sur %s" % url)
         elif time.time() - e["debut"] > DELAI_DEMARRAGE:
             e.update(message="Toujours pas de réponse : voir le journal.")
+
+    def _code(self, oid, e):
+        """Le dernier code d'appairage de l'outil, tant qu'il vaut : l'outil l'écrit dans son
+        journal, que personne ne voit. La page le montre aux appareils déjà appairés."""
+        if e["phase"] not in ("demarrage", "actif"):
+            return None
+        try:
+            with open(self.journal(oid), "rb") as f:
+                f.seek(max(0, f.seek(0, 2) - 32768))
+                texte = f.read().decode("utf-8", "replace")
+        except OSError:
+            return None
+        trouves = RE_CODE.findall(texte[texte.rfind("=== lancement"):])
+        if not trouves:
+            return None
+        # vu pour la première fois maintenant : l'heure de la ligne n'est pas écrite
+        if e.get("code", (None,))[0] != trouves[-1]:
+            e["code"] = (trouves[-1], time.time())
+        code, vu = e["code"]
+        return code if time.time() - vu < DUREE_CODE else None
 
     def _url_du_journal(self, oid):
         try:

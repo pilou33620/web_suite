@@ -237,4 +237,18 @@ with tempfile.TemporaryDirectory() as tmp:
     verifier("archive refusée", outils._telecharger_openems(cible, lambda t: None), False)
     verifier("rien d'extrait ni de .part laissé", sorted(os.listdir(tmp)), [])
 outils.urllib.request.urlopen = vraie_urlopen
+
+# Le code d'appairage d'un outil : lu dans son journal, le dernier depuis le lancement, 10 min
+g = outils.Gestionnaire.__new__(outils.Gestionnaire)   # sans __init__ : seul le journal sert
+with tempfile.TemporaryDirectory() as tmp:
+    g.journal = lambda oid: os.path.join(tmp, oid + ".log")
+    with open(g.journal("x"), "w", encoding="utf-8") as f:
+        f.write("  Code d'appairage WEB_CAO : 111 111\n=== lancement\n"
+                "  Code d'appairage WEB_CAO : 222 222   (à saisir…)\n  Code d'appairage WEB_CAO : 333 333\n")
+    e = {"phase": "actif"}
+    verifier("code : le dernier depuis le lancement", g._code("x", e), "333 333")
+    e["code"] = ("333 333", 0.0)                     # vu il y a très longtemps
+    verifier("code expiré : plus montré", g._code("x", e), None)
+    verifier("outil arrêté : pas de code", g._code("x", {"phase": None}), None)
+    verifier("pas de journal : pas de code", g._code("absent", {"phase": "actif"}), None)
 print("OK")
