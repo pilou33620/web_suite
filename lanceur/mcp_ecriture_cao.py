@@ -302,7 +302,7 @@ OUTILS_ECRITURE_CAO = {
     },
     "cao_contour_ecrire": {
         "description": "Contour de la carte, un seul élément : {forme: rectangle, x, y (coin), largeur, hauteur} ; "
-                       "{forme: disque, x, y (centre), rayon} — écrit en arcs au Gerber, au DXF et à l'IPC-2581 ; "
+                       "{forme: disque, x, y (centre), rayon} — écrit en arcs au Gerber, au STEP et à l'IPC-2581 ; "
                        "{forme: polygone, points: [{x, y}…]} (3 à 1000 sommets, côtés qui ne se coupent pas). "
                        "En mm, côtés de 5 mm au moins. Les découpes intérieures restent ; les plans de couche "
                        "suivent le contour. Relire : cao_pcb_lire carte." + CARTE + DRC + pilote.ATTENTE_DOC + pilote.DONNEES,
