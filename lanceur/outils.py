@@ -54,6 +54,7 @@ CATALOGUE = [
         "depot": "https://github.com/pilou33620/WEB_CAO.git",
         "script": "web_CAO.py",
         "port": 8000,
+        "entete": "X-WEB_CAO",           # en-tête maison exigé sur tout POST/PUT/DELETE (REGLES §2.3)
         "args": ["--local", "--sans-navigateur", "--sans-pause"],
         # numpy / scipy : solveurs SI-PI, facultatifs, installables par pip.
         "dependances": "pip",
@@ -66,6 +67,7 @@ CATALOGUE = [
         "depot": "https://github.com/pilou33620/WEB_ANTENNA.git",
         "script": "web_antenna.py",
         "port": 8732,
+        "entete": "X-WEB_ANTENNA",           # en-tête maison exigé sur tout POST/PUT/DELETE (REGLES §2.3)
         "args": ["--local", "--sans-navigateur"],
         # openEMS : archive binaire + venv Python 3.10/3.11, voir installer_openems().
         "dependances": "openems",
@@ -78,6 +80,7 @@ CATALOGUE = [
         "depot": "https://github.com/pilou33620/WEB_3D.git",
         "script": "web_3D.py",
         "port": 8139,
+        "entete": "X-Web3D",           # en-tête maison exigé sur tout POST/PUT/DELETE (REGLES §2.3)
         "args": ["--local", "--sans-navigateur", "--sans-pause"],
         "dependances": None,
     },

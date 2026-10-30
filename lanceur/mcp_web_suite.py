@@ -144,14 +144,19 @@ def appeler_outil_web(id_outil, route, corps=None, delai=DELAI, methode=None):
         # Les POST du lanceur installent, lancent, arrêtent ou publient : le MCP ne fait que lire
         raise ErreurOutil("Le lanceur est en lecture seule pour le MCP : " + route)
     port = base[id_outil] if id_outil == "web_suite" else ports()[id_outil]
-    return _requete(port, nom_outil(id_outil), route, corps, delai, methode)
+    return _requete(port, nom_outil(id_outil), route, corps, delai, methode,
+                    outils.PAR_ID.get(id_outil, {}).get("entete"))
 
 
-def _requete(port, nom, route, corps, delai, methode="GET"):
-    """Requête HTTP en boucle locale, sans contrôle : passer par appeler_outil_web()."""
+def _requete(port, nom, route, corps, delai, methode="GET", entete=None):
+    """Requête HTTP en boucle locale, sans contrôle : passer par appeler_outil_web().
+    `entete` : l'en-tête maison de l'outil (X-WEB_CAO…), sans lequel il refuse toute écriture."""
     donnees = None if corps is None else json.dumps(corps).encode("utf-8")
+    entetes = {"Content-Type": "application/json"}
+    if entete:
+        entetes[entete] = "1"
     requete = urllib.request.Request("http://127.0.0.1:%d%s" % (port, route), data=donnees,
-                                     headers={"Content-Type": "application/json"}, method=methode)
+                                     headers=entetes, method=methode)
     try:
         with OUVREUR.open(requete, timeout=delai) as rep:
             brut, type_contenu = rep.read(MAX_LECTURE + 1), rep.headers.get("Content-Type") or ""

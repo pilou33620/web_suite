@@ -297,8 +297,9 @@ def antenna_ouvert():
 
 
 def antenna_charge(nom):
-    # Rouvrir le projet déjà ouvert ne change rien côté serveur (même nom, même dossier)
-    return noyau.appeler_outil_web("web_antenna", route("/api/projet/ouvrir", nom=nom))
+    # Rouvrir le projet déjà ouvert ne change rien côté serveur (même nom, même dossier) ; en POST,
+    # puisqu'ouvrir un autre nom changerait le projet courant
+    return noyau.appeler_outil_web("web_antenna", "/api/projet/ouvrir", {"nom": nom})
 
 
 def antenna_projet_lire(args):

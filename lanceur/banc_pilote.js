@@ -13,16 +13,19 @@ const { creer, touches } = require("./pilote.js");
    attendre que l'amorce, et un relais qui se ferme proprement (« bye ») est remplacé aussitôt. */
 const REGLAGES = { annonce: 40, amorce: 160, silence: 3000, battement: 120, attenteServeur: 80, repos: 30 };
 const pause = ms => new Promise(r => setTimeout(r, ms));
+const ENTETE = { "X-WEB_CAO": "1" };   // l'en-tête maison que la page de l'outil pose (ENTETE_WEB)
+const avecEntete = p => p.entetes["X-WEB_CAO"] === "1" && p.entetes["Content-Type"] === "application/json";
 
 /* Faux serveur du pilote : il note les battements, compte les long-polls en cours et
    rend les commandes au navigateur de l'onglet visé, comme pilote.py. */
 function fauxServeur() {
-  const s = { battements: [], file: [], reponses: [], enCours: 0, maxEnCours: 0, polls: [], balises: [],
+  const s = { battements: [], file: [], reponses: [], enCours: 0, maxEnCours: 0, polls: [], balises: [], postes: [],
               inconnues: new Set(), tropGros: new Set(), demandes: [], lectures: [], conversation: [],
               statut: { lanceur: true, claude: { pret: true, message: "Claude Code 9.9 connecté.", version: "9.9" } } };
   s.fetch = async (url, opts = {}) => {
     const u = new URL(url, "http://outil");
     const corps = opts.body ? JSON.parse(opts.body) : null;
+    if (opts.method === "POST") s.postes.push({ route: u.pathname, entetes: opts.headers || {} });
     const rendre = obj => ({ ok: true, status: 200, json: async () => obj });
     if (u.pathname === "/api/pilote/battement") { s.battements.push(corps); return rendre({ ok: true }); }
     if (u.pathname === "/api/pilote/reponse") {
@@ -111,7 +114,7 @@ function panneauOuvert(doc) { const p = trouver(doc.body, e => e.classes.has("pi
 
 function onglet(serveur, stockage, page, nomCanal) {
   const balise = (url, corps) => { serveur.balises.push({ url, corps: JSON.parse(corps) }); return true; };
-  return creer({ fetch: serveur.fetch, BroadcastChannel, stockage, canal: nomCanal, balise }, REGLAGES).declarer({
+  return creer({ fetch: serveur.fetch, BroadcastChannel, stockage, canal: nomCanal, balise, entete: ENTETE }, REGLAGES).declarer({
     page, projet: () => "carte PIR" });
 }
 
@@ -148,6 +151,8 @@ function onglet(serveur, stockage, page, nomCanal) {
   await attendreQue(() => serveur.finale(id), 2000, "réponse de C");
   assert.deepStrictEqual(serveur.reponsesDe(id), ["recue", "finie"]);
   assert.ok(serveur.reponses.every(r => r.navigateur === serveur.nav), "chaque réponse porte son navigateur");
+  assert.ok(serveur.postes.some(p => p.route === "/api/pilote/reponse") && serveur.postes.every(avecEntete),
+            "chaque POST porte l'en-tête maison de l'outil");
 
   // Un clic dans un onglet remonte tout de suite : le serveur cible le dernier utilisé
   const avantFocus = serveur.battements.length;
@@ -251,7 +256,7 @@ function onglet(serveur, stockage, page, nomCanal) {
   }, 2000, "battement sans l'onglet fermé");
 
   // ---- Tâche 5 : panneau « Claude », cartes, interrupteur, annuler -----------------
-  const D = creer({ fetch: serveur.fetch, BroadcastChannel, stockage, canal, document: domFactice() }, REGLAGES)
+  const D = creer({ fetch: serveur.fetch, BroadcastChannel, stockage, canal, document: domFactice(), entete: ENTETE }, REGLAGES)
     .declarer({ page: "antenna", projet: () => "dipole" });
   const etat = { v: "1" };
   let annule = 0;
@@ -498,6 +503,7 @@ function onglet(serveur, stockage, page, nomCanal) {
   await attendreQue(() => bouton("Envoyer"), 3000, "conversation finie");
   assert.deepStrictEqual(serveur.demandes[0], { navigateur: serveur.nav, onglet: D.id, texte: "longueur de USB_DP ?",
                                                  nouvelle: false, pieces: [], modele: "opus" });
+  assert.ok(avecEntete(serveur.postes.filter(p => p.route === "/api/pilote/demande").pop()), "la demande porte l'en-tête maison");
   assert.deepStrictEqual(serveur.lectures.map(l => l.depuis), ["0", "1", "1", "2"], "lecture reprise après la coupure");
   assert.ok(serveur.lectures.every(l => l.id === "d1" && l.navigateur === serveur.nav));
   const lu = texteDe(doc.body);
@@ -672,6 +678,18 @@ function onglet(serveur, stockage, page, nomCanal) {
   }), "le clic dans un onglet non relais est transmis aussitôt");
   t1.arreter(); t2.arreter();
   await pause(REGLAGES.attenteServeur + 50);
+
+  // Dans la page : l'en-tête vient de ENTETE_WEB, et l'adieu part en fetch keepalive (sendBeacon
+  // ne porte pas d'en-tête, le serveur le refuserait)
+  const envois = [];
+  const fen = { location: { protocol: "http:" }, BroadcastChannel, localStorage: stockagePartage(), addEventListener() {},
+                fetch: async (u, o) => { envois.push([u, o]); return { ok: true, status: 200, json: async () => ({}) }; } };
+  const ctx = { window: fen, document: { visibilityState: "visible" }, navigator: {}, crypto: require("crypto").webcrypto,
+                ENTETE_WEB: { "X-WEB_ANTENNA": "1" } };
+  require("vm").runInNewContext(require("fs").readFileSync(require("path").join(__dirname, "pilote.js"), "utf8"), ctx);
+  await fen.Pilote._env.balise("/api/pilote/battement", "{}");
+  assert.deepStrictEqual(JSON.parse(JSON.stringify(envois)), [["/api/pilote/battement", { method: "POST", keepalive: true, body: "{}",
+    headers: { "Content-Type": "application/json", "X-WEB_ANTENNA": "1" } }]], "balise de la page : fetch keepalive avec l'en-tête");
   console.log("OK");
   process.exit(0);
 })().catch(e => { console.error(e); process.exit(1); });

@@ -279,10 +279,11 @@ del mcp.OUTILS_MCP["boum"]
 class FauxApi(FauxOutil):
     """Faux outil piloté par une table : (méthode, chemin sans requête) -> (statut, JSON).
     Note (méthode, chemin complet, corps) de chaque requête reçue."""
-    table, recues = {}, []
+    table, recues, entetes = {}, [], []
 
     def _repondre(self):
         n = int(self.headers.get("Content-Length") or 0)
+        FauxApi.entetes.append(self.headers)   # Message : .get() ignore la casse (urllib écrit « X-web_cao »)
         FauxApi.recues.append((self.command, self.path, json.loads(self.rfile.read(n)) if n else None))
         statut, rep = FauxApi.table.get((self.command, self.path.split("?")[0]), (200, {"route": self.path}))
         corps = json.dumps(rep).encode("utf-8")
@@ -415,6 +416,7 @@ FauxApi.recues.clear()
 verifier("cao_doc_ecrire", outil("cao_doc_ecrire", chemin="p", doc="pcb", document={"b": 3}, modifie=123)[0], False)
 verifier("fusion des clés dans le document relu, PUT avec modifie", FauxApi.recues,
          [("GET", DOC, None), ("PUT", "/api/projet/doc" + q(chemin="p", doc="pcb", modifie=123), {"a": 1, "b": 3})])
+verifier("PUT avec l'en-tête maison de WEB_CAO", FauxApi.entetes[-1].get("X-WEB_CAO"), "1")
 FauxApi.table[("GET", "/api/projet/doc")] = (404, {"detail": "absent"})
 FauxApi.recues.clear()
 outil("cao_doc_ecrire", chemin="p", doc="pcb", document={"b": 3}, modifie=0)
@@ -527,15 +529,17 @@ os.environ["WEB_SUITE_MCP_PORTS"] = json.dumps(dict(PORTS, web_antenna=api.serve
 TETE = {"titre": "T", "outil": "o", "source": "s", "fichier": "f", "dessin": {"d": 1}, "antenne": {"a": 1},
         "affichage": {"z": 1}}
 FauxApi.table[("GET", "/api/projet")] = (200, {"ouvert": {"nom": "dipole", "dossier": "/x"}, "projets": []})
-FauxApi.table[("GET", "/api/projet/ouvrir")] = (200, dict(TETE, nom="dipole", dossier="/x", carte={"c": 1},
+FauxApi.table[("POST", "/api/projet/ouvrir")] = (200, dict(TETE, nom="dipole", dossier="/x", carte={"c": 1},
                                                           resultats={"r": 1}))
 FauxApi.recues.clear()
 verifier("antenna_projet_lire", outil("antenna_projet_lire")[1]["nom"], "dipole")
-verifier("lecture du projet ouvert", [r[1] for r in FauxApi.recues], ["/api/projet", "/api/projet/ouvrir" + q(nom="dipole")])
+verifier("lecture du projet ouvert", FauxApi.recues, [("GET", "/api/projet", None),
+                                                      ("POST", "/api/projet/ouvrir", {"nom": "dipole"})])
 FauxApi.recues.clear()
 verifier("enregistrer partiel", outil("antenna_projet_enregistrer", projet={"antenne": {"a": 2}})[0], False)
-verifier("en-tête repris, ni carte ni résultats", ecritures(), [
+verifier("en-tête repris, ni carte ni résultats", ecritures(), [("POST", "/api/projet/ouvrir", {"nom": "dipole"}),
     ("POST", "/api/projet/enregistrer", dict(TETE, nom="dipole", antenne={"a": 2}))])
+verifier("POST avec l'en-tête maison de WEB_ANTENNA", FauxApi.entetes[-1].get("X-WEB_ANTENNA"), "1")
 FauxApi.recues.clear()
 for args in ({"projet": {"carte": None}}, {"projet": {"nom": "autre", "antenne": {"a": 1}}}, {"projet": "x"},
              {"projet": {"carte": False}}, {"projet": {"resultats": ""}}, {"projet": {"dessin": 0}},

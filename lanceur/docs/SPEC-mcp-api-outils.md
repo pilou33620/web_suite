@@ -42,7 +42,7 @@ Un outil par action, chacun avec un schéma d'entrée précis. Il n'y a pas d'ou
 | `pcbparts_outils` | WEB_CAO | GET `/api/tools` | — |
 | `pcbparts_appeler` | WEB_CAO | POST `/api/tool` | `name` doit figurer dans la liste `allowed` rendue par `/api/tools` ; arguments de 2 Ko au plus |
 | `antenna_projets` | WEB_ANTENNA | GET `/api/projet` | — |
-| `antenna_projet_lire` | WEB_ANTENNA | GET `/api/projet/ouvrir?nom=` | **seulement si `nom` est le projet déjà ouvert**, vérifié par `/api/projet` avant l'appel |
+| `antenna_projet_lire` | WEB_ANTENNA | POST `/api/projet/ouvrir` `{nom}` | **seulement si `nom` est le projet déjà ouvert**, vérifié par `/api/projet` avant l'appel |
 | `antenna_projet_enregistrer` | WEB_ANTENNA | POST `/api/projet/enregistrer` | **seulement le projet ouvert** (revérifié avant l'envoi) ; **refus de toute valeur `null`**, et pour `carte`, `resultats`, `dessin`, `antenne`, `affichage` de tout ce qui n'est pas un objet non vide ; les champs d'en-tête absents sont repris du projet ouvert |
 | `antenna_calculs` | WEB_ANTENNA | GET `/api/projet/calculs` | — |
 | `antenna_openems_etat` | WEB_ANTENNA | GET `/api/openems` | — |
