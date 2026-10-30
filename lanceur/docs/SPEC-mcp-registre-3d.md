@@ -69,7 +69,7 @@ importé par `09-demarrage.js`. Côté MCP, elles vivent dans `lanceur/mcp_regis
 | `web3d_visibilite` | non | `masquer`, `afficher`, `isoler`, `tout_afficher` et `selectionner`, sur des pièces |
 | `web3d_coupe` | non | Activer ou couper, axe `x`/`y`/`z` ou face désignée, décalage en mm (borné), sens |
 | `web3d_mesurer` | non | `dimensions`, `distance` (deux pièces), `faces` (une pièce) ; `afficher: true` pose la cote dans la scène ; nombres en mm, repère du monde |
-| `web3d_collisions` | non | Interférences entre pièces (tolérance en mm, défaut 0,1) : couples (uuid, nom) et longueur des courbes ; `afficher` les dessine |
+| `web3d_collisions` | non | Interférences entre pièces (tolérance en mm, défaut 0,1) : couples (uuid, nom) et longueur des courbes, `contenue` quand une pièce est noyée tout entière dans l'autre (longueur 0) ; `afficher` dessine les courbes |
 | `web3d_ouvrir` | **oui** | Fichiers de PROJETS/3D (chemins de `web3d_projets`), `ajout` ou remplacement ; un `.obj` emmène son `.mtl` |
 | `web3d_deplacer` | **oui** | Fichier visé, `translation` [mm], `rotation` [deg, autour du centre de sa boîte], `origine`, ou `contrainte` (`plan`/`axe`, face mobile et face fixe, décalage) |
 | `web3d_ranger_step` | **oui, irréversible** | Une pièce, nom du fichier : STEP extrait, rangé dans PROJETS/3D |

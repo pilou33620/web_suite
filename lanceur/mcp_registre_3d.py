@@ -243,7 +243,8 @@ OUTILS_3D = {
     },
     "web3d_collisions": {
         "description": "Interférences entre pièces visibles (surfaces qui se croisent ; un contact ne compte pas) : "
-                       "couples et longueur des courbes. afficher: true les dessine dans la vue.",
+                       "couples et longueur des courbes ; contenue: true quand une pièce est noyée tout entière "
+                       "dans l'autre (aucune courbe, longueur 0). afficher: true dessine les courbes dans la vue.",
         "inputSchema": {"type": "object", "properties": {
             "tolerance": {"type": "number", "description": "mm, 0,1 par défaut"}, "afficher": {"type": "boolean"},
             "onglet": ONGLET}},
