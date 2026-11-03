@@ -91,9 +91,14 @@ async function valider() {
   envoi = false; bouton.disabled = false;
 }
 
-// Déjà autorisé (code validé dans un autre onglet, page restée ouverte) : au lanceur.
-fetch('/api/etat', { credentials: 'same-origin', cache: 'no-store' })
-  .then(r => { if (r.ok) location.replace('/'); }).catch(() => {});
+// Déjà autorisé (code validé dans un autre onglet, arrivée depuis un autre site sans le
+// cookie SameSite=Strict, page sortie du cache) : au lanceur. Refait au retour sur l'onglet.
+function deja() {
+  fetch('/api/etat', { credentials: 'same-origin', cache: 'no-store' })
+    .then(r => { if (r.ok) location.replace('/'); }).catch(() => {});
+}
+addEventListener('pageshow', deja);
+document.addEventListener('visibilitychange', () => { if (!document.hidden) deja(); });
 
 document.getElementById('f').addEventListener('submit', e => { e.preventDefault(); valider(); });
 // 6 chiffres tapés : on valide tout seul, et l'affichage se groupe par 3
