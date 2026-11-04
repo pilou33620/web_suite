@@ -253,8 +253,8 @@ vérifie que ce que les fiches citent existe.
 
 Les règles de conception d'une pièce 3D sont un seul fichier, `WEB_3D/regles-conception.md` : `savoir_lire`
 le sert comme fiche `conception-3d`, et la page de conception le montre par son lien *Règles*, pour Claude in Chrome.
-Cette page est sur le canal de pilotage (page `conception`) : gestes et capture, comme les autres pages ; les outils
-`web3d_*` ne visent que la visionneuse.
+Cette page est sur le canal de pilotage (page `conception`) : gestes et capture, comme les autres pages ; `web3d_regles` y lance le
+contrôle des règles vérifiables (bouton Règles de l'onglet Inspecter), les autres outils `web3d_*` ne visent que la visionneuse.
 
 **Le panneau « Claude ».** Chaque page des outils a, en bas à droite, un bouton « Claude ».
 Une écriture proposée par Claude s'y affiche en carte, avant → après, avec Appliquer et

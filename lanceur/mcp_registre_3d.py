@@ -67,8 +67,18 @@ def cible(a):
     return {}
 
 
+PROCEDES = ("fdm", "injection", "tolerie")
+
+
 def envoyer(nom, args, ecriture, a):
     return pilote.envoyer("web_3d", ["3d"], nom, args, ecriture, facultatif(a, "onglet", str, None))
+
+
+def web3d_regles(a):
+    procede = facultatif(a, "procede", str, "fdm")
+    if procede not in PROCEDES:
+        refuser("Procédé inconnu : %s (%s)." % (procede, ", ".join(PROCEDES)))
+    return pilote.envoyer("web_3d", ["conception"], "web3d_regles", {"procede": procede}, False, facultatif(a, "onglet", str, None))
 
 
 def web3d_scene(a):
@@ -228,6 +238,14 @@ OUTILS_3D = {
             "chemins": {"type": "array", "items": {"type": "string"}}, "ajout": {"type": "boolean"}, "onglet": ONGLET},
             "required": ["chemins"]},
         "fn": web3d_ouvrir,
+    },
+    "web3d_regles": {
+        "description": "Page de conception : contrôle les règles de conception vérifiables, comme le bouton Règles de "
+                       "l'onglet Inspecter : esquisses entièrement contraintes sans Fixe posé à la main, noms des paramètres, "
+                       "et en FDM la grille (hauteurs × 0,2 mm, parois × 0,5 mm). Ne couvre pas le reste des règles.",
+        "inputSchema": {"type": "object", "properties": {
+            "procede": {"type": "string", "enum": list(PROCEDES), "description": "fdm si absent"}, "onglet": ONGLET}},
+        "fn": web3d_regles,
     },
 }
 

@@ -629,6 +629,11 @@ verifier("commandes déposées à la page 3d, avec leurs arguments", [(d["nom"],
          [(n, ["3d"], e) for n, e in zip(O3, [False] * 6 + [True])])
 verifier("arguments transmis tels quels", deposees[6]["args"], {"chemins": ["cartes/boitier.stp"], "ajout": True})
 FauxApi.recues.clear()
+verifier("web3d_regles accepté", outil("web3d_regles", procede="tolerie")[0], False)
+verifier("web3d_regles : la page conception, sans écriture", [(d[2]["nom"], d[2]["page"], d[2]["args"], d[2]["ecriture"]) for d in FauxApi.recues],
+         [("web3d_regles", ["conception"], {"procede": "tolerie"}, False)])
+verifier("web3d_regles refuse un procédé inconnu", outil("web3d_regles", procede="bois")[0], True)
+FauxApi.recues.clear()
 outil("web3d_collisions")
 verifier("collisions sans tolérance : celle de la page", FauxApi.recues[-1][2]["args"], {"afficher": False})
 outil("web3d_mesurer", piece="0/1")
@@ -677,7 +682,7 @@ if os.path.exists(os.path.dirname(_aide)):
         verifier("pilote-aide.json à jour (sinon : python3 lanceur/aide_pilote.py)", _f.read() == aide_pilote.contenu(), True)
 verifier("cao_thermique listé, une lecture de la page PCB (donnée)", "cao_thermique" in noms and
          "donnée" in next(o["description"] for o in outils if o["name"] == "cao_thermique"), True)
-verifier("53 outils en tout (pilote_interface, registre-cao, dessin-schema, registre-antenna, routage, chemin-auto, composants, savoir_lire)", len(noms), 53)
+verifier("54 outils en tout (pilote_interface, registre-cao, dessin-schema, registre-antenna, routage, chemin-auto, composants, savoir_lire, web3d_regles)", len(noms), 54)
 # décision du 2026-11-04 : Claude ne fait que ce que l'utilisateur peut faire à l'interface
 RETIRES = ("cao_doc_ecrire cao_profil_ecrire antenna_projet_enregistrer lib_fichier_ecrire cao_composants_ecrire "
            "cao_valeur_composant cao_pistes_ecrire cao_classes_ecrire cao_contraintes_ecrire cao_contour_ecrire "

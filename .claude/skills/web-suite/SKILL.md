@@ -48,7 +48,7 @@ peut rendre.
 | Créer ou corriger un composant de la LIB | `lib_empreinte_generer`, `lib_kicad_convertir`, `lib_brochage_verifier` ; `#bNewComp`, `#bNewPcb`, `#inspBrochage`, `#bSave` | [composants.md](composants.md) |
 | Antenne | `antenna_lire`, `antenna_openems_chiffrer` ; champs de l'assistant `#bAssistant` | [antenne.md](antenne.md) |
 | 3D : scène, mesures, collisions, assemblage | `web3d_scene`, `web3d_mesurer`, `web3d_collisions`, `web3d_ouvrir` ; `#bDeplacer` (D), `#bExportPiece` puis `#bRangerPiece` (ranger le STEP d'une pièce) | — |
-| Concevoir ou modifier une pièce 3D | `savoir_lire` (fiche conception-3d) d'abord, à appliquer ; puis `pilote_interface_lire`, `pilote_interface` et `pilote_capture` sur la page conception (les outils `web3d_*` ne visent que la visionneuse) | conception-3d |
+| Concevoir ou modifier une pièce 3D | `savoir_lire` (fiche conception-3d) d'abord, à appliquer ; puis `pilote_interface_lire`, `pilote_interface` et `pilote_capture` sur la page conception, `web3d_regles` après chaque esquisse et avant le compte rendu (les autres outils `web3d_*` ne visent que la visionneuse) | conception-3d |
 
 ## Écrire
 
