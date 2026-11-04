@@ -15,6 +15,7 @@ QUOI = ("conception", "resultats", "courbe", "balayage", "audit", "reglages", "c
 GRANDEURS = ("s11", "s21", "z", "roe")
 ONGLETS = ("bal", "ts", "s11", "s21", "roe", "z", "ff")
 TOILES = ("carte", "3d", "courbe")
+CHIFFRAGES = ("modele", "balayage", "tableau_s", "script")
 CONSEIL = "Trop long : précise le filtre, ou demande un seul composant, un seul net ou une seule grandeur."
 
 
@@ -63,6 +64,11 @@ def antenna_vue(a):
     return image
 
 
+def antenna_openems_chiffrer(a):
+    return resumer(envoyer("antenna_openems_chiffrer", {"quoi": choix(a.get("quoi"), "quoi", CHIFFRAGES)}, a),
+                   "Réponse trop grosse.")
+
+
 ONGLET = pilote.ONGLET
 T = {"type": "string"}
 OUTILS_ANTENNA = {
@@ -95,5 +101,14 @@ OUTILS_ANTENNA = {
             "etape": {"type": "integer", "minimum": 1}, "panneau": T, "toile": {"type": "string", "enum": list(TOILES)},
             "capturer": {"type": "boolean"}, "onglet": ONGLET}},
         "fn": antenna_vue,
+    },
+    "antenna_openems_chiffrer": {
+        "description": "Vérifie et chiffre le modèle de la page WEB_ANTENNA ouverte, comme ses devis, sans rien lancer : "
+                       "modele (modèle complété, estimation, avis), balayage (points du balayage réglé), tableau_s "
+                       "(matrice S complète), script (script Python autonome). Lancer un calcul reste à faire depuis la page."
+                       + pilote.DONNEES,
+        "inputSchema": {"type": "object", "required": ["quoi"], "properties": {
+            "quoi": {"type": "string", "enum": list(CHIFFRAGES)}, "onglet": ONGLET}},
+        "fn": antenna_openems_chiffrer,
     },
 }

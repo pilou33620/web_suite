@@ -95,7 +95,11 @@ def cao_chemin(a):
 
 
 def cao_score(a):
-    return envoyer("cao_score", {"quoi": choix(a.get("quoi"), "quoi", ("routage", "placement"))}, a, False)
+    vue = envoyer("cao_score", {"quoi": choix(a.get("quoi"), "quoi", ("routage", "placement"))}, a, False)
+    # shortcut: la page calcule encore ce total (37-routage-pilote.js, éprouvé par son harness) ; à retirer là-bas
+    if isinstance(vue.get("resultat"), str):
+        vue["resultat"] = "\n".join(l for l in vue["resultat"].split("\n") if not l.startswith("- total indicatif"))
+    return vue
 
 
 ONGLET = pilote.ONGLET
@@ -134,8 +138,7 @@ OUTILS_ROUTAGE = {
     },
     "cao_score": {
         "description": "Score de la carte PCB ouverte. routage : liaisons restantes, erreurs et remarques du DRC "
-                       "(dont contraintes, groupes de longueur, topologie), vias, longueur, et un total indicatif "
-                       "à faire baisser. placement : le score du serveur (longueur des liaisons, congestion, "
+                       "(dont contraintes, groupes de longueur, topologie), vias, longueur. placement : le score du serveur (longueur des liaisons, congestion, "
                        "découplage, pires contributeurs). Ne modifie rien." + pilote.DONNEES,
         "inputSchema": {"type": "object", "required": ["quoi"], "properties": {
             "quoi": {"type": "string", "enum": ["routage", "placement"]}, "onglet": ONGLET}},

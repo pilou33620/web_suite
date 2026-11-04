@@ -31,7 +31,8 @@ broches et nets existants. On ne pose rien sans savoir ce qui est déjà là.
 - Un bloc fonctionnel s'encadre : `cadre` avec `zone: true` (il devient une room au PCB) ;
   une note se pose en texte libre (`poser` type annot_text ou annot_note), ou dans un
   `cadre` sans `zone`, qui ne devient pas une room.
-- Renuméroter les repères à la fin (renumeroter, sur tout le document), et **avant** de
+- Renuméroter les repères à la fin (`renumeroter` de `cao_schema_dessiner`, ou `#bRenumeroter`
+  qui demande une confirmation à l'utilisateur ; sur tout le document), et **avant** de
   passer au PCB : le PCB garde les anciens repères jusqu'à sa resynchronisation.
 
 ## Règles de conception courantes
@@ -51,7 +52,8 @@ broches et nets existants. On ne pose rien sans savoir ce qui est déjà là.
   charge de l'échantillonneur.
 - Une valeur calculée s'applique à l'interface : composant sélectionné, `#pVal` (valeur), `#pRef`
   (repère), `#pPkgTxt` (boîtier) ; fabricant et MPN dans « ✎ Détails du composant… » (`#pCompEd` :
-  `#ceMfr`, `#ceMpn`). Plusieurs composants : un geste chacun, interrupteur allumé.
+  `#ceMfr`, `#ceMpn`) ; specs : `#pSpecV<i>`, `#pSpecCle`, `#pSpecNouv`, `#pSpecAjout`. Plusieurs
+  composants : un geste chacun, interrupteur allumé.
 
 ## Vérifier une portion de schéma
 

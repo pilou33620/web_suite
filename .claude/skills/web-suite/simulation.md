@@ -61,9 +61,10 @@ l'onglet Chute DC : `#simDCImportSch` (⚡ Du schéma), ou `#simDCAddSrc` et `#s
 clic sur la pastille ; ensuite `#simDCV{k}` et `#simDCU{k}`, borne par borne : un courant de charge
 se répartit à la main sur ses broches.
 
-Les parasites des condensateurs (ESR, ESL, capacité effective sous la tension du rail) n'ont **pas
-de champ** à l'interface : le tableau du panneau PDN les montre seulement. Les relever sur la
-datasheet (la capacité effective d'après la courbe DC-bias) et les donner à l'utilisateur.
+Les parasites des condensateurs (ESR, ESL, capacité effective sous la tension du rail) se
+saisissent dans le tableau du panneau PDN (champs `.simPDNCapChamp`, en nF, mΩ et nH). Les relever sur la
+datasheet (la capacité effective d'après la courbe DC-bias). Avec un MPN, la valeur vaut pour tous ses
+condensateurs et revient à chaque détection ; sans MPN, pour la session seulement.
 
 ## Lire un résultat
 

@@ -12,10 +12,10 @@ l'éditeur PCB de WEB_CAO, puis la carte se réexporte en IPC-2581 et se réimpo
 - Lire : `antenna_lire` (quoi=conception) pour le résumé (carte, empilage, bande, ports,
   boîte, maillage, motif ouvert, cotes balayables, chiffrage) ; (quoi=resultats) pour f0,
   S11, Z, bande à −10 dB, Dmax ; (quoi=courbe) pour une courbe ; (quoi=audit) pour les
-  contrôles, chacun avec sa correction proposée ; (quoi=reglages) pour les réglages, leurs unités,
+  contrôles, chacun avec sa correction proposée (les mêmes que le bouton Contrôles `#bAudit`) ; (quoi=reglages) pour les réglages, leurs unités,
   bornes et choix.
 - Modifier : par les gestes de l'assistant (ci-dessous), une carte par geste.
-- openEMS ne se lance jamais par le MCP : `antenna_openems_chiffrer` vérifie et chiffre le modèle,
+- openEMS ne se lance jamais par le MCP : `antenna_openems_chiffrer` (quoi=modele, balayage, tableau_s ou script) vérifie et chiffre le modèle de la page ouverte,
   `antenna_openems_suivre` en suit un que l'utilisateur a lancé.
 - Ne jamais inventer un chiffre du projet : s'il manque, le dire et dire où le lire.
 - Ne pas promettre un résultat : une simulation se relance et se vérifie.

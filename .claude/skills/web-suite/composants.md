@@ -13,13 +13,14 @@ l'interface de Gestion LIB, geste après geste : les outils `lib_*` ne font que 
 3. L'empreinte :
    - générée aux formules IPC-7351B : `lib_empreinte_generer`, avec les cotes min / max de
      la datasheet (les cotes JEDEC par défaut sont signalées : les vérifier) ;
-   - ou convertie d'un fichier KiCad : `lib_kicad_convertir` ;
+   - ou convertie d'un fichier KiCad : `lib_kicad_convertir`, ou à l'écran `#bImportKicad`, coller dans
+     `#kicadTexte`, puis `#bKicadConvertir` qui remplit l'éditeur sans enregistrer ;
    - ou écrite à la main en pcbfp-1, puis contrôlée : `lib_empreinte_verifier`.
-4. Le brochage : `lib_brochage_verifier`, face à l'empreinte et au symbole intégré.
+4. Le brochage : `lib_brochage_verifier`, face à l'empreinte et au symbole intégré (à l'écran :
+   `#bBrochageVerifier`).
 5. Créer l'empreinte : `#bNewPcb`, sous-onglet ⚡ Générateurs (`#genIpcFamille`, `#genIpcDensite`,
    `#genIpcNom`, `#genIpc_*`, Générer) ; une empreinte convertie ou écrite à la main se colle en
-   Code JSON (`#btnEditeurVueJson`, saisir `#editeurCodeJson`, 5000 caractères au plus par geste : au-delà,
-   la confier à l'utilisateur) ; `#editeurNomFichier`, puis « 💾 Enregistrer le fichier ». Même chemin
+   Code JSON (`#btnEditeurVueJson`, saisir `#editeurCodeJson`) ; `#editeurNomFichier`, puis « 💾 Enregistrer le fichier ». Même chemin
    pour un symbole (`#bNewSch`).
 6. Créer la ligne : `#bNewComp`, `#newPartName`, `#newPrefix`, `#newPackage`, `#newVal`, `#newMfr`,
    `#newDesc`, « Ajouter et auto-associer ». Sélectionner la ligne, puis `#inspBrochage` pour le
@@ -30,17 +31,18 @@ l'interface de Gestion LIB, geste après geste : les outils `lib_*` ne font que 
 
 ## Corriger une référence existante
 
-Seules s'éditent : Empreinte PCB, Empreinte Schématique, Modèle Simulation (`select.sel-assoc`) et
-Brochage (`#inspBrochage`). Lire d'abord la ligne (`lib_composants`, filtre sur la référence). Les
-autres colonnes (Value, Description, MPN, tensions…) n'ont **pas de champ** après la création :
-le dire à l'utilisateur, qui passe par le CSV ou par l'import. La Part Name ne change pas : elle
+Lire d'abord la ligne (`lib_composants`, filtre sur la référence). Empreinte PCB, Empreinte Schématique
+et Modèle Simulation : `select.sel-assoc` ; Brochage : `#inspBrochage`. Les autres colonnes (Value,
+Description, MPN, tensions…) : `#inspColonnesOuvrir`, `#inspCol-<colonne>`, puis
+`#bColonnesEnregistrer` ; une référence neuve passe d'abord par `#bSave`. La Part Name ne change pas : elle
 désigne la ligne. Pour une empreinte corrigée : une neuve sous un autre nom, que la ligne désigne.
 
 ## Lier un modèle de simulation
 
-« 📎 Lier un fichier… » (`#inspSimLier`) ouvre le sélecteur de fichier du navigateur : ce geste
-revient à l'**utilisateur**. Un fichier déjà dans la LIB se désigne par `select.sel-assoc`, sans
-table de ports. Lui préparer ce qu'il aura à saisir :
+Un modèle en texte (SPICE, Touchstone) se range et se lie par `#simModeleNom`, `#simModeleTexte` puis
+`#bSimModeleEcrire` : un nom déjà pris est refusé. « 📎 Lier un fichier… » (`#inspSimLier`) ouvre le
+sélecteur de fichier du navigateur : ce geste revient à l'**utilisateur**. Un fichier déjà dans la LIB se
+désigne par `select.sel-assoc`, sans table de ports. Ce qui reste à saisir ensuite :
 
 - Touchstone (.s1p à .s9p, paramètres S du fabricant) : la patte de chaque port **dans l'ordre du
   fichier** (numéro, ou nom du brochage de la référence), et la patte à laquelle les ports se

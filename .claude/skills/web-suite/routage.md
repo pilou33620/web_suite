@@ -16,7 +16,7 @@ passage donnés. Pour les règles électriques (largeurs, paires, retour), voir 
 ## Placer d'abord
 
 1. `#pAuto` (Placement auto, Propriétés sans rien de sélectionné) dégrossit tout, puis range
-   découplages et composants série contre leur circuit.
+   découplages et composants série contre leur circuit. `#pAutoSat` ne fait que ce rangement.
 2. Agencer un motif publié par le schéma : Outils `#bPlacementScore`, puis « 📐 Disposer » du bloc.
 3. `cao_score` (quoi=placement) : longueur des liaisons, congestion, découplage, pires
    contributeurs. Corriger les pires d'abord.
@@ -44,6 +44,8 @@ passage donnés. Pour les règles électriques (largeurs, paires, retour), voir 
 
 ## Points proposés (`cao_chemin`)
 
+À l'écran, le même chercheur sur une liaison : cliquer une pastille, puis Placer > Routage `#bCheminAuto`.
+
 - Pour des liaisons sans évidence, `cao_chemin` propose les points : un chercheur A* sur
   une grille (0,25 mm par défaut), angles de 45°, vias là où toutes les couches sont libres,
   le cuivre des autres nets évité à l'isolation de leur classe. Rien n'est écrit.
@@ -58,7 +60,7 @@ passage donnés. Pour les règles électriques (largeurs, paires, retour), voir 
 
 ## La boucle
 
-1. Après le clic : `cao_score` (quoi=routage) donne les liaisons restantes, le DRC, les vias,
-   la longueur et un total indicatif à faire baisser.
+1. Après le clic : `cao_score` (quoi=routage) donne les liaisons restantes, le DRC, les vias
+   et la longueur.
 2. `cao_drc` pour le détail des erreurs, `cao_pcb_lire` (quoi=drc) pour les relire.
 3. Corriger une cause à la fois, puis recommencer.

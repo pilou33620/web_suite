@@ -46,7 +46,7 @@ peut rendre.
 | Simuler, régler depuis une datasheet | `cao_calcul`, `cao_sim_lire` ; champs du panneau `#bSim` | [simulation.md](simulation.md) |
 | Créer ou corriger un composant de la LIB | `lib_empreinte_generer`, `lib_kicad_convertir`, `lib_brochage_verifier` ; `#bNewComp`, `#bNewPcb`, `#inspBrochage`, `#bSave` | [composants.md](composants.md) |
 | Antenne | `antenna_lire`, `antenna_openems_chiffrer` ; champs de l'assistant `#bAssistant` | [antenne.md](antenne.md) |
-| 3D : scène, mesures, collisions, assemblage | `web3d_scene`, `web3d_mesurer`, `web3d_collisions`, `web3d_ouvrir` ; `#bDeplacer` (D) | — |
+| 3D : scène, mesures, collisions, assemblage | `web3d_scene`, `web3d_mesurer`, `web3d_collisions`, `web3d_ouvrir` ; `#bDeplacer` (D), `#bExportPiece` puis `#bRangerPiece` (ranger le STEP d'une pièce) | — |
 
 ## Écrire
 

@@ -137,11 +137,15 @@ def web3d_mesurer(a):
         args["piece"] = ref(a.get("piece"))
     else:
         args.update(cible({k: a[k] for k in ("piece", "fichier") if k in a}))
+        if len(args) == 2:
+            refuser("dimensions : « piece » ou « fichier » ; la fiche ne mesure pas la scène entière.")
     return resumer(envoyer("web3d_mesurer", args, False, a), "Trop de faces : demande une autre pièce.")
 
 
 def web3d_collisions(a):
-    args = {"tolerance": nombre(a.get("tolerance", 0.1), "tolerance", 1e-6, 10), "afficher": booleen(a, "afficher")}
+    args = {"afficher": booleen(a, "afficher")}
+    if a.get("tolerance") is not None:      # absente : la préférence de la page, comme le bouton
+        args["tolerance"] = nombre(a["tolerance"], "tolerance", 1e-6, 10)
     return envoyer("web3d_collisions", args, False, a)
 
 
@@ -171,7 +175,8 @@ OUTILS_3D = {
     },
     "web3d_vue": {
         "description": "Règle la vue 3D (avant, arriere, gauche, droite, dessus, dessous, iso), la projection, et "
-                       "cadre une pièce ou un fichier ; capturer: true rend l'image dans la foulée.",
+                       "cadre une pièce ou un fichier ; capturer: true rend l'image dans la foulée. La projection s'écrit dans "
+                       "les préférences, comme le bouton de la page.",
         "inputSchema": {"type": "object", "properties": {
             "vue": {"type": "string", "enum": list(VUES)}, "projection": {"type": "string", "enum": ["ortho", "perspective"]},
             "cadrer": {"type": "object", "description": "{\"piece\": ref} ou {\"fichier\": n}"},
@@ -186,7 +191,7 @@ OUTILS_3D = {
         "fn": web3d_visibilite,
     },
     "web3d_coupe": {
-        "description": "Plan de coupe : actif, axe x/y/z ou face plane d'une pièce (index de web3d_mesurer faces), "
+        "description": "Plan de coupe : actif, axe x/y/z ou face plane d'une pièce visible (index de web3d_mesurer faces), "
                        "décalage en mm (borné par la page), sens inversé.",
         "inputSchema": {"type": "object", "properties": {
             "actif": {"type": "boolean"}, "axe": {"type": "string", "enum": ["x", "y", "z"]},
@@ -195,9 +200,11 @@ OUTILS_3D = {
         "fn": web3d_coupe,
     },
     "web3d_mesurer": {
-        "description": "Mesures en mm (repère du monde) : dimensions (encombrement, volume, surface) d'une pièce, d'un "
-                       "fichier ou de la scène ; distance minimale entre deux pièces (afficher: true pose la cote dans "
-                       "la vue) ; faces d'une pièce (plan, cylindre : rayon, axe, aire, index). effacer: true retire la cote.",
+        "description": "Mesures en mm (repère du monde), ce que montre la page : dimensions (encombrement, et volume et surface "
+                       "jusqu'à 800 000 triangles) d'une pièce ou d'un fichier ; distance minimale entre deux pièces visibles "
+                       "(afficher: true pose la cote dans la vue ; effacer: true, ou Effacer la mesure dans la page, la retire) ; "
+                       "faces d'une pièce visible (index ; plan : aire, normale ; cylindre : rayon, hauteur, axe, centre ; "
+                       "autre : aire).",
         "inputSchema": {"type": "object", "properties": {
             "quoi": {"type": "string", "enum": list(QUOI)}, "piece": REF_DOC, "fichier": {"type": "integer"},
             "pieces": {"type": "array", "items": REF_DOC}, "afficher": {"type": "boolean"},
@@ -207,9 +214,10 @@ OUTILS_3D = {
     "web3d_collisions": {
         "description": "Interférences entre pièces visibles (surfaces qui se croisent ; un contact ne compte pas) : "
                        "couples et longueur des courbes ; contenue: true quand une pièce est noyée tout entière "
-                       "dans l'autre (aucune courbe, longueur 0). afficher: true dessine les courbes dans la vue.",
+                       "dans l'autre (aucune courbe, longueur 0). afficher: true dessine les courbes dans la vue et écrit la "
+                       "tolérance dans les préférences, comme le champ de la page.",
         "inputSchema": {"type": "object", "properties": {
-            "tolerance": {"type": "number", "description": "mm, 0,1 par défaut"}, "afficher": {"type": "boolean"},
+            "tolerance": {"type": "number", "description": "mm ; absente : celle de la page"}, "afficher": {"type": "boolean"},
             "onglet": ONGLET}},
         "fn": web3d_collisions,
     },

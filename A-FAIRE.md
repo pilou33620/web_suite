@@ -61,3 +61,12 @@ Relevées le 22/10/2026 sur les fonctionnalités ci-dessus ; décidées et faite
   Tailscale `fd7a:…` et les ULA `fc00::/7` (pas le lien local `fe80::`) ; le lanceur et WEB_3D
   écoutent en double pile. La CA est refaite une fois : chaque appareil la réinstalle
   ([SPEC-mcp-canal-pilote.md](lanceur/docs/SPEC-mcp-canal-pilote.md), « Limites connues »).
+
+## MCP limité à l'interface (2026-11-04)
+
+Tout est couvert par les bancs, avec des DOM factices : rien n'a encore été joué dans une vraie page.
+À essayer sur une vraie page :
+- `pilote_interface` : un menu reste ouvert après le clic sur une carte, et un contrôle couvert ou masqué est refusé.
+- Contrôles ajoutés : `#pAutoSat`, `#bCheminAuto`, `#bRenumeroter`, specs du schéma, `.simPDNCapChamp`, `#bImportKicad`,
+  `#bBrochageVerifier`, `#inspColonnesOuvrir`, `#bSimModeleEcrire`, `#bAudit` (WEB_ANTENNA), `#bRangerPiece` (WEB_3D).
+- Un travail long par gestes : une carte par geste, donc interrupteur allumé.

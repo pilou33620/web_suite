@@ -15,14 +15,12 @@ import mcp_web_suite as noyau
 PLAFOND = 100 * 1024   # octets de JSON rendus à Claude ; au-delà, un résumé
 DOCS_CAO = ("schema", "pcb", "ipc2581")
 TYPES_LIB = ("pcb", "schematique", "simulation")
-# Chiffrer sans lancer : jamais les routes « …/lancer » (le Pi calcule des heures)
-CHIFFRAGES = {"modele": "/api/openems", "balayage": "/api/openems/balayage",
-              "tableau_s": "/api/openems/tableau-s", "script": "/api/openems/script"}
 # En-tête d'un projet WEB_ANTENNA : absent, le serveur le remet à vide (projet.py:438-446)
 # Présents dans un enregistrement ANTENNA, ils remplacent le fichier : un objet non vide, ou rien
-SOLVEURS = {"simulation": "/api/simulation", "simulation_dc": "/api/simulation-dc",
-            "crosstalk": "/api/crosstalk", "simulation_rf": "/api/simulation-rf", "oeil": "/api/oeil",
-            "analyse_carte": "/api/analyse-carte", "ipc2581": "/api/ipc2581"}
+# Les états que la page lit : les autres routes de calcul ne montrent le leur nulle part
+SOLVEURS = {"simulation": "/api/simulation", "oeil": "/api/oeil", "ipc2581": "/api/ipc2581"}
+# Comme la page (WEB_3D/js/02-import.js, ANNEXES) : une annexe suit son .obj, elle ne se liste pas
+ANNEXES_3D = (".mtl", ".png", ".jpg", ".jpeg", ".webp", ".bmp", ".gif")
 
 
 def exiger(args, **types):
@@ -133,13 +131,13 @@ def garder_parties(objet, parties, rep):
 
 
 def cao_solveurs(_args):
-    """Les sept GET d'état en un appel ; un solveur en panne n'empêche pas les autres."""
+    """Les GET d'état en un appel ; un solveur en panne n'empêche pas les autres."""
     etat = {}
     for nom, chemin in SOLVEURS.items():
         try:
-            etat[nom] = noyau.appeler_outil_web("web_cao", chemin, delai=10)   # pas 7 x 30 s s'il ne répond plus
+            etat[nom] = noyau.appeler_outil_web("web_cao", chemin, delai=10)   # pas 3 x 30 s s'il ne répond plus
         except noyau.OutilArrete:
-            raise                        # WEB_CAO arrêté : un seul message, pas sept
+            raise                        # WEB_CAO arrêté : un seul message, pas trois
         except noyau.ErreurOutil as exc:
             etat[nom] = {"erreur": str(exc)}
     oeil = etat["oeil"]
@@ -185,6 +183,21 @@ def lib_composants(args):
                    "Page trop grosse : baisse « nombre » ou choisis des « colonnes ».")
 
 
+def web3d_projets(_args):
+    rep = noyau.appeler_outil_web("web_3d", "/api/projets")
+    rep["fichiers"] = [f for f in rep.get("fichiers") or []
+                       if not (isinstance(f, dict) and str(f.get("chemin")).lower().endswith(ANNEXES_3D))]
+    return resumer(rep, "Trop de fichiers.")
+
+
+def pcbparts_outils(_args):
+    """Ce que WEB_CAO relaie vraiment : /api/tools rend tout pcbparts.dev (« tools ») et sa liste blanche (« allowed »)."""
+    rep = noyau.appeler_outil_web("web_cao", "/api/tools")
+    permis = rep.get("allowed") or []
+    return resumer({"tools": [t for t in rep.get("tools") or [] if isinstance(t, dict) and t.get("name") in permis],
+                    "allowed": permis}, "Trop d'outils.")
+
+
 def pcbparts_appeler(args):
     nom = exiger(args, name=str)
     arguments = facultatif(args, "arguments", dict, {})
@@ -199,33 +212,15 @@ def pcbparts_appeler(args):
                    "Réponse pcbparts trop grosse : affine la recherche.")
 
 
-def antenna_ouvert():
-    """Nom du projet ouvert dans WEB_ANTENNA ; refus s'il n'y en a pas."""
-    ouvert = noyau.appeler_outil_web("web_antenna", "/api/projet").get("ouvert")
-    if not isinstance(ouvert, dict) or not ouvert.get("nom"):
-        raise noyau.ErreurOutil("Aucun projet ouvert dans WEB_ANTENNA : ouvre-le depuis la page. "
-                                "Le MCP ne change pas le projet courant.")
-    return ouvert["nom"]
-
-
-def antenna_charge(nom):
-    # Rouvrir le projet déjà ouvert ne change rien côté serveur (même nom, même dossier) ; en POST,
-    # puisqu'ouvrir un autre nom changerait le projet courant
-    return noyau.appeler_outil_web("web_antenna", "/api/projet/ouvrir", {"nom": nom})
-
-
 def antenna_projet_lire(args):
     parties = lire_parties(args)
+    # Une seule lecture, qui ne change rien : le nom comparé est celui du contenu rendu
+    charge = noyau.appeler_outil_web("web_antenna", "/api/projet/lire")
+    nom = charge.get("nom")
+    if not any(o.get("projet") == nom for o in noyau.appeler_outil_web("web_antenna", "/api/pilote/onglets")["onglets"]):
+        raise noyau.ErreurOutil("Aucun onglet WEB_ANTENNA n'a le projet « %s » ouvert : ouvre-le depuis la page." % nom)
     notes = {}
-    return dict(garder_parties(antenna_charge(antenna_ouvert()), parties, notes), **notes)
-
-
-def antenna_openems_chiffrer(args):
-    quoi, document = exiger(args, quoi=str, document=dict)
-    if quoi not in CHIFFRAGES:
-        raise noyau.ErreurOutil("Argument « quoi » invalide : %s attendu. Le MCP ne lance pas de calcul."
-                                % ", ".join(CHIFFRAGES))
-    return resumer(noyau.appeler_outil_web("web_antenna", CHIFFRAGES[quoi], document), "Réponse trop grosse.")
+    return dict(garder_parties(charge, parties, notes), **notes)
 
 
 def antenna_openems_suivre(args):
@@ -264,8 +259,8 @@ OUTILS_API = {
         "fn": cao_doc_lire,
     },
     "cao_solveurs": {
-        "description": "État des solveurs WEB_CAO (EM, DC, crosstalk, RF, œil avec ses gabarits, "
-                       "analyse de carte, import IPC-2581) : disponibles ou non, version, conseil. "
+        "description": "État des solveurs WEB_CAO que la page lit (EM, œil avec ses gabarits, import IPC-2581) : "
+                       "disponibles ou non, version, conseil. "
                        "Lancer un calcul se fait depuis la page, pas d'ici.",
         "inputSchema": {"type": "object", "properties": {}},
         "fn": cao_solveurs,
@@ -310,16 +305,17 @@ OUTILS_API = {
         "fn": lambda _a: lire("web_cao", "/api/lib/parasites"),
     },
     "web3d_projets": {
-        "description": "Liste les fichiers 3D (STEP, STL…) rangés dans les projets WEB_3D.",
+        "description": "Liste les fichiers 3D (STEP, STL…) rangés dans les projets WEB_3D, comme la page : "
+                       "sans les annexes (.mtl, images), qui suivent leur .obj.",
         "inputSchema": {"type": "object", "properties": {}},
-        "fn": lambda _a: lire("web_3d", "/api/projets"),
+        "fn": web3d_projets,
     },
     "pcbparts_outils": {
         "description": "Liste les outils pcbparts.dev (recherche JLCPCB, Mouser, Digi-Key, brochages, "
-                       "règles de fabrication…) que WEB_CAO relaie, avec leurs schémas d'arguments. "
+                       "règles de fabrication…) de la liste blanche de WEB_CAO, avec leurs schémas d'arguments. "
                        "Passe par Internet.",
         "inputSchema": {"type": "object", "properties": {}},
-        "fn": lambda _a: lire("web_cao", "/api/tools"),
+        "fn": pcbparts_outils,
     },
     "pcbparts_appeler": {
         "description": "Appelle un outil pcbparts.dev par le relais de WEB_CAO (seulement ceux de sa "
@@ -336,7 +332,7 @@ OUTILS_API = {
     },
     "antenna_projet_lire": {
         "description": "Lit le projet ouvert dans WEB_ANTENNA (en-tête, dessin, antenne, carte, "
-                       "résultats). Seulement celui-là : le MCP ne change pas le projet courant. "
+                       "résultats), si un onglet l'a ouvert. Seulement celui-là : le MCP ne change pas le projet courant. "
                        "Au-delà de 100 Ko, résumé : redemande avec « parties ».",
         "inputSchema": {"type": "object", "properties": {
             "parties": {"type": "array", "items": {"type": "string"},
@@ -353,18 +349,6 @@ OUTILS_API = {
                        "disponibles ou non, fils de calcul, solveur.",
         "inputSchema": {"type": "object", "properties": {}},
         "fn": lambda _a: lire("web_antenna", "/api/openems"),
-    },
-    "antenna_openems_chiffrer": {
-        "description": "Vérifie et chiffre un modèle d'antenne openEMS sans rien lancer : « modele » "
-                       "(modèle complété, estimation, avis), « balayage » (points d'un balayage "
-                       "paramétrique), « tableau_s » (matrice S complète), « script » (script Python "
-                       "autonome). Lancer reste à faire depuis la page.",
-        "inputSchema": {"type": "object", "properties": {
-            "quoi": {"type": "string", "enum": list(CHIFFRAGES)},
-            "document": {"type": "object", "description": "Document antenne (unite, empilage, cuivre, "
-                                                          "ports, bande…), tel que dans le projet."}},
-            "required": ["quoi", "document"]},
-        "fn": antenna_openems_chiffrer,
     },
     "antenna_openems_suivre": {
         "description": "Suit un calcul openEMS lancé depuis la page : état (prepare, calcule, fini, "

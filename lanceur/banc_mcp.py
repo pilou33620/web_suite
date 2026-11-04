@@ -372,15 +372,14 @@ os.environ["WEB_SUITE_MCP_PORTS"] = json.dumps(dict(PORTS, web_cao=api.server_ad
                                                     web_3d=api.server_address[1]))
 FauxApi.table[("GET", "/api/oeil")] = (200, {"dispo": True, "gabarits": [
     {"id": "usb2", "nom": "USB 2.0", "polygone": [[0, 0]] * 50, "masque": {}}]})
-FauxApi.table[("GET", "/api/crosstalk")] = (500, {"detail": "en panne"})
+FauxApi.table[("GET", "/api/ipc2581")] = (500, {"detail": "en panne"})
 FauxApi.recues.clear()
 erreur, solveurs = outil("cao_solveurs")
 verifier("cao_solveurs malgré une panne", erreur, False)
-verifier("les sept GET", sorted(r[1] for r in FauxApi.recues), sorted(
-    ["/api/simulation", "/api/simulation-dc", "/api/crosstalk", "/api/simulation-rf", "/api/oeil",
-     "/api/analyse-carte", "/api/ipc2581"]))
+verifier("les trois GET que la page lit", sorted(r[1] for r in FauxApi.recues), sorted(
+    ["/api/simulation", "/api/oeil", "/api/ipc2581"]))
 verifier("gabarits réduits", solveurs["oeil"]["gabarits"], [{"id": "usb2", "nom": "USB 2.0"}])
-verifier("solveur en panne marqué", "erreur" in solveurs["crosstalk"], True)
+verifier("solveur en panne marqué", "erreur" in solveurs["ipc2581"], True)
 verifier("solveur sain intact", solveurs["simulation"], {"route": "/api/simulation"})
 
 FauxApi.recues.clear()
@@ -444,12 +443,18 @@ except mcp.ErreurOutil:
     pass
 mcp.MAX_LECTURE = plafond
 FauxApi.table.clear()
+FauxApi.table[("GET", "/api/projets")] = (200, {"dispo": True, "fichiers": [
+    {"chemin": "a/b.obj"}, {"chemin": "a/b.MTL"}, {"chemin": "a/tex.png"}, {"chemin": "p.json"}, {"chemin": "c.stp"}]})
+verifier("web3d_projets : sans les annexes, comme la page", [f["chemin"] for f in outil("web3d_projets")[1]["fichiers"]],
+         ["a/b.obj", "p.json", "c.stp"])
+FauxApi.table.clear()
 
 # pcbparts par le relais de WEB_CAO : seulement les outils de sa liste blanche
 FauxApi.table[("GET", "/api/tools")] = (200, {"tools": [{"name": "jlc_search"}, {"name": "autre"}],
                                               "allowed": ["jlc_search"]})
 FauxApi.recues.clear()
-verifier("pcbparts_outils", outil("pcbparts_outils")[1]["allowed"], ["jlc_search"])
+verifier("pcbparts_outils : la seule liste blanche", outil("pcbparts_outils")[1],
+         {"tools": [{"name": "jlc_search"}], "allowed": ["jlc_search"]})
 verifier("pcbparts_appeler", outil("pcbparts_appeler", name="jlc_search", arguments={"q": "LM317"})[0], False)
 verifier("appel relayé", FauxApi.recues[-1], ("POST", "/api/tool", {"name": "jlc_search", "arguments": {"q": "LM317"}}))
 FauxApi.recues.clear()
@@ -466,37 +471,26 @@ os.environ["WEB_SUITE_MCP_PORTS"] = json.dumps(dict(PORTS, web_antenna=api.serve
 TETE = {"titre": "T", "outil": "o", "source": "s", "fichier": "f", "dessin": {"d": 1}, "antenne": {"a": 1},
         "affichage": {"z": 1}}
 FauxApi.table[("GET", "/api/projet")] = (200, {"ouvert": {"nom": "dipole", "dossier": "/x"}, "projets": []})
-FauxApi.table[("POST", "/api/projet/ouvrir")] = (200, dict(TETE, nom="dipole", dossier="/x", carte={"c": 1},
-                                                          resultats={"r": 1}))
+FauxApi.table[("GET", "/api/projet/lire")] = (200, dict(TETE, nom="dipole", dossier="/x", carte={"c": 1},
+                                                        resultats={"r": 1}))
+FauxApi.table[("GET", "/api/pilote/onglets")] = (200, {"onglets": [{"id": "A", "page": "antenna", "projet": "dipole"}]})
 FauxApi.recues.clear()
 verifier("antenna_projet_lire", outil("antenna_projet_lire")[1]["nom"], "dipole")
-verifier("lecture du projet ouvert", FauxApi.recues, [("GET", "/api/projet", None),
-                                                      ("POST", "/api/projet/ouvrir", {"nom": "dipole"})])
-FauxApi.recues.clear()
-verifier("POST avec l'en-tête maison de WEB_ANTENNA", FauxApi.entetes[-1].get("X-WEB_ANTENNA"), "1")
-FauxApi.table[("GET", "/api/projet")] = (200, {"ouvert": None, "projets": []})
-FauxApi.recues.clear()
+verifier("lecture du projet ouvert, sans POST", FauxApi.recues, [("GET", "/api/projet/lire", None),
+                                                                 ("GET", "/api/pilote/onglets", None)])
+FauxApi.table[("GET", "/api/pilote/onglets")] = (200, {"onglets": [{"id": "A", "page": "antenna", "projet": "autre"}]})
+erreur, texte = outil("antenna_projet_lire")
+verifier("aucun onglet ne déclare ce projet : refus lisible", (erreur, "onglet" in texte and "dipole" in texte), (True, True))
+FauxApi.table[("GET", "/api/projet/lire")] = (409, {"detail": "Aucun projet ouvert"})
 verifier("aucun projet ouvert : lecture refusée", outil("antenna_projet_lire")[0], True)
-verifier("jamais d'ouverture", [r[1] for r in FauxApi.recues], ["/api/projet"])
 FauxApi.recues.clear()
 outil("antenna_projets")
 outil("antenna_calculs")
 verifier("antenna_projets, antenna_calculs", [r[1] for r in FauxApi.recues], ["/api/projet", "/api/projet/calculs"])
 FauxApi.table.clear()
 
-# openEMS : chiffrer et suivre, jamais lancer ni arrêter
+# openEMS : chiffrer (par la page, voir plus bas) et suivre, jamais lancer ni arrêter
 FauxApi.recues.clear()
-modele = {"unite": "mm", "cuivre": []}
-for quoi in ("modele", "balayage", "tableau_s", "script"):
-    verifier("chiffrer %s" % quoi, outil("antenna_openems_chiffrer", quoi=quoi, document=modele)[0], False)
-verifier("routes de chiffrage", FauxApi.recues, [
-    ("POST", "/api/openems", modele), ("POST", "/api/openems/balayage", modele),
-    ("POST", "/api/openems/tableau-s", modele), ("POST", "/api/openems/script", modele)])
-FauxApi.recues.clear()
-for args in ({"quoi": "lancer", "document": modele}, {"quoi": "balayage/lancer", "document": modele},
-             {"quoi": "modele"}, {"quoi": "modele", "document": []}):
-    verifier("chiffrer refuse %r" % args, outil("antenna_openems_chiffrer", **args)[0], True)
-verifier("rien d'envoyé", FauxApi.recues, [])
 outil("antenna_openems_etat")
 outil("antenna_openems_suivre", id="a1b2 c3", depuis=3)
 outil("antenna_openems_suivre", id="a1b2c3")
@@ -634,12 +628,18 @@ deposees = [r[2] for r in FauxApi.recues]
 verifier("commandes déposées à la page 3d, avec leurs arguments", [(d["nom"], d["page"], d["ecriture"]) for d in deposees],
          [(n, ["3d"], e) for n, e in zip(O3, [False] * 6 + [True])])
 verifier("arguments transmis tels quels", deposees[6]["args"], {"chemins": ["cartes/boitier.stp"], "ajout": True})
+FauxApi.recues.clear()
+outil("web3d_collisions")
+verifier("collisions sans tolérance : celle de la page", FauxApi.recues[-1][2]["args"], {"afficher": False})
+outil("web3d_mesurer", piece="0/1")
+verifier("dimensions d'une pièce transmises", FauxApi.recues[-1][2]["args"], {"quoi": "dimensions", "afficher": False, "piece": "0/1"})
 
 FauxApi.recues.clear()
 for nom, args in (("web3d_vue", {"vue": "plongee"}), ("web3d_vue", {"projection": "fisheye"}),
                   ("web3d_visibilite", {"action": "exploser"}), ("web3d_visibilite", {"action": "masquer", "pieces": "x"}),
                   ("web3d_coupe", {"axe": "w"}), ("web3d_coupe", {"decalage_mm": float("nan")}),
                   ("web3d_mesurer", {"quoi": "masse"}), ("web3d_mesurer", {"quoi": "distance", "pieces": [UU]}),
+                  ("web3d_mesurer", {"quoi": "dimensions"}), ("web3d_mesurer", {}),
                   ("web3d_collisions", {"tolerance": -1}),
                   ("web3d_ouvrir", {"chemins": ["../web_3D.py"]}), ("web3d_ouvrir", {"chemins": []}),
                   ("web3d_ouvrir", {"chemins": ["/etc/x.stp"]}),
@@ -771,7 +771,7 @@ verifier("aucune opération invalide n'atteint la page", FauxApi.recues, [])
 
 # registre-antenna (lanceur/docs/SPEC-mcp-registre-antenna.md) : lectures et vue de la page WEB_ANTENNA
 os.environ["WEB_SUITE_MCP_PORTS"] = json.dumps(dict(PORTS, web_antenna=api.server_address[1]))
-OA = ["antenna_lire", "antenna_vue"]
+OA = ["antenna_lire", "antenna_vue", "antenna_openems_chiffrer"]
 verifier("outils de registre-antenna listés", set(OA) <= set(noms), True)
 verifier("registre-antenna : donnée, jamais de calcul", all("donnée" in o["description"] and "calcul" in o["description"]
                                                           for o in outils if o["name"] in OA), True)
@@ -793,6 +793,16 @@ for nom, args in (("antenna_lire", {}), ("antenna_lire", {"quoi": "tout"}), ("an
                   ("antenna_vue", {"point_balayage": 1.5}), ("antenna_vue", {"toile": "pdf"}), ("antenna_vue", {"capturer": True})):
     verifier("%s refuse %r" % (nom, args), outil(nom, **args)[0], True)
 verifier("aucun argument invalide n'atteint la page (antenna)", FauxApi.recues, [])
+for quoi in ("modele", "balayage", "tableau_s", "script"):
+    verifier("chiffrer %s" % quoi, outil("antenna_openems_chiffrer", quoi=quoi, document={"libre": 1})[0], False)
+verifier("chiffrer : par la page, sans écriture ; un « document » libre ne passe plus",
+         [(r[2]["nom"], r[2]["args"], r[2]["ecriture"]) for r in FauxApi.recues],
+         [("antenna_openems_chiffrer", {"quoi": q}, False) for q in ("modele", "balayage", "tableau_s", "script")])
+verifier("POST avec l'en-tête maison de WEB_ANTENNA", FauxApi.entetes[-1].get("X-WEB_ANTENNA"), "1")
+FauxApi.recues.clear()
+for args in ({"quoi": "lancer"}, {"quoi": "balayage/lancer"}, {}):
+    verifier("chiffrer refuse %r" % args, outil("antenna_openems_chiffrer", **args)[0], True)
+verifier("rien d'envoyé", FauxApi.recues, [])
 reponses = iter([fin("Vue : vue 3D."), fin({"image": "data:image/png;base64," + png, "largeur": 10, "hauteur": 10})])
 _table = FauxApi.table
 FauxApi.table = type("T", (dict,), {"get": lambda self, k, d=None: next(reponses) if k == ("POST", "/api/pilote/commande") else d})()
@@ -809,6 +819,9 @@ verifier("outils du routage listés", set(OR) <= set(noms), True)
 verifier("routage : donnée ; les écritures disent la carte et l'aperçu",
          all("donnée" in o["description"] and (o["name"] == "cao_score" or "aperçu" in o["description"])
              for o in outils if o["name"] in OR), True)
+FauxApi.table[("POST", "/api/pilote/commande")] = fin("Score :\n- vias : 2\n- total indicatif : 12 (10 par liaison)")
+verifier("cao_score : sans le total indicatif, que la page n'affiche pas", outil("cao_score", quoi="routage")[1]["resultat"],
+         "Score :\n- vias : 2")
 FauxApi.table[("POST", "/api/pilote/commande")] = fin("ok", "appliquee")
 FauxApi.recues.clear()
 R1 = {"depart": "U1.3", "points": [{"x": 10, "y": 5.5}, {"x": 12, "y": 5.5, "couche": "Bottom"}], "arrivee": "R2.1", "largeur": 0.3}

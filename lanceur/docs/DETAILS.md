@@ -169,16 +169,16 @@ Outils MCP (`etat` dans `mcp_web_suite.py`, les autres dans `mcp_api_outils.py`,
 
 - `etat` : qui tourne, sur quel port.
 - WEB_CAO, lecture : `cao_projets`, `cao_projet_lire`, `cao_doc_lire` (schéma, PCB,
-  IPC-2581 ; `parties` pour n'en lire qu'un morceau), `cao_solveurs` (état des solveurs),
+  IPC-2581 ; `parties` pour n'en lire qu'un morceau), `cao_solveurs` (état des solveurs que la page lit : EM, œil, IPC-2581),
   `cao_profils`, `cao_profil_lire`.
 - LIB, lecture : `lib_composants` (recherche et pagination dans le catalogue),
   `lib_fichiers`, `lib_fichier_lire`, `lib_parasites`.
-- pcbparts.dev, par le relais de WEB_CAO : `pcbparts_outils`, `pcbparts_appeler` (liste
-  blanche de WEB_CAO).
+- pcbparts.dev, par le relais de WEB_CAO : `pcbparts_outils`, `pcbparts_appeler` (seulement
+  la liste blanche de WEB_CAO).
 - WEB_ANTENNA : `antenna_projets`, `antenna_calculs`, `antenna_projet_lire` (le projet
-  ouvert seulement), `antenna_openems_etat`, `antenna_openems_chiffrer` (modèle,
-  balayage, tableau S, script), `antenna_openems_suivre`, `antenna_openems_champs`.
-- WEB_3D : `web3d_projets`.
+  ouvert, s'il a un onglet ; `GET /api/projet/lire`, qui ne change pas le projet courant),
+  `antenna_openems_etat`, `antenna_openems_suivre`, `antenna_openems_champs`.
+- WEB_3D : `web3d_projets` (comme la page : sans les annexes `.mtl` et images).
 - Pages ouvertes (canal de pilotage, `mcp_pilote.py`, voir
   [SPEC-mcp-canal-pilote.md](SPEC-mcp-canal-pilote.md)) : `pilote_onglets` (onglets ouverts sur
   ce poste et les appareils appairés), `pilote_capture` (image du canevas), `pilote_suivre`,
@@ -191,8 +191,14 @@ Outils MCP (`etat` dans `mcp_web_suite.py`, les autres dans `mcp_api_outils.py`,
   passe par des gestes (la fiche `SKILL` du skill web-suite dit lesquels).
 - Page WEB_3D (`mcp_registre_3d.py`, voir [SPEC-mcp-registre-3d.md](SPEC-mcp-registre-3d.md)) :
   `web3d_scene` (fichiers et pièces : uuid, chemin, nom), `web3d_vue` (vue standard, cadrage,
-  capture), `web3d_visibilite`, `web3d_coupe`, `web3d_mesurer` (dimensions, distance avec cote,
-  faces), `web3d_collisions` ; en carte : `web3d_ouvrir` (fichiers de PROJETS/3D, annulable).
+  capture), `web3d_visibilite`, `web3d_coupe`, `web3d_mesurer` (dimensions d'une pièce ou d'un fichier, volume et
+  surface jusqu'à 800 000 triangles comme la fiche ; distance avec cote, que l'effacement de la mesure
+  ou la fermeture retirent aussi ; faces, ce que montre la fiche de la mesure), `web3d_collisions` ; en
+  carte : `web3d_ouvrir` (fichiers de PROJETS/3D, annulable). Distance, faces et coupe sur une face
+  refusent une pièce masquée. Deux préférences s'écrivent, comme par les contrôles de la page : la
+  projection (`web3d_vue`) et la tolérance des collisions affichées (`web3d_collisions` avec `afficher`).
+  Ranger le STEP d'une pièce dans PROJETS est un geste : `#bRangerPiece` et son champ de nom, dans
+  « Exporter une pièce » (`#bExportPiece`).
 - Pages WEB_CAO (`mcp_registre_cao.py`, voir [SPEC-mcp-registre-cao.md](SPEC-mcp-registre-cao.md)) :
   `cao_schema_lire` (feuilles, composants, composant, nets, net : tout le document),
   `cao_pcb_lire` (empilage, classes, composants, composant, nets, net, drc), `cao_ipc_lire`
@@ -210,9 +216,11 @@ Outils MCP (`etat` dans `mcp_web_suite.py`, les autres dans `mcp_api_outils.py`,
   relierait d'autres broches que celles demandées. Une étape Ctrl+Z. Code de page :
   `WEB_CAO/editeur-schematique/js/28-dessin-pilote.js`, sur le socle `WEB_CAO/commun/ecriture-cao.js`.
 - Page WEB_ANTENNA (`mcp_registre_antenna.py`, voir [SPEC-mcp-registre-antenna.md](SPEC-mcp-registre-antenna.md)) :
-  `antenna_lire` (conception, résultats, courbe, balayage, audit avec ses corrections, réglages,
-  carte importée) et `antenna_vue` (2D/3D, maillage, onglet de résultats, point
-  de balayage, étape, panneau ; capture de la carte, de la 3D ou des courbes). Rien n'est
+  `antenna_lire` (conception, résultats, courbe, balayage, audit avec ses corrections, que le bouton
+  Contrôles `#bAudit` du panneau Assistant montre aussi, réglages, carte importée), `antenna_vue` (2D/3D,
+  maillage, onglet de résultats, point de balayage, étape, panneau ; capture de la carte, de la 3D ou
+  des courbes) et `antenna_openems_chiffrer` (`quoi` : modèle, balayage, tableau S, script ; le modèle de
+  la page, sans argument `document`, par les routes de ses devis). Rien n'est
   écrit, aucune préférence, jamais de calcul lancé : écrire se fait par des gestes. Lectures de la page : `WEB_ANTENNA/js/29-lecture-antenna.js`.
 - Routage (`mcp_routage.py`, voir [SPEC-mcp-routage.md](SPEC-mcp-routage.md)) : `cao_router` (routes
   par points de passage, changement de couche par via, vias seules ; 20 routes par carte),
