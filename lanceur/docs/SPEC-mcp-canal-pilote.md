@@ -78,6 +78,11 @@ Utilisateur : toi, depuis Claude Code (sur le poste ou par SSH). Les pages pilot
      allumé ; il est recalculé au clic, le contrôle a pu bouger depuis la carte ;
    - le panneau « Claude » n'est jamais lu ni visé : Claude n'appuie pas sur ses cartes ni sur
      l'interrupteur ;
+   - un geste ne dépasse pas ce que peut une main : cible visible et au premier plan, ni champ en
+     lecture seule, ni onglet masqué ; un clic sur une carte laisse ouvert le menu que le geste
+     suivant vise ;
+   - réservé à l'utilisateur, refusé aussi par geste et par raccourci : envoyer sur GitHub, lancer ou
+     arrêter openEMS, régler ses fils (`GESTES_INTERDITS` de `pilote.js`) ;
    - un événement synthétique ne choisit pas de fichier sur le disque et ne tape pas de texte
      (`saisir` pose la valeur) ; une fenêtre confirm/prompt de la page attend l'utilisateur.
 3. **`cao_calcul`** lance dans l'onglet PCB (ou visionneuse IPC) une analyse parmi

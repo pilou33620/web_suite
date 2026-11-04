@@ -101,6 +101,7 @@ function domFactice() {
     appendChild(e) { if (e.parent) e.parent.enfants = e.parent.enfants.filter(x => x !== e); this.enfants.push(e); e.parent = this; return e; }
     replaceChildren(...e) { this.enfants = []; e.forEach(x => this.appendChild(x)); }
     remove() { if (this.parent) this.parent.enfants = this.parent.enfants.filter(x => x !== this); this.parent = null; }
+    contains(x) { return x === this || this.enfants.some(e => e.contains(x)); }
     setAttribute(k, v) { this.attributs[k] = String(v); }
     addEventListener(t, f) { (this.ecoutes[t] = this.ecoutes[t] || []).push(f); }
     dispatch(t) { (this.ecoutes[t] || []).forEach(f => f({ target: this })); }
@@ -690,6 +691,70 @@ function onglet(serveur, stockage, page, nomCanal) {
   await fen.Pilote._env.balise("/api/pilote/battement", "{}");
   assert.deepStrictEqual(JSON.parse(JSON.stringify(envois)), [["/api/pilote/battement", { method: "POST", keepalive: true, body: "{}",
     headers: { "Content-Type": "application/json", "X-WEB_ANTENNA": "1" } }]], "balise de la page : fetch keepalive avec l'en-tête");
+  // Le geste « comme une main » : à l'écran, au premier plan, ni lecture seule, ni réservé à l'utilisateur
+  const fs = require("fs"), path = require("path");
+  const controle = (o = {}) => { const e = Object.assign({ tagName: "BUTTON", type: "", title: "", innerText: "Bouton", id: "", evts: [],
+    classList: { contains: () => false }, getAttribute: () => null, getClientRects: () => [1], closest: () => null, matches: () => false,
+    getBoundingClientRect: () => ({ left: 0, top: 0, width: 10, height: 10 }), contains: x => x === e, focus() {}, scrollIntoView() {},
+    dispatchEvent(ev) { e.evts.push(ev.type); return true; } }, o); return e; };
+  const ongletGestes = (page, cibles, visible) => {
+    const dom = domFactice();
+    dom.querySelector = s => cibles[s] || null;
+    dom.elementFromPoint = () => cibles.dessus === undefined ? cibles["#b"] : cibles.dessus;
+    class Ev { constructor(type) { this.type = type; } }
+    const fenetre = { addEventListener() {}, getComputedStyle: e => ({ visibility: e.cache ? "hidden" : "visible" }),
+                      requestAnimationFrame: f => f(), PointerEvent: Ev, MouseEvent: Ev, WheelEvent: Ev, Event: Ev, KeyboardEvent: Ev };
+    const canal4 = "banc4." + Math.random(), stock4 = stockagePartage(), serv4 = fauxServeur();
+    const T = creer({ fetch: serv4.fetch, BroadcastChannel, stockage: stock4, canal: canal4, document: dom, fenetre, visible: () => visible !== false,
+                      entete: ENTETE }, REGLAGES).declarer({ page });
+    serv4.nav = stock4.getItem("websuite.pilote.navigateur");
+    T.interrupteur = true;
+    return { T, serv4 };
+  };
+  const refuse = async (quoi, motif, args, cibles, page = "pcb", visible) => {
+    const { T, serv4 } = ongletGestes(page, cibles, visible);
+    await pause(REGLAGES.amorce * 2);
+    const n = serv4.deposer(T.id, "interface", args, true);
+    await attendreQue(() => serv4.finale(n), 2000, quoi);
+    const r = serv4.finale(n);
+    T.arreter();
+    assert.ok(r.etat === "echouee" && motif.test(r.resultat), quoi + " : " + JSON.stringify(r));
+  };
+  const clic = { geste: "cliquer", cible: "#b" };
+  await refuse("élément masqué", /pas visible/, clic, { "#b": controle({ getClientRects: () => [] }) });
+  await refuse("visibility hidden", /pas visible/, clic, { "#b": controle({ cache: true }) });
+  await refuse("sous un voile", /couvert/, clic, { "#b": controle(), dessus: controle() });
+  await refuse("hors de l'écran", /couvert/, clic, { "#b": controle(), dessus: null });
+  await refuse("désactivé", /désactivé/, clic, { "#b": controle({ matches: s => s === ":disabled" }) });
+  await refuse("réservé", /réservé/, clic, { "#b": controle({ closest: s => s.includes("#bSaveGit") ? {} : null }) });
+  await refuse("réservé (visionneuse)", /réservé/, clic, { "#b": controle({ closest: s => s === "#bJson" ? {} : null }) }, "visionneuse-ipc");
+  await refuse("lecture seule", /lecture seule/, { geste: "saisir", cible: "#b", valeur: "1" }, { "#b": controle({ tagName: "INPUT", readOnly: true }) });
+  await refuse("onglet masqué", /pas à l'écran/, clic, { "#b": controle() }, "pcb", false);
+  await refuse("Ctrl+Maj+S", /GitHub/, { geste: "touche", touche: "Ctrl+Shift+S" }, {});
+  await refuse("Ctrl+S (visionneuse)", /GitHub/, { geste: "touche", touche: "Ctrl+S" }, {}, "visionneuse-ipc");
+  {
+    const b = controle(), { T, serv4 } = ongletGestes("pcb", { "#b": b, "#bJson": controle({ id: "bJson" }) });
+    await pause(REGLAGES.amorce * 2);
+    const n = serv4.deposer(T.id, "interface", clic, true);
+    await attendreQue(() => serv4.finale(n), 2000, "clic permis");
+    assert.ok(serv4.finale(n).etat === "appliquee" && b.evts.includes("click"), "un contrôle à portée reçoit le clic");
+    T.arreter();
+  }
+  // Chaque cible réservée existe vraiment : un bouton renommé rouvrirait la porte (la CI clone les outils à côté)
+  const racine = [path.join(__dirname, ".."), path.join(__dirname, "..", "..")].find(r => fs.existsSync(path.join(r, "WEB_ANTENNA", "js")));
+  if (racine) {
+    const lire = d => fs.readdirSync(d, { withFileTypes: true }).flatMap(f => f.isDirectory() ? (["dist", "test", "__pycache__"].includes(f.name) ? [] : lire(path.join(d, f.name)))
+      : /\.(js|html)$/.test(f.name) ? [fs.readFileSync(path.join(d, f.name), "utf8")] : []);
+    const sources = ["WEB_CAO/commun", "WEB_CAO/editeur-pcb", "WEB_CAO/editeur-schematique", "WEB_CAO/visionneuse-ipc2581", "WEB_ANTENNA/js"].flatMap(d => lire(path.join(racine, d))).join("\n")
+                    + fs.readFileSync(path.join(racine, "WEB_ANTENNA/index.html"), "utf8");
+    const code = fs.readFileSync(path.join(__dirname, "pilote.js"), "utf8");
+    const liste = /const GESTES_INTERDITS = ((?:"[^"]*"(?: \+\s*)?)+);/.exec(code)[1].replace(/"\s*\+\s*"/g, "").slice(1, -1).split(",").map(c => c.trim());
+    assert.ok(liste.length >= 14, "liste lue : " + liste);
+    for (const c of liste) {
+      const nom = c[0] === "#" ? c.slice(1) : /\[(?:data-[a-z-]+=)?([^\]]+)\]/.exec(c)[1];
+      assert.ok(sources.includes(nom), "cible réservée introuvable dans les sources : " + c);
+    }
+  }
   console.log("OK");
   process.exit(0);
 })().catch(e => { console.error(e); process.exit(1); });

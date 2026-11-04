@@ -238,17 +238,18 @@ OUTILS_PILOTE = {
     },
     "pilote_interface": {
         "description": "Fait un geste dans une page d'outil, comme l'utilisateur : cliquer un contrôle (cible = "
-                       "numéro de pilote_interface_lire, ou sélecteur CSS comme #bDrc, même dans un menu fermé), "
+                       "numéro de pilote_interface_lire, ou sélecteur CSS comme #bDrc ; visible et au premier plan, sinon "
+                       "ouvre d'abord son menu ou son panneau), "
                        "saisir une valeur (champ, liste par valeur ou texte du choix, case par true/false), touche "
                        "(raccourci au nom du DOM : Ctrl+Z, Delete, Escape, r… ; ne tape pas de texte : saisir), souris "
                        "sur le canevas (x, y en pixels de pilote_capture ; double, droit, molette = deltaY, x2/y2 pour "
                        "glisser, modificateurs = Shift, Ctrl…). Pour ce qu'aucun outil propre à la page ne fait : "
-                       "préfère-les quand ils existent (vérifiés, annulables). Ne choisit pas de fichier sur le disque "
-                       "(le navigateur exige un vrai clic) ; une fenêtre confirm/prompt attend la réponse de "
-                       "l'utilisateur. Rend ce qui a été fait ; relis l'interface ou capture ensuite pour voir l'effet."
+                       "préfère-les quand ils existent (vérifiés, annulables). Comme l'utilisateur et pas plus : ni champ en "
+                       "lecture seule, ni onglet masqué. Réservé à l'utilisateur, refusé : envoyer sur GitHub, lancer ou "
+                       "arrêter openEMS, régler ses fils. Ne choisit pas de fichier sur le disque (le navigateur exige un "
+                       "vrai clic) ; une fenêtre confirm/prompt attend la réponse de l'utilisateur. Rend ce qui a été fait ; relis l'interface ou capture ensuite pour voir l'effet."
                        + ATTENTE_DOC + " La carte n'annule pas le geste (Ctrl+Z dans l'éditeur s'il y fait une étape). "
-                       "Avec la carte, le clic de l'utilisateur sur « Appliquer » peut refermer un menu ouvert : pour "
-                       "enchaîner des gestes, l'interrupteur de l'onglet doit être allumé.",
+                       "Pour enchaîner beaucoup de gestes, demande d'allumer l'interrupteur de l'onglet.",
         "inputSchema": {"type": "object", "required": ["outil", "geste"], "properties": {
             "outil": OUTIL, "onglet": ONGLET,
             "page": {"type": "string", "description": "Restreindre à une page de l'outil (pcb, schema…)."},
