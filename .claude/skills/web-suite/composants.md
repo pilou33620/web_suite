@@ -1,8 +1,8 @@
 # Composants de la LIB : empreintes, brochage, catalogue
 
 La LIB est partagée par tous les projets. On y **crée** ; on ne **corrige** une référence
-existante (`lib_composant_modifier`) que si l'utilisateur le demande, et aucun fichier n'est
-jamais écrasé.
+existante que si l'utilisateur le demande, et aucun fichier n'est jamais écrasé. Tout s'écrit à
+l'interface de Gestion LIB, geste après geste : les outils `lib_*` ne font que calculer.
 
 ## La méthode
 
@@ -16,35 +16,38 @@ jamais écrasé.
    - ou convertie d'un fichier KiCad : `lib_kicad_convertir` ;
    - ou écrite à la main en pcbfp-1, puis contrôlée : `lib_empreinte_verifier`.
 4. Le brochage : `lib_brochage_verifier`, face à l'empreinte et au symbole intégré.
-5. Créer : `lib_composant_creer` (empreinte neuve + ligne de catalogue), une carte que
-   l'utilisateur clique, toujours. Puis poser le composant au schéma depuis le catalogue
+5. Créer l'empreinte : `#bNewPcb`, sous-onglet ⚡ Générateurs (`#genIpcFamille`, `#genIpcDensite`,
+   `#genIpcNom`, `#genIpc_*`, Générer) ; une empreinte convertie ou écrite à la main se colle en
+   Code JSON (`#btnEditeurVueJson`, saisir `#editeurCodeJson`, 5000 caractères au plus par geste : au-delà,
+   la confier à l'utilisateur) ; `#editeurNomFichier`, puis « 💾 Enregistrer le fichier ». Même chemin
+   pour un symbole (`#bNewSch`).
+6. Créer la ligne : `#bNewComp`, `#newPartName`, `#newPrefix`, `#newPackage`, `#newVal`, `#newMfr`,
+   `#newDesc`, « Ajouter et auto-associer ». Sélectionner la ligne, puis `#inspBrochage` pour le
+   brochage ; `select.sel-assoc` pour Empreinte PCB, Empreinte Schématique, Modèle Simulation.
+   `#bSave` enregistre le catalogue. Puis poser le composant au schéma depuis le catalogue
    (`cao_schema_dessiner`, opération poser avec « catalogue »).
-6. Expliquer en une ou deux lignes d'où viennent les cotes (pas, pastilles, densité).
+7. Expliquer en une ou deux lignes d'où viennent les cotes (pas, pastilles, densité).
 
 ## Corriger une référence existante
 
-`lib_composant_modifier` : `reference` (la Part Name), `champs` {colonne: nouvelle valeur}
-(les autres cases restent ; "" vide une case), et au besoin `empreinte`, une empreinte neuve
-sous un nom absent de la LIB que la ligne désignera. La Part Name ne change pas. Lire d'abord
-la ligne (`lib_composants`, filtre sur la référence) : la carte montre l'avant et l'après de
-chaque case, et le serveur refuse si la ligne a changé entre la lecture et le clic. Une
-faute que la ligne avait déjà n'est qu'une remarque ; une faute nouvelle refuse.
+Seules s'éditent : Empreinte PCB, Empreinte Schématique, Modèle Simulation (`select.sel-assoc`) et
+Brochage (`#inspBrochage`). Lire d'abord la ligne (`lib_composants`, filtre sur la référence). Les
+autres colonnes (Value, Description, MPN, tensions…) n'ont **pas de champ** après la création :
+le dire à l'utilisateur, qui passe par le CSV ou par l'import. La Part Name ne change pas : elle
+désigne la ligne. Pour une empreinte corrigée : une neuve sous un autre nom, que la ligne désigne.
 
 ## Lier un modèle de simulation
 
-`lib_simulation_lier` range un fichier dans lib_simulation et l'ajoute à la colonne
-« Modèle Simulation » d'une référence existante (carte toujours cliquée) :
+« 📎 Lier un fichier… » (`#inspSimLier`) ouvre le sélecteur de fichier du navigateur : ce geste
+revient à l'**utilisateur**. Un fichier déjà dans la LIB se désigne par `select.sel-assoc`, sans
+table de ports. Lui préparer ce qu'il aura à saisir :
 
-- Touchstone (.s1p à .s9p, paramètres S du fabricant) : `ports` donne la patte de chaque port
-  **dans l'ordre du fichier** (numéro, ou nom du brochage de la référence), `masse` la patte
-  à laquelle les ports se rapportent (absente : la masse de la carte). C'est ce branchement
-  que lit la simulation RF ; le relever sur la datasheet ou dans l'en-tête du fichier.
+- Touchstone (.s1p à .s9p, paramètres S du fabricant) : la patte de chaque port **dans l'ordre du
+  fichier** (numéro, ou nom du brochage de la référence), et la patte à laquelle les ports se
+  rapportent (`#inspSimForm`, absente : la masse de la carte). C'est ce branchement que lit la
+  simulation RF ; le relever sur la datasheet ou dans l'en-tête du fichier.
 - SPICE (.sub, .cir, .lib, .mod, .sp) : rangé tel quel, sans ports.
 - Plusieurs modèles sur une référence : les états d'un commutateur, le premier par défaut.
-- 4 Mo au plus : au-delà, l'utilisateur le lie lui-même (« 📎 Lier un fichier » de la
-  fiche dans Gestion LIB).
-- Un fichier de même nom déjà dans la LIB n'est repris que s'il est identique : sinon,
-  choisir un autre nom.
 
 ## Densités IPC-7351B
 
@@ -106,11 +109,11 @@ Les autres symboles prennent les numéros de broche ; « ic » en accepte autant
   - Part Name, unique, sans tenir compte de la casse ;
   - Reference designator Prefix (R, C, U, J…) ;
   - Number Of pins ;
-  - Empreinte PCB : une empreinte de la LIB, ou celle que la carte crée ;
-  - Empreinte Schématique : un symbole intégré du schéma (regulator, opamp, ic…), un symbole
-    de la LIB, ou le symbole neuf que la carte crée.
+  - Empreinte PCB : une empreinte de la LIB ;
+  - Empreinte Schématique : un symbole intégré du schéma (regulator, opamp, ic…) ou un symbole
+    de la LIB.
 - Un symbole intégré suffit le plus souvent (avec le brochage). Pour un boîtier qui n'en a pas
-  (un microcontrôleur, un module), `symbole` donne un schsym-1 neuf : broches numérotées de 1
+  (un microcontrôleur, un module), créer un symbole schsym-1 (`#bNewSch`) : broches numérotées de 1
   à N sans trou, nommées (`name`), au pas de 20 px (1 mm), et des primitives line, rect, arc,
   circle, poly, text, arrow. Le schéma le dessine comme un intégré, et le recopie dans le
   document où il est posé.

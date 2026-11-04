@@ -29,7 +29,7 @@ Claude Code lit le PDF lui-même. Ensuite :
 
 1. Lire le catalogue : `cao_sim_lire` (quoi=catalogue). Il donne chaque paramètre réglable
    (groupe.clé), son unité ou ses choix, la valeur actuelle et où la trouver sur une
-   datasheet, et ses bornes : une valeur hors bornes est refusée par `cao_sim_ecrire`.
+   datasheet, et ses bornes : rester dedans.
 2. Ne relever que des valeurs **écrites** dans le document. Une valeur absente ne s'invente
    pas et ne se tire pas d'une « valeur usuelle » : la dire manquante (le nombre de sorties
    qui basculent ensemble, par exemple, dépend du firmware).
@@ -40,18 +40,30 @@ Claude Code lit le PDF lui-même. Ensuite :
 4. Pour chaque valeur : la page et une citation courte et exacte du tableau ou de la phrase,
    et une confiance (haute, moyenne, basse).
 5. Convertir dans l'unité **exacte** du catalogue : 12,5 mA pour pdn_fiche.iActifMa
-   (0,0125 A serait faux). `cao_sim_ecrire` refuse une autre unité, sans conversion.
+   (0,0125 A serait faux) : le champ prend l'unité qu'il affiche, sans conversion.
 6. Viser la bonne cible : la fiche pdn_fiche décrit la charge du rail (le composant que le
    rail alimente) ; une datasheet de régulateur règle pdn.rVrmMOhm et pdn.fVrmKhz, pas la
    fiche.
 7. Montrer d'abord un tableau court (paramètre, valeur, unité, page, citation, confiance),
-   puis proposer le lot par `cao_sim_ecrire` : une carte, Annuler sur la carte la défait.
+   puis saisir chaque valeur dans son champ du panneau `#bSim` (une carte par geste : interrupteur
+   allumé pour un lot) :
+   - pdn : `#simPDNVdd`, `#simPDNRipple`, `#simPDNDeltaI`, `#simPDNRvrm`, `#simPDNFvrm`,
+     `#simPDNPlaneEr`, `#simPDNPlaneTanD` ;
+   - pdn_fiche : `#simPDNAssistantActif`, puis `input.simPDNFiche[data-cle=…]` ;
+   - si : `#simTr`, `#simSwing`, `#simXtTr`, `#simZCible`, `#simZTol`, `#simFc`, `#simZDiffCible`,
+     `#simZDiffTol` ;
+   - bus : `#simBusProtocole`, `#simBusFreq`, `#simBusTsu`, `#simBusTh`, `#simBusTcoMin`,
+     `#simBusTcoMax`, `#simBusRpu`, `#simBusBaud` ;
+   - dc : `#simDCMaxChute`, `#simDCMaxDT`, `#simDCAmbiante`, `#simDCLambda`.
 
-Les parasites des condensateurs (ESR, ESL, capacité effective sous la tension du rail) et les
-bornes de la chute DC (courant total d'une charge, tension d'une source) s'écrivent aussi par
-`cao_sim_ecrire`, avec une « cible » : groupe condensateurs, cible {refs}, {mpn} ou {valeur,
-boitier} ; groupe bornes_dc, cible {composant}. Une borne doit déjà être posée dans la page
-(Chute DC → ⚡ Du schéma) : sinon le dire à l'utilisateur.
+Les bornes de la chute DC (courant total d'une charge, tension d'une source) se règlent dans
+l'onglet Chute DC : `#simDCImportSch` (⚡ Du schéma), ou `#simDCAddSrc` et `#simDCAddRef` puis un
+clic sur la pastille ; ensuite `#simDCV{k}` et `#simDCU{k}`, borne par borne : un courant de charge
+se répartit à la main sur ses broches.
+
+Les parasites des condensateurs (ESR, ESL, capacité effective sous la tension du rail) n'ont **pas
+de champ** à l'interface : le tableau du panneau PDN les montre seulement. Les relever sur la
+datasheet (la capacité effective d'après la courbe DC-bias) et les donner à l'utilisateur.
 
 ## Lire un résultat
 

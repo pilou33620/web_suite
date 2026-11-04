@@ -315,18 +315,19 @@ os.environ["WEB_SUITE_MCP_PORTS"] = json.dumps(dict(PORTS, web_cao=api.server_ad
 noms = [o["name"] for o in outils]   # tools/list du tout premier échange, par le protocole
 verifier("outils du socle listés", {"etat", "cao_projets", "cao_projet_lire", "cao_doc_lire"} <= set(noms), True)
 
-# Méthodes : PUT permis aux outils, DELETE jamais, le lanceur en GET seulement
+# Méthodes : GET sans corps, POST avec, ni PUT ni DELETE ; le lanceur en GET seulement
 FauxApi.recues.clear()
-for id_, route, corps, methode in (("web_cao", "/api/lib/fichier", None, "DELETE"),
-                                   ("web_suite", "/api/etat", {}, "PUT"), ("web_suite", "/api/etat", None, "PUT")):
-    try:
-        mcp.appeler_outil_web(id_, route, corps, methode=methode)
-        raise AssertionError("méthode permise à tort : %s %s" % (methode, id_))
-    except mcp.ErreurOutil:
-        pass
-verifier("aucune méthode refusée n'atteint l'outil", FauxApi.recues, [])
-mcp.appeler_outil_web("web_cao", "/api/profil", {"a": 1}, methode="PUT")
-verifier("PUT avec son corps", FauxApi.recues, [("PUT", "/api/profil", {"a": 1})])
+try:
+    mcp.appeler_outil_web("web_suite", "/api/etat", {})
+    raise AssertionError("POST permis à tort au lanceur")
+except mcp.ErreurOutil:
+    pass
+verifier("le POST refusé n'atteint pas le lanceur", FauxApi.recues, [])
+try:
+    mcp.appeler_outil_web("web_cao", "/api/profil", {"a": 1}, methode="PUT")
+    raise AssertionError("PUT permis à tort")
+except TypeError:
+    pass
 
 # Lectures de projets CAO
 FauxApi.recues.clear()
@@ -408,73 +409,8 @@ for args in ({"nombre": 0}, {"debut": -1}, {"colonnes": "ref"}):
     verifier("lib_composants refuse %r" % args, outil("lib_composants", **args)[0], True)
 FauxApi.table.clear()
 
-# Écritures CAO gardées : aucune écriture n'atteint l'outil quand un garde-fou refuse
 ecritures = lambda: [r for r in FauxApi.recues if r[0] != "GET"]   # noqa: E731
-DOC = "/api/projet/doc" + q(chemin="p", doc="pcb")
-FauxApi.table[("GET", "/api/projet/doc")] = (200, {"document": {"a": 1, "b": 2}, "modifie": 123})
-FauxApi.recues.clear()
-verifier("cao_doc_ecrire", outil("cao_doc_ecrire", chemin="p", doc="pcb", document={"b": 3}, modifie=123)[0], False)
-verifier("fusion des clés dans le document relu, PUT avec modifie", FauxApi.recues,
-         [("GET", DOC, None), ("PUT", "/api/projet/doc" + q(chemin="p", doc="pcb", modifie=123), {"a": 1, "b": 3})])
-verifier("PUT avec l'en-tête maison de WEB_CAO", FauxApi.entetes[-1].get("X-WEB_CAO"), "1")
-FauxApi.table[("GET", "/api/projet/doc")] = (404, {"detail": "absent"})
-FauxApi.recues.clear()
-outil("cao_doc_ecrire", chemin="p", doc="pcb", document={"b": 3}, modifie=0)
-verifier("document absent : créé avec les clés données", ecritures(),
-         [("PUT", "/api/projet/doc" + q(chemin="p", doc="pcb", modifie=0), {"b": 3})])
-FauxApi.table[("GET", "/api/projet/doc")] = (200, {"document": {"a": 1}, "modifie": 123})
-FauxApi.recues.clear()
-for args in ({"document": {"b": 3}},                                                  # pas de modifie
-             {"document": {"b": 3}, "modifie": -1},                                   # -1 : pas de contrôle côté serveur
-             {"document": {"b": 3}, "modifie": 1, "doc": "autre"},
-             {"document": "texte", "modifie": 1},
-             {"document": {}, "modifie": 1},
-             {"document": {"resume": True, "taille_octets": 9, "forme": {}}, "modifie": 1},   # un résumé renvoyé
-             {"document": {"pistes": {"type": "list", "longueur": 3}}, "modifie": 1},        # une forme renvoyée
-             {"document": {"b": 3}, "modifie": 1, "chemin": "/etc"},
-             {"document": {"b": 3}, "modifie": 1, "chemin": "a/../../b"},
-             {"document": {"b": 3}, "modifie": 1, "chemin": "C:\\x"}):
-    args = dict({"chemin": "p", "doc": "pcb"}, **args)
-    verifier("cao_doc_ecrire refuse %r" % sorted(args.items()), outil("cao_doc_ecrire", **args)[0], True)
-verifier("aucune écriture refusée envoyée", ecritures(), [])
-FauxApi.table[("PUT", "/api/projet/doc")] = (409, {"detail": "modifié ailleurs"})
-erreur, texte = outil("cao_doc_ecrire", chemin="p", doc="pcb", document={"b": 3}, modifie=1)
-verifier("409 lisible", (erreur, "relis" in texte), (True, True))
 verifier("chemin absolu refusé en lecture aussi", outil("cao_projet_lire", chemin="/etc")[0], True)
-
-# Profils et fichiers LIB : « existe déjà » demandé au serveur (GET, 404 attendu), qui
-# applique sa propre normalisation du nom (casse, lecteur Windows, Unicode)
-profil = {"format": "cao-profil-1", "couches": 4}
-FauxApi.recues.clear()
-for statut in (200, 500):   # existe, ou contrôle impossible : jamais d'écriture
-    FauxApi.table[("GET", "/api/profil")] = (statut, {})
-    FauxApi.table[("GET", "/api/lib/fichier")] = (statut, {})
-    verifier("profil refusé (%d)" % statut, outil("cao_profil_ecrire", nom="JLC 4c", profil=profil)[0], True)
-    verifier("LIB refusé (%d)" % statut, outil("lib_fichier_ecrire", type="schematique", nom="C:R0603.json", data={})[0], True)
-FauxApi.table[("GET", "/api/profil")] = (404, {})
-FauxApi.table[("GET", "/api/lib/fichier")] = (404, {})
-for nom, args in (("cao_profil_ecrire", {"nom": "neuf", "profil": "texte"}),
-                  ("lib_fichier_ecrire", {"type": "schematique", "nom": "neuf.json"}),           # ni data ni contenu
-                  ("lib_fichier_ecrire", {"type": "schematique", "nom": "neuf.json", "data": {}, "contenu": "x"}),
-                  ("lib_fichier_ecrire", {"type": "schematique", "nom": "neuf.json", "data": 5}),
-                  ("lib_fichier_ecrire", {"type": "autre", "nom": "neuf.json", "data": {}}),
-                  ("lib_fichier_ecrire", {"type": "pcb", "nom": "neuf.json", "data": {}})):     # par la carte seulement
-    verifier("%s refuse %r" % (nom, args), outil(nom, **args)[0], True)
-verifier("aucune écriture refusée envoyée (bis)", ecritures(), [])
-FauxApi.recues.clear()
-verifier("profil neuf", outil("cao_profil_ecrire", nom="neuf", profil=profil)[0], False)
-verifier("fichier LIB neuf", outil("lib_fichier_ecrire", type="schematique", nom="C0402.json", data={"a": 1})[0], False)
-verifier("fichier LIB texte", outil("lib_fichier_ecrire", type="simulation", nom="m.sub", contenu="* x")[0], False)
-verifier("contrôles puis écritures", FauxApi.recues, [
-    ("GET", "/api/profil" + q(nom="neuf"), None), ("PUT", "/api/profil" + q(nom="neuf"), profil),
-    ("GET", "/api/lib/fichier" + q(type="schematique", nom="C0402.json"), None),
-    ("POST", "/api/lib/fichier", {"type": "schematique", "nom": "C0402.json", "si_absent": True, "data": {"a": 1}}),
-    ("GET", "/api/lib/fichier" + q(type="simulation", nom="m.sub"), None),
-    ("POST", "/api/lib/fichier", {"type": "simulation", "nom": "m.sub", "si_absent": True, "contenu": "* x"})])
-# créé entre le contrôle et l'écriture : le serveur refuse (409), le message le dit
-FauxApi.table[("POST", "/api/lib/fichier")] = (409, {"detail": "existe"})
-erreur, texte = outil("lib_fichier_ecrire", type="schematique", nom="C0402.json", data={"a": 1})
-verifier("course : 409 lisible", (erreur, "n'écrase pas" in texte), (True, True))
 FauxApi.table.clear()
 
 # Plafond tenu sur le texte rendu à Claude, pas seulement sur le JSON compact
@@ -521,10 +457,11 @@ verifier("outil hors liste refusé", outil("pcbparts_appeler", name="autre", arg
 verifier("arguments non objet refusés", outil("pcbparts_appeler", name="jlc_search", arguments="x")[0], True)
 verifier("arguments de plus de 2 Ko refusés", outil("pcbparts_appeler", name="jlc_search",
                                                     arguments={"q": "x" * 3000})[0], True)
+verifier("POST avec l'en-tête maison de WEB_CAO", FauxApi.entetes[-1].get("X-WEB_CAO"), "1")
 verifier("seulement la lecture de la liste", ecritures(), [])
 FauxApi.table.clear()
 
-# Projets WEB_ANTENNA : seulement le projet ouvert ; jamais de null ; en-tête absent repris
+# Projets WEB_ANTENNA : seulement le projet ouvert
 os.environ["WEB_SUITE_MCP_PORTS"] = json.dumps(dict(PORTS, web_antenna=api.server_address[1]))
 TETE = {"titre": "T", "outil": "o", "source": "s", "fichier": "f", "dessin": {"d": 1}, "antenne": {"a": 1},
         "affichage": {"z": 1}}
@@ -536,21 +473,11 @@ verifier("antenna_projet_lire", outil("antenna_projet_lire")[1]["nom"], "dipole"
 verifier("lecture du projet ouvert", FauxApi.recues, [("GET", "/api/projet", None),
                                                       ("POST", "/api/projet/ouvrir", {"nom": "dipole"})])
 FauxApi.recues.clear()
-verifier("enregistrer partiel", outil("antenna_projet_enregistrer", projet={"antenne": {"a": 2}})[0], False)
-verifier("en-tête repris, ni carte ni résultats", ecritures(), [("POST", "/api/projet/ouvrir", {"nom": "dipole"}),
-    ("POST", "/api/projet/enregistrer", dict(TETE, nom="dipole", antenne={"a": 2}))])
 verifier("POST avec l'en-tête maison de WEB_ANTENNA", FauxApi.entetes[-1].get("X-WEB_ANTENNA"), "1")
-FauxApi.recues.clear()
-for args in ({"projet": {"carte": None}}, {"projet": {"nom": "autre", "antenne": {"a": 1}}}, {"projet": "x"},
-             {"projet": {"carte": False}}, {"projet": {"resultats": ""}}, {"projet": {"dessin": 0}},
-             {"projet": {"antenne": {}}}, {"projet": {"carte": {"type": "dict", "longueur": 3}}}):
-    verifier("enregistrer refuse %r" % args, outil("antenna_projet_enregistrer", **args)[0], True)
-verifier("aucun enregistrement refusé envoyé", ecritures(), [])
 FauxApi.table[("GET", "/api/projet")] = (200, {"ouvert": None, "projets": []})
 FauxApi.recues.clear()
 verifier("aucun projet ouvert : lecture refusée", outil("antenna_projet_lire")[0], True)
-verifier("aucun projet ouvert : enregistrement refusé", outil("antenna_projet_enregistrer", projet=TETE)[0], True)
-verifier("jamais d'ouverture ni d'écriture", [r[1] for r in FauxApi.recues], ["/api/projet", "/api/projet"])
+verifier("jamais d'ouverture", [r[1] for r in FauxApi.recues], ["/api/projet"])
 FauxApi.recues.clear()
 outil("antenna_projets")
 outil("antenna_calculs")
@@ -590,8 +517,7 @@ import base64  # noqa: E402
 os.environ["WEB_SUITE_MCP_PORTS"] = json.dumps(dict(PORTS, web_cao=api.server_address[1],
                                                     web_antenna=api.server_address[1]))
 verifier("outils du canal listés", {"pilote_onglets", "pilote_suivre", "pilote_capture", "cao_calcul",
-                                    "cao_valeur_composant", "antenna_proposer", "pilote_interface_lire",
-                                    "pilote_interface"} <= set(noms), True)
+                                    "pilote_interface_lire", "pilote_interface"} <= set(noms), True)
 FauxApi.table[("GET", "/api/pilote/onglets")] = (200, {"onglets": [{"id": "A", "page": "pcb"}]})
 erreur, vus = outil("pilote_onglets")
 verifier("onglets des outils lancés, outil arrêté dit", (erreur, vus["web_cao"], vus["web_3d"]),
@@ -606,38 +532,31 @@ FauxApi.recues.clear()
 erreur, rendu = outil("cao_calcul", analyse="impedance")
 verifier("cao_calcul", (erreur, rendu["resultat"]), (False, {"rapport": "Z0 = 50 ohms"}))
 outil("cao_calcul", analyse="crosstalk", onglet="B")
-outil("cao_valeur_composant", ref="R12", valeur="4k7")
-outil("antenna_proposer", carte={"type": "cotes", "cotes": {"L": 30}})
 verifier("commandes déposées", [r[2] for r in FauxApi.recues], [
     {"page": ["pcb", "visionneuse-ipc"], "nom": "cao_calcul", "args": {"analyse": "impedance"}, "ecriture": False},
     {"page": ["pcb", "visionneuse-ipc"], "nom": "cao_calcul", "args": {"analyse": "crosstalk"}, "ecriture": False,
-     "onglet": "B"},
-    {"page": ["schema"], "nom": "cao_valeur_composant", "args": {"ref": "R12", "valeur": "4k7"}, "ecriture": True},
-    {"page": ["antenna"], "nom": "antenna_proposer", "args": {"carte": {"type": "cotes", "cotes": {"L": 30}}},
-     "ecriture": True}])
+     "onglet": "B"}])
 FauxApi.recues.clear()
 for nom, args in (("cao_calcul", {"analyse": "tout"}), ("cao_calcul", {}),
-                  ("cao_valeur_composant", {"ref": "", "valeur": "1k"}), ("cao_valeur_composant", {"ref": "R1"}),
-                  ("antenna_proposer", {"carte": {"type": "lancer"}}), ("antenna_proposer", {"carte": "x"}),
                   ("pilote_capture", {"outil": "web_ferme"}), ("pilote_suivre", {"outil": "web_cao"})):
     verifier("%s refuse %r" % (nom, args), outil(nom, **args)[0], True)
 verifier("aucune commande refusée déposée", FauxApi.recues, [])
 
 # États rendus par la page : refusée n'est pas une erreur ; échouée et expirée en sont
+GESTE = {"outil": "web_cao", "geste": "touche", "touche": "Escape"}
 FauxApi.table[("POST", "/api/pilote/commande")] = fin(None, "refusee")
-verifier("refusée", outil("cao_valeur_composant", ref="R1", valeur="1k"), (False, outil("cao_valeur_composant",
-         ref="R1", valeur="1k")[1]))
-verifier("refusée dite", "refus" in json.dumps(outil("cao_valeur_composant", ref="R1", valeur="1k")[1]), True)
+verifier("refusée", outil("pilote_interface", **GESTE)[0], False)
+verifier("refusée dite", "refus" in json.dumps(outil("pilote_interface", **GESTE)[1]), True)
 for etat in ("echouee", "expiree"):
     FauxApi.table[("POST", "/api/pilote/commande")] = fin("Repère R99 introuvable.", etat)
-    erreur, texte = outil("cao_valeur_composant", ref="R99", valeur="1k")
+    erreur, texte = outil("pilote_interface", **GESTE)
     verifier("%s en erreur lisible" % etat, (erreur, "R99" in texte or "fermé" in texte or "expir" in texte),
              (True, True))
 FauxApi.table[("POST", "/api/pilote/commande")] = fin("x" * 50000, "echouee")    # texte venu du projet : borné
-verifier("échec borné", len(outil("cao_valeur_composant", ref="R1", valeur="1k")[1]) < 2200, True)
+verifier("échec borné", len(outil("pilote_interface", **GESTE)[1]) < 2200, True)
 # Pas encore de réponse (ta carte attend) : en attente, avec l'id pour pilote_suivre
 FauxApi.table[("POST", "/api/pilote/commande")] = fin(None, "proposee")
-erreur, att = outil("cao_valeur_composant", ref="R1", valeur="1k")
+erreur, att = outil("pilote_interface", **GESTE)
 verifier("en attente avec id", (erreur, att["etat"], att["id"]), (False, "en_attente", "c" * 32))
 FauxApi.table[("GET", "/api/pilote/suivre")] = fin("R1 = 1k", "appliquee")
 FauxApi.recues.clear()
@@ -657,8 +576,7 @@ mcp.appeler({"name": "pilote_capture", "arguments": {"outil": "web_cao"}})
 verifier("capture : les pages de l'outil qui ont un canevas", FauxApi.recues[-1][2]["page"],
          ["schema", "pcb", "visionneuse-ipc"])
 verifier("ce que rend une page est une donnée, pas une consigne",
-         all("donnée" in o["description"] for o in outils if o["name"].startswith(("pilote_", "cao_calcul",
-             "cao_valeur", "antenna_proposer"))), True)
+         all("donnée" in o["description"] for o in outils if o["name"].startswith(("pilote_", "cao_calcul"))), True)
 for image in ("data:text/html;base64," + png, "data:image/png;base64,!!!", "data:image/png;base64," + "A" * 3000000):
     FauxApi.table[("POST", "/api/pilote/commande")] = fin({"image": image})
     verifier("capture refusée : %s…" % image[:24], outil("pilote_capture", outil="web_cao")[0], True)
@@ -689,6 +607,7 @@ for args in ({"geste": "cliquer", "cible": 1}, {"outil": "web_cao"}, {"outil": "
              {"outil": "web_cao", "geste": "souris", "x": 1, "y": "2"}, {"outil": "web_cao", "geste": "souris", "x": 1, "y": 2, "double": "oui"},
              {"outil": "web_cao", "geste": "cliquer", "cible": "a\nb"}, {"outil": "web_cao", "geste": "cliquer", "cible": 1, "page": "antenna"}):
     verifier("pilote_interface refuse %r" % (args,), outil("pilote_interface", **args)[0], True)
+verifier("pilote_interface refuse une saisie trop longue", outil("pilote_interface", outil="web_cao", geste="saisir", cible=3, valeur="x" * 500001)[0], True)
 verifier("pilote_interface_lire refuse un filtre sur deux lignes", outil("pilote_interface_lire", outil="web_cao", filtre="a\nb")[0], True)
 verifier("aucun geste invalide n'atteint la page", FauxApi.recues, [])
 FauxApi.table.clear()
@@ -697,7 +616,7 @@ FauxApi.table.clear()
 # registre-3d (lanceur/docs/SPEC-mcp-registre-3d.md) : commandes de la page WEB_3D
 os.environ["WEB_SUITE_MCP_PORTS"] = json.dumps(dict(PORTS, web_3d=api.server_address[1]))
 O3 = ["web3d_scene", "web3d_vue", "web3d_visibilite", "web3d_coupe", "web3d_mesurer", "web3d_collisions",
-      "web3d_ouvrir", "web3d_deplacer", "web3d_ranger_step"]
+      "web3d_ouvrir"]
 verifier("outils de registre-3d listés", set(O3) <= set(noms), True)
 FauxApi.table[("POST", "/api/pilote/commande")] = fin({"ok": 1})
 FauxApi.recues.clear()
@@ -709,14 +628,12 @@ for nom, args, ecriture in (
         ("web3d_coupe", {"actif": True, "axe": "z", "decalage_mm": -2.5, "inverse": False}, False),
         ("web3d_mesurer", {"quoi": "distance", "pieces": ["0/1", UU], "afficher": True}, False),
         ("web3d_collisions", {"tolerance": 0.2}, False),
-        ("web3d_ouvrir", {"chemins": ["cartes/boitier.stp"], "ajout": True}, True),
-        ("web3d_deplacer", {"fichier": 1, "translation": [10, 0, 0], "rotation_deg": [0, 0, 90]}, True),
-        ("web3d_ranger_step", {"piece": UU, "nom": "boulon"}, True)):
+        ("web3d_ouvrir", {"chemins": ["cartes/boitier.stp"], "ajout": True}, True)):
     verifier(nom + " accepté", outil(nom, **args)[0], False)
 deposees = [r[2] for r in FauxApi.recues]
 verifier("commandes déposées à la page 3d, avec leurs arguments", [(d["nom"], d["page"], d["ecriture"]) for d in deposees],
-         [(n, ["3d"], e) for n, e in zip(O3, [False] * 6 + [True] * 3)])
-verifier("arguments transmis tels quels", deposees[7]["args"], {"fichier": 1, "translation": [10, 0, 0], "rotation_deg": [0, 0, 90]})
+         [(n, ["3d"], e) for n, e in zip(O3, [False] * 6 + [True])])
+verifier("arguments transmis tels quels", deposees[6]["args"], {"chemins": ["cartes/boitier.stp"], "ajout": True})
 
 FauxApi.recues.clear()
 for nom, args in (("web3d_vue", {"vue": "plongee"}), ("web3d_vue", {"projection": "fisheye"}),
@@ -726,13 +643,7 @@ for nom, args in (("web3d_vue", {"vue": "plongee"}), ("web3d_vue", {"projection"
                   ("web3d_collisions", {"tolerance": -1}),
                   ("web3d_ouvrir", {"chemins": ["../web_3D.py"]}), ("web3d_ouvrir", {"chemins": []}),
                   ("web3d_ouvrir", {"chemins": ["/etc/x.stp"]}),
-                  ("web3d_deplacer", {"fichier": -1, "translation": [1, 0, 0]}),
-                  ("web3d_deplacer", {"fichier": 0, "translation": [1, 0]}),
-                  ("web3d_deplacer", {"fichier": 0, "rotation_deg": [0, 0, "90"]}),
-                  ("web3d_ranger_step", {"piece": ""}), ("web3d_ranger_step", {"piece": UU, "nom": "a/b"}),
                   # bornes et booléens stricts (revue) : « "false" » valait vrai, 1e9 mm cassait la vue
-                  ("web3d_deplacer", {"fichier": 0, "translation": [1e9, 0, 0]}),
-                  ("web3d_deplacer", {"fichier": 0, "rotation_deg": [0, 0, 1e5]}),
                   ("web3d_coupe", {"actif": "false"}), ("web3d_coupe", {"decalage_mm": 5e6}),
                   ("web3d_ouvrir", {"chemins": ["a.stp"], "ajout": "oui"}),
                   ("web3d_scene", {"nombre": 5000}), ("web3d_vue", {"capturer": 1})):
@@ -766,7 +677,16 @@ if os.path.exists(os.path.dirname(_aide)):
         verifier("pilote-aide.json à jour (sinon : python3 lanceur/aide_pilote.py)", _f.read() == aide_pilote.contenu(), True)
 verifier("cao_thermique listé, une lecture de la page PCB (donnée)", "cao_thermique" in noms and
          "donnée" in next(o["description"] for o in outils if o["name"] == "cao_thermique"), True)
-verifier("76 outils en tout (pilote_interface, registre-cao, ecriture-cao, dessin-schema, registre-antenna, routage, chemin-auto, composants, savoir_lire)", len(noms), 76)
+verifier("53 outils en tout (pilote_interface, registre-cao, dessin-schema, registre-antenna, routage, chemin-auto, composants, savoir_lire)", len(noms), 53)
+# décision du 2026-11-04 : Claude ne fait que ce que l'utilisateur peut faire à l'interface
+RETIRES = ("cao_doc_ecrire cao_profil_ecrire antenna_projet_enregistrer lib_fichier_ecrire cao_composants_ecrire "
+           "cao_valeur_composant cao_pistes_ecrire cao_classes_ecrire cao_contraintes_ecrire cao_contour_ecrire "
+           "cao_decoupes_ecrire cao_interdits_ecrire cao_zones_ecrire cao_serigraphie_ecrire cao_pastille_regler "
+           "cao_sim_ecrire antenna_proposer lib_composant_creer lib_composant_modifier lib_simulation_lier "
+           "cao_placement_auto web3d_deplacer web3d_ranger_step").split()
+verifier("les 23 outils d'écriture retirés sont absents", (len(RETIRES), sorted(set(RETIRES) & set(noms))), (23, []))
+verifier("aucune description ni instruction ne les cite",
+         [n for n in RETIRES if n in mcp.INSTRUCTIONS or any(n in o["description"] for o in outils)], [])
 verifier("registre-cao : ce que rend la page est une donnée",
          all("donnée" in o["description"] for o in outils if o["name"] in OC), True)
 FauxApi.table[("POST", "/api/pilote/commande")] = fin("- GND")
@@ -818,115 +738,9 @@ FauxApi.table = _table
 verifier("cao_vue + capturer : image puis texte", [c["type"] for c in r["content"]], ["image", "text"])
 verifier("la capture vise l'onglet de la vue (cao)", (FauxApi.recues[-1][2]["nom"], FauxApi.recues[-1][2]["onglet"]), ("capture", "A"))
 
-# ecriture-cao (lanceur/docs/SPEC-mcp-ecriture-cao.md) : écritures en lot, par cartes
 os.environ["WEB_SUITE_MCP_PORTS"] = json.dumps(dict(PORTS, web_cao=api.server_address[1]))
-OE = ["cao_composants_ecrire", "cao_pistes_ecrire", "cao_classes_ecrire", "cao_contraintes_ecrire", "cao_sim_ecrire",
-      "cao_contour_ecrire", "cao_decoupes_ecrire", "cao_interdits_ecrire", "cao_zones_ecrire", "cao_serigraphie_ecrire", "cao_pastille_regler"]
-verifier("outils d'ecriture-cao listés", set(OE) <= set(noms), True)
-verifier("ecriture-cao : donnée, carte, lot", all("donnée" in o["description"] and "carte" in o["description"] and "50" in o["description"]
-                                                 for o in outils if o["name"] in OE), True)
 FauxApi.table[("POST", "/api/pilote/commande")] = fin("ok", "appliquee")
 FauxApi.recues.clear()
-for nom, args in (("cao_composants_ecrire", {"page": "schema", "lot": [{"ref": "R1", "champs": {"valeur": "4k7", "specs": {"tol": "1%", "x": None}, "non_monte": True}}]}),
-                  ("cao_composants_ecrire", {"page": "pcb", "lot": [{"ref": "U1", "champs": {"x": 12.5, "rotation": 90, "face": "dessous"}}]}),
-                  ("cao_pistes_ecrire", {"lot": [{"net": "GND", "largeur": 0.5, "couche": "Top"}, {"net": "VCC", "realigner": True}]}),
-                  ("cao_classes_ecrire", {"lot": [{"action": "creer", "nom": "P", "largeur": 0.8, "largeur_couches": {"Top": 0.9}},
-                                                  {"action": "affecter", "net": "VCC", "classe": "P"}]}),
-                  ("cao_contraintes_ecrire", {"lot": [{"action": "paire", "nom": "USB", "impedance": "D90"},
-                                                      {"action": "net", "net": "CLK", "l_max": 40, "z": None, "couches": ["Top"]}]}),
-                  ("cao_sim_ecrire", {"lot": [{"groupe": "pdn", "cle": "rVrmMOhm", "valeur": 12, "unite": "mΩ"},
-                                              {"groupe": "bus", "cle": "protocole", "valeur": "I2C"},
-                                              {"groupe": "condensateurs", "cle": "esl_nh", "valeur": 0.3, "unite": "nH",
-                                               "cible": {"refs": ["C1", "C2"]}},
-                                              {"groupe": "bornes_dc", "cle": "courant_ma", "valeur": 80, "unite": "mA",
-                                               "cible": {"composant": "U1"}}]}),
-                  ("cao_contour_ecrire", {"lot": [{"forme": "disque", "x": 13, "y": 13, "rayon": 13}]}),
-                  ("cao_interdits_ecrire", {"lot": [{"action": "creer", "forme": "disque", "x": 13, "y": 13, "rayon": 12,
-                                                    "face": "dessous", "nom": "Côté LED", "hauteur_max": None},
-                                                   {"action": "hauteurs", "dessus": 9.5, "dessous": None}]}),
-                  ("cao_decoupes_ecrire", {"lot": [{"action": "creer", "forme": "disque", "x": 13, "y": 13, "rayon": 2},
-                                                   {"action": "supprimer", "numero": 1}]}),
-                  ("cao_zones_ecrire", {"lot": [{"action": "creer", "couche": "Top", "net": "GND", "forme": "carte", "liaison": "cms-directe"},
-                                                {"action": "modifier", "id": 3, "forme": "polygone",
-                                                 "points": [{"x": 0, "y": 0}, {"x": 5, "y": 0}, {"x": 0, "y": 5}]},
-                                                {"action": "supprimer", "id": 4}]}),
-                  ("cao_serigraphie_ecrire", {"lot": [{"action": "texte", "face": "dessus", "texte": "LED_UV", "x": 1, "y": 2, "hauteur": 1},
-                                                      {"action": "repere", "ref": "D1", "dx": 0, "dy": -1.5},
-                                                      {"action": "auto", "ref": "J1", "actif": False}, {"action": "supprimer", "id": 9}]}),
-                  ("cao_pastille_regler", {"lot": [{"pastille": "LED1.2", "liaison": "directe", "bras_largeur": None, "masque": 0.05}]})):
-    verifier(nom + " accepté", outil(nom, **args)[0], False)
-deposees = [r[2] for r in FauxApi.recues]
-verifier("écritures déposées aux bonnes pages, en écriture", [(d["nom"], d["page"], d["ecriture"]) for d in deposees],
-         [("cao_composants_ecrire", ["schema"], True), ("cao_composants_ecrire", ["pcb"], True),
-          ("cao_pistes_ecrire", ["pcb"], True), ("cao_classes_ecrire", ["pcb"], True),
-          ("cao_contraintes_ecrire", ["pcb"], True), ("cao_sim_ecrire", ["pcb", "visionneuse-ipc"], True),
-          ("cao_contour_ecrire", ["pcb"], True), ("cao_interdits_ecrire", ["pcb"], True), ("cao_decoupes_ecrire", ["pcb"], True), ("cao_zones_ecrire", ["pcb"], True),
-          ("cao_serigraphie_ecrire", ["pcb"], True), ("cao_pastille_regler", ["pcb"], True)])
-verifier("le lot passe tel quel", deposees[1]["args"], {"lot": [{"ref": "U1", "champs": {"x": 12.5, "rotation": 90, "face": "dessous"}}]})
-
-FauxApi.recues.clear()
-L = lambda *e: {"lot": list(e)}
-for nom, args in (("cao_composants_ecrire", L({"ref": "R1", "champs": {"valeur": "1k"}})),                       # page manquante
-                  ("cao_composants_ecrire", dict(L({"ref": "R1", "champs": {"x": 1}}), page="schema")),       # x : PCB seulement
-                  ("cao_composants_ecrire", dict(L({"ref": "R1", "champs": {"face": "gauche"}}), page="pcb")),
-                  ("cao_composants_ecrire", dict(L({"ref": "R1", "champs": {}}), page="pcb")),
-                  ("cao_composants_ecrire", dict(L({"ref": "R1"}), page="pcb")),
-                  ("cao_composants_ecrire", dict(L({"ref": "", "champs": {"valeur": "1"}}), page="pcb")),
-                  ("cao_composants_ecrire", dict(L({"ref": "R1", "champs": {"valeur": "a\nb"}}), page="schema")),
-                  ("cao_composants_ecrire", dict(L({"ref": "R1", "champs": {"specs": {"k%d" % i: "v" for i in range(31)}}}), page="schema")),
-                  ("cao_composants_ecrire", dict(L({"ref": "R1", "champs": {"x": float("nan")}}), page="pcb")),
-                  ("cao_composants_ecrire", dict(L({"ref": "R1", "champs": {"rotation": True}}), page="pcb")),
-                  ("cao_composants_ecrire", {"page": "pcb", "lot": [{"ref": "R1", "champs": {"valeur": "1"}}] * 51}),
-                  ("cao_composants_ecrire", {"page": "pcb", "lot": []}),
-                  ("cao_pistes_ecrire", L({"largeur": 0.3})), ("cao_pistes_ecrire", L({"net": "GND", "largeur": "0.3"})),
-                  ("cao_pistes_ecrire", L({"net": "GND", "epaisseur": 1})),
-                  ("cao_classes_ecrire", L({"action": "renommer", "nom": "P"})), ("cao_classes_ecrire", L({"nom": "P"})),
-                  ("cao_classes_ecrire", L({"action": "creer", "nom": "P", "largeur_couches": {"Top": "0.3"}})),
-                  ("cao_contraintes_ecrire", L({"action": "net", "net": "CLK", "couches": []})),
-                  ("cao_contraintes_ecrire", L({"action": "net", "net": "CLK", "l_max": "40"})),
-                  ("cao_sim_ecrire", L({"groupe": "pdn", "cle": "rVrmMOhm"})),
-                  ("cao_sim_ecrire", L({"groupe": "pdn", "cle": "rVrmMOhm", "valeur": None})),
-                  ("cao_sim_ecrire", L({"groupe": "condensateurs", "cle": "esl_nh", "valeur": 1, "cible": {"refs": []}})),
-                  ("cao_sim_ecrire", L({"groupe": "condensateurs", "cle": "esl_nh", "valeur": 1, "cible": {"ref": "C1"}})),
-                  ("cao_sim_ecrire", L({"groupe": "bornes_dc", "cle": "courant_ma", "valeur": 1, "cible": "U1"})),
-                  ("cao_contour_ecrire", {"lot": [{"forme": "disque", "x": 0, "y": 0, "rayon": 5}] * 2}),
-                  ("cao_contour_ecrire", L({"forme": "ovale"})),
-                  ("cao_contour_ecrire", L({"forme": "polygone", "points": [{"x": 0, "y": 0}, {"x": 1, "y": 1}]})),
-                  ("cao_contour_ecrire", L({"forme": "polygone", "points": [{"x": 0, "y": 0}, {"x": 1}, {"x": 0, "y": 1}]})),
-                  ("cao_decoupes_ecrire", L({"action": "supprimer", "numero": 0})),
-                  ("cao_interdits_ecrire", L({"action": "hauteurs", "dessus": 500})),
-                  ("cao_interdits_ecrire", L({"action": "creer", "face": "gauche"})),
-                  ("cao_decoupes_ecrire", L({"action": "creer", "forme": "carte"})),
-                  ("cao_zones_ecrire", L({"action": "deplacer", "id": 1})), ("cao_zones_ecrire", L({"action": "supprimer", "id": "1"})),
-                  ("cao_zones_ecrire", L({"action": "creer", "liaison": "soudee"})),
-                  ("cao_serigraphie_ecrire", L({"action": "texte", "face": "cote"})),
-                  ("cao_serigraphie_ecrire", L({"action": "texte", "texte": "a\nb"})),
-                  ("cao_pastille_regler", L({"liaison": "directe"})), ("cao_pastille_regler", L({"pastille": "U1.1", "bras_nombre": 9})),
-                  ("cao_pastille_regler", L({"pastille": "U1.1", "soudure": 1})),
-                  ("cao_sim_ecrire", "pas un objet")):
-    verifier("%s refuse %r" % (nom, str(args)[:60]), outil(nom, **args)[0] if isinstance(args, dict) else
-             mcp.appeler({"name": nom, "arguments": {"lot": args}}).get("isError", False), True)
-verifier("aucun lot invalide n'atteint la page", FauxApi.recues, [])
-
-# classes et contraintes au schéma (page « schema »)
-FauxApi.recues.clear()
-KS = [{"action": "affecter", "net": "CLK", "classe": "Horloge"}, {"action": "affecter", "net": "SDA", "classe": ""}]
-CS = [{"action": "net", "net": "CLK", "z": 50, "couches": [1, 4], "topologie": "chaine", "ordre": ["U1", "U2"],
-       "stub_max": None}]
-verifier("classes au schéma acceptées", outil("cao_classes_ecrire", page="schema", lot=KS)[0], False)
-verifier("contraintes au schéma acceptées", outil("cao_contraintes_ecrire", page="schema", lot=CS)[0], False)
-verifier("déposées au schéma, telles quelles", [(r[2]["nom"], r[2]["page"], r[2]["args"]) for r in FauxApi.recues],
-         [("cao_classes_ecrire", ["schema"], {"lot": KS}), ("cao_contraintes_ecrire", ["schema"], {"lot": CS})])
-FauxApi.recues.clear()
-for nom, args in (("cao_classes_ecrire", {"page": "schema", "lot": [{"action": "creer", "nom": "P"}]}),
-                  ("cao_classes_ecrire", {"page": "schema", "lot": [{"action": "affecter", "classe": "RF"}]}),
-                  ("cao_classes_ecrire", {"page": "sch", "lot": KS}),
-                  ("cao_contraintes_ecrire", {"page": "schema", "lot": [{"action": "paire", "nom": "USB"}]}),
-                  ("cao_contraintes_ecrire", {"page": "schema", "lot": [dict(CS[0], couches=["Top"])]}),
-                  ("cao_contraintes_ecrire", {"page": "schema", "lot": [dict(CS[0], topologie="anneau")]}),
-                  ("cao_contraintes_ecrire", {"page": "schema", "lot": [dict(CS[0], largeur_min=0.1)]})):
-    verifier("%s refuse %r" % (nom, str(args)[:60]), outil(nom, **args)[0], True)
-verifier("aucun lot invalide n'atteint la page du schéma", FauxApi.recues, [])
 
 # dessin-schema (lanceur/docs/SPEC-mcp-dessin-schema.md) : une liste d'opérations, une carte
 d_outil = next(o for o in outils if o["name"] == "cao_schema_dessiner")
@@ -988,9 +802,9 @@ verifier("antenna_vue + capturer : image puis texte", [c["type"] for c in r["con
 verifier("la capture vise l'onglet de la vue (antenna)", (FauxApi.recues[-1][2]["nom"], FauxApi.recues[-1][2]["onglet"]), ("capture", "A"))
 
 
-# routage (lanceur/docs/SPEC-mcp-routage.md) : routes par points de passage, paires, placement, scores
+# routage (lanceur/docs/SPEC-mcp-routage.md) : routes par points de passage, paires, scores
 os.environ["WEB_SUITE_MCP_PORTS"] = json.dumps(dict(PORTS, web_cao=api.server_address[1]))
-OR = ["cao_router", "cao_paire", "cao_placement_auto", "cao_score"]
+OR = ["cao_router", "cao_paire", "cao_score"]
 verifier("outils du routage listés", set(OR) <= set(noms), True)
 verifier("routage : donnée ; les écritures disent la carte et l'aperçu",
          all("donnée" in o["description"] and (o["name"] == "cao_score" or "aperçu" in o["description"])
@@ -1000,17 +814,16 @@ FauxApi.recues.clear()
 R1 = {"depart": "U1.3", "points": [{"x": 10, "y": 5.5}, {"x": 12, "y": 5.5, "couche": "Bottom"}], "arrivee": "R2.1", "largeur": 0.3}
 for nom, args in (("cao_router", {"routes": [R1], "vias": [{"x": 1, "y": 2, "net": "GND"}], "mode": "contourner"}),
                   ("cao_paire", {"paire": "USB", "depart": {"x": 7, "y": 19.7}, "arrivee": "U1.4"}),
-                  ("cao_placement_auto", {"methode": "blocs", "motif": "Alim"}),
                   ("cao_score", {"quoi": "routage"}),
                   ("cao_pcb_lire", {"quoi": "zone", "x1": 0, "y1": 0, "x2": 20, "y2": 10.5}),
                   ("cao_pcb_lire", {"quoi": "liaisons", "filtre": "GND"})):
     verifier(nom + " accepté", outil(nom, **args)[0], False)
 deposees = [r[2] for r in FauxApi.recues]
 verifier("routage : pages et écriture", [(d["nom"], d["page"], d["ecriture"]) for d in deposees],
-         [("cao_router", ["pcb"], True), ("cao_paire", ["pcb"], True), ("cao_placement_auto", ["pcb"], True),
+         [("cao_router", ["pcb"], True), ("cao_paire", ["pcb"], True),
           ("cao_score", ["pcb"], False), ("cao_pcb_lire", ["pcb"], False), ("cao_pcb_lire", ["pcb"], False)])
 verifier("la route arrive telle quelle", deposees[0]["args"]["routes"][0], R1)
-verifier("la fenêtre de zone arrive", deposees[4]["args"], {"quoi": "zone", "x1": 0, "y1": 0, "x2": 20, "y2": 10.5})
+verifier("la fenêtre de zone arrive", deposees[3]["args"], {"quoi": "zone", "x1": 0, "y1": 0, "x2": 20, "y2": 10.5})
 FauxApi.recues.clear()
 for nom, args in (("cao_router", {}), ("cao_router", {"routes": [R1] * 21}), ("cao_router", {"routes": [{"depart": "U1.3"}]}),
                   ("cao_router", {"routes": [dict(R1, depart={"x": "a", "y": 1})]}),
@@ -1018,7 +831,6 @@ for nom, args in (("cao_router", {}), ("cao_router", {"routes": [R1] * 21}), ("c
                   ("cao_router", {"routes": [dict(R1, points=[{"x": 1, "y": 2}] * 201)]}),
                   ("cao_router", {"routes": [R1], "mode": "sauter"}), ("cao_router", {"vias": [{"x": 1, "y": 2}]}),
                   ("cao_paire", {"paire": "USB", "depart": "J1.1"}), ("cao_paire", dict(R1, paire="USB", largeur=0.2)),
-                  ("cao_placement_auto", {"methode": "hasard"}), ("cao_placement_auto", {"methode": "blocs", "motif": "a\nb"}),
                   ("cao_score", {"quoi": "tout"}), ("cao_pcb_lire", {"quoi": "zone", "x1": 5000}),
                   ("cao_pcb_lire", {"quoi": "zone", "x1": "5"}), ("cao_pcb_lire", {"quoi": "zone", "x1": float("nan")}),
                   ("cao_router", {"routes": [dict(R1, depart={"x": 5000, "y": 1})]}),
@@ -1050,43 +862,23 @@ for args in ({}, {"liaisons": []}, {"liaisons": [LI] * 21}, {"liaisons": [{"depa
 verifier("aucun argument invalide n'atteint la page (chemin-auto)", FauxApi.recues, [])
 
 
-# composants (lanceur/docs/SPEC-mcp-composants.md) : calculs dans Gestion LIB, création par carte
-OC = ["lib_empreinte_generer", "lib_empreinte_verifier", "lib_kicad_convertir", "lib_brochage_verifier", "lib_composant_creer",
-      "lib_simulation_lier", "lib_composant_modifier"]
+# composants (lanceur/docs/SPEC-mcp-composants.md) : calculs dans Gestion LIB, sans écriture
+OC = ["lib_empreinte_generer", "lib_empreinte_verifier", "lib_kicad_convertir", "lib_brochage_verifier"]
 verifier("outils des composants listés", set(OC) <= set(noms), True)
 desc = {o["name"]: o["description"] for o in outils if o["name"] in OC}
 verifier("composants : méthode et donnée dans chaque description",
-         all("lib_empreinte_generer" in d and "lib_composant_creer" in d and "données" in d for d in desc.values()), True)
-for n in ("lib_composant_creer", "lib_simulation_lier", "lib_composant_modifier"):
-    verifier(n + " : jamais d'écrasement, toujours au clic", ("JAMAIS" in desc[n], "MÊME interrupteur allumé" in desc[n]),
-             (True, True))
+         all("lib_empreinte_generer" in d and "Gestion LIB" in d and "données" in d for d in desc.values()), True)
 FauxApi.table[("POST", "/api/pilote/commande")] = fin("ok", "appliquee")
 FauxApi.recues.clear()
 FP = {"format": "pcbfp-1", "name": "SOT-23-5-LDO", "pads": [{"n": 1, "x": 0, "y": 0, "w": 1, "h": 1}]}
-SYMB = {"format": "schsym-1", "id": "LDO_SYM", "pins": [{"n": 1, "x": -40, "y": 0, "name": "VIN"}], "primitives": []}
-LIGNE = {"Part Name": "LDO_3V3", "Reference designator Prefix": "U", "Number Of pins": 5,
-         "Empreinte PCB": "SOT-23-5-LDO", "Empreinte Schématique": "regulator", "Brochage": "IN=1,GND=2,OUT=5"}
 for nom, args in (("lib_empreinte_generer", {"famille": "soic", "parametres": {"broches": 8, "empattement": [5.8, 6.2], "corps": [3.9, 4.9], "densite": "N"}}),
                   ("lib_empreinte_verifier", {"empreinte": FP}),
                   ("lib_kicad_convertir", {"texte": "(footprint \"X\")"}),
-                  ("lib_brochage_verifier", {"brochage": "IN=1,GND=2,OUT=5", "empreinte": "SOT-23-5", "symbole": "regulator"}),
-                  ("lib_composant_creer", {"ligne": LIGNE, "empreinte": FP}),
-                  ("lib_simulation_lier", {"reference": "AS179", "fichier": "as179.s3p", "texte": "# GHz S DB R 50\n",
-                                           "ports": ["J1", 3, "J3"], "masse": "GND"}),
-                  ("lib_composant_modifier", {"reference": "LDO_3V3", "champs": {"Value": "3V3 500 mA", "Description": ""},
-                                              "empreinte": FP}),
-                  ("lib_composant_creer", {"ligne": dict(LIGNE, **{"Empreinte Schématique": "LDO_SYM"}), "symbole": SYMB}),
-                  ("lib_composant_modifier", {"reference": "LDO_3V3", "symbole": SYMB})):
+                  ("lib_brochage_verifier", {"brochage": "IN=1,GND=2,OUT=5", "empreinte": "SOT-23-5", "symbole": "regulator"})):
     verifier(nom + " accepté", outil(nom, **args)[0], False)
 deposees = [r[2] for r in FauxApi.recues]
-verifier("composants : page Gestion LIB, seule la création écrit", [(d["nom"], d["page"], d["ecriture"]) for d in deposees[:7]],
-         [(n, ["gestion-lib"], n in ("lib_composant_creer", "lib_simulation_lier", "lib_composant_modifier")) for n in OC])
-verifier("le symbole neuf arrive tel quel", (deposees[7]["args"]["symbole"], deposees[8]["args"]["symbole"]), (SYMB, SYMB))
-verifier("la modification arrive telle quelle", deposees[6]["args"],
-         {"reference": "LDO_3V3", "champs": {"Value": "3V3 500 mA", "Description": ""}, "empreinte": FP})
-verifier("le modèle et ses pattes arrivent tels quels", deposees[5]["args"],
-         {"reference": "AS179", "fichier": "as179.s3p", "texte": "# GHz S DB R 50\n", "ports": ["J1", 3, "J3"], "masse": "GND"})
-verifier("la ligne et l'empreinte arrivent telles quelles", deposees[4]["args"], {"ligne": LIGNE, "empreinte": FP})
+verifier("composants : page Gestion LIB, aucune écriture", [(d["nom"], d["page"], d["ecriture"]) for d in deposees],
+         [(n, ["gestion-lib"], False) for n in OC])
 FauxApi.recues.clear()
 for nom, args in (("lib_empreinte_generer", {"famille": "bga"}), ("lib_empreinte_generer", {"famille": "soic", "parametres": {"script": 1}}),
                   ("lib_empreinte_generer", {"famille": "soic", "parametres": {"pas": float("inf")}}),
@@ -1098,26 +890,7 @@ for nom, args in (("lib_empreinte_generer", {"famille": "bga"}), ("lib_empreinte
                   ("lib_brochage_verifier", {"brochage": "IN=1;GND=2", "empreinte": "X", "symbole": "regulator"}),
                   ("lib_brochage_verifier", {"brochage": "IN=1", "empreinte": 5, "symbole": "regulator"}),
                   ("lib_brochage_verifier", {"brochage": "IN=1", "empreinte": "X", "symbole": ""}),
-                  ("lib_composant_creer", {"ligne": "LDO"}), ("lib_composant_creer", {"ligne": dict(LIGNE, Value="a\nb")}),
-                  ("lib_composant_creer", {"ligne": {str(i): "x" for i in range(41)}}),
-                  ("lib_composant_creer", {"ligne": LIGNE, "empreinte": "SOT-23-5"}),
-                  ("lib_composant_creer", {"ligne": dict(LIGNE, Value=["3V3"])}),
-                  ("lib_simulation_lier", {"reference": "R1", "fichier": "r.txt", "texte": "x"}),
-                  ("lib_simulation_lier", {"reference": "", "fichier": "r.sub", "texte": "x"}),
-                  ("lib_simulation_lier", {"reference": "R1", "fichier": "r.sub", "texte": " "}),
-                  ("lib_simulation_lier", {"reference": "R1", "fichier": "r.s2p", "texte": "1 2\n" * 1100000}),
-                  ("lib_simulation_lier", {"reference": "R1", "fichier": "r.s2p", "texte": "x", "ports": "1 2"}),
-                  ("lib_simulation_lier", {"reference": "R1", "fichier": "r.s2p", "texte": "x", "ports": [True, 2]}),
-                  ("lib_simulation_lier", {"reference": "R1", "fichier": "r.s2p", "texte": "x", "ports": list(range(10))}),
-                  ("lib_simulation_lier", {"reference": "R1", "fichier": "r.s2p", "texte": "x", "masse": ["2"]}),
-                  ("lib_composant_modifier", {"reference": "R1"}),
-                  ("lib_composant_modifier", {"reference": "", "champs": {"Value": "1"}}),
-                  ("lib_composant_modifier", {"reference": "R1", "champs": {"Value": "a\nb"}}),
-                  ("lib_composant_modifier", {"reference": "R1", "champs": {"Value": ["1"]}}),
-                  ("lib_composant_modifier", {"reference": "R1", "champs": "Value=1"}),
-                  ("lib_composant_modifier", {"reference": "R1", "empreinte": "SOT-23-5"}),
-                  ("lib_composant_modifier", {"reference": "R1", "symbole": "LDO_SYM"}),
-                  ("lib_composant_creer", {"ligne": LIGNE, "symbole": ["schsym-1"]})):
+                  ):
     verifier("%s refuse %r" % (nom, str(args)[:60]), outil(nom, **args)[0], True)
 verifier("aucun argument invalide n'atteint la page (composants)", FauxApi.recues, [])
 

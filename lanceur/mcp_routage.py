@@ -1,4 +1,4 @@
-"""Outils MCP du module routage : router la carte ouverte par points de passage, placer, scorer.
+"""Outils MCP du module routage : router la carte ouverte par points de passage, scorer.
 
 Spec : lanceur/docs/SPEC-mcp-routage.md. Chaque outil vérifie la forme de ses arguments, puis les
 dépose à la page PCB par le canal de pilotage (WEB_CAO/editeur-pcb/js/37-routage-pilote.js). La page
@@ -69,14 +69,6 @@ def cao_paire(a):
     return envoyer("cao_paire", corps, a)
 
 
-def cao_placement_auto(a):
-    args = {"methode": choix(a.get("methode"), "methode", ("forces", "satellites", "blocs"))}
-    if a.get("motif") is not None:
-        valider({"motif": a["motif"]}, {"motif": NOM}, (), "placement")
-        args["motif"] = a["motif"]
-    return envoyer("cao_placement_auto", args, a)
-
-
 BOUTS_PAIRE = (lambda v: isinstance(v, list) and len(v) == 2 and all(isinstance(x, str) and NOM[0](x) for x in v),
                "[« REF.pastille » de P, « REF.pastille » de N]")
 
@@ -139,19 +131,6 @@ OUTILS_ROUTAGE = {
             "paire": T, "depart": PT, "arrivee": PT, "points": {"type": "array", "items": PT}, "couche": T,
             "mode": {"type": "string", "enum": ["pousser", "contourner"]}, "onglet": ONGLET}},
         "fn": cao_paire,
-    },
-    "cao_placement_auto": {
-        "description": "Lance un placement automatique de la page sur la carte PCB : forces (dégrossit tout, "
-                       "découplages contre leur broche), satellites (découplages et composants série contre leur "
-                       "circuit), blocs (agence un motif ou une zone publiés par le schéma : « motif »)."
-                       + " Le placement est joué par la page puis défait ; la carte dit combien d'empreintes bougent "
-                         "et lesquelles, et l'aperçu dessine chacune à sa nouvelle place en pointillés, avec son "
-                         "trajet depuis l'ancienne (pilote_capture le montre). Au clic, une étape d'historique "
-                         "(Ctrl+Z la défait)."
-                       + pilote.ATTENTE_DOC + pilote.DONNEES,
-        "inputSchema": {"type": "object", "required": ["methode"], "properties": {
-            "methode": {"type": "string", "enum": ["forces", "satellites", "blocs"]}, "motif": T, "onglet": ONGLET}},
-        "fn": cao_placement_auto,
     },
     "cao_score": {
         "description": "Score de la carte PCB ouverte. routage : liaisons restantes, erreurs et remarques du DRC "

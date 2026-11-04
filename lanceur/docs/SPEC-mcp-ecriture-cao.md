@@ -1,5 +1,7 @@
 # Spec : ecriture-cao
 
+> Historique : ces outils sont retirés depuis la décision du 2026-11-04 (Claude ne fait que ce que l'utilisateur peut faire à l'interface, écriture par `pilote_interface`).
+
 Module 5 de la [carte MCP web_suite](SPEC-mcp.md). Dépend de [`registre-cao`](SPEC-mcp-registre-cao.md).
 Statut : **validée le 2026-10-19**.
 

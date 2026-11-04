@@ -7,7 +7,6 @@ sa réponse. Ne s'importe que par mcp_web_suite, comme mcp_api_outils.
 import base64
 import binascii
 
-import mcp_api_outils as api
 import mcp_web_suite as noyau
 from mcp_api_outils import exiger, facultatif, resumer, route
 
@@ -17,7 +16,6 @@ PAGES = {"web_cao": ["schema", "pcb", "visionneuse-ipc", "gestion-lib", "accueil
 # Pages qui ont un canevas : une capture sans onglet nommé ne vise qu'elles
 CAPTURABLES = {"web_cao": ["schema", "pcb", "visionneuse-ipc"], "web_antenna": ["antenna"], "web_3d": ["3d"]}
 ANALYSES = ("impedance", "diff", "retour", "crosstalk", "oeil", "bus", "dc", "pdn", "s21", "verif")
-CARTES_ANTENNA = ("reglages", "cotes", "balayage", "formes")
 MAX_IMAGE = 2 * 1024 * 1024   # octets de PNG rendus à Claude
 PNG = "data:image/png;base64,"
 
@@ -105,24 +103,8 @@ def cao_calcul(args):
                    facultatif(args, "onglet", str, None))
 
 
-def cao_valeur_composant(args):
-    ref, valeur = exiger(args, ref=str, valeur=str)
-    if not ref.strip() or not valeur.strip():
-        raise noyau.ErreurOutil("« ref » et « valeur » ne peuvent pas être vides.")
-    return envoyer("web_cao", ["schema"], "cao_valeur_composant", {"ref": ref.strip(), "valeur": valeur.strip()},
-                   True, facultatif(args, "onglet", str, None))
-
-
-def antenna_proposer(args):
-    carte = exiger(args, carte=dict)
-    if carte.get("type", "reglages") not in CARTES_ANTENNA:
-        raise noyau.ErreurOutil("Type de carte invalide : %s attendu." % ", ".join(CARTES_ANTENNA))
-    api.refuser_resume(carte, "carte")
-    return envoyer("web_antenna", ["antenna"], "antenna_proposer", {"carte": carte}, True,
-                   facultatif(args, "onglet", str, None))
-
-
 GESTES = ("cliquer", "saisir", "touche", "souris")
+MAX_SAISIE = 500000   # caractères : une empreinte JSON collée dans Gestion LIB
 
 
 def pages_outil(id_outil, args):
@@ -163,8 +145,8 @@ def pilote_interface(args):
             raise noyau.ErreurOutil("Argument « cible » : numéro rendu par pilote_interface_lire, ou sélecteur CSS.")
     if geste == "saisir":
         v = args.get("valeur")
-        if type(v) not in (str, int, float, bool) or (isinstance(v, str) and len(v) > 5000):
-            raise noyau.ErreurOutil("« saisir » : « valeur », texte (5000 caractères au plus), nombre ou booléen.")
+        if type(v) not in (str, int, float, bool) or (isinstance(v, str) and len(v) > MAX_SAISIE):
+            raise noyau.ErreurOutil("« saisir » : « valeur », texte (%d caractères au plus)," % MAX_SAISIE + " nombre ou booléen.")
         corps["valeur"] = v
     if geste == "touche":
         corps["touche"] = ligne(args, "touche", 40)
@@ -227,8 +209,8 @@ OUTILS_PILOTE = {
         "description": "Liste les contrôles visibles d'une page d'outil (WEB_CAO, WEB_ANTENNA, WEB_3D), comme "
                        "l'utilisateur les voit : boutons, menus ouverts, onglets, champs, cases, listes (avec leur "
                        "valeur et leurs choix), chacun numéroté [n] pour pilote_interface, avec son #id quand il en a "
-                       "un, et la taille du canevas dans les pixels de pilote_capture. Pour tout ce qu'aucun outil "
-                       "propre à la page ne fait. Les numéros changent quand l'interface change (menu ouvert, panneau "
+                       "un, et la taille du canevas dans les pixels de pilote_capture. À lire avant chaque geste. "
+                       "Les numéros changent quand l'interface change (menu ouvert, panneau "
                        "redessiné) : relire après un geste. Le panneau « Claude » n'y figure jamais. Ne modifie rien.",
         "inputSchema": {"type": "object", "required": ["outil"], "properties": {
             "outil": OUTIL, "onglet": ONGLET,
@@ -243,13 +225,13 @@ OUTILS_PILOTE = {
                        "saisir une valeur (champ, liste par valeur ou texte du choix, case par true/false), touche "
                        "(raccourci au nom du DOM : Ctrl+Z, Delete, Escape, r… ; ne tape pas de texte : saisir), souris "
                        "sur le canevas (x, y en pixels de pilote_capture ; double, droit, molette = deltaY, x2/y2 pour "
-                       "glisser, modificateurs = Shift, Ctrl…). Pour ce qu'aucun outil propre à la page ne fait : "
-                       "préfère-les quand ils existent (vérifiés, annulables). Comme l'utilisateur et pas plus : ni champ en "
+                       "glisser, modificateurs = Shift, Ctrl…). C'est ainsi que Claude écrit dans une page, sauf le routage "
+                       "(cao_router, cao_paire) et le dessin du schéma (cao_schema_dessiner). Comme l'utilisateur et pas plus : ni champ en "
                        "lecture seule, ni onglet masqué. Réservé à l'utilisateur, refusé : envoyer sur GitHub, lancer ou "
                        "arrêter openEMS, régler ses fils. Ne choisit pas de fichier sur le disque (le navigateur exige un "
                        "vrai clic) ; une fenêtre confirm/prompt attend la réponse de l'utilisateur. Rend ce qui a été fait ; relis l'interface ou capture ensuite pour voir l'effet."
                        + ATTENTE_DOC + " La carte n'annule pas le geste (Ctrl+Z dans l'éditeur s'il y fait une étape). "
-                       "Pour enchaîner beaucoup de gestes, demande d'allumer l'interrupteur de l'onglet.",
+                       "Une carte par geste : pour en enchaîner, demande d'allumer l'interrupteur de l'onglet.",
         "inputSchema": {"type": "object", "required": ["outil", "geste"], "properties": {
             "outil": OUTIL, "onglet": ONGLET,
             "page": {"type": "string", "description": "Restreindre à une page de l'outil (pcb, schema…)."},
@@ -272,24 +254,6 @@ OUTILS_PILOTE = {
         "inputSchema": {"type": "object", "properties": {
             "analyse": {"type": "string", "enum": list(ANALYSES)}, "onglet": ONGLET}, "required": ["analyse"]},
         "fn": cao_calcul,
-    },
-    "cao_valeur_composant": {
-        "description": "Propose de changer la valeur d'un composant du schéma par son repère (R12 → 4k7). "
-                       "Pour plusieurs champs ou plusieurs composants, au schéma ou au PCB : cao_composants_ecrire."
-                       + ATTENTE_DOC + " Appliquée, elle fait une étape d'undo (Ctrl+Z la défait).",
-        "inputSchema": {"type": "object", "properties": {
-            "ref": {"type": "string"}, "valeur": {"type": "string"}, "onglet": ONGLET},
-            "required": ["ref", "valeur"]},
-        "fn": cao_valeur_composant,
-    },
-    "antenna_proposer": {
-        "description": "Propose une carte WEB_ANTENNA, au format des cartes de son assistant : « reglages » "
-                       "(bande, boîte, maillage, arrêt, ports…), « cotes » (gabarit), « balayage » (armé, "
-                       "jamais lancé), « formes » (rect, disque, poly, piste, via)." + ATTENTE_DOC,
-        "inputSchema": {"type": "object", "properties": {
-            "carte": {"type": "object", "description": "La carte, avec son « type »."}, "onglet": ONGLET},
-            "required": ["carte"]},
-        "fn": antenna_proposer,
     },
 }
 

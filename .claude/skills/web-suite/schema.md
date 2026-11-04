@@ -24,7 +24,8 @@ broches et nets existants. On ne pose rien sans savoir ce qui est déjà là.
   étiquette alors. Un tracé précis se donne par `fil` (points en mm, segments horizontaux ou
   verticaux) : il ne relie que par ses deux bouts.
 - Classes et contraintes d'un net nommé se posent dès le schéma (le PCB les reprend) :
-  `cao_classes_ecrire` et `cao_contraintes_ecrire` avec `page: "schema"`.
+  classe par `select.netcls` (Propriétés du fil, liste des nets), contraintes par Outils
+  `#bSchContraintes` ou `#pNetCmBtn` (fenêtre `#schCmEd`).
 - Une feuille par sous-système (alimentation, microcontrôleur, connecteurs, RF…) ; à
   l'intérieur, un bloc par fonction, les signaux de gauche à droite.
 - Un bloc fonctionnel s'encadre : `cadre` avec `zone: true` (il devient une room au PCB) ;
@@ -48,8 +49,9 @@ broches et nets existants. On ne pose rien sans savoir ce qui est déjà là.
 - **Entrée analogique d'ADC** : un filtre RC, fc = 1 / (2π·R·C). R reste sous l'impédance
   de source maximale que la datasheet de l'ADC admet, et C (souvent quelques nF) fournit la
   charge de l'échantillonneur.
-- Une valeur calculée se propose à l'application : `cao_valeur_composant` pour une valeur,
-  `cao_composants_ecrire` pour plusieurs champs ou plusieurs composants.
+- Une valeur calculée s'applique à l'interface : composant sélectionné, `#pVal` (valeur), `#pRef`
+  (repère), `#pPkgTxt` (boîtier) ; fabricant et MPN dans « ✎ Détails du composant… » (`#pCompEd` :
+  `#ceMfr`, `#ceMpn`). Plusieurs composants : un geste chacun, interrupteur allumé.
 
 ## Vérifier une portion de schéma
 

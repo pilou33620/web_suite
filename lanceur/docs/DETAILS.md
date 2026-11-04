@@ -173,31 +173,26 @@ Outils MCP (`etat` dans `mcp_web_suite.py`, les autres dans `mcp_api_outils.py`,
   `cao_profils`, `cao_profil_lire`.
 - LIB, lecture : `lib_composants` (recherche et pagination dans le catalogue),
   `lib_fichiers`, `lib_fichier_lire`, `lib_parasites`.
-- Écriture gardée : `cao_doc_ecrire` (remplace seulement les clés données ; exige le
-  `modifie` lu : refus si le fichier a changé depuis), `cao_profil_ecrire` et
-  `lib_fichier_ecrire` (refus si le nom existe déjà : jamais d'écrasement ; symboles et modèles
-  seulement : une empreinte PCB passe par la carte de `lib_composant_creer`).
 - pcbparts.dev, par le relais de WEB_CAO : `pcbparts_outils`, `pcbparts_appeler` (liste
   blanche de WEB_CAO).
-- WEB_ANTENNA : `antenna_projets`, `antenna_calculs`, `antenna_projet_lire` et
-  `antenna_projet_enregistrer` (le projet ouvert seulement ; `null` refusé, en-tête absent
-  repris du projet ouvert), `antenna_openems_etat`, `antenna_openems_chiffrer` (modèle,
+- WEB_ANTENNA : `antenna_projets`, `antenna_calculs`, `antenna_projet_lire` (le projet
+  ouvert seulement), `antenna_openems_etat`, `antenna_openems_chiffrer` (modèle,
   balayage, tableau S, script), `antenna_openems_suivre`, `antenna_openems_champs`.
 - WEB_3D : `web3d_projets`.
 - Pages ouvertes (canal de pilotage, `mcp_pilote.py`, voir
   [SPEC-mcp-canal-pilote.md](SPEC-mcp-canal-pilote.md)) : `pilote_onglets` (onglets ouverts sur
   ce poste et les appareils appairés), `pilote_capture` (image du canevas), `pilote_suivre`,
-  `pilote_interface_lire` et `pilote_interface` (le reste de l'interface, comme Claude in Chrome :
+  `pilote_interface_lire` et `pilote_interface` (l'écriture dans une page, comme Claude in Chrome :
   liste des contrôles visibles, puis clic, saisie, raccourci clavier ou geste souris au canevas ; un geste
   est une écriture à carte, directe interrupteur allumé, le mode pratique pour enchaîner des gestes),
-  `cao_calcul` (lance une analyse dans la page PCB ou la visionneuse et rend son rapport),
-  `cao_valeur_composant` (schéma), `antenna_proposer` (cartes d'action de WEB_ANTENNA : réglages, cotes, balayage, formes).
+  `cao_calcul` (lance une analyse dans la page PCB ou la visionneuse et rend son rapport).
+  Décision du 2026-11-04 : Claude ne fait que ce que l'utilisateur peut faire à l'interface. Seuls le
+  routage, les paires, le dessin du schéma et `web3d_ouvrir` restent des outils qui écrivent ; le reste
+  passe par des gestes (la fiche `SKILL` du skill web-suite dit lesquels).
 - Page WEB_3D (`mcp_registre_3d.py`, voir [SPEC-mcp-registre-3d.md](SPEC-mcp-registre-3d.md)) :
   `web3d_scene` (fichiers et pièces : uuid, chemin, nom), `web3d_vue` (vue standard, cadrage,
   capture), `web3d_visibilite`, `web3d_coupe`, `web3d_mesurer` (dimensions, distance avec cote,
-  faces), `web3d_collisions` ; en carte : `web3d_ouvrir` (fichiers de PROJETS/3D, annulable),
-  `web3d_deplacer` (translation, rotation, contraintes, annulable), `web3d_ranger_step` (STEP
-  d'une pièce rangé dans PROJETS/3D, jamais d'écrasement, non annulable).
+  faces), `web3d_collisions` ; en carte : `web3d_ouvrir` (fichiers de PROJETS/3D, annulable).
 - Pages WEB_CAO (`mcp_registre_cao.py`, voir [SPEC-mcp-registre-cao.md](SPEC-mcp-registre-cao.md)) :
   `cao_schema_lire` (feuilles, composants, composant, nets, net : tout le document),
   `cao_pcb_lire` (empilage, classes, composants, composant, nets, net, drc), `cao_ipc_lire`
@@ -207,32 +202,21 @@ Outils MCP (`etat` dans `mcp_web_suite.py`, les autres dans `mcp_api_outils.py`,
   `WEB_CAO/commun/lecture-cao.js`, reprises de l'ancien assistant IA de la page. Seule exception : la visibilité des couches du PCB
   fait partie du fichier, comme l'œil du panneau ; elle part avec le prochain Enregistrer.
   Surligner un net le met en avant sans sélectionner son routage.
-- Écritures WEB_CAO (`mcp_ecriture_cao.py`, voir [SPEC-mcp-ecriture-cao.md](SPEC-mcp-ecriture-cao.md)) :
-  `cao_composants_ecrire` (schéma ou PCB : repère, valeur, boîtier, fabricant, MPN, specs,
-  non monté ; face, position, rotation au PCB), `cao_pistes_ecrire` (largeur, réalignement
-  sur la classe), `cao_classes_ecrire` (créer, modifier, supprimer, rattacher des nets),
-  `cao_contraintes_ecrire` (règles de paires, contraintes de net), `cao_sim_ecrire`
-  (paramètres de simulation, unité du catalogue). Un lot de 50 éléments au plus = une carte
-  = une étape Ctrl+Z (la simulation : Annuler sur la carte). Un seul refus et rien ne
-  change ; au clic, la page revérifie que rien n'a bougé sous la carte. Au PCB, la réponse
-  donne le DRC avant → après. Code de page : `WEB_CAO/commun/ecriture-cao.js`.
-- Dessin du schéma (`cao_schema_dessiner`, voir [SPEC-mcp-dessin-schema.md](SPEC-mcp-dessin-schema.md)) :
+- Dessin du schéma (`mcp_ecriture_cao.py`, `cao_schema_dessiner`, voir [SPEC-mcp-dessin-schema.md](SPEC-mcp-dessin-schema.md)) :
   une liste de 40 opérations au plus, en une carte. Les opérations : poser (symbole intégré
   ou ligne du catalogue), relier broche à broche, étiqueter (local, global, VCC, GND),
   déplacer, tourner, miroir, supprimer, supprimer_fil, feuille (créer, renommer), renuméroter.
   La page joue le lot puis le défait avant de montrer la carte ; elle refuse un fil qui
   relierait d'autres broches que celles demandées. Une étape Ctrl+Z. Code de page :
-  `WEB_CAO/editeur-schematique/js/28-dessin-pilote.js`.
+  `WEB_CAO/editeur-schematique/js/28-dessin-pilote.js`, sur le socle `WEB_CAO/commun/ecriture-cao.js`.
 - Page WEB_ANTENNA (`mcp_registre_antenna.py`, voir [SPEC-mcp-registre-antenna.md](SPEC-mcp-registre-antenna.md)) :
-  `antenna_lire` (conception, résultats, courbe, balayage, audit avec ses cartes, réglages
-  modifiables, carte importée) et `antenna_vue` (2D/3D, maillage, onglet de résultats, point
+  `antenna_lire` (conception, résultats, courbe, balayage, audit avec ses corrections, réglages,
+  carte importée) et `antenna_vue` (2D/3D, maillage, onglet de résultats, point
   de balayage, étape, panneau ; capture de la carte, de la 3D ou des courbes). Rien n'est
-  écrit, aucune préférence, jamais de calcul lancé : les écritures restent
-  `antenna_proposer`. Lectures de la page : `WEB_ANTENNA/js/29-lecture-antenna.js`.
+  écrit, aucune préférence, jamais de calcul lancé : écrire se fait par des gestes. Lectures de la page : `WEB_ANTENNA/js/29-lecture-antenna.js`.
 - Routage (`mcp_routage.py`, voir [SPEC-mcp-routage.md](SPEC-mcp-routage.md)) : `cao_router` (routes
   par points de passage, changement de couche par via, vias seules ; 20 routes par carte),
-  `cao_paire` (paire différentielle déclarée), `cao_placement_auto` (forces, satellites, blocs)
-  et `cao_score` (routage, placement). `cao_pcb_lire` donne aussi `liaisons` et `zone` pour
+  `cao_paire` (paire différentielle déclarée) et `cao_score` (routage, placement). `cao_pcb_lire` donne aussi `liaisons` et `zone` pour
   préparer les points ; `cao_chemin` (module chemin-auto, `40-chemin-auto.js`) les propose,
   par un chercheur A* sur grille, sans rien écrire (une paire aussi, vias de paire comprises). La page joue le lot puis le défait, montre un aperçu en pointillés et,
   au clic, charge le résultat vu en une étape Ctrl+Z. Une route bloquée ne laisse rien.
@@ -240,13 +224,8 @@ Outils MCP (`etat` dans `mcp_web_suite.py`, les autres dans `mcp_api_outils.py`,
 - Composants de la LIB (`mcp_composants.py`, voir [SPEC-mcp-composants.md](SPEC-mcp-composants.md)),
   dans la page Gestion LIB ouverte : `lib_empreinte_generer` (IPC-7351B : chip, SOT, SOIC,
   TSSOP, MSOP, QFN, DFN, DIP, barrette), `lib_empreinte_verifier`, `lib_kicad_convertir`
-  (kicad_mod de 200 Ko au plus) et `lib_brochage_verifier` calculent sans rien écrire ;
-  `lib_composant_creer` montre une carte avec l'aperçu de l'empreinte et n'écrit qu'au
-  clic, même interrupteur allumé : l'empreinte neuve (jamais d'écrasement) puis une ligne
-  ajoutée au catalogue, sans réécrire les autres. Pas d'annulation par la carte.
-  `lib_simulation_lier` fait de même pour un modèle de simulation (Touchstone avec la patte
-  de chaque port et la masse, ou SPICE, 4 Mo au plus) : rangé dans lib_simulation, puis
-  ajouté à la case « Modèle Simulation » de la référence ; seule cette case est réécrite.
+  (kicad_mod de 200 Ko au plus) et `lib_brochage_verifier` calculent sans rien écrire ; la LIB
+  s'écrit à l'interface de Gestion LIB.
   Code de page : `WEB_CAO/gestion-lib/js/08-pilote-lib.js`, `WEB_CAO/commun/composants-lib.js`.
 
 **L'ancien assistant IA.** Les assistants IA intégrés aux pages de WEB_CAO

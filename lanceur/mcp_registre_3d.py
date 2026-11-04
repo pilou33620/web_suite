@@ -16,7 +16,6 @@ ACTIONS = ("masquer", "afficher", "isoler", "tout_afficher", "selectionner")
 QUOI = ("dimensions", "distance", "faces")
 REF = re.compile(r"^[^\x00-\x1f]{1,200}$")      # uuid, chemin « 0/3/1 », ou nom unique
 MM = 1e6                                          # mm : au-delà, la vue casse (positions infinies)
-DEGRES = 3600
 
 
 def refuser(texte):
@@ -35,12 +34,6 @@ def nombre(v, nom, mini=None, maxi=None):
         refuser("Argument « %s » invalide : nombre fini%s." % (
             nom, "" if mini is None else " entre %s et %s" % (mini, maxi)))
     return v
-
-
-def vecteur(v, nom, borne=MM):
-    if not isinstance(v, list) or len(v) != 3:
-        refuser("Argument « %s » invalide : trois nombres [x, y, z]." % nom)
-    return [nombre(x, nom, -borne, borne) for x in v]
 
 
 def booleen(a, nom):
@@ -163,38 +156,8 @@ def web3d_ouvrir(a):
     return envoyer("web3d_ouvrir", {"chemins": chemins, "ajout": booleen(a, "ajout")}, True, a)
 
 
-def web3d_deplacer(a):
-    args = {"fichier": index(a.get("fichier"), "fichier")}
-    for k in ("position", "translation", "rotation_deg"):
-        if a.get(k) is not None:
-            args[k] = vecteur(a[k], k, DEGRES if k == "rotation_deg" else MM)
-    if booleen(a, "origine"):
-        args["origine"] = True
-    if a.get("contrainte") is not None:
-        c = a["contrainte"]
-        if not isinstance(c, dict) or not isinstance(c.get("mobile"), dict) or not isinstance(c.get("fixe"), dict):
-            refuser("contrainte : {\"mobile\": {piece, face}, \"fixe\": {piece, face}, \"decalage\": mm}.")
-        args["contrainte"] = {k: {"piece": ref(c[k].get("piece")), "face": index(c[k].get("face"), k + ".face")}
-                              for k in ("mobile", "fixe")}
-        args["contrainte"]["decalage"] = nombre(c.get("decalage", 0), "decalage", -MM, MM)
-    if len(args) == 1:
-        refuser("Rien à faire : position, translation, rotation_deg, origine ou contrainte.")
-    return envoyer("web3d_deplacer", args, True, a)
-
-
-def web3d_ranger_step(a):
-    args = {"piece": ref(a.get("piece"))}
-    if a.get("nom") is not None:
-        nom = a["nom"]
-        if not isinstance(nom, str) or not re.match(r"^[\w .()+-]{1,100}$", nom):
-            refuser("Argument « nom » invalide : un nom de fichier simple (sans dossier).")
-        args["nom"] = nom
-    return envoyer("web3d_ranger_step", args, True, a)
-
-
 ONGLET = pilote.ONGLET
 REF_DOC = {"type": "string", "description": "Pièce : uuid ou chemin (0/3/1) rendus par web3d_scene ; un nom seulement s'il est unique."}
-VEC = {"type": "array", "items": {"type": "number"}, "minItems": 3, "maxItems": 3}
 CARTE = (" Carte dans la page : rien ne change avant le clic de l'utilisateur (sauf interrupteur allumé) ; "
          "l'appel attend jusqu'à 2 min, puis rend « en_attente » (pilote_suivre).")
 
@@ -257,26 +220,6 @@ OUTILS_3D = {
             "chemins": {"type": "array", "items": {"type": "string"}}, "ajout": {"type": "boolean"}, "onglet": ONGLET},
             "required": ["chemins"]},
         "fn": web3d_ouvrir,
-    },
-    "web3d_deplacer": {
-        "description": "Déplace un fichier de l'assemblage (index de web3d_scene) : position absolue, translation, "
-                       "rotation_deg absolue (autour du centre de sa boîte), origine, ou contrainte face plane contre "
-                       "face plane (décalage) / axe contre axe, faces désignées par leur index. Annulable." + CARTE,
-        "inputSchema": {"type": "object", "properties": {
-            "fichier": {"type": "integer"}, "position": VEC, "translation": VEC, "rotation_deg": VEC,
-            "origine": {"type": "boolean"},
-            "contrainte": {"type": "object", "description": "{\"mobile\": {\"piece\", \"face\"}, \"fixe\": {\"piece\", \"face\"}, \"decalage\": mm}"},
-            "onglet": ONGLET}, "required": ["fichier"]},
-        "fn": web3d_deplacer,
-    },
-    "web3d_ranger_step": {
-        "description": "Extrait le STEP d'une pièce (du STEP d'origine, positions d'origine) et le range dans "
-                       "PROJETS/3D sans jamais écraser (un nom pris devient « x (2) ») ; non annulable par la page."
-                       + CARTE,
-        "inputSchema": {"type": "object", "properties": {
-            "piece": REF_DOC, "nom": {"type": "string", "description": "Nom du fichier, sans dossier"},
-            "onglet": ONGLET}, "required": ["piece"]},
-        "fn": web3d_ranger_step,
     },
 }
 

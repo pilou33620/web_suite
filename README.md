@@ -145,12 +145,12 @@ système 64 bits) : pas besoin de `claude mcp add` pour cela.
 - Le serveur MCP n'appelle que `127.0.0.1` et refuse `/api/github`, `/api/envoyer`,
   `/api/identite`, `/api/ia` et `/api/appairer`, et ne fait que lire le lanceur : Claude ne
   publie rien sur GitHub, ne touche pas à la clé d'IA et ne lance ni n'arrête rien.
-  Il n'écrit dans les projets et la LIB qu'avec garde-fous : un document n'est modifié
-  qu'avec contrôle de conflit, un profil ou un fichier de LIB existant n'est jamais écrasé,
-  rien n'est supprimé ; il ne lance aucun calcul openEMS.
-- Dans les pages ouvertes, une écriture de Claude s'affiche en carte dans le panneau
-  « Claude » et n'est appliquée qu'à ton clic (sauf case « Appliquer directement » cochée
-  dans l'onglet, décochée à chaque chargement). Seul le MCP de ce poste peut donner des
+  Il ne fait que ce que tu peux faire à l'interface : il écrit dans une page par des gestes
+  (clic, saisie, touche, souris), et ne lance aucun calcul openEMS. Seuls le routage, les paires,
+  le dessin du schéma et l'ouverture d'un fichier 3D restent des outils qui écrivent.
+- Dans les pages ouvertes, chaque écriture de Claude (une carte par geste) s'affiche dans le
+  panneau « Claude » et n'est appliquée qu'à ton clic (sauf case « Appliquer directement » cochée
+  dans l'onglet, décochée à chaque chargement, utile pour enchaîner). Seul le MCP de ce poste peut donner des
   ordres aux pages ; une page d'un autre site est refusée.
 
 ## Divers

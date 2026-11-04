@@ -71,8 +71,8 @@ OUTILS_ANTENNA = {
                        "(le résumé de l'assistant : carte, empilage, bande, ports, boîte, maillage, motif et cotes, "
                        "chiffrage du serveur), resultats (f0, S11, Z, bande à -10 dB, Dmax, couplages), courbe "
                        "(grandeur s11, s21, z ou roe ; 200 points au plus), balayage (tableau du balayage fini), "
-                       "audit (contrôles hors ligne, chacun avec une carte prête pour antenna_proposer), reglages "
-                       "(chemins modifiables par antenna_proposer : valeur, unité, bornes, choix), et pour la carte "
+                       "audit (contrôles hors ligne, chacun avec la correction proposée), reglages "
+                       "(réglages de l'assistant : chemin, valeur, unité, bornes, choix), et pour la carte "
                        "importée composants, composant, nets, net. Ne modifie rien, ne lance aucun calcul."
                        + pilote.DONNEES,
         "inputSchema": {"type": "object", "required": ["quoi"], "properties": {

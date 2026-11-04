@@ -30,7 +30,7 @@ et `WEB_ANTENNA@24ba852f80ac21d0efc97a997d08ffe6f8f72c9e`, avant le retrait de G
 | C7 | WEB_CAO/commun/ia-assistant.js:1774 | Rôle : « ingénieur électronicien d'élite » | écartée : rôle de Gemini, sans objet pour Claude Code |
 | C8 | WEB_CAO/commun/ia-assistant.js:1776 | Répondre exclusivement en français, sans méta-commentaire anglais | écartée : propre à Gemma ; Claude Code suit la langue de l'utilisateur |
 | C9 | WEB_CAO/commun/ia-assistant.js:1778 | Valeurs calculées (composants, largeur de piste) : toujours proposer de les appliquer | pcb.md |
-| C10 | WEB_CAO/commun/ia-assistant.js:1779 | Blocs ```action schema_values et pcb_track_width | écartée : remplacés par les outils `cao_valeur_composant`, `cao_composants_ecrire` et `cao_pistes_ecrire` |
+| C10 | WEB_CAO/commun/ia-assistant.js:1779 | Blocs ```action schema_values et pcb_track_width | écartée : remplacés par les gestes de l'interface (pilote_interface, décision du 2026-11-04) |
 | C11 | WEB_CAO/commun/ia-assistant.js:1798 | Datasheet → simulation : ne relever que des valeurs écrites dans le document | simulation.md |
 | C12 | WEB_CAO/commun/ia-assistant.js:1799 | Pire cas : courants et tco au max, temps de montée au min, tsu/th au min exigé ; conditions les plus proches du projet | simulation.md |
 | C13 | WEB_CAO/commun/ia-assistant.js:1800 | Pour chaque valeur : page et citation exacte | simulation.md |
@@ -38,7 +38,7 @@ et `WEB_ANTENNA@24ba852f80ac21d0efc97a997d08ffe6f8f72c9e`, avant le retrait de G
 | C15 | WEB_CAO/commun/ia-assistant.js:1802 | Convertir dans l'unité exacte du catalogue (12,5 mA pour pdn_fiche.iActifMa) | simulation.md |
 | C16 | WEB_CAO/commun/ia-assistant.js:1803 | Bonne cible : pdn_fiche = charge du rail ; une datasheet de régulateur règle pdn.rVrmMOhm et pdn.fVrmKhz | simulation.md |
 | C17 | WEB_CAO/commun/ia-assistant.js:1804 | Répondre d'abord par un tableau court (paramètre, valeur, page, citation), avec une confiance | simulation.md |
-| C18 | WEB_CAO/commun/ia-assistant.js:1806 | Bloc sim_params (valeurs, condensateurs ESR/ESL, bornes_dc) | écartée : remplacé par l'outil `cao_sim_ecrire` pour les groupes pdn_fiche, pdn, si, bus, dc ; condensateurs et bornes_dc aussi, par une « cible » (21/10/2026) |
+| C18 | WEB_CAO/commun/ia-assistant.js:1806 | Bloc sim_params (valeurs, condensateurs ESR/ESL, bornes_dc) | écartée : remplacé par les gestes dans les champs du panneau de simulation ; bornes_dc dans l'onglet Chute DC ; condensateurs sans champ (décision du 2026-11-04) |
 | C19 | WEB_CAO/commun/ia-assistant.js:1811 | Le catalogue des paramètres réglables (clé, unité, bornes, valeur actuelle, où la lire) joint à la consigne | généré : cao_sim_lire (quoi=catalogue) |
 | C20 | WEB_CAO/commun/ia-assistant.js:253 | Le contexte n'est qu'un résumé : demander le détail avant de répondre, du plus ciblé au plus large ; ne jamais inventer une donnée qu'on peut lire | SKILL.md |
 | C21 | WEB_CAO/commun/ia-assistant.js:538 | Bus de pistes : skew acceptable à 100 MHz et plus, règle des 3W, diaphonie | pcb.md |
@@ -52,9 +52,9 @@ et `WEB_ANTENNA@24ba852f80ac21d0efc97a997d08ffe6f8f72c9e`, avant le retrait de G
 | L2 | WEB_CAO/gestion-lib/js/06-ia-lib.js:194 | Répondre en français | écartée : propre à Gemma ; Claude Code suit la langue de l'utilisateur |
 | L3 | WEB_CAO/gestion-lib/js/06-ia-lib.js:195 | pcbfp-1 : mm, vue de dessus, origine au centre du corps, y vers le bas, broche 1 en haut à gauche, sens antihoraire | composants.md |
 | L4 | WEB_CAO/gestion-lib/js/06-ia-lib.js:195 | Trous NPTH « holes » {x, y, d} (oblong : w, rot) ; perçage oblong « slot » ; les garder en corrigeant une empreinte | composants.md |
-| L5 | WEB_CAO/gestion-lib/js/06-ia-lib.js:196 | Bloc ```action:pcb | écartée : remplacé par les outils `lib_empreinte_verifier` et `lib_composant_creer` |
+| L5 | WEB_CAO/gestion-lib/js/06-ia-lib.js:196 | Bloc ```action:pcb | écartée : remplacé par l'outil `lib_empreinte_verifier` et les gestes de Gestion LIB (décision du 2026-11-04) |
 | L6 | WEB_CAO/gestion-lib/js/06-ia-lib.js:213 | Symbole schsym-1, bloc ```action:sch | écartée : décision du module composants (symbole intégré + brochage, pas de schsym-1) |
-| L7 | WEB_CAO/gestion-lib/js/06-ia-lib.js:235 | Ligne de catalogue, bloc ```action:comp | écartée : remplacé par l'outil `lib_composant_creer` |
+| L7 | WEB_CAO/gestion-lib/js/06-ia-lib.js:235 | Ligne de catalogue, bloc ```action:comp | écartée : remplacé par les gestes de Gestion LIB (décision du 2026-11-04) |
 | L8 | WEB_CAO/gestion-lib/js/06-ia-lib.js:249 | Brochage : NOM=patte, virgules, jamais « ; » ; noms des broches des symboles ; parties A:…\|B:…, « *: » ; NC=5/6 ; OUT=2/4 ; exemples AMS1117, MCP6001 | composants.md |
 | L9 | WEB_CAO/gestion-lib/js/06-ia-lib.js:251 | Être direct ; expliquer brièvement les cotes choisies (pas, pastilles) | composants.md |
 | A1 | WEB_ANTENNA/js/30-ia.js:1581 | Rôle : ingénieur antennes de l'outil | écartée : rôle de Gemini, sans objet pour Claude Code |

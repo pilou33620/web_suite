@@ -13,11 +13,12 @@ erreurs en cours. Ne jamais supposer une épaisseur de cuivre ou un empilage : i
   à comparer à une température absolue : Tg du stratifié, limite d'un boîtier.
 - Ne pas recopier une valeur de charte comme un fait. Calculer avec la page :
   `cao_calcul` (analyse=dc) résout la chute de tension et l'échauffement par étalement.
-- Appliquer : `cao_pistes_ecrire` (largeur d'un net), ou mieux une classe de nets
-  (`cao_classes_ecrire`), pour que les pistes futures la suivent. Changer une classe ne
-  touche pas les pistes déjà posées : les réaligner ensuite (`cao_pistes_ecrire`, realigner).
-- Un calcul de largeur se termine par une proposition d'application (une carte), jamais par
-  un chiffre laissé à reporter à la main.
+- Appliquer : sur une piste sélectionnée, `#tW` (Largeur) puis `#tAll` (Largeur au net), ou mieux
+  une classe de nets (Outils `#bRules`, page Classes), pour que les pistes futures la suivent.
+  Changer une classe ne touche pas les pistes déjà posées : `#clsApply` (Recaler le routage
+  posé) les réaligne.
+- Un calcul de largeur se termine par son application à l'interface, jamais par un chiffre
+  laissé à reporter à la main.
 
 ## Classes et isolations
 
@@ -37,7 +38,9 @@ règles de leur famille (Rapide ou Lent) et portent l'impédance différentielle
 norme : 90 Ω (USB), 100 Ω (Ethernet, LVDS), 120 Ω (CAN, RS-485).
 
 Ce sont des points de départ : la classe réelle se lit (`cao_pcb_lire` (quoi=classes)) et se
-règle par `cao_classes_ecrire` (créer, modifier, rattacher des nets).
+règle à l'interface : Outils `#bRules`, page Classes (`#reCls`, `#clsW`, `#clsClr`, `#clsVia`,
+`#clsDrill`, `#clsNew`, `#clsDel`) ; un net se rattache par `select.netcls` (liste des nets) ou
+`#tC` (piste sélectionnée). Largeur par couche : `#bContraintes`, onglet Classes.
 
 ## Paires différentielles
 
@@ -45,8 +48,9 @@ règle par `cao_classes_ecrire` (créer, modifier, rattacher des nets).
   datasheet ou la norme du lien la donne.
 - La règle de paire d'usine ne fixe pas d'impédance : largeur 0,15 / 0,2 / 0,4 mm
   (min / préférée / max), écart 0,13 / 0,15 / 0,4 mm, 12,7 mm au plus de longueur non
-  couplée. Pour une impédance visée : `cao_contraintes_ecrire` (action paire, impedance :
-  profil D90 pour l'USB, D100, D85 ou D120).
+  couplée. Pour une impédance visée : `#bRules`, page Règle et paires, `#dpImpOn` puis `#dpImp`
+  (profil D90 pour l'USB, D100, D85 ou D120) ; `#dpRuleNew` crée une règle, `#dpScope` la borne
+  à une paire. Contraintes de net (Z, longueurs, vias, couches) : `#bContraintes`, onglet Nets.
 - Vérifier l'impédance obtenue avec `cao_calcul` (analyse=diff), router la paire avec
   `cao_paire`.
 
@@ -76,8 +80,8 @@ chiffre l'échauffement obtenu.
 
 ## La boucle de vérification
 
-1. Proposer le lot (une carte, une étape Ctrl+Z).
-2. Après le clic : `cao_score` (quoi=routage), puis `cao_drc` pour le détail des erreurs
+1. Faire les gestes, ou proposer le lot de routage (une carte, une étape Ctrl+Z).
+2. Une fois appliqué : `cao_score` (quoi=routage), puis `cao_drc` pour le détail des erreurs
    (comme dans [routage.md](routage.md)).
 3. `cao_calcul` (analyse=verif) pour l'audit de la carte avant fabrication.
 4. Corriger ce qui reste, une cause à la fois.
@@ -85,27 +89,33 @@ chiffre l'échauffement obtenu.
 ## Contour, zones, sérigraphie, pastilles
 
 Ne jamais modifier l'état de la page (`S`) depuis la console : il n'entre pas dans
-l'historique, et Ctrl+Z se comporte mal ensuite. Chaque geste a sa commande, une carte et
-une étape d'historique :
+l'historique, et Ctrl+Z se comporte mal ensuite. Chaque geste de l'interface a sa carte et
+fait son étape d'historique :
 
-- Contour : `cao_contour_ecrire` (rectangle, disque — écrit en arcs au Gerber —, polygone).
-  Relire : `cao_pcb_lire` (quoi=carte). Fenêtres fraisées dans la carte : `cao_decoupes_ecrire`.
-- Zones de cuivre : `cao_zones_ecrire` (creer, modifier, supprimer ; forme « carte » pour un
-  plan pleine carte). Relire : `cao_pcb_lire` (quoi=zones), qui donne les id.
+- Contour : cliquer le contour, puis `#bpW`, `#bpH`, `#bpRect` (rectangle), `#bpDisque` (disque
+  inscrit dans L × H, écrit en arcs au Gerber), `#bpDraw` (redessiner) ; polygone : Placer `#mEdge`
+  (E), un clic par sommet. Relire : `cao_pcb_lire` (quoi=carte). Fenêtres fraisées dans la carte :
+  Placer `#mDecoupe` (Maj+E), `#bpCutOff` les retire toutes.
+- Zones de cuivre : Placer `#mZone` (Z), puis `#zmNet`, `#zmFull` pour un plan pleine carte ;
+  zone sélectionnée : `#zL`, `#zN`, `#zC` (liaison), `#zDel`. Relire : `cao_pcb_lire` (quoi=zones),
+  qui donne les id.
 - Plot thermique d'une LED de puissance, d'un QFN, d'un régulateur : liaison **directe** à
-  la zone, pas des bras thermiques. Soit la zone entière (`liaison` : cms-directe = directe
-  pour les CMS, bras pour les traversantes), soit la pastille seule
-  (`cao_pastille_regler`, liaison directe). Les bras restent l'usage pour une pastille
-  qu'on brase à la main ou une traversante.
-- Sérigraphie : `cao_serigraphie_ecrire` (texte, trait, rectangle ; repere pour éloigner un
-  repère d'une pastille ; auto pour couper la sérigraphie d'office). Les valeurs ne sont pas
-  imprimées. Relire : `cao_pcb_lire` (quoi=serigraphie).
+  la zone, pas des bras thermiques. Soit la zone entière (`#zC` : directe, ou directe pour
+  les CMS et bras pour les traversantes), soit la pastille seule (la cliquer, puis `#ppConn`).
+  Les bras restent l'usage pour une pastille qu'on brase à la main ou une traversante ; ils se
+  règlent par composant (`#pThW`, `#pThN`), le masque et la pâte par pastille (`#ppMask`, `#ppPaste`).
+- Sérigraphie : Placer `#mSilk` (Maj+S), puis `#smText`, `#smLine`, `#smRect` ; dessin sélectionné :
+  `#pDrwTxt`, `#pDrwDel`. Pour éloigner un repère d'une pastille : le cliquer, `#rtDx`, `#rtDy` ; pour
+  couper la sérigraphie d'office : `#pSilk`. Les valeurs ne sont pas imprimées.
+  Relire : `cao_pcb_lire` (quoi=serigraphie).
+- Empreinte : `#pRef`, `#pVal`, `#pPkg`, `#pSide`, `#pX`, `#pY`, `#pRot` dans Propriétés.
 - Une via seule (de couture, de plot thermique) : `cao_router` avec `vias` et sans `routes`.
 - Intégration mécanique (carte dans un boîtier, un bouchon, une face contre une LED) :
-  `cao_interdits_ecrire` — zones interdites par face (aucune patte traversante qui en
-  ressorte, composants sous une hauteur permise) et hauteur maximale par face. Une patte
+  Placer `#mInterdit`, puis `#ziNom`, `#ziFace`, `#ziH` : zones interdites par face (aucune
+  patte traversante qui en ressorte, composants sous une hauteur permise) ; hauteur maximale
+  par face : `#bpHD`, `#bpHB` dans les propriétés du contour. Une patte
   traversante ressort sur la face opposée à son composant. Relire : `cao_pcb_lire`
   (quoi=interdits) ; le DRC dit ce qui déborde.
-- Chaleur : donner à chaque composant qui dissipe sa puissance (`cao_composants_ecrire`, champ
-  puissance en W), puis `cao_thermique`. C'est un ordre de grandeur (±30 %) : pour faire
+- Chaleur : donner à chaque composant qui dissipe sa puissance (empreinte sélectionnée, `#pPuiss`,
+  en W), puis `cao_thermique`. C'est un ordre de grandeur (±30 %) : pour faire
   baisser ΔT, relier plus de cuivre (liaison directe du plot, zone, vias vers un plan).

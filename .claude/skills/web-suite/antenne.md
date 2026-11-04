@@ -7,13 +7,14 @@ Un projet vit dans PROJETS/ANTENNA/<projet>.
 La carte importée vient du PCB de WEB_CAO : une modification du cuivre se fait dans
 l'éditeur PCB de WEB_CAO, puis la carte se réexporte en IPC-2581 et se réimporte.
 
-## Lire, proposer, ne jamais lancer
+## Lire, modifier, ne jamais lancer
 
 - Lire : `antenna_lire` (quoi=conception) pour le résumé (carte, empilage, bande, ports,
   boîte, maillage, motif ouvert, cotes balayables, chiffrage) ; (quoi=resultats) pour f0,
   S11, Z, bande à −10 dB, Dmax ; (quoi=courbe) pour une courbe ; (quoi=audit) pour les
-  contrôles, chacun avec une carte prête.
-- Proposer : `antenna_proposer`, une carte que l'utilisateur clique.
+  contrôles, chacun avec sa correction proposée ; (quoi=reglages) pour les réglages, leurs unités,
+  bornes et choix.
+- Modifier : par les gestes de l'assistant (ci-dessous), une carte par geste.
 - openEMS ne se lance jamais par le MCP : `antenna_openems_chiffrer` vérifie et chiffre le modèle,
   `antenna_openems_suivre` en suit un que l'utilisateur a lancé.
 - Ne jamais inventer un chiffre du projet : s'il manque, le dire et dire où le lire.
@@ -49,38 +50,32 @@ l'éditeur PCB de WEB_CAO, puis la carte se réexporte en IPC-2581 et se réimpo
 - Résonance trop haute : allonger la cote résonante du même pourcentage environ
   (f ∝ 1/L au premier ordre). **Une seule cote à la fois.**
 
-## Les quatre cartes de `antenna_proposer`
+## Les quatre gestes de l'assistant
 
-Une carte par idée ; plusieurs cartes si plusieurs idées.
+Une idée à la fois.
 
-1. `{"type":"reglages","titre":…,"valeurs":{chemin: valeur}}` : bande, boîte, maillage,
-   arrêt, ports. **Seuls les chemins** que rend `antenna_lire` (quoi=reglages) sont acceptés
-   (avec leurs unités, bornes et choix) ; « port.X » vise le port en cours, « ports.0.X »
-   le premier ; les chemins « con.* » n'existent qu'en mode conception.
-2. `{"type":"cotes","motif":…,"valeurs":{…},"tracer":false}` : cotes du motif ouvert, en mm,
-   identifiants tels que la lecture conception les liste. « tracer » à vrai redessine le
-   motif : le dessin en cours est effacé et la bande remise à ±15 % ; à faux, seules la fiche
-   et son aperçu changent.
-3. `{"type":"balayage","titre":…,"source":…,"min":…,"max":…,"pas":…}` : arme un balayage
-   (jamais lancé) sur une des cotes balayables listées par la lecture conception, recopiée à
-   la lettre ; s'il n'y en a aucune, pas de balayage. 40 points au plus.
-4. `{"type":"formes",…}` : de la géométrie libre en mode conception, par exemple :
-   ```json
-   {"type":"formes","titre":"Patch à coins coupés","carte":{"L":40,"W":45},"remplacer":true,
-    "elements":[{"type":"rect","couche":"bas","net":"GND","x1":0,"y1":0,"x2":40,"y2":45},
-                {"type":"poly","couche":"haut","net":"ANTENNE","pts":[[8,12],[30,12],[32,14],[32,36],[10,36],[8,34]]},
-                {"type":"piste","couche":"haut","net":"ANTENNE","pts":[[20,0],[20,12]],"w":3.06}],
-    "port":{"x":20,"y":0.4,"w":3.06,"l":0.8}}
-   ```
+1. Réglages (`#bAssistant`) : bande `#antF1`, `#antF2`, `#antUF`, `#antFc`, `#antN` ; boîte `#antMx`,
+   `#antMy`, `#antMzh`, `#antMzb`, `#antPml` ; maillage `#antRa`, `#antRd`, `#antTiers` ; arrêt `#antEn`,
+   `#antNmax` ; ports `#bPortPlus`, `#antPtype`, `#antPx`, `#antPy`, `#antPde`, `#antPa`, `#antPdir`,
+   `#antPw`, `#antPl`, `#antPR`. Les valeurs, unités, bornes et choix sont ceux que rend `antenna_lire`
+   (quoi=reglages) ; « port.X » y vise le port en cours, « ports.0.X » le premier ; les chemins
+   « con.* » n'existent qu'en mode conception.
+2. Cotes du motif (`#bConcevoir`) : choisir le motif `[data-con-gabarit]`, saisir `[data-con-cote]`
+   (en mm, identifiants tels que la lecture conception les liste). « Dessiner ce motif » le
+   redessine : le dessin en cours est effacé et la bande remise à ±15 % ; sans ce bouton, seules
+   la fiche et son aperçu changent.
+3. Balayage (étape « Le calcul ») : `#antBalOn` arme (jamais lancé), `#antBalSrc` choisit une des cotes
+   balayables de la lecture conception, `#antBalMin`, `#antBalMax`, `#antBalPas` ; s'il n'y en a aucune,
+   pas de balayage. 40 points au plus. `#bBalLancer` reste à l'utilisateur.
+4. Géométrie libre, en mode conception : outils `[data-con-outil]` (Rectangle, Piste, Polygone,
+   Disque, Via), à la souris sur le canevas (pixels de `pilote_capture`) ; une forme posée se
+   corrige par `[data-con-el]`, se retire par `[data-con-el-suppr]`.
    - mm, origine au coin de la carte, x de 0 à L, y de 0 à W ;
-   - « couche » : haut, bas, ou le nom exact d'une couche ;
-   - genres et champs : rect (x1, y1, x2, y2), disque (cx, cy, r), poly (pts, trois sommets
-     au moins), piste (pts, w), via (x, y, d) ; « trou » à vrai fait une découpe (rect,
-     disque, poly) ;
-   - « carte » et « port » sont facultatifs, mais sans port rien ne se simule ;
-     « remplacer » à vrai efface le dessin en cours ;
-   - une forme entièrement hors de la carte est refusée ; le nombre de formes et de sommets
-     est plafonné (la page refuse au-delà).
+   - rectangle (x1, y1, x2, y2), disque (cx, cy, r), polygone (trois sommets au moins), piste
+     (points, largeur), via (x, y, d) ; une forme peut être une découpe ;
+   - sans port rien ne se simule ;
+   - une forme entièrement hors de la carte n'a pas de sens ; le nombre de formes et de sommets
+     est plafonné.
 
 ## Motif ou géométrie libre
 

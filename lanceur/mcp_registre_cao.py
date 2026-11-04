@@ -156,7 +156,7 @@ OUTILS_CAO = {
     "cao_sim_lire": {
         "description": "Lit les simulations de la page PCB ou de la visionneuse : simulations (analyses, celles qui ont un "
                        "résultat, chiffres clés), simulation (une partie du rapport d'une analyse ; commence par chiffres "
-                       "et diagnostics), catalogue (paramètres réglables par cao_sim_ecrire : groupe.clé, unité ou "
+                       "et diagnostics), catalogue (paramètres réglables au panneau de simulation : groupe.clé, unité ou "
                        "choix, valeur actuelle, où la lire dans une datasheet). Le rapport complet n'existe que pour "
                        "l'analyse affichée : afficher=true y passe le panneau. cao_calcul lance un calcul." + DONNEES,
         "inputSchema": {"type": "object", "required": ["quoi"], "properties": {
@@ -182,8 +182,8 @@ OUTILS_CAO = {
         "fn": cao_vue,
     },
     "cao_thermique": {
-        "description": "Estime l'échauffement des composants du PCB ouvert qui dissipent (puissance réglée par "
-                       "cao_composants_ecrire, champ puissance en W) : le cuivre relié à leurs pastilles (îlots de zone "
+        "description": "Estime l'échauffement des composants du PCB ouvert qui dissipent (champ puissance en W de "
+                       "l'inspecteur de l'empreinte) : le cuivre relié à leurs pastilles (îlots de zone "
                        "touchés par un cuivre réel, pistes de leurs nets) est mesuré par la page, puis le modèle "
                        "d'étalement de la chute DC (dc_solver) rend ΔT, la résistance thermique et ce qui est supposé. "
                        "Un ordre de grandeur (±30 %), pas une simulation. Le DRC signale ensuite ce qui dépasse "

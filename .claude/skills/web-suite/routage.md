@@ -15,9 +15,9 @@ passage donnés. Pour les règles électriques (largeurs, paires, retour), voir 
 
 ## Placer d'abord
 
-1. `cao_placement_auto` (methode=forces) dégrossit tout, découplages contre leur broche.
-2. (methode=satellites) range découplages et composants série contre leur circuit ;
-   (methode=blocs) agence un motif publié par le schéma.
+1. `#pAuto` (Placement auto, Propriétés sans rien de sélectionné) dégrossit tout, puis range
+   découplages et composants série contre leur circuit.
+2. Agencer un motif publié par le schéma : Outils `#bPlacementScore`, puis « 📐 Disposer » du bloc.
 3. `cao_score` (quoi=placement) : longueur des liaisons, congestion, découplage, pires
    contributeurs. Corriger les pires d'abord.
 
