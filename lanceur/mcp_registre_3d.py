@@ -92,7 +92,7 @@ def web3d_vue(a):
     if not capturer or vue.get("etat") != "finie":
         return vue
     # La capture du même onglet, dans la foulée : l'image et la vue en un appel
-    image = pilote.pilote_capture({"outil": "web_3d", "onglet": vue["onglet"]["id"]})
+    image = pilote.pilote_capture({"outil": "web_3d", "page": "3d", "onglet": vue["onglet"]["id"]})
     image["vue"] = vue.get("resultat")
     return image
 

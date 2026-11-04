@@ -11,7 +11,8 @@ description: Piloter WEB·SUITE (WEB_CAO schéma/PCB/LIB/simulations, WEB_ANTENN
   paires), bibliothèque LIB (Gestion LIB), visionneuse IPC-2581, simulations SI / PI / RF.
 - **WEB_ANTENNA** : antennes PCB simulées par openEMS (FDTD), à partir d'un export IPC-2581
   de WEB_CAO ou d'une carte dessinée sur place.
-- **WEB_3D** : visionneuse 3D (STEP, IGES, STL), mesures, assemblage.
+- **WEB_3D** : visionneuse 3D (STEP, IGES, STL), mesures, assemblage ; page de conception
+  de pièces paramétriques.
 - **PROJETS** : les projets et la LIB. Un projet WEB_CAO regroupe le schéma (-SCH), le
   circuit imprimé (-PCB) et la carte de fabrication (-IPC) dans PROJETS/CAO/<projet> ; la
   LIB, partagée par tous les projets, est PROJETS/LIB_CAO. Lancé depuis WEB·SUITE, ce qui
@@ -47,6 +48,7 @@ peut rendre.
 | Créer ou corriger un composant de la LIB | `lib_empreinte_generer`, `lib_kicad_convertir`, `lib_brochage_verifier` ; `#bNewComp`, `#bNewPcb`, `#inspBrochage`, `#bSave` | [composants.md](composants.md) |
 | Antenne | `antenna_lire`, `antenna_openems_chiffrer` ; champs de l'assistant `#bAssistant` | [antenne.md](antenne.md) |
 | 3D : scène, mesures, collisions, assemblage | `web3d_scene`, `web3d_mesurer`, `web3d_collisions`, `web3d_ouvrir` ; `#bDeplacer` (D), `#bExportPiece` puis `#bRangerPiece` (ranger le STEP d'une pièce) | — |
+| Concevoir ou modifier une pièce 3D | `savoir_lire` (fiche conception-3d) d'abord, à appliquer ; puis `pilote_interface_lire`, `pilote_interface` et `pilote_capture` sur la page conception (les outils `web3d_*` ne visent que la visionneuse) | conception-3d |
 
 ## Écrire
 

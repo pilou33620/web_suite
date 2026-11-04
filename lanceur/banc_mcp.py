@@ -909,8 +909,13 @@ verifier("aucun argument invalide n'atteint la page (composants)", FauxApi.recue
 
 
 # le skill servi par le MCP (hors du dépôt) : une liste fermée de fiches, rien d'autre
-verifier("savoir_lire : les fiches du skill", mcp.FICHES,
+verifier("savoir_lire : les fiches du skill", [f for f in mcp.FICHES if f != "conception-3d"],
          ["SKILL", "antenne", "composants", "pcb", "routage", "schema", "simulation"])
+if os.path.isfile(mcp.REGLES_3D):       # WEB_3D est un autre dépôt, absent de la CI de web_suite
+    erreur, texte = outil("savoir_lire", fiche="conception-3d")
+    verifier("savoir_lire conception-3d : le fichier de WEB_3D", (erreur, "RÈGLES DE CONCEPTION" in texte), (False, True))
+else:
+    verifier("savoir_lire conception-3d : refusée sans WEB_3D", outil("savoir_lire", fiche="conception-3d")[0], True)
 erreur, texte = outil("savoir_lire", fiche="pcb")
 verifier("savoir_lire pcb", (erreur, texte.startswith("# PCB")), (False, True))
 for f in ("../../README", "SKILL.md", "/etc/passwd", None):

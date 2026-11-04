@@ -12,9 +12,9 @@ from mcp_api_outils import exiger, facultatif, resumer, route
 
 ATTENTE = 130   # s : un peu plus que les 120 s pendant lesquelles pilote.py attend la page
 PAGES = {"web_cao": ["schema", "pcb", "visionneuse-ipc", "gestion-lib", "accueil"],
-         "web_antenna": ["antenna"], "web_3d": ["3d"]}
+         "web_antenna": ["antenna"], "web_3d": ["3d", "conception"]}
 # Pages qui ont un canevas : une capture sans onglet nommé ne vise qu'elles
-CAPTURABLES = {"web_cao": ["schema", "pcb", "visionneuse-ipc"], "web_antenna": ["antenna"], "web_3d": ["3d"]}
+CAPTURABLES = {"web_cao": ["schema", "pcb", "visionneuse-ipc"], "web_antenna": ["antenna"], "web_3d": ["3d", "conception"]}
 ANALYSES = ("impedance", "diff", "retour", "crosstalk", "oeil", "bus", "dc", "pdn", "s21", "verif")
 MAX_IMAGE = 2 * 1024 * 1024   # octets de PNG rendus à Claude
 PNG = "data:image/png;base64,"

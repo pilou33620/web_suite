@@ -251,6 +251,11 @@ résumé dans sa réponse `initialize` (`instructions`) et sert les fiches par l
 y sont suivies une à une dans [savoir-trace.md](savoir-trace.md), et `lanceur/banc_savoir.py`
 vérifie que ce que les fiches citent existe.
 
+Les règles de conception d'une pièce 3D sont un seul fichier, `WEB_3D/regles-conception.md` : `savoir_lire`
+le sert comme fiche `conception-3d`, et la page de conception le montre par son lien *Règles*, pour Claude in Chrome.
+Cette page est sur le canal de pilotage (page `conception`) : gestes et capture, comme les autres pages ; les outils
+`web3d_*` ne visent que la visionneuse.
+
 **Le panneau « Claude ».** Chaque page des outils a, en bas à droite, un bouton « Claude ».
 Une écriture proposée par Claude s'y affiche en carte, avant → après, avec Appliquer et
 Refuser : rien ne change avant le clic. La case « Appliquer directement (cet onglet) »
