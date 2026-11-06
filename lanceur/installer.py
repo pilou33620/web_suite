@@ -99,6 +99,10 @@ def installer(ids, racine, demander_dependances=True):
             print()
             if not outils.installer_dependances(o, racine, lambda t: print("  " + t)):
                 dependances_ok = False
+        elif o["dependances"] == "openems" and outils.openems_pret(o, racine) is None:
+            print()
+            print("  %s : openEMS ne s'installe tout seul que sous Windows. Ailleurs, voir son"
+                  " requirements.txt." % o["nom"])
         elif o["dependances"] == "openems" and not outils.openems_pret(o, racine):
             print()
             print("  %s démarre sans rien d'autre, mais ses simulations demandent openEMS." % o["nom"])

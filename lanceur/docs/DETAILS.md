@@ -44,7 +44,7 @@ télécharger d'un coup. Sans git, les outils sont téléchargés en zip.
 
 En mode réseau, le lanceur exige un jeton de tout appareil autre que le serveur.
 
-- L'appareil ouvre `http://<adresse>:8100/` et saisit le **code d'appairage** à 6 chiffres
+- L'appareil ouvre `https://<adresse>:8100/` (`http://` sans openssl) et saisit le **code d'appairage** à 6 chiffres
   affiché dans le terminal du serveur. Le bon code lui donne le jeton, rangé dans un cookie
   valable un an.
 - Le code sert une fois et vit 10 minutes ; 5 erreurs l'annulent avec une minute
@@ -64,7 +64,8 @@ En mode réseau, le lanceur exige un jeton de tout appareil autre que le serveur
 ## Mises à jour
 
 Chaque dépôt garde son propre git et se met à jour par `git pull --ff-only`. Si des
-fichiers sont modifiés, « des fichiers sont modifiés » s'affiche et rien n'est touché.
+fichiers sont modifiés, « des fichiers sont modifiés » s'affiche et le lanceur n'y touche pas ; un
+outil lancé ensuite refait sa propre vérification : `git stash`, mise à jour, `git stash pop`.
 
 - **WEB_SUITE** se vérifie avant d'ouvrir son serveur et redémarre seul s'il vient d'être
   mis à jour.
@@ -149,8 +150,8 @@ sur le serveur sans rien envoyer : une retouche de dernière minute ne fait pas 
   requêtes d'action sans l'en-tête `X-WebSuite`. Il refuse aussi tout en-tête `Host` qui
   n'est ni une adresse IP, ni `localhost`, ni le nom du poste (protection contre le DNS
   rebinding).
-- Les outils sont démarrés avec `--local --sans-navigateur` (sans `--local` en mode
-  réseau) sur leur port habituel (CAO 8000, ANTENNA 8732, 3D 8139) ou le suivant s'il est
+- Les outils sont démarrés avec `--local --sans-navigateur`, plus `--sans-pause` pour WEB_CAO et
+  WEB_3D (sans `--local` en mode réseau) sur leur port habituel (CAO 8000, ANTENNA 8732, 3D 8139) ou le suivant s'il est
   pris, avec `--projets` / `--lib` vers `PROJETS/`.
 - La page ne rejoue pas l'intro quand on recharge l'onglet ; le bouton **↻ Intro** la relance.
 - Fermer la fenêtre de WEB_SUITE (ou Ctrl+C) arrête les outils lancés depuis elle. Sous
@@ -203,7 +204,8 @@ Outils MCP (`etat` dans `mcp_web_suite.py`, les autres dans `mcp_api_outils.py`,
 - Pages WEB_CAO (`mcp_registre_cao.py`, voir [SPEC-mcp-registre-cao.md](SPEC-mcp-registre-cao.md)) :
   `cao_schema_lire` (feuilles, composants, composant, nets, net : tout le document),
   `cao_pcb_lire` (empilage, classes, composants, composant, nets, net, drc), `cao_ipc_lire`
-  (visionneuse), `cao_sim_lire` (simulations, une partie d'un rapport), `cao_vue` (cadrer,
+  (visionneuse), `cao_sim_lire` (simulations, une partie d'un rapport), `cao_thermique` (échauffement estimé des
+  composants), `cao_vue` (cadrer,
   surligner, feuille, couches, ajuster, capture), `cao_drc` (lance le DRC). Lectures et vue
   seulement : rien n'est écrit dans le projet. Les lectures sont celles de
   `WEB_CAO/commun/lecture-cao.js`, reprises de l'ancien assistant IA de la page. Seule exception : la visibilité des couches du PCB
@@ -259,15 +261,14 @@ contrôle des règles vérifiables (bouton Règles de l'onglet Inspecter), les a
 **Le panneau « Claude ».** Chaque page des outils a, en bas à droite, un bouton « Claude ».
 Une écriture proposée par Claude s'y affiche en carte, avant → après, avec Appliquer et
 Refuser : rien ne change avant le clic. La case « Appliquer directement (cet onglet) »
-saute la carte, sauf pour la création de composants dans la LIB, qui attend toujours le
-clic ; elle est éteinte à chaque chargement de la page. Une écriture appliquée
+saute la carte ; elle est éteinte à chaque chargement de la page. Une écriture appliquée
 se défait par Ctrl+Z dans l'éditeur qui a un historique (schéma), sinon par le bouton
 Annuler de la carte, qui refuse si quelque chose a changé depuis. Un seul onglet par outil
 et par navigateur tient la connexion au serveur et relaie les autres.
 
 Au-delà de 100 Ko, une réponse devient un résumé (clés, tailles, extrait). Le MCP ne
-supprime rien, ne lance ni n'arrête aucun calcul (les calculs WEB_CAO passeront par la
-page, avec le module `canal-pilote`), n'ouvre ni ne ferme de projet ANTENNA, ne touche
+supprime rien, ne lance aucun calcul hors de la page (`cao_calcul` lance une analyse dans la page
+PCB ou la visionneuse, comme son bouton), n'ouvre ni ne ferme de projet ANTENNA, ne touche
 ni aux racines de projets ni au catalogue LIB entier.
 
 **Sur le poste des outils** (Linux, Pi) :
@@ -316,7 +317,13 @@ doit rendre `{"jsonrpc": "2.0", "id": 1, "result": {}}`.
   jeton du mode réseau (refus, cookie, poste local exempté), code d'appairage (usage
   unique, expiration, cinq erreurs puis pause).
 - `python lanceur/banc_termux.py` : faux `pkg` — `numpy` / `scipy` partent à
-  `pkg install`, rien à pip, un paquet introuvable après coup est signalé.
+  `pkg install`, rien à pip, un paquet introuvable après coup est signalé ; hors Termux, pip n'est
+  pas lancé si tout est là, un lancement à qui il manque un paquet lance l'installation, et aucune
+  question openEMS n'est posée hors Windows.
+- `python lanceur/connexion_github.py` : la connexion à GitHub au démarrage, sans réseau.
+- `python lanceur/appairage.py` : code, jeton et cookie partagés par les web tools.
+- `python lanceur/claude_pages.py` : le panneau « Claude » des pages et ses demandes passées à Claude Code.
+- `python lanceur/banc_traces_ia.py` : plus aucune trace de l'ancien assistant IA.
 - `python lanceur/banc_mcp.py` : serveur MCP en sous-processus — protocole (initialize,
   ping, erreurs), outil `etat` face à un faux WEB_CAO, routes `/api/github`, `/api/envoyer`,
   `/api/identite`, `/api/ia`, `/api/appairer` refusées et lanceur en lecture seule, sans

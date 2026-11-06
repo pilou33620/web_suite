@@ -7,6 +7,8 @@ ninja -> numpy), ce qui échoue. L'installateur doit passer par pkg. Ce banc jou
 Termux sur n'importe quel poste : un faux `pkg` dans le PATH note ses arguments,
 rien n'est installé. Affiche OK si tout passe.
 """
+import contextlib
+import io
 import os
 import stat
 import sys
@@ -14,6 +16,7 @@ import tempfile
 import time
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import installer  # noqa: E402
 import outils  # noqa: E402
 import web_suite  # noqa: E402
 
@@ -114,7 +117,18 @@ def main():
         assert lancees and lancees[0][1:4] == ["-m", "pip", "install"], lancees
         assert g.etats["web_cao"]["phase"] == "erreur", g.etats["web_cao"]
 
-    # 5. Termux : le lanceur sert les autres appareils (réseau, pas de navigateur).
+    # 5. Hors Windows, openEMS ne s'installe pas tout seul : aucune question à poser.
+    outils.installer = lambda o, racine, ecrire: True
+    outils.openems_pret = lambda o, racine: None
+
+    def question(_):
+        raise AssertionError("question openEMS posée hors Windows")
+    installer.oui = question
+    with contextlib.redirect_stdout(io.StringIO()) as sortie:
+        assert installer.installer(["web_antenna"], "/inexistant")
+    assert "que sous Windows" in sortie.getvalue(), sortie.getvalue()
+
+    # 6. Termux : le lanceur sert les autres appareils (réseau, pas de navigateur).
     assert web_suite.poste_serveur()
 
     print("OK")
