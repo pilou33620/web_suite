@@ -56,7 +56,7 @@ CATALOGUE = [
         "port": 8000,
         "entete": "X-WEB_CAO",           # en-tête maison exigé sur tout POST/PUT/DELETE (REGLES §2.3)
         "args": ["--local", "--sans-navigateur", "--sans-pause"],
-        # numpy / scipy : solveurs SI-PI, facultatifs, installables par pip.
+        # numpy / scipy : obligatoires, web_CAO.py ne démarre pas sans eux.
         "dependances": "pip",
     },
     {
@@ -345,26 +345,48 @@ def _installer_dependances_termux(req, ecrire):
                % (sys.executable, ", ".join(manquants)))
         ok = False
     ecrire("[OK] Dépendances installées." if ok
-           else "[!] Dépendances incomplètes : l'outil démarre quand même, "
-                "sans ses solveurs avancés.")
+           else "[!] Dépendances incomplètes : l'outil ne démarrera pas sans elles.")
     return ok
 
 
-def installer_dependances(outil, racine=RACINE_DEFAUT, ecrire=print):
-    """pip install -r requirements.txt de l'outil, pour ceux qui s'y prêtent.
+def modules_manquants(outil, racine=RACINE_DEFAUT):
+    """Paquets obligatoires de l'outil que la Python du lanceur ne sait pas importer.
 
-    Sous Termux, numpy et scipy passent par pkg (voir PAQUETS_TERMUX)."""
+    shortcut: le nom pip sert de nom d'import, à revoir si un paquet les distingue."""
+    req = os.path.join(dossier(outil, racine), "requirements.txt")
+    if outil["dependances"] != "pip" or not os.path.isfile(req):
+        return []
+    noms = sorted({nom for _, nom in lire_requirements(req) if nom})
+    return [nom for nom in noms if not _module_present(nom)]
+
+
+def installer_dependances(outil, racine=RACINE_DEFAUT, ecrire=print):
+    """Installe ce qui manque du requirements.txt de l'outil, pour ceux qui s'y prêtent.
+
+    Sous Termux, numpy et scipy passent par pkg (voir PAQUETS_TERMUX). Ailleurs, rien
+    n'est lancé si tout est là : sur Debian, pip refuse la Python du système
+    (externally-managed-environment) même quand apt a déjà tout installé."""
     req = os.path.join(dossier(outil, racine), "requirements.txt")
     if outil["dependances"] != "pip" or not os.path.isfile(req):
         return True
     if TERMUX:
         return _installer_dependances_termux(req, ecrire)
+    manquants = modules_manquants(outil, racine)
+    if not manquants:
+        ecrire("[OK] Dépendances déjà présentes.")
+        return True
     ecrire("pip install -r %s" % req)
-    code = subprocess.call([sys.executable, "-m", "pip", "install", "-r", req])
-    ecrire("[OK] Dépendances installées." if code == 0
-           else "[!] pip a échoué (code %d) : l'outil démarre quand même, "
-                "sans ses solveurs avancés." % code)
-    return code == 0
+    code = _executer([sys.executable, "-m", "pip", "install",
+                      "--disable-pip-version-check", "-r", req], ecrire)
+    if code == 0:
+        ecrire("[OK] Dépendances installées.")
+        return True
+    ecrire("[!] pip a échoué (code %d) : l'outil ne démarrera pas sans %s."
+           % (code, ", ".join(manquants)))
+    if not WINDOWS:
+        ecrire("    Sur Raspberry Pi ou Debian : sudo apt install %s"
+               % " ".join("python3-" + nom for nom in manquants))
+    return False
 
 
 # ---------------------------------------------------------------------------
@@ -811,7 +833,9 @@ class Gestionnaire:
         return statut in MAJ_FAITE and time.time() - quand < FRAICHEUR_MAJ
 
     def installer(self, oid):
-        return self._installer_en_fond(oid, installer, "Installé.")
+        def complet(o, racine, ecrire):
+            return installer(o, racine, ecrire) and installer_dependances(o, racine, ecrire)
+        return self._installer_en_fond(oid, complet, "Installé.")
 
     def installer_openems(self, oid):
         o = PAR_ID[oid]
@@ -850,6 +874,8 @@ class Gestionnaire:
         if self.etats[oid]["phase"] not in ("demarrage", "actif") and git_disponible():
             # La lib ou un projet a pu changer sur un autre PC depuis le démarrage.
             self._noter(oid, projets.tirer(self.racine))
+        # Hors du verrou : importer numpy et scipy prend une seconde sur un Pi.
+        manquants = modules_manquants(o, self.racine) if est_installe(o, self.racine) else []
         with self.verrou:
             e = self.etats[oid]
             self._actualiser(o, e)
@@ -858,6 +884,15 @@ class Gestionnaire:
             if not est_installe(o, self.racine):
                 e.update(phase="erreur", message="Outil non installé.")
                 return False
+        if manquants:    # une mise à jour peut les avoir rendus obligatoires
+            self._installer_en_fond(oid, installer_dependances,
+                                    "Dépendances installées : relancez l'outil.")
+            return False
+        with self.verrou:
+            e = self.etats[oid]
+            self._actualiser(o, e)
+            if e["phase"] in ("demarrage", "actif"):
+                return True
             port = port_libre(o["port"])
             args = [x for x in o["args"] if not (self.reseau and x == "--local")]
             deja_maj = self._maj_deja_faite(oid)

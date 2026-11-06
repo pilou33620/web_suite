@@ -11,6 +11,7 @@ import os
 import stat
 import sys
 import tempfile
+import time
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import outils  # noqa: E402
@@ -76,7 +77,44 @@ def main():
         assert not outils.installer_dependances(outils.PAR_ID["web_cao"], tmp, lignes.append)
         assert any("numpy" in l and "introuvable" in l for l in lignes), lignes
 
-    # 4. Termux : le lanceur sert les autres appareils (réseau, pas de navigateur).
+    # 4. Hors Termux : rien à faire si tout est là (pip refuserait la Python de Debian),
+    #    et un échec de pip est dit, avec la commande apt.
+    outils.TERMUX = False
+    with tempfile.TemporaryDirectory() as tmp:
+        os.makedirs(os.path.join(tmp, "WEB_CAO"))
+        with open(os.path.join(tmp, "WEB_CAO", "requirements.txt"), "w", encoding="utf-8") as f:
+            f.write(REQ)
+        cao = outils.PAR_ID["web_cao"]
+        lancees = []
+        outils._executer = lambda cmd, ecrire, cwd=None: lancees.append(cmd) or 1
+        outils._module_present = lambda nom: True
+        assert outils.modules_manquants(cao, tmp) == []
+        assert outils.installer_dependances(cao, tmp, lambda t: None) and not lancees
+        outils._module_present = lambda nom: nom != "scipy"
+        assert outils.modules_manquants(cao, tmp) == ["scipy"]
+        lignes = []
+        assert not outils.installer_dependances(cao, tmp, lignes.append) and lancees
+        assert any("ne démarrera pas" in l and "scipy" in l for l in lignes), lignes
+        if os.name != "nt":
+            assert any("apt install python3-scipy" in l for l in lignes), lignes
+
+        # Lancer un outil à qui il manque un paquet : pas de serveur, l'installation part.
+        with open(os.path.join(tmp, "WEB_CAO", "web_CAO.py"), "w", encoding="utf-8") as f:
+            f.write("")
+        outils.git_disponible = lambda: False
+        g = outils.Gestionnaire(tmp)
+        for evt in g.maj_finie.values():
+            evt.set()
+        del lancees[:]
+        assert g.lancer("web_cao") is False
+        for _ in range(100):
+            if g.etats["web_cao"]["phase"] != "installation":
+                break
+            time.sleep(0.05)
+        assert lancees and lancees[0][1:4] == ["-m", "pip", "install"], lancees
+        assert g.etats["web_cao"]["phase"] == "erreur", g.etats["web_cao"]
+
+    # 5. Termux : le lanceur sert les autres appareils (réseau, pas de navigateur).
     assert web_suite.poste_serveur()
 
     print("OK")

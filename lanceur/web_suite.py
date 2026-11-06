@@ -413,7 +413,7 @@ def ipv4_libre(port):
 
 
 def ouvrir_serveur(port, hote="127.0.0.1"):
-    # Réseau : double pile d'abord, IPv4 seule si IPv6 manque (Pyto, conteneurs)
+    # Réseau : double pile d'abord, IPv4 seule si IPv6 manque (conteneurs)
     piles = [(ServeurDoublePile, "::"), (Serveur, hote)] if hote == "0.0.0.0" else [(Serveur, hote)]
     for essai in range(port, port + 10):
         if hote == "0.0.0.0" and not ipv4_libre(essai):

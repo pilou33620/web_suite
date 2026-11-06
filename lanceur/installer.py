@@ -86,6 +86,7 @@ def oui(question):
 
 def installer(ids, racine, demander_dependances=True):
     installes = []
+    dependances_ok = True
     for oid in ids:
         o = outils.PAR_ID[oid]
         print()
@@ -96,10 +97,8 @@ def installer(ids, racine, demander_dependances=True):
     for o in installes:
         if o["dependances"] == "pip" and demander_dependances:
             print()
-            via = " par pkg (Termux)" if outils.TERMUX else ""
-            if oui("Installer les dépendances Python facultatives de %s "
-                   "(numpy, scipy : solveurs avancés)%s ?" % (o["nom"], via)):
-                outils.installer_dependances(o, racine, lambda t: print("  " + t))
+            if not outils.installer_dependances(o, racine, lambda t: print("  " + t)):
+                dependances_ok = False
         elif o["dependances"] == "openems" and not outils.openems_pret(o, racine):
             print()
             print("  %s démarre sans rien d'autre, mais ses simulations demandent openEMS." % o["nom"])
@@ -114,7 +113,7 @@ def installer(ids, racine, demander_dependances=True):
     if ids:
         print("  Terminé : %d outil(s) prêt(s)%s." % (
             len(installes), ", %d échec(s)" % echecs if echecs else ""))
-    return echecs == 0
+    return echecs == 0 and dependances_ok
 
 
 def main(argv=None):
@@ -125,7 +124,8 @@ def main(argv=None):
     ap.add_argument("--racine", default=outils.RACINE_DEFAUT,
                     help="dossier où cloner les outils (défaut : le dossier de WEB_SUITE)")
     ap.add_argument("--sans-dependances", action="store_true",
-                    help="ne pas proposer l'installation des dépendances (pip, openEMS)")
+                    help="ne pas installer les dépendances (numpy et scipy, sans lesquels WEB_CAO"
+                         " ne démarre pas) ni proposer openEMS")
     args = ap.parse_args(argv)
 
     if args.outils:

@@ -28,7 +28,8 @@ télécharger d'un coup. Sans git, les outils sont téléchargés en zip.
 
 ## Installation selon le système
 
-- **Linux / Raspberry Pi** : `sudo apt install python3 git`.
+- **Linux / Raspberry Pi** : `sudo apt install python3 git python3-numpy python3-scipy` (numpy et
+  scipy sont obligatoires pour WEB_CAO, et pip refuse la Python du système sur Debian).
 - **Termux** : l'installateur installe `numpy` / `scipy` par `pkg install python-numpy
   python-scipy` (paquets précompilés) au lieu de pip, qui n'a pas de roue Android et
   échouerait en tentant de les compiler. Lancer WEB_SUITE avec la `python` de Termux, hors

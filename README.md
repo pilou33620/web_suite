@@ -13,7 +13,7 @@ Lanceur de trois outils web, utilisables depuis n'importe quel appareil avec un 
 |---|---|
 | [**WEB_CAO**](https://github.com/pilou33620/WEB_CAO) | Schéma & routage PCB, bibliothèque, IPC-2581, simulation SI / PI / RF |
 | [**WEB_ANTENNA**](https://github.com/pilou33620/WEB_ANTENNA) | Simulation d'antennes RF (openEMS) |
-| [**WEB_3D**](https://github.com/pilou33620/WEB_3D) | Visionneuse 3D (STEP, IGES, STL…) avec mesure |
+| [**WEB_3D**](https://github.com/pilou33620/WEB_3D) | Visionneuse 3D (STEP, IGES, STL…) avec mesure, et conception de pièces |
 
 Une carte par outil : **Télécharger** s'il manque, **Lancer** s'il est là. Les projets sont
 dans `PROJETS/`, synchronisé avec GitHub. Détails complets : [lanceur/docs/DETAILS.md](lanceur/docs/DETAILS.md).
@@ -35,10 +35,13 @@ git clone https://github.com/pilou33620/WEB_SUITE.git WEB_TOOLS
 L'installateur demande quels outils télécharger (`1`, `1 3`, `4` = tous), ou directement :
 `python lanceur/installer.py cao 3d`.
 
-Dépendances des outils, proposées par l'installateur :
+Dépendances des outils :
 
-- **WEB_CAO** : `numpy`, `scipy` (facultatifs). Sous Termux, installés par `pkg`.
-- **WEB_ANTENNA** : openEMS, installé automatiquement sous Windows seulement
+- **WEB_CAO** : `numpy` et `scipy`, obligatoires : l'installateur les installe, et le lanceur
+  les installe aussi si un lancement les trouve absents. Sous Termux, ils passent par `pkg`. Sur
+  Raspberry Pi ou Debian, où `pip` refuse la Python du système :
+  `sudo apt install python3-numpy python3-scipy`.
+- **WEB_ANTENNA** : openEMS, dont l'installation automatique est proposée sous Windows seulement
   (nécessite Python 3.10 ou 3.11 64 bits). Ailleurs, voir `WEB_ANTENNA/requirements.txt`.
 - **WEB_3D** : aucune.
 
@@ -88,9 +91,13 @@ saisir sur https://github.com/login/device, depuis n'importe quel appareil.
 
 ## Mises à jour
 
-WEB_SUITE et les outils se mettent à jour au démarrage (`git pull --ff-only`), jamais
-par-dessus des fichiers modifiés. Le bilan s'affiche dans la page et dans le terminal.
-`--sans-maj` désactive tout.
+WEB_SUITE et les outils se mettent à jour au démarrage (`git pull --ff-only`). Le bilan
+s'affiche dans la page et dans le terminal. Si des fichiers sont modifiés, le lanceur n'y touche
+pas ; un outil lancé ensuite refait alors sa propre vérification : il met ses modifications de
+côté (`git stash`), se met à jour, puis les reprend (`git stash pop`). Il la refait aussi quand la
+dernière vérification date de plus de 10 minutes.
+`--sans-maj` : le lanceur ne vérifie ni lui-même ni les outils au démarrage, mais un outil lancé
+ensuite fait quand même sa propre vérification.
 
 ## Options
 
@@ -99,9 +106,10 @@ python lanceur/web_suite.py [--port 8100] [--racine DOSSIER] [--installer]
                     [--navigateur | --sans-navigateur] [--reseau | --local] [--sans-maj]
 ```
 
+- `--port` : port du lanceur (8100 par défaut, le suivant s'il est pris).
 - `--reseau` / `--local` : écouter sur le réseau local ou seulement sur ce poste.
 - `--navigateur` / `--sans-navigateur` : forcer ou empêcher l'ouverture du navigateur.
-- `--racine` : dossier des outils. `--installer` : menu de téléchargement seul.
+- `--racine` : dossier des outils et de `PROJETS/`. `--installer` : menu de téléchargement seul.
 - `?sans-intro` dans l'adresse saute l'animation.
 
 ## Claude Code (MCP)
@@ -127,7 +135,7 @@ Puis `/mcp` dans Claude Code. Windows, clé SSH, dépannage : [DETAILS](lanceur/
 « Claude » en bas à droite ouvre une zone « Demander à Claude ». Ce qu'on y écrit part au lanceur,
 qui le passe à Claude Code **de ce poste**, avec le MCP web_suite seul (ni terminal ni fichiers) ;
 la réponse s'affiche dans le panneau et les modifications arrivent en cartes. On peut joindre des
-fichiers (trombone, coller, glisser-déposer, bouton « Vue » pour l'image de l'onglet) : images,
+fichiers (bouton « Joindre », coller, glisser-déposer, bouton « Vue » pour l'image de l'onglet) : images,
 PDF, fichiers texte (md, json, KiCad, csv…), 10 fichiers et 20 Mo par demande. Un menu choisit le
 modèle (Opus, Sonnet, Haiku) et, à chaque ouverture, une ligne d'état dit si le lanceur et Claude
 Code sont prêts (sans requête au modèle). Il suffit que Claude
@@ -159,4 +167,8 @@ système 64 bits) : pas besoin de `claude mcp add` pour cela.
 - `python maj_git.py` : état git de WEB_SUITE, des outils et de `PROJETS/`, avec
   commit / pull / push guidés.
 - Tests : `python lanceur/projets.py`, `python lanceur/banc_serveur.py`,
-  `python lanceur/banc_termux.py` (affichent `OK`).
+  `python lanceur/connexion_github.py`, `python lanceur/banc_termux.py`,
+  `python lanceur/appairage.py`, `python lanceur/banc_mcp.py`, `python lanceur/pilote.py`,
+  `node lanceur/banc_pilote.js`, `python lanceur/claude_pages.py`, `python lanceur/banc_savoir.py`,
+  `python lanceur/banc_traces_ia.py` (affichent `OK` ; les deux derniers lisent aussi les dépôts
+  des outils). La CI les lance tous.
