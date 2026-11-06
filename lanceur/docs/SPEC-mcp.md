@@ -74,4 +74,4 @@ dans ce dossier. Les ids ne changent plus.
 - [x] `routage` : [SPEC-mcp-routage.md](SPEC-mcp-routage.md)
 - [x] `chemin-auto` : [SPEC-mcp-chemin-auto.md](SPEC-mcp-chemin-auto.md) (2026-10-21)
 - [x] `savoir-metier` : [SPEC-mcp-savoir-metier.md](SPEC-mcp-savoir-metier.md)
-- [x] `retrait-gemini` : [SPEC-mcp-retrait-gemini.md](SPEC-mcp-retrait-gemini.md)
+- [x] `retrait-gemini` : spec retirée une fois le travail fini, elle reste dans l'historique git

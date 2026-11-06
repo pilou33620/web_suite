@@ -237,8 +237,7 @@ Outils MCP (`etat` dans `mcp_web_suite.py`, les autres dans `mcp_api_outils.py`,
   Code de page : `WEB_CAO/gestion-lib/js/08-pilote-lib.js`, `WEB_CAO/commun/composants-lib.js`.
 
 **L'ancien assistant IA.** Les assistants IA intégrés aux pages de WEB_CAO
-(schéma, PCB, visionneuse, Gestion LIB) et de WEB_ANTENNA sont retirés (voir
-[SPEC-mcp-retrait-gemini.md](SPEC-mcp-retrait-gemini.md)) : Claude, par ce MCP, fait leur
+(schéma, PCB, visionneuse, Gestion LIB) et de WEB_ANTENNA sont retirés : Claude, par ce MCP, fait leur
 travail. Les deux serveurs n'ont plus de route de clé ; le MCP continue de refuser `/api/ia`.
 `lanceur/banc_traces_ia.py` vérifie en CI qu'il n'en reste aucune trace.
 

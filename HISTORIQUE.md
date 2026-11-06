@@ -9,6 +9,9 @@
 > Le 22/10/2026, les essais à faire (`TESTS-A-FAIRE.md` et les specs de `tasks/essais/`) ont été retirés : on ne s'occupe pour
 > l'instant que des fonctionnalités, les essais se feront plus tard et autrement. Ils restent
 > dans l'historique git, au commit `2154478`.
+>
+> Le 06/11/2026, `tasks/` (un plan et une todo par module) a été retiré : les renvois ci-dessous
+> se lisent dans l'historique git, au commit `e9e25a1`.
 
 ## Ce qui restait au 21/10/2026
 

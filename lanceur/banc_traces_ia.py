@@ -1,4 +1,4 @@
-"""Banc du module retrait-gemini (lanceur/docs/SPEC-mcp-retrait-gemini.md) : plus aucune trace
+"""Banc du module retrait-gemini : plus aucune trace
 active de l'ancien assistant IA (Gemini / Gemma) dans web_suite ni dans ses trois outils.
 
 Restent permis :
@@ -21,7 +21,7 @@ RACINE = os.path.dirname(ICI)
 TRACE = re.compile(r"generativelanguage|gemma|gemini|/api/ia/cle|ia-assistant|06-ia-lib|30-ia\.js"
                    r"|bIaAssistant|iaAfficherMenuContextuel|iaPanneau|tb-ia\b", re.I)
 PERMIS = {
-    "web_suite": (r"^lanceur/docs/(SPEC-|savoir-trace)", r"^tasks/", r"^lanceur/mcp_web_suite\.py$",
+    "web_suite": (r"^lanceur/docs/(SPEC-|savoir-trace)", r"^lanceur/mcp_web_suite\.py$",
                   r"^lanceur/banc_mcp\.py$", r"^lanceur/banc_savoir\.py$", r"^lanceur/banc_traces_ia\.py$", r"\.gitignore$"),
     "outil": (r"^tasks/", r"^graphify-out/", r"^python/test/banc-(serveur|lib-routes|serveur-routes)\.py$", r"\.gitignore$"),
 }
