@@ -271,6 +271,8 @@ function statutDe(o) {
 // lequel cette page a été ouverte (127.0.0.1 en local, l'IP du poste depuis
 // une tablette), seul le port change.
 function urlOutil(o) {
+  // Ouvert par le relais du launcher (Tailscale Funnel) : seuls les chemins /o/<id>/ sont joignables.
+  if (location.pathname.startsWith('/o/')) return `/o/${o.id}/`;
   const u = new URL(o.url);
   u.hostname = location.hostname;
   u.protocol = location.protocol;   // en réseau, les outils servent aussi HTTPS sur leur port
