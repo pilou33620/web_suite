@@ -597,6 +597,9 @@ def installer_openems(outil, racine=RACINE_DEFAUT, ecrire=print):
 def port_libre(depart, essais=20):
     for port in range(depart, depart + essais):
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+            # sinon un outil qu'on vient d'arrêter (TIME_WAIT) prend le port suivant ; pas sous Windows,
+            # où cette option laisserait deux serveurs partager un port
+            s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, os.name != "nt")
             try:
                 s.bind(("127.0.0.1", port))
                 return port
