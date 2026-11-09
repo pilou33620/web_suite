@@ -7,7 +7,14 @@ fichiers dans son dépôt.
 
 ## Bugs
 
-Aucun bug connu ouvert. Corrigé le 22/10/2026 : `pilote.py` refusait (403) les pages servies en
+- [ ] **`pilote.js` écrit sur un canal fermé en quittant la page** (relevé par web_bench le 09/11/2026) :
+  à chaque changement de page dans un outil (bouton Accueil, Éditeur PCB…), `annoncer()`
+  (`lanceur/pilote.js:153`) est encore appelé par un écouteur du document après `P.arreter()`,
+  qui a déjà fermé le `BroadcastChannel` → `InvalidStateError: Channel is closed`. Invisible pour
+  l'utilisateur, mais c'est une erreur JS à chaque navigation, dans les trois outils. Correctif à
+  faire dans l'original puis dans les trois copies (la CI exige qu'elles restent identiques).
+
+Avant le 09/11/2026 : aucun bug connu ouvert. Corrigé le 22/10/2026 : `pilote.py` refusait (403) les pages servies en
 HTTPS, donc toute page d'un autre appareil en mode réseau chiffré ; il accepte maintenant
 `https://<hôte>` comme `http://<hôte>`.
 
@@ -48,6 +55,13 @@ Décidées le 22/10/2026 : les quatre sont à coder, et sont faites. Chacune tou
 - [x] **Modèle et test de connexion dans le panneau « Claude »** (23/10/2026) : menu Opus, Sonnet,
   Haiku gardé par appareil ; ligne d'état à chaque ouverture (lanceur, Claude Code installé et
   connecté, sans requête au modèle) ; `claude.exe` de l'installeur Windows trouvé hors du PATH.
+
+- [x] **Banc d'essai web_bench** (09/11/2026) : `web_bench/`, lancé par `demarrer_web_bench.cmd`/`.sh`.
+  L'outil choisi (WEB_CAO, WEB_ANTENNA, WEB_3D) s'ouvre en entier dans la page, sur des dossiers
+  temporaires. Un clic-partout clique sur tous les boutons et relève les erreurs JS, réseau et
+  Python. Les scripts `banc-*` de l'outil se lancent depuis la page. Chaque rapport est écrit en
+  `.json` et en `.md` détaillé pour les corrections. GitHub, Claude Code et openEMS sont arrêtés
+  par le relais ([web_bench/README.md](web_bench/README.md)).
 
 ### Limites connues
 

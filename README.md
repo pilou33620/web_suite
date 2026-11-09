@@ -161,6 +161,16 @@ système 64 bits) : pas besoin de `claude mcp add` pour cela.
   dans l'onglet, décochée à chaque chargement, utile pour enchaîner). Seul le MCP de ce poste peut donner des
   ordres aux pages ; une page d'un autre site est refusée.
 
+## Banc d'essai (web_bench)
+
+`demarrer_web_bench.cmd` (Windows) ou `./demarrer_web_bench.sh` ouvre un banc d'essai visible.
+Il fonctionne pour les trois outils : l'outil choisi s'ouvre en entier dans la page, un
+**clic-partout** clique sur tous ses boutons et relève les erreurs JS, réseau et Python, et
+l'onglet **Bancs** lance ses scripts `banc-*`. L'outil tourne sur des dossiers temporaires :
+tes projets et ta LIB ne sont pas touchés, et rien ne part sur GitHub ni dans openEMS. Chaque
+rapport est gardé dans `web_bench/rapports/`, avec un `.md` détaillé à donner à Claude pour les
+corrections. Détails : [web_bench/README.md](web_bench/README.md).
+
 ## Divers
 
 - Journaux des outils : `lanceur/journaux/<outil>.log` (bouton **Journal**).
@@ -169,6 +179,6 @@ système 64 bits) : pas besoin de `claude mcp add` pour cela.
 - Tests : `python lanceur/projets.py`, `python lanceur/banc_serveur.py`,
   `python lanceur/connexion_github.py`, `python lanceur/banc_termux.py`,
   `python lanceur/appairage.py`, `python lanceur/banc_mcp.py`, `python lanceur/pilote.py`,
-  `node lanceur/banc_pilote.js`, `python lanceur/claude_pages.py`, `python lanceur/banc_savoir.py`,
+  `node lanceur/banc_pilote.js`, `python lanceur/claude_pages.py`, `python web_bench/banc_web_bench.py`, `python lanceur/banc_savoir.py`,
   `python lanceur/banc_traces_ia.py` (affichent `OK` ; les deux derniers lisent aussi les dépôts
   des outils). La CI les lance tous.

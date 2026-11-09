@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>web_bench</title>
+<link rel="stylesheet" href="/__banc/banc.css">
+</head>
+<body>
+<header>
+  <div class="marque">web<span>_</span>bench</div>
+  <label class="choix-page">Outil
+    <select id="outil"></select>
+  </label>
+  <div id="etat-outil" class="pastille">…</div>
+  <label class="choix-page">Page
+    <select id="page-cadre"></select>
+  </label>
+  <button id="b-recharger" title="Recharger la page de l'outil">Recharger</button>
+  <button id="b-redemarrer" title="Arrête l'outil et le relance avec des dossiers temporaires neufs">Redémarrer l'outil</button>
+  <div class="espace"></div>
+  <div id="compteurs"></div>
+</header>
+
+<main>
+  <section id="zone-outil">
+    <iframe id="cadre" title="Outil essayé"></iframe>
+    <div id="surlignage" hidden></div>
+  </section>
+
+  <aside>
+    <nav class="onglets">
+      <button data-onglet="clic" class="actif">Clic-partout</button>
+      <button data-onglet="bancs">Bancs</button>
+      <button data-onglet="rapports">Rapports</button>
+      <button data-onglet="journal">Journal</button>
+    </nav>
+
+    <!-- Clic-partout -->
+    <div class="volet actif" id="volet-clic">
+      <details open class="reglages">
+        <summary>Réglages</summary>
+        <div id="choix-pages" class="liste-cases"></div>
+        <div class="ligne">
+          <label>Clics max par page <input id="r-max" type="number" min="10" max="5000" value="300"></label>
+          <label>Pause entre clics <input id="r-delai" type="number" min="0" max="5000" step="50" value="150"> ms</label>
+        </div>
+        <label class="case"><input id="r-confirmer" type="checkbox"> Répondre « oui » aux confirmations (teste aussi ce qu'elles protègent)</label>
+        <label class="bloc"><span>Liste noire de <span class="nom-outil">l'outil</span> : boutons jamais cliqués (expression régulière sur le texte, l'id, le titre)</span>
+          <textarea id="r-noire" rows="3" spellcheck="false"></textarea>
+        </label>
+      </details>
+      <div class="commandes">
+        <button id="b-lancer" class="primaire">Lancer le clic-partout</button>
+        <button id="b-pause" disabled>Pause</button>
+        <button id="b-stop" disabled>Arrêter</button>
+      </div>
+      <div id="progression"></div>
+      <div class="filtres">
+        <button data-filtre="tous" class="actif">Tous</button>
+        <button data-filtre="erreur">Erreurs</button>
+        <button data-filtre="avert">Avertissements</button>
+        <button data-filtre="ignore">Ignorés</button>
+        <div class="espace"></div>
+        <button id="b-export" title="Télécharger le rapport en Markdown">Exporter .md</button>
+      </div>
+      <div id="resultats" class="tableau"></div>
+      <div id="detail" class="detail" hidden></div>
+    </div>
+
+    <!-- Bancs -->
+    <div class="volet" id="volet-bancs">
+      <p class="aide">Les scripts <code>banc-*</code> de <span class="nom-outil">l'outil</span>, lancés un par un côté serveur. Vert : le script a rendu 0. Cochés d'office : ceux que la CI de l'outil lance.</p>
+      <div class="commandes">
+        <button id="b-bancs-lancer" class="primaire">Lancer la sélection</button>
+        <button id="b-bancs-tous">Tout cocher</button>
+        <button id="b-bancs-stop">Arrêter</button>
+      </div>
+      <div id="bilan-bancs"></div>
+      <div id="liste-bancs" class="tableau"></div>
+      <pre id="sortie-banc" class="sortie" hidden></pre>
+    </div>
+
+    <!-- Rapports -->
+    <div class="volet" id="volet-rapports">
+      <p class="aide">Chaque clic-partout terminé ou arrêté est gardé dans <code>web_bench/rapports/</code>. Clique sur un rapport pour le recharger.</p>
+      <div id="liste-rapports" class="tableau"></div>
+    </div>
+
+    <!-- Journal -->
+    <div class="volet" id="volet-journal">
+      <p class="aide">Sortie du serveur <span class="nom-outil">de l'outil</span>. Les erreurs Python (Traceback) sont en rouge et comptent dans le clic-partout.</p>
+      <pre id="journal" class="sortie"></pre>
+    </div>
+  </aside>
+</main>
+<script src="/__banc/banc.js"></script>
+</body>
+</html>

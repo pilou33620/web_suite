@@ -32,3 +32,6 @@ Desktop.ini
 !.claude/skills/
 .claude/skills/*
 !.claude/skills/web-suite/
+
+# Rapports du banc d'essai (web_bench)
+web_bench/rapports/

@@ -32,6 +32,9 @@ jobs:
       - name: Serveur MCP — protocole, outil etat, publication GitHub et lanceur refusés
         run: python lanceur/banc_mcp.py
 
+      - name: Banc d'essai web_bench — relais, sonde, outils, routes arrêtées, bancs, rapports (faux outils)
+        run: python web_bench/banc_web_bench.py
+
       # Node 20 comme sur le Pi : BroadcastChannel et crypto y sont globaux, le banc s'en sert
       - uses: actions/setup-node@v4
         with:
@@ -42,6 +45,9 @@ jobs:
 
       - name: "Canal de pilotage — page (pilote.js : relais, cartes, interrupteur)"
         run: node lanceur/banc_pilote.js
+
+      - name: Banc d'essai web_bench — syntaxe de la page
+        run: node --check web_bench/page/banc.js && node --check web_bench/page/sonde.js
 
       - name: Claude depuis la page — le lanceur passe la demande à Claude Code (faux claude)
         run: python lanceur/claude_pages.py
