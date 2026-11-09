@@ -7,14 +7,11 @@ fichiers dans son dépôt.
 
 ## Bugs
 
-- [ ] **`pilote.js` écrit sur un canal fermé en quittant la page** (relevé par web_bench le 09/11/2026) :
-  à chaque changement de page dans un outil (bouton Accueil, Éditeur PCB…), `annoncer()`
-  (`lanceur/pilote.js:153`) est encore appelé par un écouteur du document après `P.arreter()`,
-  qui a déjà fermé le `BroadcastChannel` → `InvalidStateError: Channel is closed`. Invisible pour
-  l'utilisateur, mais c'est une erreur JS à chaque navigation, dans les trois outils. Correctif à
-  faire dans l'original puis dans les trois copies (la CI exige qu'elles restent identiques).
+- [x] **`pilote.js` écrivait sur un canal fermé en quittant la page** (relevé par web_bench, corrigé
+  le 09/11/2026, commit `3dc069e`) : après `P.arreter()` (pagehide), `annoncer()` et `livrer()` se
+  taisent ; copies mises à jour dans les trois outils.
 
-Avant le 09/11/2026 : aucun bug connu ouvert. Corrigé le 22/10/2026 : `pilote.py` refusait (403) les pages servies en
+Aucun autre bug connu ouvert. Corrigé le 22/10/2026 : `pilote.py` refusait (403) les pages servies en
 HTTPS, donc toute page d'un autre appareil en mode réseau chiffré ; il accepte maintenant
 `https://<hôte>` comme `http://<hôte>`.
 
