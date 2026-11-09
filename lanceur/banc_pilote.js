@@ -659,6 +659,16 @@ function onglet(serveur, stockage, page, nomCanal) {
   assert.deepStrictEqual([vu.relais, cache.relais], [true, false], "le visible tient le relais, quel que soit l'id");
   cache.arreter(); vu.arreter();
   await pause(REGLAGES.attenteServeur + 50);
+  // Quitter la page : pagehide ferme le canal, puis le navigateur émet visibilitychange (« hidden ») ;
+  // réannoncer sur le canal fermé levait « Channel is closed » à chaque changement d'outil
+  {
+    const ecoutes = {}, dom = Object.assign(domFactice(), { addEventListener: (t, f) => (ecoutes[t] = ecoutes[t] || []).push(f) });
+    const T = creer({ fetch: serveur.fetch, BroadcastChannel, stockage: stockagePartage(), canal: "banc5." + Math.random(),
+                      document: dom, entete: ENTETE }, REGLAGES).declarer({ page: "pcb" });
+    T.arreter();
+    assert.ok((ecoutes.visibilitychange || []).length, "l'onglet écoute visibilitychange");
+    assert.doesNotThrow(() => { ecoutes.visibilitychange.forEach(f => f()); T.focaliser(); }, "rien ne part sur le canal fermé");
+  }
 
   // Un clic dans un onglet qui n'est pas le relais part au serveur tout de suite, sans attendre
   // la prochaine élection du relais (annonce lente ici : 1 s). Vu à l'essai réel dans Chromium.
