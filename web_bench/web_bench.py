@@ -51,7 +51,21 @@ CATALOGUE = [
     {"id": "cao", "nom": "WEB_CAO", "script": "web_CAO.py", "lib": True,
      "args": ["--local", "--sans-navigateur", "--sans-pause", "--sans-maj", "--projets", "{projets}", "--lib", "{lib}"],
      # la simulation se lance à la main ici : rien de lourd par défaut
-     "noire": ""},
+     "noire": "",
+     # Ce que la CI de WEB_CAO fait en plus des banc-* (voir son .github/workflows/ci.yml) :
+     # - les essais qui ne s'appellent pas banc-* ;
+     "essais": ["editeur-pcb/test/harness.js", "editeur-schematique/test/harness.js",
+                "visionneuse-ipc2581/test/harness-sim.js"],
+     # - les préparations : l'assemblage du monofichier, et l'export que harness.js écrit ;
+     "preparations": {
+         "editeur-pcb/test/harness.js": [["python", "editeur-pcb/outils/build-monofichier.py"]],
+         "editeur-schematique/test/harness.js": [["python", "editeur-schematique/outils/build-monofichier.py"]],
+         "editeur-pcb/test/banc-ipc2581-export.py": [["python", "editeur-pcb/outils/build-monofichier.py"],
+                                                     ["node", "editeur-pcb/test/harness.js"]],
+     },
+     # - la LIB privée (WEB_SUITE_PROJETS) : sans elle, la CI saute ces bancs-là et donne aux
+     #   autres une LIB factice minimale (WEB_CAO_LIB_MINIMALE, python/test/lib_essai.py).
+     "lib_reelle": ["python/test/banc-lib-routes.py", "python/test/banc-rf.py", "gestion-lib/test/banc-catalogue.js"]},
     {"id": "antenna", "nom": "WEB_ANTENNA", "script": "web_antenna.py", "lib": False,
      # --sans-banc : pas de mesure de vitesse du poste au démarrage
      "args": ["--local", "--sans-navigateur", "--sans-maj", "--sans-banc", "--projets", "{projets}"],
@@ -61,7 +75,9 @@ CATALOGUE = [
      "routes": r"^/api/openems/.*lancer"},
     {"id": "3d", "nom": "WEB_3D", "script": "web_3D.py", "lib": False,
      "args": ["--local", "--sans-navigateur", "--sans-pause", "--sans-maj", "--projets", "{projets}"],
-     "noire": ""},
+     "noire": "",
+     # les essais propres de appairage.py et pilote.py, que la CI de WEB_3D lance aussi
+     "essais": ["appairage.py", "pilote.py"]},
 ]
 PAR_ID = {o["id"]: o for o in CATALOGUE}
 # Requêtes arrêtées par le relais pour tous les outils, quel que soit le bouton qui les envoie :
@@ -78,6 +94,35 @@ BANC = re.compile(r"^banc[-_].+\.(py|js|mjs)$")
 DELAI_BANC = 300          # s : au-delà, un banc est arrêté et compté « délai dépassé »
 MAX_SORTIE = 40000        # caractères gardés de la sortie d'un banc
 MAX_JOURNAL = 4000        # lignes gardées du journal d'un outil
+# les gros modèles Murata de lib_simulation : ni l'outil ni le clic-partout n'en ont besoin, et
+# les recopier à chaque démarrage prendrait des minutes (même choix que python/test/lib_essai.py)
+LIB_IGNOREE = (".git", "CAPA G*", "INDUC *", "*.zip")
+GROS_FICHIER = 256 * 1024  # o : au-delà (modèles 3D STEP…), un lien dur plutôt qu'une copie
+
+
+def copier_ou_lier(source, cible):
+    """Copie d'un fichier de la LIB pour le banc. Les gros fichiers (Models/*.stp, 290 Mo en tout)
+    sont liés en dur quand le disque le permet : instantané, et sans risque pour la vraie LIB,
+    car l'outil les remplace par écriture atomique (nouveau fichier puis renommage) sans jamais
+    les réécrire en place. Le catalogue et les petits fichiers sont toujours vraiment copiés."""
+    if os.path.getsize(source) > GROS_FICHIER:
+        try:
+            os.link(source, cible)
+            return cible
+        except OSError:
+            pass
+    return shutil.copy2(source, cible)
+
+
+def lib_minimale(dossier):
+    """La LIB factice de la CI de WEB_CAO sans la LIB privée (python/test/lib_essai.py) : de quoi
+    que l'outil démarre et réponde, au lieu d'un dossier vide qui fait échouer chaque page."""
+    for d in ("lib_empreinte_pcb", "lib_empreinte_schematique", "lib_simulation"):
+        os.makedirs(os.path.join(dossier, d))
+    with open(os.path.join(dossier, "LIB_composants.csv"), "w", encoding="utf-8") as f:
+        f.write("Part Name;Part Type;Description\n")
+    with open(os.path.join(dossier, "lib_empreinte_pcb", "0603.json"), "w", encoding="utf-8") as f:
+        f.write("{}\n")
 
 
 def port_libre():
@@ -122,10 +167,12 @@ class Outil:
 
     def lib_reelle(self):
         """La LIB que WEB_CAO prend par défaut (même ordre que lui et ses bancs) : WEB_CAO_LIB,
-        LIB/ à côté de l'outil, sinon ../PROJETS/LIB_CAO de web_suite."""
-        for c in (os.environ.get("WEB_CAO_LIB"), os.path.join(self.dossier, "LIB"),
-                  os.path.join(os.path.dirname(self.dossier), "PROJETS", "LIB_CAO")):
-            if c and os.path.isdir(c):
+        LIB/ à côté de l'outil, sinon ../PROJETS/LIB_CAO de web_suite. Seulement une vraie LIB,
+        avec son catalogue ; les bancs la cherchent aussi par le chemin réel de l'outil."""
+        parents = {os.path.dirname(self.dossier), os.path.dirname(os.path.realpath(self.dossier))}
+        for c in [os.environ.get("WEB_CAO_LIB"), os.path.join(self.dossier, "LIB")] + \
+                 [os.path.join(p, "PROJETS", "LIB_CAO") for p in sorted(parents)]:
+            if c and os.path.isfile(os.path.join(c, "LIB_composants.csv")):
                 return c
         return None
 
@@ -144,9 +191,10 @@ class Outil:
             # une copie de la LIB que l'outil prendrait : le banc peut y écrire sans risque
             source = self.lib_reelle()
             if source:
-                shutil.copytree(source, lib, ignore=shutil.ignore_patterns(".git"))
+                shutil.copytree(source, lib, ignore=shutil.ignore_patterns(*LIB_IGNOREE),
+                                copy_function=copier_ou_lier)
             else:
-                os.makedirs(lib)
+                lib_minimale(lib)
         self.port = port_libre()
         args = [a.format(projets=projets, lib=lib) for a in self.conf["args"]]
         env = dict(os.environ, WEB_TOOLS_HTTP="1", PYTHONUNBUFFERED="1", PYTHONIOENCODING="utf-8")
@@ -236,9 +284,16 @@ def trouver_outils(racine):
 # Les bancs d'un outil : scripts banc-*.py / .js / .mjs, lancés un par un
 # --------------------------------------------------------------------------------------
 class Bancs:
-    def __init__(self, dossier):
-        self.dossier = dossier
+    def __init__(self, outil):
+        self.outil = outil
+        self.conf = outil.conf
+        self.dossier = outil.dossier
         self.verrou = threading.Lock()
+        try:
+            with open(os.path.join(self.dossier, ".github", "workflows", "ci.yml"), encoding="utf-8") as fh:
+                self.ci = fh.read()
+        except OSError:
+            self.ci = ""
         self.liste = self.decouvrir()
         self.file = []
         self.courant = None        # processus en cours
@@ -246,29 +301,30 @@ class Bancs:
         self.fil = None
 
     def decouvrir(self):
-        """Les scripts banc-* de l'outil. Ceux que sa CI lance (.github/workflows/ci.yml) sont
-        marqués : ils tournent d'habitude seuls. Les autres demandent parfois une préparation
-        (assemblage, LIB privée, dossier PROJETS)."""
-        try:
-            with open(os.path.join(self.dossier, ".github", "workflows", "ci.yml"), encoding="utf-8") as fh:
-                ci = fh.read()
-        except OSError:
-            ci = ""
+        """Les scripts banc-* de l'outil, plus les essais que sa CI lance sous un autre nom
+        (harness.js…). Ceux que la CI lance (.github/workflows/ci.yml) sont marqués : ils sont
+        cochés d'office. Les autres demandent parfois une préparation (LIB privée, dossier PROJETS)."""
         trouves = []
         for racine, dossiers, fichiers in os.walk(self.dossier):
             dossiers[:] = sorted(d for d in dossiers if d not in DOSSIERS_IGNORES)
             for f in sorted(fichiers):
                 if BANC.match(f):
-                    rel = os.path.relpath(os.path.join(racine, f), self.dossier).replace(os.sep, "/")
-                    trouves.append({"id": rel, "ci": rel in ci, "debut": None, "etat": "attente",
-                                    "duree": None, "sortie": "", "code": None})
-        trouves.sort(key=lambda b: (not b["ci"], b["id"]))
-        return trouves
+                    trouves.append(os.path.relpath(os.path.join(racine, f), self.dossier).replace(os.sep, "/"))
+        for e in self.conf.get("essais", []):
+            if os.path.isfile(os.path.join(self.dossier, e)) and e not in trouves:
+                trouves.append(e)
+        liste = [{"id": rel, "ci": rel in self.ci, "debut": None, "etat": "attente",
+                  "duree": None, "sortie": "", "code": None,
+                  "preparation": [" ".join(c) for c in self.conf.get("preparations", {}).get(rel, [])],
+                  "lib_reelle": rel in self.conf.get("lib_reelle", [])} for rel in trouves]
+        liste.sort(key=lambda b: (not b["ci"], b["id"]))
+        return liste
 
     def etat(self):
         with self.verrou:
             return {"en_cours": bool(self.fil and self.fil.is_alive()),
-                    "bancs": [{k: b[k] for k in ("id", "ci", "etat", "duree", "code", "debut")} for b in self.liste]}
+                    "bancs": [{k: b[k] for k in ("id", "ci", "etat", "duree", "code", "debut", "preparation", "lib_reelle")}
+                              for b in self.liste]}
 
     def sortie(self, id_):
         with self.verrou:
@@ -296,45 +352,83 @@ class Bancs:
         if p and p.poll() is None:
             p.kill()
 
-    def _commande(self, banc):
-        ext = banc["id"].rsplit(".", 1)[-1]
-        if ext == "py":
-            return [sys.executable, banc["id"]]
+    def _commande(self, args):
+        """La commande d'un banc ou d'une préparation : la même Python que web_bench, ou node avec
+        les options que la CI lui donne pour ce fichier (--experimental-websocket…)."""
+        if isinstance(args, str):
+            args = ["python" if args.endswith(".py") else "node", args]
+        if args[0] == "python":
+            return [sys.executable] + args[1:]
         node = shutil.which("node")
-        return [node, banc["id"]] if node else None
+        if not node:
+            return None
+        m = re.search(r"node((?:\s+--[\w-]+)*)\s+" + re.escape(args[1]) + r"(?:\s|$)", self.ci)
+        options = m.group(1).split() if m else []
+        return [node] + options + args[1:]
+
+    def _executer(self, cmd, env):
+        """Lance une commande et rend (code, sortie) ; code None si le délai est dépassé."""
+        self.courant = subprocess.Popen(cmd, cwd=self.dossier, env=env, stdin=subprocess.DEVNULL,
+                                        stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        try:
+            sortie, _ = self.courant.communicate(timeout=DELAI_BANC)
+            return self.courant.returncode, sortie.decode("utf-8", "replace")
+        except subprocess.TimeoutExpired:
+            self.courant.kill()
+            sortie, _ = self.courant.communicate()
+            return None, sortie.decode("utf-8", "replace")
 
     def _derouler(self):
         chromium = trouver_chromium()
         env = dict(os.environ, PYTHONIOENCODING="utf-8", WEB_TOOLS_HTTP="1")
         if chromium:
             env["CHROMIUM"] = chromium
+        lib = self.outil.lib_reelle() if self.conf.get("lib") else None
+        if self.conf.get("lib"):
+            if lib:
+                env.setdefault("WEB_CAO_LIB", lib)
+            else:
+                env["WEB_CAO_LIB_MINIMALE"] = "1"     # comme la CI sans la LIB privée
         for banc in list(self.file):
             if self.arret:
                 with self.verrou:
                     banc["etat"] = "attente"
                 continue
-            cmd = self._commande(banc)
-            if not cmd:
+            if banc["lib_reelle"] and not lib:
+                with self.verrou:
+                    banc.update(etat="ignore", sortie=(
+                        "Sauté : ce banc éprouve le CONTENU de la LIB privée, introuvable ici "
+                        "(PROJETS/LIB_CAO, WEB_CAO/LIB ou WEB_CAO_LIB). La CI de WEB_CAO le saute aussi "
+                        "sans elle. Clone WEB_SUITE_PROJETS dans PROJETS/ pour le lancer."))
+                continue
+            cmds = [self._commande(c) for c in self.conf.get("preparations", {}).get(banc["id"], [])]
+            cmd = self._commande(banc["id"])
+            if not cmd or not all(cmds):
                 with self.verrou:
                     banc.update(etat="ignore", sortie="node est introuvable : ce banc JavaScript ne peut pas tourner.")
                 continue
             with self.verrou:
                 banc["etat"] = "en_cours"
                 banc["debut"] = debut = time.time()
+            texte, code, etat = "", None, None
             try:
-                self.courant = subprocess.Popen(cmd, cwd=self.dossier, env=env, stdin=subprocess.DEVNULL,
-                                                stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-                try:
-                    sortie, _ = self.courant.communicate(timeout=DELAI_BANC)
-                    code = self.courant.returncode
-                    etat = "ok" if code == 0 else ("arrete" if self.arret else "echec")
-                except subprocess.TimeoutExpired:
-                    self.courant.kill()
-                    sortie, _ = self.courant.communicate()
-                    code, etat = None, "delai"
-                texte = sortie.decode("utf-8", "replace")
+                for prep in cmds:
+                    texte += "$ " + " ".join(os.path.basename(a) if i == 0 else a for i, a in enumerate(prep)) + \
+                             "   (préparation)\n"
+                    code, sortie = self._executer(prep, env)
+                    texte += sortie + "\n"
+                    if code != 0:
+                        etat = "delai" if code is None else ("arrete" if self.arret else "echec")
+                        texte += "[préparation en échec : le banc n'est pas lancé]\n"
+                        break
+                if etat is None:
+                    if cmds:
+                        texte += "$ " + banc["id"] + "\n"
+                    code, sortie = self._executer(cmd, env)
+                    texte += sortie
+                    etat = "delai" if code is None else "ok" if code == 0 else ("arrete" if self.arret else "echec")
             except OSError as exc:
-                code, etat, texte = None, "echec", "Lancement impossible : %s" % exc
+                code, etat, texte = None, "echec", texte + "Lancement impossible : %s" % exc
             with self.verrou:
                 banc.update(etat=etat, code=code, duree=round(time.time() - debut, 1),
                             sortie=texte[-MAX_SORTIE:])
@@ -405,7 +499,7 @@ class Banc:
 
     def __init__(self, outils, actif):
         self.outils = outils
-        self.bancs = {i: Bancs(o.dossier) for i, o in outils.items()}
+        self.bancs = {i: Bancs(o) for i, o in outils.items()}
         self.actif = actif
 
     def outil(self):

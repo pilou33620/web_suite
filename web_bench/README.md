@@ -7,7 +7,7 @@ lance les essais et montre les résultats. Les essais se lancent outil par outil
 | Volet | Ce qu'il fait |
 |---|---|
 | **Clic-partout** | Clique un par un tous les boutons, menus, onglets, cases, listes et liens de chaque page, et relève ce qui casse : erreur JavaScript, promesse rejetée, requête en échec, erreur Python côté serveur (Traceback), page bloquée plus de 1,5 s, requêtes qui ne finissent pas. Les éléments qui apparaissent après un clic (menu, fenêtre) sont essayés juste après, en rouvrant le menu si besoin. Une fenêtre déjà vue qui masque la page est refermée par son bouton (Annuler, ×, OK). |
-| **Bancs** | Trouve les scripts `banc-*.py / .js / .mjs` de l'outil et les lance un par un. Ceux que la CI de l'outil lance sont cochés d'office. Vert : le script a rendu 0. Un clic montre sa sortie. |
+| **Bancs** | Trouve les scripts `banc-*.py / .js / .mjs` de l'outil, plus les essais que sa CI lance sous un autre nom (`harness.js` des éditeurs, `harness-sim.js`, `appairage.py` et `pilote.py` de WEB_3D). Il les lance un par un, **comme la CI** : avec les mêmes options de node, et après les mêmes préparations (assemblage `build-monofichier.py`, puis `harness.js` avant `banc-ipc2581-export.py`). Ceux que la CI lance sont cochés d'office. Vert : le script a rendu 0. Un clic montre sa sortie. |
 | **Rapports** | Chaque clic-partout terminé ou arrêté est gardé dans `web_bench/rapports/`, en `.json` (tout) et en `.md` (lisible). Un clic recharge un rapport, et **.md** le télécharge. |
 | **Journal** | La sortie du serveur de l'outil, avec les Traceback en rouge et les requêtes arrêtées par le banc. |
 
@@ -96,8 +96,16 @@ affichée.
   aussi le banc. Un clic qui bloque la page est relevé dès qu'elle reprend la main.
 - Les trois outils passent par la même adresse, `127.0.0.1:8200` : ils partagent le stockage du
   navigateur pendant les essais.
-- Certains bancs demandent une préparation : un assemblage `build-monofichier.py` puis
-  `harness.js`, la LIB privée dans `PROJETS/LIB_CAO`, ou un dossier `PROJETS`. Leur sortie le dit.
+- **La LIB privée** : avec `PROJETS/LIB_CAO` (le dépôt WEB_SUITE_PROJETS cloné dans `PROJETS/`), tous les
+  bancs de WEB_CAO tournent sur ta vraie LIB. Sans elle, le banc fait comme la CI de WEB_CAO :
+  `banc-lib-routes.py`, `banc-rf.py` et `banc-catalogue.js` sont sautés (gris, avec la raison), et
+  les autres tournent sur une LIB factice minimale (`WEB_CAO_LIB_MINIMALE=1`).
+- Quelques bancs « Hors CI » demandent encore une préparation à la main (un dossier `PROJETS`
+  rempli, des images de référence). Leur sortie le dit.
+- La copie de la LIB lie en dur les gros fichiers (les modèles 3D de `Models/`, 290 Mo) : la copie
+  est instantanée. C'est sans risque pour la vraie LIB, car WEB_CAO ne réécrit jamais un fichier
+  en place (il passe par un nouveau fichier puis un renommage). Si les deux dossiers sont sur des
+  disques différents, les fichiers sont copiés.
 
 ## Vérifier web_bench lui-même
 

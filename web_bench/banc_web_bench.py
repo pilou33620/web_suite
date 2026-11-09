@@ -72,6 +72,19 @@ def main():
         os.makedirs(os.path.join(temp, "PROJETS", "LIB_CAO"))
         with open(os.path.join(temp, "PROJETS", "LIB_CAO", "LIB_composants.csv"), "w") as f:
             f.write("ref;valeur\n")
+        # ce que la CI fait en plus des banc-* : un essai sous un autre nom, une préparation,
+        # et un banc qui exige la LIB privée (il voit la LIB par WEB_CAO_LIB)
+        with open(os.path.join(cao, "test", "harness.js"), "w") as f:
+            f.write("console.log('harness ok')\n")
+        with open(os.path.join(cao, "prep.py"), "w") as f:
+            f.write("open('prepare.txt', 'w').write('fait')\nprint('préparé')\n")
+        with open(os.path.join(cao, "test", "banc-lib.py"), "w") as f:
+            f.write("import os, sys\nprint(os.environ.get('WEB_CAO_LIB'))\n"
+                    "sys.exit(0 if os.path.isfile(os.path.join(os.environ['WEB_CAO_LIB'], 'LIB_composants.csv')) else 4)\n")
+        conf_cao = web_bench.PAR_ID["cao"]
+        sauve = {k: conf_cao.get(k) for k in ("essais", "preparations", "lib_reelle")}
+        conf_cao.update(essais=["test/harness.js"], preparations={"test/banc-bon.py": [["python", "prep.py"]]},
+                        lib_reelle=["test/banc-lib.py"])
         with open(os.path.join(cao, "index.html"), "w") as f:
             f.write("<html></html>")
         with open(os.path.join(cao, "test", "banc-bon.py"), "w") as f:
@@ -127,10 +140,11 @@ def main():
             code, _ = requete(port, "GET", f, entetes=hote)
             assert code == 200, f
 
-        # bancs : graphify-out ignoré, les deux autres lancés
+        # bancs : graphify-out ignoré, l'essai harness.js ajouté, tous lancés
         code, e = requete(port, "GET", "/__banc/api/bancs", entetes=hote)
         ids = [b["id"] for b in json.loads(e)["bancs"]]
-        assert ids == ["test/banc-bon.py", "test/banc-mauvais.py"], ids
+        assert ids == ["test/banc-bon.py", "test/banc-lib.py", "test/banc-mauvais.py", "test/harness.js"] or \
+            not web_bench.shutil.which("node") and "test/harness.js" in ids, ids
         code, _ = requete(port, "POST", "/__banc/api/bancs/lancer", json.dumps({"ids": ids}).encode(),
                           dict(hote, **{"X-Web-Bench": "1"}))
         assert code == 200
@@ -140,7 +154,21 @@ def main():
                 break
             time.sleep(0.1)
         etats = {b["id"]: (b["etat"], b["code"]) for b in e["bancs"]}
-        assert etats == {"test/banc-bon.py": ("ok", 0), "test/banc-mauvais.py": ("echec", 3)}, etats
+        attendu = {"test/banc-bon.py": ("ok", 0), "test/banc-lib.py": ("ok", 0), "test/banc-mauvais.py": ("echec", 3),
+                   "test/harness.js": ("ok", 0) if web_bench.shutil.which("node") else ("ignore", None)}
+        assert etats == attendu, etats
+        bon = json.loads(requete(port, "GET", "/__banc/api/bancs/sortie?id=test/banc-bon.py", entetes=hote)[1])["sortie"]
+        assert "préparé" in bon and "(préparation)" in bon and os.path.isfile(os.path.join(cao, "prepare.txt")), bon
+        # sans la LIB privée : le banc qui l'exige est sauté, comme dans la CI
+        shutil.rmtree(os.path.join(temp, "PROJETS"))
+        requete(port, "POST", "/__banc/api/bancs/lancer", json.dumps({"ids": ["test/banc-lib.py"]}).encode(),
+                dict(hote, **{"X-Web-Bench": "1"}))
+        for _ in range(100):
+            e = json.loads(requete(port, "GET", "/__banc/api/bancs", entetes=hote)[1])
+            if not e["en_cours"]:
+                break
+            time.sleep(0.1)
+        assert {b["id"]: b["etat"] for b in e["bancs"]}["test/banc-lib.py"] == "ignore", e
         sortie = json.loads(requete(port, "GET", "/__banc/api/bancs/sortie?id=test/banc-mauvais.py", entetes=hote)[1])
         assert "raté" in sortie["sortie"], sortie
 
@@ -178,6 +206,8 @@ def main():
         print("OK")
     finally:
         web_bench.DOSSIER_RAPPORTS = rapports
+        if "sauve" in locals():
+            conf_cao.update(sauve)
         shutil.rmtree(temp, ignore_errors=True)
 
 

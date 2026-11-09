@@ -270,13 +270,19 @@ setInterval(() => { if (!clic.enCours) lireJournal().catch(() => {}); }, 2000);
 /* ---------------------------------------------------------------- clic-partout */
 const GRAVITE = { js: "erreur", promesse: "erreur", reseau: "erreur", serveur: "erreur",
   reseau4xx: "avert", console: "avert", ressource: "avert",
-  dialogue: "info", telechargement: "info", navigation: "info", info: "info", bloque: "info", attendu: "info", lent: "avert" };
+  dialogue: "info", telechargement: "info", navigation: "info", info: "info", bloque: "info", attendu: "info", externe: "avert", lent: "avert" };
 /* Ce qui est normal quand l'outil est lancé seul par le banc, et pas par le lanceur : pas un problème. */
 const ATTENDUS = [
   /^404 GET \/api\/github(\?|$)/,      // « Envoi sur GitHub indisponible : outil pas lancé par WEB_SUITE »
 ];
+/* Un service Internet que l'outil interroge (pcbparts.dev…) injoignable depuis ce poste. */
+const EXTERNE = /connexion impossible|urlopen error|name or service not known|getaddrinfo|timed out|unreachable/i;
 function classer(evts) {
   for (const e of evts) {
+    if (e.type === "reseau" && e.requete && e.requete.statut >= 502 && EXTERNE.test(e.requete.reponse || "")) {
+      e.type = "externe";
+      e.message += " (service Internet injoignable depuis ce poste : vérifier la connexion)";
+    }
     if (e.type === "reseau4xx" && ATTENDUS.some((m) => m.test(e.message))) {
       e.type = "attendu";
       e.message += " (normal : l'outil n'est pas lancé par le lanceur)";
@@ -339,7 +345,8 @@ async function essayerElement(page, el, k, delai, hist, url) {
     res.evts.push(...s2.evts.slice(n0));
   }
   classer(res.evts);
-  if (!calme) res.evts.push({ type: "lent", message: "requêtes encore en cours 5 s après le clic" });
+  // après un changement de page, ce sont les requêtes de la NOUVELLE page qui sont en cours : pas une lenteur du clic
+  if (!calme && !res.navigation) res.evts.push({ type: "lent", message: "requêtes encore en cours 5 s après le clic" });
   if (res.duree > 1500) res.evts.push({ type: "lent", message: "le clic a bloqué la page " + res.duree + " ms" });
   journalFin = j0;
   const lignes = await lireJournal().catch(() => []);
@@ -754,7 +761,11 @@ async function rafraichirBancs() {
     if (dossier(b) !== courant) { courant = dossier(b); html += '<div class="entete-groupe">' + echapper(courant) + "</div>"; }
     html += '<div class="rang" data-id="' + echapper(b.id) + '"><input type="checkbox" ' + (cochesBancs.has(b.id) ? "checked" : "") +
       '><div><div class="titre"><span class="point ' + b.etat + '" style="display:inline-block;margin-right:6px"></span>' +
-      echapper(b.id.slice(b.id.lastIndexOf("/") + 1)) + '</div></div><span class="duree">' + (b.duree != null ? b.duree + " s" : b.debut ? Math.round(Date.now() / 1000 - b.debut) + " s…" : "") + "</span></div>";
+      echapper(b.id.slice(b.id.lastIndexOf("/") + 1)) + "</div>" +
+      (b.preparation.length || b.lib_reelle ? '<div class="sous">' + echapper([b.preparation.length ? "prépare : " +
+        b.preparation.map((c) => c.split(" ").pop().split("/").pop()).join(" puis ") : "",
+        b.lib_reelle ? "demande la LIB privée" : ""].filter(Boolean).join(" · ")) + "</div>" : "") +
+      '</div><span class="duree">' + (b.duree != null ? b.duree + " s" : b.debut ? Math.round(Date.now() / 1000 - b.debut) + " s…" : "") + "</span></div>";
   }
   liste.innerHTML = html;
   liste.querySelectorAll(".rang").forEach((r) => {
