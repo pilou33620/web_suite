@@ -55,8 +55,7 @@ def menu(racine):
     print("  Dossier : %s" % racine)
     if not outils.git_disponible():
         print("  [!] git introuvable : les outils seront téléchargés en zip et")
-        print("      ne pourront pas se mettre à jour seuls. %s"
-              % ("pkg install git" if outils.TERMUX else "https://git-scm.com"))
+        print("      ne pourront pas se mettre à jour seuls. https://git-scm.com")
     print()
     for i, o in enumerate(outils.CATALOGUE, 1):
         etat = "installé" if outils.est_installe(o, racine) else "à télécharger"

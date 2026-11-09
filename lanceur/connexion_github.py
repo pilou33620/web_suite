@@ -1,4 +1,4 @@
-"""Connexion à GitHub, une fois, dans le terminal du serveur (Termux, Raspberry Pi).
+"""Connexion à GitHub, une fois, dans le terminal du serveur (Raspberry Pi).
 
     python lanceur/connexion_github.py              vérification (banc d'essai, sans réseau)
     python lanceur/connexion_github.py --connecter  se connecter puis récupérer PROJETS
@@ -58,8 +58,6 @@ def github_identifie():
 
 
 def commande_installation_gh():
-    if outils.TERMUX:
-        return ["pkg", "install", "-y", "gh"]
     if shutil.which("apt-get"):
         return ["sudo", "apt-get", "install", "-y", "gh"]
     return None
@@ -127,14 +125,11 @@ def proposer(racine, demander=input, lancer=subprocess.call, ecrire=print,
     ecrire("  gh va afficher un code à 8 caractères : saisissez-le sur")
     ecrire("  https://github.com/login/device (sur ce téléphone, la tablette ou un PC),")
     ecrire("  validez, et revenez ici.")
-    env = None
-    if not outils.TERMUX:
-        # Sur un Pi sans bureau, gh ouvrirait un navigateur texte (lynx, w3m) dans ce
-        # terminal et bloquerait tout : on lui donne un navigateur qui ne fait rien.
-        # Sous Termux, il ouvre celui du téléphone, qui est justement le bon appareil.
-        env = dict(os.environ, GH_BROWSER="true", BROWSER="true")
-        ecrire("  Quand gh dit « Press Enter », appuyez sur Entrée : aucun navigateur ne")
-        ecrire("  s'ouvre ici, gh attend simplement que le code soit validé.")
+    # Sur un Pi sans bureau, gh ouvrirait un navigateur texte (lynx, w3m) dans ce
+    # terminal et bloquerait tout : on lui donne un navigateur qui ne fait rien.
+    env = dict(os.environ, GH_BROWSER="true", BROWSER="true")
+    ecrire("  Quand gh dit « Press Enter », appuyez sur Entrée : aucun navigateur ne")
+    ecrire("  s'ouvre ici, gh attend simplement que le code soit validé.")
     ecrire("")
     # Pas de --skip-ssh-key : le gh de Raspberry Pi OS / Debian (2.23) ne le connaît
     # pas et s'arrête aussitôt ; en HTTPS, gh ne propose de toute façon aucune clé SSH.
@@ -207,7 +202,7 @@ if __name__ == "__main__":
         assert r == "connecte", r
         assert ["gh", "auth", "setup-git", "--hostname", "github.com"] in cmds
         assert any(c[:3] == ["gh", "auth", "login"] and "--web" in c for c in cmds)
-        assert outils.TERMUX or derniere_env["env"]["GH_BROWSER"] == "true"   # pas de lynx qui bloque
+        assert derniere_env["env"]["GH_BROWSER"] == "true"   # pas de lynx qui bloque
         assert essai(["n"], False)[0] == "plus-tard"
         r, cmds = essai(["o"], False, gh=False)                 # gh absent : installé d'abord
         assert r == "connecte" and cmds[0][-1] == "gh", cmds

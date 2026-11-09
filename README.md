@@ -30,7 +30,6 @@ git clone https://github.com/pilou33620/WEB_SUITE.git WEB_TOOLS
 |---|---|---|
 | Windows | `installer.cmd` | `demarrer_WEB_SUITE.cmd` |
 | Linux, Raspberry Pi | `./installer.sh` | `./demarrer_WEB_SUITE.sh` |
-| Android (Termux) | `pkg install python git` puis `./installer.sh` | `./demarrer_WEB_SUITE.sh` |
 
 L'installateur demande quels outils télécharger (`1`, `1 3`, `4` = tous), ou directement :
 `python lanceur/installer.py cao 3d`.
@@ -38,8 +37,7 @@ L'installateur demande quels outils télécharger (`1`, `1 3`, `4` = tous), ou d
 Dépendances des outils :
 
 - **WEB_CAO** : `numpy` et `scipy`, obligatoires : l'installateur les installe, et le lanceur
-  les installe aussi si un lancement les trouve absents. Sous Termux, ils passent par `pkg`. Sur
-  Raspberry Pi ou Debian, où `pip` refuse la Python du système :
+  les installe aussi si un lancement les trouve absents. Sur Raspberry Pi ou Debian, où `pip` refuse la Python du système :
   `sudo apt install python3-numpy python3-scipy`.
 - **WEB_ANTENNA** : openEMS, dont l'installation automatique est proposée sous Windows seulement
   (nécessite Python 3.10 ou 3.11 64 bits). Ailleurs, voir `WEB_ANTENNA/requirements.txt`.
@@ -47,7 +45,7 @@ Dépendances des outils :
 
 ## Utiliser depuis un autre appareil
 
-Sur Raspberry Pi et Termux, le lanceur écoute sur le réseau local et n'ouvre pas de
+Sur Raspberry Pi, le lanceur écoute sur le réseau local et n'ouvre pas de
 navigateur (ailleurs : `--reseau`). Depuis la tablette, le téléphone ou le PC :
 
 1. ouvrir l'adresse **Réseau** affichée dans le terminal (`https://<adresse>:8100/`) ;
@@ -55,8 +53,6 @@ navigateur (ailleurs : `--reseau`). Depuis la tablette, le téléphone ou le PC 
    appareil et par adresse du serveur).
 
 En mode réseau, la connexion est **chiffrée (HTTPS)** quand la commande `openssl` est présente sur le poste (Raspberry Pi, Linux, macOS ; sous Windows, celle de Git) : une autorité propre au poste, créée une fois dans `~/.web_tools/tls/`, signe le certificat du serveur. Chaque appareil l'installe une fois, depuis le lien de la page du code (`/appairage/ca.pem`) ; sur iPad : Réglages › Profil téléchargé › Installer, puis Général › Informations › Réglages des certificats › activer. Comparer son empreinte SHA-256 avec celle du terminal. Sans `openssl` (ou avec `WEB_TOOLS_HTTP=1`), tout reste en HTTP et le terminal le dit.
-
-Sous Termux, garder `termux-wake-lock` actif.
 
 ## Projets et GitHub
 
@@ -72,7 +68,7 @@ PROJETS/
 ```
 
 - Le dépôt est **privé** : chaque poste doit être connecté une fois à votre compte GitHub.
-  Sous Windows, une fenêtre de connexion s'ouvre toute seule. Sur Termux ou un Raspberry Pi,
+  Sous Windows, une fenêtre de connexion s'ouvre toute seule. Sur un Raspberry Pi,
   le lanceur le propose dans son terminal au démarrage (ou, à tout moment :
   `python lanceur/connexion_github.py --connecter`).
 - Il est récupéré au démarrage et avant chaque lancement d'outil.
@@ -86,7 +82,7 @@ PROJETS/
 - **Conflit** : rien n'est fusionné automatiquement, le lanceur indique le dossier à régler.
 
 **Connexion à GitHub** : sous Windows, Git Credential Manager s'en charge au premier envoi.
-Sur Pi et Termux, le lanceur propose au démarrage de se connecter via `gh` : un code est à
+Sur Pi, le lanceur propose au démarrage de se connecter via `gh` : un code est à
 saisir sur https://github.com/login/device, depuis n'importe quel appareil.
 
 ## Mises à jour
@@ -177,7 +173,7 @@ corrections. Détails : [web_bench/README.md](web_bench/README.md).
 - `python maj_git.py` : état git de WEB_SUITE, des outils et de `PROJETS/`, avec
   commit / pull / push guidés.
 - Tests : `python lanceur/projets.py`, `python lanceur/banc_serveur.py`,
-  `python lanceur/connexion_github.py`, `python lanceur/banc_termux.py`,
+  `python lanceur/connexion_github.py`, `python lanceur/banc_dependances.py`,
   `python lanceur/appairage.py`, `python lanceur/banc_mcp.py`, `python lanceur/pilote.py`,
   `node lanceur/banc_pilote.js`, `python lanceur/claude_pages.py`, `python web_bench/banc_web_bench.py`, `python lanceur/banc_savoir.py`,
   `python lanceur/banc_traces_ia.py` (affichent `OK` ; les deux derniers lisent aussi les dépôts

@@ -30,10 +30,6 @@ télécharger d'un coup. Sans git, les outils sont téléchargés en zip.
 
 - **Linux / Raspberry Pi** : `sudo apt install python3 git python3-numpy python3-scipy` (numpy et
   scipy sont obligatoires pour WEB_CAO, et pip refuse la Python du système sur Debian).
-- **Termux** : l'installateur installe `numpy` / `scipy` par `pkg install python-numpy
-  python-scipy` (paquets précompilés) au lieu de pip, qui n'a pas de roue Android et
-  échouerait en tentant de les compiler. Lancer WEB_SUITE avec la `python` de Termux, hors
-  venv, pour qu'elle voie ces paquets.
 - **openEMS (WEB_ANTENNA, Windows)** : l'installateur (ou `python lanceur/installer.py
   antenna`, ou le bouton **Installer openEMS** de la carte) télécharge openEMS v0.0.36
   (~50 Mo) dans `WEB_ANTENNA/openEMS/`, crée `WEB_ANTENNA/env/` et y installe les paquets.
@@ -86,7 +82,7 @@ outil lancé ensuite refait sa propre vérification : `git stash`, mise à jour,
   reste en sauvegarde (`PROJETS.avant-git-<date>`).
 - **Dépôt privé** : WEB_SUITE_PROJETS est privé, git doit donc être connecté au compte
   GitHub pour le cloner, le tirer et l'envoyer. Sous Windows, Git Credential Manager ouvre
-  sa fenêtre de connexion. Sur Termux ou un Pi, le lanceur le propose dans son terminal au
+  sa fenêtre de connexion. Sur un Pi, le lanceur le propose dans son terminal au
   démarrage (`gh auth login` + `gh auth setup-git`), ou à tout moment avec
   `python lanceur/connexion_github.py --connecter`. Tant que le poste n'est pas
   connecté, `PROJETS/` reste un simple dossier (pas de dépôt local sans lien avec GitHub) et
@@ -111,11 +107,11 @@ outil lancé ensuite refait sa propre vérification : `git stash`, mise à jour,
 
 ## Enregistrer depuis un autre appareil
 
-Cas typique : le serveur est un téléphone (Termux), un Raspberry Pi ou un PC, et l'on
+Cas typique : le serveur est un Raspberry Pi ou un PC, et l'on
 travaille depuis une tablette, un téléphone ou un autre poste.
 
 **Une fois, sur le serveur** : connecter git à GitHub. Sous Windows, Git Credential Manager
-s'en charge au premier envoi. Sur Termux et le Pi, le lanceur le propose au démarrage :
+s'en charge au premier envoi. Sur le Pi, le lanceur le propose au démarrage :
 
 ```
   GitHub : ce serveur n'est pas encore connecté à votre compte.
@@ -146,7 +142,7 @@ sur le serveur sans rien envoyer : une retouche de dernière minute ne fait pas 
 
 ## Fonctionnement du lanceur
 
-- Il n'écoute que sur `127.0.0.1` (sauf `--reseau`, défaut sur Pi et Termux) et refuse les
+- Il n'écoute que sur `127.0.0.1` (sauf `--reseau`, défaut sur Pi) et refuse les
   requêtes d'action sans l'en-tête `X-WebSuite`. Il refuse aussi tout en-tête `Host` qui
   n'est ni une adresse IP, ni `localhost`, ni le nom du poste (protection contre le DNS
   rebinding).
@@ -316,8 +312,7 @@ doit rendre `{"jsonrpc": "2.0", "id": 1, "result": {}}`.
 - `python lanceur/banc_serveur.py` : `Host` étranger, `X-WebSuite`, taille des requêtes,
   jeton du mode réseau (refus, cookie, poste local exempté), code d'appairage (usage
   unique, expiration, cinq erreurs puis pause).
-- `python lanceur/banc_termux.py` : faux `pkg` — `numpy` / `scipy` partent à
-  `pkg install`, rien à pip, un paquet introuvable après coup est signalé ; hors Termux, pip n'est
+- `python lanceur/banc_dependances.py` : pip n'est
   pas lancé si tout est là, un lancement à qui il manque un paquet lance l'installation, et aucune
   question openEMS n'est posée hors Windows.
 - `python lanceur/connexion_github.py` : la connexion à GitHub au démarrage, sans réseau.

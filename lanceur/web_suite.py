@@ -1,7 +1,7 @@
 """WEB·SUITE — lanceur des outils WEB_CAO, WEB_ANTENNA et WEB_3D.
 
     python lanceur/web_suite.py              ouvre le lanceur dans le navigateur
-                                             (sauf sur Raspberry Pi et Termux : adresse affichée en console)
+                                             (sauf sur Raspberry Pi : adresse affichée en console)
     python lanceur/web_suite.py --installer  menu de téléchargement des outils seulement
 
 Le lanceur joue l'animation d'intro, puis propose les trois outils : il les
@@ -9,7 +9,7 @@ télécharge s'ils manquent (git clone à la racine du dépôt), démarre leur s
 et ouvre leur page. Fermer cette fenêtre arrête les outils lancés depuis elle.
 
 Bibliothèque standard seule. Par défaut le serveur n'écoute que sur 127.0.0.1 :
-il lance des programmes. Avec --reseau (défaut sur Raspberry Pi et Termux), le lanceur et
+il lance des programmes. Avec --reseau (défaut sur Raspberry Pi), le lanceur et
 les outils écoutent sur le réseau local ; le lanceur exige alors des autres
 appareils un jeton, qu'ils reçoivent en saisissant le code d'appairage affiché en
 console (ou avec l'adresse « Réseau » complète, ?jeton=...). Les outils exigent
@@ -133,7 +133,7 @@ def redemarrer(bilan):
     cmd = [sys.executable, script] + sys.argv[1:]
     sys.stdout.flush()
     if os.name != "nt":
-        # Linux, Pi, Termux : le nouveau lanceur REMPLACE celui-ci, comme le
+        # Linux, Pi : le nouveau lanceur REMPLACE celui-ci, comme le
         # fait WEB_CAO. Un parent qui attendait recevait lui aussi Ctrl+C et
         # l'affichait en trace d'erreur sous le « Arrêt. » de l'enfant ; et un
         # kill visait le parent en laissant l'enfant tourner.
@@ -458,9 +458,9 @@ def est_raspberry_pi():
 
 
 def poste_serveur():
-    """Vrai sur une machine qui sert les autres appareils (Raspberry Pi, téléphone
-    Termux) : réseau local par défaut, et pas de navigateur ouvert sur place."""
-    return outils.TERMUX or est_raspberry_pi()
+    """Vrai sur une machine qui sert les autres appareils (Raspberry Pi) : réseau
+    local par défaut, et pas de navigateur ouvert sur place."""
+    return est_raspberry_pi()
 
 
 def main(argv=None):
@@ -473,13 +473,13 @@ def main(argv=None):
     ap.add_argument("--installer", action="store_true",
                     help="ouvrir seulement le menu de téléchargement des outils")
     ap.add_argument("--navigateur", action="store_true",
-                    help="ouvrir le navigateur au démarrage même sur Raspberry Pi ou Termux")
+                    help="ouvrir le navigateur au démarrage même sur Raspberry Pi")
     ap.add_argument("--sans-navigateur", action="store_true",
                     help="ne pas ouvrir le navigateur au démarrage")
     ecoute = ap.add_mutually_exclusive_group()
     ecoute.add_argument("--reseau", dest="reseau", action="store_true", default=None,
                         help="écouter sur le réseau local : ouvrir WEB·SUITE depuis un autre "
-                             "appareil (défaut sur Raspberry Pi et Termux)")
+                             "appareil (défaut sur Raspberry Pi)")
     ecoute.add_argument("--local", dest="reseau", action="store_false",
                         help="n'écouter que sur 127.0.0.1 (défaut ailleurs)")
     ap.add_argument("--sans-maj", dest="verifier_maj", action="store_false", default=True,

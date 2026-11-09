@@ -259,7 +259,7 @@ def definir_identite(racine, nom, email):
 
 
 # Ce que git répond quand GitHub ne sait pas qui pousse. Sous Windows, Git
-# Credential Manager ouvre sa fenêtre ; sur un Raspberry Pi ou sous Termux, il
+# Credential Manager ouvre sa fenêtre ; sur un Raspberry Pi, il
 # n'y en a pas, et GIT_TERMINAL_PROMPT=0 interdit la question en console.
 # Dépôt privé : sans compte autorisé, GitHub répond « Repository not found ».
 REFUS_AUTH = ("could not read username", "could not read password",
@@ -478,7 +478,7 @@ if __name__ == "__main__":
         print(preparer(d, nu))
         assert os.path.isfile(os.path.join(dossier(d), "CAO", "carte_alim", "projet.cao.json"))
         assert not any(n.startswith("PROJETS.avant-git-") for n in os.listdir(d))
-    # Push refusé faute d'identifiants (Pi, Termux) : le message dit quoi faire.
+    # Push refusé faute d'identifiants (Pi) : le message dit quoi faire.
     assert "gh auth login" in echec_push(
         "fatal: could not read Username for 'https://github.com': terminal prompts disabled")
     assert "gh auth login" in echec_push("remote: Permission to x.git denied.\n"

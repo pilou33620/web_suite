@@ -32,16 +32,6 @@ RACINE_DEFAUT = os.path.dirname(ICI)                   # racine du dépôt, où 
 DOSSIER_JOURNAUX = os.path.join(ICI, "journaux")
 
 WINDOWS = os.name == "nt"
-# Termux (Android) : pip n'y trouve aucune roue pour numpy/scipy et se met à les
-# compiler, ce qui échoue (cmake -> ninja -> numpy). Termux les fournit précompilés.
-TERMUX = (bool(os.environ.get("TERMUX_VERSION"))
-          or "com.termux" in os.environ.get("PREFIX", "")
-          or "com.termux" in sys.prefix)
-# Nom pip (minuscules) -> paquet Termux qui le fournit, pour la Python de Termux.
-PAQUETS_TERMUX = {
-    "numpy": "python-numpy",
-    "scipy": "python-scipy",
-}
 # Pas de fenêtre console pour les serveurs lancés : leur sortie va au journal.
 SANS_FENETRE = 0x08000000 if WINDOWS else 0          # CREATE_NO_WINDOW
 
@@ -290,18 +280,6 @@ def lire_requirements(req):
     return lignes
 
 
-def repartir_termux(lignes):
-    """-> (paquets Termux à installer par pkg, lignes laissées à pip)."""
-    paquets, reste = [], []
-    for ligne, nom in lignes:
-        if nom in PAQUETS_TERMUX:
-            if PAQUETS_TERMUX[nom] not in paquets:
-                paquets.append(PAQUETS_TERMUX[nom])
-        else:
-            reste.append(ligne)
-    return paquets, reste
-
-
 def _module_present(nom):
     """Importable par la Python qui lance WEB_SUITE (testé dans un processus neuf)."""
     try:
@@ -310,43 +288,6 @@ def _module_present(nom):
                                stdin=subprocess.DEVNULL, creationflags=SANS_FENETRE) == 0
     except OSError:
         return False
-
-
-def _installer_dependances_termux(req, ecrire):
-    """Termux : numpy/scipy par pkg (précompilés), le reste éventuel par pip."""
-    paquets, reste = repartir_termux(lire_requirements(req))
-    if sys.prefix != getattr(sys, "base_prefix", sys.prefix):
-        ecrire("[!] WEB_SUITE tourne dans un venv : les paquets pkg vont dans la Python de "
-               "Termux. Lancez plutôt WEB_SUITE avec `python` de Termux (hors venv).")
-    ok = True
-    if paquets:
-        pkg = shutil.which("pkg") or shutil.which("apt")
-        if not pkg:
-            ecrire("[X] pkg introuvable : installez à la main  pkg install %s" % " ".join(paquets))
-            ok = False
-        else:
-            ecrire("Termux détecté : %s install -y %s  (paquets précompilés, pas de compilation)"
-                   % (os.path.basename(pkg), " ".join(paquets)))
-            code = _executer([pkg, "install", "-y"] + paquets, ecrire)
-            if code != 0:
-                ecrire("[X] pkg a échoué (code %d). Essayez : pkg update && pkg install %s"
-                       % (code, " ".join(paquets)))
-                ok = False
-    if reste:
-        ecrire("pip install %s" % " ".join(reste))
-        code = _executer([sys.executable, "-m", "pip", "install",
-                          "--disable-pip-version-check"] + reste, ecrire)
-        ok = ok and code == 0
-    # Vérification finale : ce que l'outil importera vraiment.
-    manquants = [n for n in ("numpy", "scipy")
-                 if PAQUETS_TERMUX.get(n) in paquets and not _module_present(n)]
-    if manquants:
-        ecrire("[!] Toujours introuvable(s) pour %s : %s"
-               % (sys.executable, ", ".join(manquants)))
-        ok = False
-    ecrire("[OK] Dépendances installées." if ok
-           else "[!] Dépendances incomplètes : l'outil ne démarrera pas sans elles.")
-    return ok
 
 
 def modules_manquants(outil, racine=RACINE_DEFAUT):
@@ -363,14 +304,11 @@ def modules_manquants(outil, racine=RACINE_DEFAUT):
 def installer_dependances(outil, racine=RACINE_DEFAUT, ecrire=print):
     """Installe ce qui manque du requirements.txt de l'outil, pour ceux qui s'y prêtent.
 
-    Sous Termux, numpy et scipy passent par pkg (voir PAQUETS_TERMUX). Ailleurs, rien
-    n'est lancé si tout est là : sur Debian, pip refuse la Python du système
+    Rien n'est lancé si tout est là : sur Debian, pip refuse la Python du système
     (externally-managed-environment) même quand apt a déjà tout installé."""
     req = os.path.join(dossier(outil, racine), "requirements.txt")
     if outil["dependances"] != "pip" or not os.path.isfile(req):
         return True
-    if TERMUX:
-        return _installer_dependances_termux(req, ecrire)
     manquants = modules_manquants(outil, racine)
     if not manquants:
         ecrire("[OK] Dépendances déjà présentes.")

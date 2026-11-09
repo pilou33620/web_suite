@@ -20,11 +20,11 @@ jobs:
       - name: Serveur du lanceur — Host, jeton du mode réseau, X-WebSuite
         run: python lanceur/banc_serveur.py
 
-      - name: Connexion à GitHub au démarrage (Termux, Pi) — sans réseau
+      - name: Connexion à GitHub au démarrage (Pi) — sans réseau
         run: python lanceur/connexion_github.py
 
-      - name: Termux — numpy/scipy par pkg, pas par pip
-        run: python lanceur/banc_termux.py
+      - name: Dépendances — pip seulement s'il manque un paquet, openEMS sans question hors Windows
+        run: python lanceur/banc_dependances.py
 
       - name: Appairage — code, jeton et cookie partagés par les web tools
         run: python lanceur/appairage.py
