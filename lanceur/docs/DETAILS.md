@@ -254,6 +254,11 @@ le sert comme fiche `conception-3d`, et la page de conception le montre par son 
 Cette page est sur le canal de pilotage (page `conception`) : gestes et capture, comme les autres pages ; `web3d_regles` y lance le
 contrôle des règles vérifiables (bouton Règles de l'onglet Inspecter), les autres outils `web3d_*` ne visent que la visionneuse.
 
+Les règles de conception électronique (schéma et PCB, base IPC CID/CID+) sont les chapitres de `WEB_CAO/docs/regles/` :
+`savoir_lire` les sert, `index.md` d'abord, comme fiche `conception-electronique`, et la consigne de session impose de les lire
+avant de concevoir un schéma ou un PCB. WEB_CAO en tire la page `docs/regles/regles.html`, que l'Éditeur schématique et l'Éditeur PCB
+montrent par leur lien 📏 Règles, pour Claude in Chrome. `cao_regles` lance le contrôle des règles vérifiables sur l'onglet schéma ou PCB.
+
 **Le panneau « Claude ».** Chaque page des outils a, en bas à droite, un bouton « Claude ».
 Une écriture proposée par Claude s'y affiche en carte, avant → après, avec Appliquer et
 Refuser : rien ne change avant le clic. La case « Appliquer directement (cet onglet) »

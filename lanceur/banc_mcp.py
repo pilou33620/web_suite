@@ -672,7 +672,7 @@ FauxApi.table.clear()
 # ---------------------------------------------------------------------------
 # registre-cao (lanceur/docs/SPEC-mcp-registre-cao.md) : lectures, vue et DRC des pages WEB_CAO
 os.environ["WEB_SUITE_MCP_PORTS"] = json.dumps(dict(PORTS, web_cao=api.server_address[1]))
-OC = ["cao_schema_lire", "cao_pcb_lire", "cao_ipc_lire", "cao_sim_lire", "cao_vue", "cao_drc"]
+OC = ["cao_schema_lire", "cao_pcb_lire", "cao_ipc_lire", "cao_sim_lire", "cao_vue", "cao_drc", "cao_regles"]
 verifier("outils de registre-cao listés", set(OC) <= set(noms), True)
 # l'aide de la page (WEB_CAO/commun/pilote-aide.json, Pilote.aide) est tirée de ces définitions
 import aide_pilote
@@ -682,7 +682,7 @@ if os.path.exists(os.path.dirname(_aide)):
         verifier("pilote-aide.json à jour (sinon : python3 lanceur/aide_pilote.py)", _f.read() == aide_pilote.contenu(), True)
 verifier("cao_thermique listé, une lecture de la page PCB (donnée)", "cao_thermique" in noms and
          "donnée" in next(o["description"] for o in outils if o["name"] == "cao_thermique"), True)
-verifier("54 outils en tout (pilote_interface, registre-cao, dessin-schema, registre-antenna, routage, chemin-auto, composants, savoir_lire, web3d_regles)", len(noms), 54)
+verifier("55 outils en tout (pilote_interface, registre-cao, dessin-schema, registre-antenna, routage, chemin-auto, composants, savoir_lire, web3d_regles, cao_regles)", len(noms), 55)
 # décision du 2026-11-04 : Claude ne fait que ce que l'utilisateur peut faire à l'interface
 RETIRES = ("cao_doc_ecrire cao_profil_ecrire antenna_projet_enregistrer lib_fichier_ecrire cao_composants_ecrire "
            "cao_valeur_composant cao_pistes_ecrire cao_classes_ecrire cao_contraintes_ecrire cao_contour_ecrire "
@@ -701,13 +701,13 @@ for nom, args in (("cao_schema_lire", {"quoi": "net", "nom": "LOCAL", "feuille":
                   ("cao_ipc_lire", {"quoi": "composant", "ref": "U1"}),
                   ("cao_sim_lire", {"quoi": "simulation", "analyse": "pdn", "partie": "chiffres", "afficher": True}),
                   ("cao_vue", {"cadrer": "U1", "couches": ["Top"], "ajuster": True, "page": "pcb"}),
-                  ("cao_drc", {})):
+                  ("cao_drc", {}), ("cao_regles", {})):
     verifier(nom + " accepté", outil(nom, **args)[0], False)
 deposees = [r[2] for r in FauxApi.recues]
 verifier("commandes déposées aux bonnes pages, sans écriture", [(d["nom"], d["page"], d["ecriture"]) for d in deposees],
          [("cao_schema_lire", ["schema"], False), ("cao_pcb_lire", ["pcb"], False),
           ("cao_ipc_lire", ["visionneuse-ipc"], False), ("cao_sim_lire", ["pcb", "visionneuse-ipc"], False),
-          ("cao_vue", ["pcb"], False), ("cao_drc", ["pcb"], False)])
+          ("cao_vue", ["pcb"], False), ("cao_drc", ["pcb"], False), ("cao_regles", ["schema", "pcb"], False)])
 FauxApi.recues.clear()
 verifier("cao_schema_lire etiquettes accepté", outil("cao_schema_lire", quoi="etiquettes", filtre="VCC")[0], False)
 verifier("etiquettes transmis", FauxApi.recues[0][2]["args"], {"quoi": "etiquettes", "filtre": "VCC"})
@@ -914,13 +914,21 @@ verifier("aucun argument invalide n'atteint la page (composants)", FauxApi.recue
 
 
 # le skill servi par le MCP (hors du dépôt) : une liste fermée de fiches, rien d'autre
-verifier("savoir_lire : les fiches du skill", [f for f in mcp.FICHES if f != "conception-3d"],
+verifier("savoir_lire : les fiches du skill", [f for f in mcp.FICHES if f not in ("conception-3d", "conception-electronique")],
          ["SKILL", "antenne", "composants", "pcb", "routage", "schema", "simulation"])
 if os.path.isfile(mcp.REGLES_3D):       # WEB_3D est un autre dépôt, absent de la CI de web_suite
     erreur, texte = outil("savoir_lire", fiche="conception-3d")
     verifier("savoir_lire conception-3d : le fichier de WEB_3D", (erreur, "RÈGLES DE CONCEPTION" in texte), (False, True))
 else:
     verifier("savoir_lire conception-3d : refusée sans WEB_3D", outil("savoir_lire", fiche="conception-3d")[0], True)
+if os.path.isfile(os.path.join(mcp.REGLES_CAO, "index.md")):     # WEB_CAO est un autre dépôt
+    erreur, texte = outil("savoir_lire", fiche="conception-electronique")
+    verifier("savoir_lire conception-electronique : les chapitres de WEB_CAO/docs/regles, index d'abord",
+             (erreur, texte.startswith("# Règles de conception WEB_CAO"), "# Routage" in texte), (False, True, True))
+else:
+    verifier("savoir_lire conception-electronique : refusée sans WEB_CAO", outil("savoir_lire", fiche="conception-electronique")[0], True)
+verifier("la consigne de session impose les règles électroniques",
+         "conception-electronique" in mcp.INSTRUCTIONS and "cao_regles" in mcp.INSTRUCTIONS, True)
 erreur, texte = outil("savoir_lire", fiche="pcb")
 verifier("savoir_lire pcb", (erreur, texte.startswith("# PCB")), (False, True))
 for f in ("../../README", "SKILL.md", "/etc/passwd", None):

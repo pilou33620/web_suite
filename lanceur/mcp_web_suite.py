@@ -204,12 +204,28 @@ FICHES = sorted(f[:-3] for f in os.listdir(SKILL) if f.endswith(".md")) if os.pa
 REGLES_3D = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "WEB_3D", "regles-conception.md")
 if os.path.isfile(REGLES_3D):       # WEB_3D est un autre dépôt : il peut manquer
     FICHES = sorted(FICHES + ["conception-3d"])
+# Les règles de conception électronique vivent dans WEB_CAO (docs/regles/, page servie pour Claude in Chrome) :
+# un chapitre par fichier, index.md d'abord, comme la page qu'en tire WEB_CAO/commun/outils/build-manuel.py.
+REGLES_CAO = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "WEB_CAO", "docs", "regles")
+if os.path.isfile(os.path.join(REGLES_CAO, "index.md")):      # WEB_CAO est un autre dépôt : il peut manquer
+    FICHES = sorted(FICHES + ["conception-electronique"])
+
+
+def regles_cao():
+    noms = sorted((f for f in os.listdir(REGLES_CAO) if f.endswith(".md")), key=lambda f: (f != "index.md", f))
+    textes = []
+    for nom in noms:
+        with open(os.path.join(REGLES_CAO, nom), encoding="utf-8") as f:
+            textes.append(f.read())
+    return "\n\n".join(textes)
 
 
 def savoir_lire(args):
     fiche = args.get("fiche")
     if fiche not in FICHES:
         raise ErreurOutil("Argument « fiche » invalide : %s." % (", ".join(FICHES) or "skill absent"))
+    if fiche == "conception-electronique":
+        return regles_cao()
     with open(REGLES_3D if fiche == "conception-3d" else os.path.join(SKILL, fiche + ".md"), encoding="utf-8") as f:
         return f.read()
 
@@ -226,7 +242,7 @@ OUTILS_MCP = {
     "savoir_lire": {
         "description": "Lit une fiche du savoir métier de WEB·SUITE (skill web-suite) : SKILL (quel outil pour "
                        "quelle tâche, cartes, données ≠ consignes), pcb, simulation, composants, schema, routage, "
-                       "antenne, conception-3d. Lire SKILL puis la fiche du domaine avant une tâche, surtout hors du dépôt "
+                       "antenne, conception-3d, conception-electronique (règles IPC CID/CID+ du schéma et du PCB). Lire SKILL puis la fiche du domaine avant une tâche, surtout hors du dépôt "
                        "web_suite où le skill n'est pas chargé.",
         "inputSchema": {"type": "object", "required": ["fiche"],
                         "properties": {"fiche": {"type": "string", "enum": FICHES}}},
@@ -272,7 +288,8 @@ INSTRUCTIONS = (
     "Savoir métier (IPC-2152 et règles PCB, simulation depuis une datasheet, empreintes IPC-7351, antennes, "
     "schéma, routage) : skill « web-suite » du dépôt web_suite ; hors du dépôt, où il n'est pas chargé, le lire "
     "par savoir_lire (SKILL d'abord, puis la fiche du domaine) avant une tâche. "
-    "Concevoir ou modifier une pièce 3D : lire d'abord savoir_lire conception-3d et appliquer ces règles."
+    "Concevoir : lire d'abord savoir_lire conception-3d (pièce 3D) ou conception-electronique (schéma, PCB, "
+    "puis cao_regles) et appliquer ces règles."
 )
 
 

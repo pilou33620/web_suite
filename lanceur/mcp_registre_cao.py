@@ -110,6 +110,10 @@ def cao_drc(a):
     return resumer(envoyer(["pcb"], "cao_drc", {}, a), "Trop d'erreurs : corrige les premières, puis relance.")
 
 
+def cao_regles(a):
+    return envoyer(["schema", "pcb"], "cao_regles", {}, a)
+
+
 ONGLET = pilote.ONGLET
 DONNEES = pilote.DONNEES
 PROPRIETES = {"filtre": {"type": "string", "description": "Sous-chaîne, sans tenir compte de la casse (repère, valeur, boîtier, nom de net)."},
@@ -196,5 +200,15 @@ OUTILS_CAO = {
                        "remarques, avec leur position en mm. N'entre pas dans l'historique." + DONNEES,
         "inputSchema": {"type": "object", "properties": {"onglet": ONGLET}},
         "fn": cao_drc,
+    },
+    "cao_regles": {
+        "description": "Contrôle les règles de conception vérifiables (savoir_lire conception-electronique) sur l'éditeur "
+                       "schématique ou PCB ouvert, et rend chaque règle avec son repère : ✓ respectée, ✗ et ses écarts. "
+                       "Schéma : cartouche (S3), préfixes des repères (S6), repères uniques et numérotés (S7), paires "
+                       "nommées (S13), référence fabricant (S27), empreinte (S29), ERC (S34). PCB : cartouche (C46), "
+                       "empilage symétrique (C7), repères de pose (C30), sérigraphie (C36), anneaux (R16), points de "
+                       "test (C39), DRC (R1, relancé). Ne couvre pas le reste des règles. Ne modifie rien." + DONNEES,
+        "inputSchema": {"type": "object", "properties": {"onglet": ONGLET}},
+        "fn": cao_regles,
     },
 }
