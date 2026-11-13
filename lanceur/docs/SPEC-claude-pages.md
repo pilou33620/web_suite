@@ -27,7 +27,7 @@ lanceur web_suite (claude_pages.py) ──GET /api/pilote/demandes (long-poll)
 
 ```
 claude -p --output-format stream-json --verbose --tools Skill --strict-mcp-config
-       --mcp-config '{"mcpServers":{"web_suite":{…mcp_web_suite.py}}}'
+       --mcp-config '{"mcpServers":{"web_suite":{…mcp_web_suite}}}'
        --allowedTools mcp__web_suite --permission-mode dontAsk
        --settings '{"disableAllHooks":true}'
        --append-system-prompt "<outil, page, onglet, projet, appareil>"  [--resume <session>]
@@ -109,7 +109,7 @@ système 64 bits.
 ## Bancs
 
 - `python3 lanceur/pilote.py` : routes, refus, appareil distant, page en HTTPS.
-- `python3 lanceur/claude_pages.py` : faux `claude` qui écrit le flux stream-json — arguments
+- `cargo test -p web_suite_lanceur claude_pages` : faux `claude` qui écrit le flux stream-json — arguments
   (outils permis, MCP seul, consigne), messages, reprise, nouvelle conversation, échec, absence.
 - `node lanceur/banc_pilote.js` : la zone de texte, la conversation affichée en texte brut,
   une coupure réseau retentée, un refus affiché.

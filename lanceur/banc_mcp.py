@@ -1,11 +1,14 @@
-"""Banc du serveur MCP (mcp_web_suite.py) : protocole JSON-RPC sur stdio, outil etat,
-porte vers les outils et routes refusées.
+"""Banc du serveur MCP (exécutable mcp_web_suite, lanceur/src/mcp/) : protocole JSON-RPC sur
+stdio, outil etat, outils et refus.
 
     python lanceur/banc_mcp.py
 
 Lance le serveur en sous-processus, lui écrit des lignes sur stdin et lit ses
-réponses sur stdout, comme le fait Claude Code. Un faux WEB_CAO (serveur HTTP
-local) compte les requêtes reçues ; les autres outils sont sur des ports fermés.
+réponses sur stdout, comme le fait Claude Code : le serveur est une boîte noire. Un faux
+WEB_CAO (serveur HTTP local) compte les requêtes reçues ; les autres outils sont sur des
+ports fermés. Ce qu'on n'atteint pas par le protocole (la porte vers les outils appelée
+avec une route interdite, le lanceur en lecture seule, la lecture plafonnée, un outil qui
+plante) est vérifié par les tests de lanceur/src/mcp/mod.rs (cargo test -p web_suite_lanceur).
 Affiche OK si tout passe.
 """
 import http.server
@@ -18,7 +21,12 @@ import threading
 import urllib.parse
 
 ICI = os.path.dirname(os.path.abspath(__file__))
-SERVEUR = os.path.join(ICI, "mcp_web_suite.py")
+RACINE = os.path.dirname(ICI)
+sys.path.insert(0, ICI)
+from banc_bin import binaire  # noqa: E402
+
+SERVEUR = binaire("mcp_web_suite")
+os.environ["WEB_SUITE_DEPOT"] = RACINE   # hérité : le skill et les règles relus sont ceux de ce dépôt
 
 
 class FauxOutil(http.server.BaseHTTPRequestHandler):
@@ -65,7 +73,7 @@ def verifier(nom, obtenu, attendu):
 
 def echanger(lignes):
     """Envoie les lignes puis ferme stdin : rend (réponses décodées, code de sortie, stderr)."""
-    p = subprocess.run([sys.executable, SERVEUR], input="".join(l + "\n" for l in lignes).encode("utf-8"),
+    p = subprocess.run([SERVEUR], input="".join(l + "\n" for l in lignes).encode("utf-8"),
                        stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=30)
     sortie = p.stdout.decode("utf-8")
     # stdout ne porte que du JSON-RPC : chaque ligne doit se décoder
@@ -81,6 +89,25 @@ def msg(id_, methode, params=None):
     if params is not None:
         m["params"] = params
     return json.dumps(m)
+
+
+def appeler(params):
+    """tools/call par le protocole, dans un serveur neuf (il relit WEB_SUITE_MCP_PORTS) : le résultat MCP.
+    NaN et Infinity ne sont pas du JSON : le serveur refuse la ligne entière (-32700), rien n'atteint l'outil."""
+    reponse = echanger([msg(1, "tools/call", params)])[0][0]
+    if "error" in reponse:
+        return {"content": [{"type": "text", "text": reponse["error"]["message"]}], "isError": True}
+    return reponse["result"]
+
+
+def outil(_outil, **args):
+    """Appelle un outil MCP comme le fait Claude : (isError, contenu décodé, ou texte)."""
+    r = appeler({"name": _outil, "arguments": args})
+    texte = r["content"][0]["text"]
+    try:
+        return r["isError"], json.loads(texte)
+    except ValueError:
+        return r["isError"], texte
 
 
 # Ouverture de session, notification sans réponse, ping, liste des outils
@@ -139,39 +166,11 @@ verifier("lancés", {k: e["lance"] for k, e in etat.items()},
 verifier("ports", {k: e["port"] for k, e in etat.items()}, PORTS)
 verifier("adresse", etat["web_cao"]["adresse"], "http://127.0.0.1:%d/" % PORTS["web_cao"])
 
-# La porte vers les outils, appelée directement
-sys.path.insert(0, ICI)
-import mcp_web_suite as mcp  # noqa: E402
-
+# La porte vers les outils (routes interdites, lanceur en lecture seule) : tests de lanceur/src/mcp/mod.rs.
+# Par le protocole : une lecture arrive à l'outil, en GET
 FauxOutil.recues.clear()
-for route in ("/api/github/envoyer", "/api/ia/cle", "/API/GitHub/envoyer", "/api/./github/envoyer",
-              "/api//ia/cle", "/x/../api/github/identite", "@evil.example/", "api/projets",
-              "/api/github", "/api/%67ithub/envoyer", "/api/ia/cle?x=1",
-              "/api/envoyer", "/api/identite", "/api/appairer",
-              # urlparse du lanceur coupe « ;… » : /api/envoyer;x y devient /api/envoyer
-              "/api/envoyer;x", "/api/github/envoyer;x", "/api/projets x", "/api/projets\tx"):
-    try:
-        mcp.appeler_outil_web("web_cao", route, {})
-        raise AssertionError("route permise à tort : " + route)
-    except mcp.ErreurOutil:
-        pass
-verifier("aucune requête refusée n'atteint l'outil", FauxOutil.recues, [])
-verifier("route permise, en GET", mcp.appeler_outil_web("web_cao", "/api/projets"), {"route": "/api/projets"})
-verifier("route permise, en POST", mcp.appeler_outil_web("web_cao", "/api/oeil", {"a": 1})["route"], "/api/oeil")
-verifier("requêtes reçues", FauxOutil.recues, [("GET", "/api/projets"), ("POST", "/api/oeil")])
-
-# Le lanceur est en lecture seule : ses POST installent, lancent, arrêtent, publient
-os.environ["WEB_SUITE_MCP_PORTS"] = json.dumps(dict(PORTS, web_suite=PORTS["web_cao"]))
-FauxOutil.recues.clear()
-for route in ("/api/lancer", "/api/arreter", "/api/installer"):
-    try:
-        mcp.appeler_outil_web("web_suite", route, {"id": "web_3d"})
-        raise AssertionError("POST permis au lanceur : " + route)
-    except mcp.ErreurOutil:
-        pass
-verifier("aucun POST n'atteint le lanceur", FauxOutil.recues, [])
-verifier("GET permis au lanceur", mcp.appeler_outil_web("web_suite", "/api/etat")["route"], "/api/etat")
-os.environ["WEB_SUITE_MCP_PORTS"] = json.dumps(PORTS)
+verifier("route permise, en GET", outil("cao_projets"), (False, {"route": "/api/projets"}))
+verifier("requêtes reçues", FauxOutil.recues, [("GET", "/api/projets")])
 
 # Le lanceur tourne et a lancé WEB_3D sur un port décalé (le sien était pris) : on le suit
 class FauxLanceur(FauxOutil):
@@ -191,11 +190,11 @@ class FauxLanceur(FauxOutil):
 lanceur = http.server.ThreadingHTTPServer(("127.0.0.1", 0), FauxLanceur)
 threading.Thread(target=lanceur.serve_forever, daemon=True).start()
 os.environ["WEB_SUITE_MCP_PORTS"] = json.dumps(dict(PORTS, web_suite=lanceur.server_address[1]))
-vus = {e["outil"]: (e["port"], e["lance"]) for e in mcp.etat_outils()}
+vus = {e["outil"]: (e["port"], e["lance"]) for e in outil("etat")[1]}
 verifier("WEB_3D suivi sur son port décalé", vus["web_3d"], (PORTS["web_cao"], True))
 verifier("outil arrêté : port du catalogue", vus["web_antenna"], (PORTS["web_antenna"], False))
 verifier("port illisible : port du catalogue", vus["web_cao"][0], PORTS["web_cao"])
-verifier("appel vers le port décalé", mcp.appeler_outil_web("web_3d", "/api/projets")["route"], "/api/projets")
+verifier("appel vers le port décalé", outil("web3d_projets")[1]["route"], "/api/projets")
 lanceur.shutdown()
 os.environ["WEB_SUITE_MCP_PORTS"] = json.dumps(PORTS)
 
@@ -243,35 +242,21 @@ illisible, bizarre = servir(JsonIllisible), servir(LanceurBizarre)
 os.environ["WEB_SUITE_MCP_PORTS"] = json.dumps(dict(PORTS, web_suite=bizarre.server_address[1],
                                                     web_cao=pas_http.getsockname()[1],
                                                     web_antenna=illisible.server_address[1]))
-vus = {e["outil"]: (e["port"], e["lance"]) for e in mcp.etat_outils()}
+vus = {e["outil"]: (e["port"], e["lance"]) for e in outil("etat")[1]}
 verifier("entrées illisibles du lanceur ignorées", vus["web_3d"], (PORTS["web_3d"], False))
 verifier("port pris par un service non HTTP : pas WEB_CAO", vus["web_cao"][1], False)
-for outil, attendu in (("web_cao", mcp.OutilArrete), ("web_antenna", mcp.ErreurOutil)):
-    try:
-        mcp.appeler_outil_web(outil, "/api/projets")
-        raise AssertionError("aurait dû échouer : " + outil)
-    except attendu:
-        pass
+# l'outil arrêté (port pris par autre chose) et l'outil qui répond mal : deux pannes, dites chacune
+for nom, attendu in (("cao_projets", "occupé par un autre service"), ("antenna_projets", "JSON illisible")):
+    erreur, texte = outil(nom)
+    verifier("aurait dû échouer : " + nom, (erreur, attendu in texte), (True, True))
 os.environ["WEB_SUITE_MCP_PORTS"] = json.dumps(dict(PORTS, web_suite=illisible.server_address[1]))
-mcp._cache_ports = (0.0, None, None)
-verifier("lanceur au JSON illisible : ports du catalogue", mcp.ports(), dict(PORTS, web_suite=illisible.server_address[1]))
+verifier("lanceur au JSON illisible : ports du catalogue", {e["outil"]: e["port"] for e in outil("etat")[1]},
+         dict(PORTS, web_suite=illisible.server_address[1]))
 os.environ["WEB_SUITE_MCP_PORTS"] = json.dumps(PORTS)
 
-try:
-    mcp.appeler_outil_web("web_3d", "/api/projets")
-    raise AssertionError("un outil arrêté devrait échouer")
-except mcp.OutilArrete as exc:
-    verifier("message d'outil arrêté", str(exc), "WEB_3D ne tourne pas : lance-le depuis WEB·SUITE")
-try:
-    mcp.appeler_outil_web("inconnu", "/")
-    raise AssertionError("un outil inconnu devrait échouer")
-except mcp.ErreurOutil:
-    pass
-
-# Un outil MCP qui plante : résultat en erreur, pas d'exception
-mcp.OUTILS_MCP["boum"] = {"description": "", "inputSchema": {}, "fn": lambda a: 1 / 0}
-verifier("panne d'outil", mcp.appeler({"name": "boum"})["isError"], True)
-del mcp.OUTILS_MCP["boum"]
+verifier("message d'outil arrêté", outil("web3d_projets"),
+         (True, "Échec de web3d_projets : WEB_3D ne tourne pas : lance-le depuis WEB·SUITE"))
+# Un outil inconnu de la porte, un outil MCP qui plante : tests de lanceur/src/mcp/mod.rs
 
 
 # ---------------------------------------------------------------------------
@@ -296,16 +281,6 @@ class FauxApi(FauxOutil):
     do_GET = do_POST = do_PUT = do_DELETE = _repondre
 
 
-def outil(_outil, **args):
-    """Appelle un outil MCP comme le fait Claude : (isError, contenu décodé, ou texte)."""
-    r = mcp.appeler({"name": _outil, "arguments": args})
-    texte = r["content"][0]["text"]
-    try:
-        return r["isError"], json.loads(texte)
-    except ValueError:
-        return r["isError"], texte
-
-
 def q(**params):
     return "?" + urllib.parse.urlencode(params)
 
@@ -315,19 +290,8 @@ os.environ["WEB_SUITE_MCP_PORTS"] = json.dumps(dict(PORTS, web_cao=api.server_ad
 noms = [o["name"] for o in outils]   # tools/list du tout premier échange, par le protocole
 verifier("outils du socle listés", {"etat", "cao_projets", "cao_projet_lire", "cao_doc_lire"} <= set(noms), True)
 
-# Méthodes : GET sans corps, POST avec, ni PUT ni DELETE ; le lanceur en GET seulement
-FauxApi.recues.clear()
-try:
-    mcp.appeler_outil_web("web_suite", "/api/etat", {})
-    raise AssertionError("POST permis à tort au lanceur")
-except mcp.ErreurOutil:
-    pass
-verifier("le POST refusé n'atteint pas le lanceur", FauxApi.recues, [])
-try:
-    mcp.appeler_outil_web("web_cao", "/api/profil", {"a": 1}, methode="PUT")
-    raise AssertionError("PUT permis à tort")
-except TypeError:
-    pass
+# Méthodes : GET sans corps, POST avec, ni PUT ni DELETE (la porte n'a pas d'autre méthode) ; le lanceur
+# en GET seulement : tests de lanceur/src/mcp/mod.rs
 
 # Lectures de projets CAO
 FauxApi.recues.clear()
@@ -354,7 +318,7 @@ verifier("aucun argument invalide n'atteint l'outil", FauxApi.recues, [])
 gros = {"document": {"pistes": [[i, i] for i in range(30000)], "nom": "carte"}, "fichier": "x-PCB.json",
         "modifie": 123}
 FauxApi.table[("GET", "/api/projet/doc")] = (200, gros)
-r = mcp.appeler({"name": "cao_doc_lire", "arguments": {"chemin": "p", "doc": "pcb"}})
+r = appeler({"name": "cao_doc_lire", "arguments": {"chemin": "p", "doc": "pcb"}})
 verifier("réponse de plus de 300 Ko", len(json.dumps(gros)) > 300 * 1024, True)
 verifier("résumé sous 100 Ko", len(r["content"][0]["text"].encode("utf-8")) < 100 * 1024, True)
 _, rendu = outil("cao_doc_lire", chemin="p", doc="pcb")
@@ -416,32 +380,12 @@ FauxApi.table.clear()
 for nom_cas, document in (("coordonnées imbriquées de 91 Ko", {"pts": [[[i, i + 1]] for i in range(9000)]}),
                           ("100 clés de 5 Ko", {("k%03d" % i) + "x" * 5000: i for i in range(100)})):
     FauxApi.table[("GET", "/api/projet/doc")] = (200, {"document": document, "modifie": 1})
-    r = mcp.appeler({"name": "cao_doc_lire", "arguments": {"chemin": "p", "doc": "pcb"}})
+    r = appeler({"name": "cao_doc_lire", "arguments": {"chemin": "p", "doc": "pcb"}})
     verifier("sous 100 Ko : " + nom_cas, len(r["content"][0]["text"].encode("utf-8")) < 100 * 1024, True)
 FauxApi.table.clear()
 
-# Défense en profondeur : routes « Jamais » refusées par le noyau, quelle que soit la méthode
-FauxApi.recues.clear()
-for id_, route_ in (("web_antenna", "/api/openems/lancer"), ("web_antenna", "/api/openems/balayage/lancer"),
-                    ("web_antenna", "/api/openems/arreter"), ("web_antenna", "/api/projet/racine"),
-                    ("web_antenna", "/api/projet/dossier"), ("web_cao", "/api/lib/config"),
-                    ("web_cao", "/api/datasheet/telecharger")):
-    try:
-        mcp.appeler_outil_web(id_, route_, {})
-        raise AssertionError("route « Jamais » permise : " + route_)
-    except mcp.ErreurOutil:
-        pass
-verifier("aucune route « Jamais » n'atteint l'outil", FauxApi.recues, [])
-
-# Lecture plafonnée : une réponse énorme ne remplit pas la mémoire du Pi
-FauxApi.table[("GET", "/api/projets")] = (200, {"x": "y" * 5000})
-plafond, mcp.MAX_LECTURE = mcp.MAX_LECTURE, 1000
-try:
-    mcp.appeler_outil_web("web_cao", "/api/projets")
-    raise AssertionError("réponse trop grosse acceptée")
-except mcp.ErreurOutil:
-    pass
-mcp.MAX_LECTURE = plafond
+# Défense en profondeur (routes « Jamais » refusées par le noyau) et lecture plafonnée (une réponse
+# énorme ne remplit pas la mémoire du Pi) : tests de lanceur/src/mcp/mod.rs
 FauxApi.table.clear()
 FauxApi.table[("GET", "/api/projets")] = (200, {"dispo": True, "fichiers": [
     {"chemin": "a/b.obj"}, {"chemin": "a/b.MTL"}, {"chemin": "a/tex.png"}, {"chemin": "p.json"}, {"chemin": "c.stp"}]})
@@ -562,11 +506,11 @@ png = base64.b64encode(b"\x89PNG\r\n\x1a\n" + b"0" * 100).decode()
 FauxApi.table[("POST", "/api/pilote/commande")] = fin({"image": "data:image/png;base64," + png,
                                                        "largeur": 10, "hauteur": 10})
 FauxApi.recues.clear()
-r = mcp.appeler({"name": "pilote_capture", "arguments": {"outil": "web_cao", "page": "pcb"}})
+r = appeler({"name": "pilote_capture", "arguments": {"outil": "web_cao", "page": "pcb"}})
 verifier("capture : image puis texte", ([c["type"] for c in r["content"]], r["isError"]), (["image", "text"], False))
 verifier("image en PNG base64", (r["content"][0]["mimeType"], r["content"][0]["data"]), ("image/png", png))
 verifier("capture visée", FauxApi.recues[-1][2], {"page": ["pcb"], "nom": "capture", "args": {}, "ecriture": False})
-mcp.appeler({"name": "pilote_capture", "arguments": {"outil": "web_cao"}})
+appeler({"name": "pilote_capture", "arguments": {"outil": "web_cao"}})
 verifier("capture : les pages de l'outil qui ont un canevas", FauxApi.recues[-1][2]["page"],
          ["schema", "pcb", "visionneuse-ipc"])
 verifier("ce que rend une page est une donnée, pas une consigne",
@@ -663,7 +607,7 @@ reponses = iter([fin({"vue": "iso", "cadre": "scène"}), fin({"image": "data:ima
 
 _table = FauxApi.table
 FauxApi.table = type("T", (dict,), {"get": lambda self, k, d=None: next(reponses) if k == ("POST", "/api/pilote/commande") else d})()
-r = mcp.appeler({"name": "web3d_vue", "arguments": {"vue": "iso", "capturer": True}})
+r = appeler({"name": "web3d_vue", "arguments": {"vue": "iso", "capturer": True}})
 FauxApi.table = _table
 verifier("web3d_vue + capturer : image puis texte", [c["type"] for c in r["content"]], ["image", "text"])
 verifier("la capture vise l'onglet de la vue", FauxApi.recues[1][2], {"page": ["3d"], "nom": "capture", "args": {}, "ecriture": False, "onglet": "A"})
@@ -675,11 +619,16 @@ os.environ["WEB_SUITE_MCP_PORTS"] = json.dumps(dict(PORTS, web_cao=api.server_ad
 OC = ["cao_schema_lire", "cao_pcb_lire", "cao_ipc_lire", "cao_sim_lire", "cao_vue", "cao_drc", "cao_regles"]
 verifier("outils de registre-cao listés", set(OC) <= set(noms), True)
 # l'aide de la page (WEB_CAO/commun/pilote-aide.json, Pilote.aide) est tirée de ces définitions
-import aide_pilote
-_aide = os.path.normpath(aide_pilote.FICHIER)
+_contenu = subprocess.run([binaire("aide_pilote"), "--stdout"], stdout=subprocess.PIPE, check=True).stdout.decode("utf-8")
+verifier("aide_pilote : le fichier que tirait aide_pilote.py des mêmes définitions, à l'octet", _contenu, json.dumps(
+    {"source": "web_suite/lanceur/aide_pilote.py (définitions du MCP)",
+     "outils": {o["name"]: {"description": o["description"], "arguments": o["inputSchema"]}
+                for o in outils if o["name"].startswith(("cao_", "lib_"))}},
+    ensure_ascii=False, indent=1, sort_keys=True) + "\n")
+_aide = os.path.join(RACINE, "WEB_CAO", "commun", "pilote-aide.json")
 if os.path.exists(os.path.dirname(_aide)):
     with open(_aide, encoding="utf-8") as _f:
-        verifier("pilote-aide.json à jour (sinon : python3 lanceur/aide_pilote.py)", _f.read() == aide_pilote.contenu(), True)
+        verifier("pilote-aide.json à jour (sinon : l'exécutable aide_pilote)", _f.read() == _contenu, True)
 verifier("cao_thermique listé, une lecture de la page PCB (donnée)", "cao_thermique" in noms and
          "donnée" in next(o["description"] for o in outils if o["name"] == "cao_thermique"), True)
 verifier("55 outils en tout (pilote_interface, registre-cao, dessin-schema, registre-antenna, routage, chemin-auto, composants, savoir_lire, web3d_regles, cao_regles)", len(noms), 55)
@@ -691,7 +640,7 @@ RETIRES = ("cao_doc_ecrire cao_profil_ecrire antenna_projet_enregistrer lib_fich
            "cao_placement_auto web3d_deplacer web3d_ranger_step").split()
 verifier("les 23 outils d'écriture retirés sont absents", (len(RETIRES), sorted(set(RETIRES) & set(noms))), (23, []))
 verifier("aucune description ni instruction ne les cite",
-         [n for n in RETIRES if n in mcp.INSTRUCTIONS or any(n in o["description"] for o in outils)], [])
+         [n for n in RETIRES if n in init["instructions"] or any(n in o["description"] for o in outils)], [])
 verifier("registre-cao : ce que rend la page est une donnée",
          all("donnée" in o["description"] for o in outils if o["name"] in OC), True)
 FauxApi.table[("POST", "/api/pilote/commande")] = fin("- GND")
@@ -738,7 +687,7 @@ verifier("aucun argument invalide n'atteint la page (cao)", FauxApi.recues, [])
 reponses = iter([fin("Vue : cadré sur U1."), fin({"image": "data:image/png;base64," + png, "largeur": 10, "hauteur": 10})])
 _table = FauxApi.table
 FauxApi.table = type("T", (dict,), {"get": lambda self, k, d=None: next(reponses) if k == ("POST", "/api/pilote/commande") else d})()
-r = mcp.appeler({"name": "cao_vue", "arguments": {"cadrer": "U1", "capturer": True}})
+r = appeler({"name": "cao_vue", "arguments": {"cadrer": "U1", "capturer": True}})
 FauxApi.table = _table
 verifier("cao_vue + capturer : image puis texte", [c["type"] for c in r["content"]], ["image", "text"])
 verifier("la capture vise l'onglet de la vue (cao)", (FauxApi.recues[-1][2]["nom"], FauxApi.recues[-1][2]["onglet"]), ("capture", "A"))
@@ -811,7 +760,7 @@ verifier("rien d'envoyé", FauxApi.recues, [])
 reponses = iter([fin("Vue : vue 3D."), fin({"image": "data:image/png;base64," + png, "largeur": 10, "hauteur": 10})])
 _table = FauxApi.table
 FauxApi.table = type("T", (dict,), {"get": lambda self, k, d=None: next(reponses) if k == ("POST", "/api/pilote/commande") else d})()
-r = mcp.appeler({"name": "antenna_vue", "arguments": {"vue": "3d", "capturer": True}})
+r = appeler({"name": "antenna_vue", "arguments": {"vue": "3d", "capturer": True}})
 FauxApi.table = _table
 verifier("antenna_vue + capturer : image puis texte", [c["type"] for c in r["content"]], ["image", "text"])
 verifier("la capture vise l'onglet de la vue (antenna)", (FauxApi.recues[-1][2]["nom"], FauxApi.recues[-1][2]["onglet"]), ("capture", "A"))
@@ -914,21 +863,22 @@ verifier("aucun argument invalide n'atteint la page (composants)", FauxApi.recue
 
 
 # le skill servi par le MCP (hors du dépôt) : une liste fermée de fiches, rien d'autre
-verifier("savoir_lire : les fiches du skill", [f for f in mcp.FICHES if f not in ("conception-3d", "conception-electronique")],
+FICHES = next(o for o in outils if o["name"] == "savoir_lire")["inputSchema"]["properties"]["fiche"]["enum"]
+verifier("savoir_lire : les fiches du skill", [f for f in FICHES if f not in ("conception-3d", "conception-electronique")],
          ["SKILL", "antenne", "composants", "pcb", "routage", "schema", "simulation"])
-if os.path.isfile(mcp.REGLES_3D):       # WEB_3D est un autre dépôt, absent de la CI de web_suite
+if os.path.isfile(os.path.join(RACINE, "WEB_3D", "regles-conception.md")):       # WEB_3D est un autre dépôt, absent de la CI de web_suite
     erreur, texte = outil("savoir_lire", fiche="conception-3d")
     verifier("savoir_lire conception-3d : le fichier de WEB_3D", (erreur, "RÈGLES DE CONCEPTION" in texte), (False, True))
 else:
     verifier("savoir_lire conception-3d : refusée sans WEB_3D", outil("savoir_lire", fiche="conception-3d")[0], True)
-if os.path.isfile(os.path.join(mcp.REGLES_CAO, "index.md")):     # WEB_CAO est un autre dépôt
+if os.path.isfile(os.path.join(RACINE, "WEB_CAO", "docs", "regles", "index.md")):     # WEB_CAO est un autre dépôt
     erreur, texte = outil("savoir_lire", fiche="conception-electronique")
     verifier("savoir_lire conception-electronique : les chapitres de WEB_CAO/docs/regles, index d'abord",
              (erreur, texte.startswith("# Règles de conception WEB_CAO"), "# Routage" in texte), (False, True, True))
 else:
     verifier("savoir_lire conception-electronique : refusée sans WEB_CAO", outil("savoir_lire", fiche="conception-electronique")[0], True)
 verifier("la consigne de session impose les règles électroniques",
-         "conception-electronique" in mcp.INSTRUCTIONS and "cao_regles" in mcp.INSTRUCTIONS, True)
+         "conception-electronique" in init["instructions"] and "cao_regles" in init["instructions"], True)
 erreur, texte = outil("savoir_lire", fiche="pcb")
 verifier("savoir_lire pcb", (erreur, texte.startswith("# PCB")), (False, True))
 for f in ("../../README", "SKILL.md", "/etc/passwd", None):
