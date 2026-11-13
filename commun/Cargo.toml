@@ -5,7 +5,7 @@ edition = "2021"
 description = "Commun aux web tools : serveur HTTP/HTTPS, appairage, canal de pilotage"
 
 [dependencies]
-serde_json = "1"
+serde_json = { version = "1", features = ["preserve_order"] } # les clés JSON gardent leur ordre, comme en Python
 rustls = { version = "0.23", default-features = false, features = ["ring", "std", "tls12"] }
 rustls-pemfile = "2"
 sha2 = "0.10"
