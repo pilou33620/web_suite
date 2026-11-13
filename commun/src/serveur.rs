@@ -124,6 +124,7 @@ fn raison(code: u16) -> &'static str {
         405 => "Method Not Allowed",
         409 => "Conflict",
         413 => "Request Entity Too Large",
+        429 => "Too Many Requests",
         500 => "Internal Server Error",
         503 => "Service Unavailable",
         _ => "",
