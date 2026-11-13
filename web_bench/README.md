@@ -20,6 +20,17 @@ Depuis la racine de web_suite, une fois les outils installés (`installer.cmd` /
 | Windows | `demarrer_web_bench.cmd` |
 | Linux, Raspberry Pi | `./demarrer_web_bench.sh` |
 
+web_bench est un exécutable Rust (caisse `web_bench`). Pour le lancer à la main, depuis la racine
+de web_suite :
+
+```
+cargo run -p web_bench -- --outil 3d
+```
+
+Il trouve ses pages (`web_bench/page/`) et les outils à la racine du dépôt : celle que donne
+`WEB_SUITE_DEPOT`, sinon le premier dossier contenant `lanceur/index.html` en remontant depuis
+l'exécutable, puis depuis le dossier courant.
+
 Le navigateur s'ouvre sur `http://127.0.0.1:8200/__banc/`.
 
 Options :
@@ -27,7 +38,8 @@ Options :
 - `--racine DOSSIER` : si les outils ne sont pas à la racine de web_suite ;
 - `--port` et `--sans-navigateur`.
 
-Prérequis : Python 3.8+. Ajoute Node.js pour les bancs JavaScript, et Chrome, Chromium ou Edge
+Prérequis : Rust (cargo) pour compiler web_bench, et Python 3.8+ pour les outils, qu'il lance
+avec `python3` (`py` ou `python` sous Windows). Ajoute Node.js pour les bancs JavaScript, et Chrome, Chromium ou Edge
 pour les bancs qui ouvrent une page (ceux de WEB_3D surtout).
 
 ## Le rapport, pour les corrections
@@ -111,7 +123,10 @@ affichée.
 
 ```
 python web_bench/banc_web_bench.py
+cargo test -p web_bench
 ```
 
-Ce banc utilise de faux outils. Il vérifie le relais, la sonde, le passage d'un outil à l'autre,
-les gardes, les routes arrêtées, les bancs et les rapports. Il est lancé par la CI de web_suite.
+Le banc pilote l'exécutable de l'extérieur, avec de faux outils (il le compile au besoin ;
+`WEB_SUITE_BIN` donne un dossier d'exécutables déjà compilés). Il vérifie le relais, la sonde, le
+passage d'un outil à l'autre, les gardes, les routes arrêtées, les bancs, les rapports et l'arrêt.
+Il est lancé par la CI de web_suite. `cargo test` éprouve les fonctions internes.
