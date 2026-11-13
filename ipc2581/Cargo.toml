@@ -1,0 +1,17 @@
+[package]
+name = "ipc2581"
+version = "0.1.0"
+edition = "2021"
+description = "Lecteur IPC-2581 de WEB_CAO et WEB_ANTENNA : XML (ou ZIP) -> IPCDesign -> JSON de la visionneuse"
+
+[lib]
+doctest = false # les schémas indentés des commentaires ne sont pas du code
+
+[dependencies]
+roxmltree = "0.20"  # l'arbre entier en mémoire, comme ET.parse : le lecteur le parcourt plusieurs fois
+indexmap = "2"      # les dict de Python gardent l'ordre d'insertion, et le JSON le montre
+regex = "1"         # valeur et tolérance d'un composant (_extraire_val_tol)
+zip = { version = "2", default-features = false, features = ["deflate"] }
+
+[dev-dependencies]
+sha2 = "0.10" # les sorties de référence trop longues pour le dépôt sont tenues par leur empreinte

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<IPC-2581 revision="C" xmlns="http://webstds.ipc.org/2581">
+ <Content roleRef="owner">
+  <DictionaryLineDesc units="MILLIMETER">
+   <EntryLineDesc id="l2"><LineDesc lineEnd="SQUARE" lineWidth="0.2"/></EntryLineDesc>
+  </DictionaryLineDesc>
+  <DictionaryStandard units="INCH">
+   <EntryStandard id="c"><Circle diameter="0.04"/></EntryStandard>
+  </DictionaryStandard>
+ </Content>
+ <Ecad name="mini">
+  <CadHeader units="MILLIMETER"/>
+  <CadData>
+   <Layer name="TOP" layerFunction="SIGNAL" side="TOP"/>
+   <Step name="MINI"></Step>
+  </CadData>
+ </Ecad>
+</IPC-2581>

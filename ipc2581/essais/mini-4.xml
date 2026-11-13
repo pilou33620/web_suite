@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<IPC-2581 revision="C" xmlns="http://webstds.ipc.org/2581">
+ <Content roleRef="owner">
+  <DictionaryLineDesc units="MILLIMETER">
+   <EntryLineDesc id="l2"><LineDesc lineEnd="SQUARE" lineWidth="0.2"/></EntryLineDesc>
+  </DictionaryLineDesc>
+  
+ </Content><HistoryRecord number="1"><FileRevision fileRevisionId="1"><SoftwarePackage name="Editeur PCB" vendor="WEB_CAO" revision="2"/></FileRevision></HistoryRecord>
+ <Ecad name="mini">
+  <CadHeader units="MILLIMETER"/>
+  <CadData>
+   <Layer name="TOP" layerFunction="SIGNAL" side="TOP"/>
+   <Step name="MINI">
+    <LayerFeature layerRef="TOP"><Set>
+     <Features><Location x="10" y="10"/><UserSpecial>
+      <Polyline><PolyBegin x="0" y="0"/><PolyStepSegment x="0" y="1"/><LineDescRef id="l2"/></Polyline>
+     </UserSpecial></Features>
+    </Set></LayerFeature></Step>
+  </CadData>
+ </Ecad>
+</IPC-2581>

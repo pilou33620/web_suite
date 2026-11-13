@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Carte d'essai du contre-percage (back-drill), lue par banc-essai.py.
+
+  Quatre cuivres (TOP, IN1, IN2 = plan GND, BOTTOM), 1,34 mm d'empilage, et
+  trois vias traversants du net SIG, que le signal n'emprunte que de TOP a IN1 :
+    V1 (10 ; 10) contre-perce comme l'ecrit KiCad : une <Spec> faite de
+       <Backdrill type="START_LAYER | MUST_NOT_CUT_LAYER | MAX_STUB_LENGTH">,
+       pointee par un <SpecRef> du trou ;
+    V2 (20 ; 10) contre-perce par un FORET a part : un trou non metallise de
+       0,55 mm sur un calque de percage dont le <Span> va de BOTTOM a IN2 (les
+       couches retirees), et dont la spec ne donne que le moignon residuel ;
+    V3 (30 ; 10) sans contre-percage.
+  Un quatrieme foret, en (40 ; 10), n'a pas de via : il doit etre compte a
+  part, pas fabriquer un trou nu sur la carte.
+-->
+<IPC-2581 revision="C" xmlns="http://webstds.ipc.org/2581">
+ <Content roleRef="owner">
+  <FunctionMode mode="USERDEF" level="1"/>
+  <StepRef name="CP-ESSAI"/>
+  <DictionaryStandard units="MILLIMETER">
+   <EntryStandard id="c060"><Circle diameter="0.6"/></EntryStandard>
+  </DictionaryStandard>
+ </Content>
+ <Ecad name="contre-percage">
+  <CadHeader units="MILLIMETER">
+   <Spec name="BD_1A">
+    <Backdrill type="START_LAYER">
+     <Property layerOrGroupRef="BOTTOM"/>
+    </Backdrill>
+    <Backdrill type="MUST_NOT_CUT_LAYER">
+     <Property layerOrGroupRef="IN1"/>
+    </Backdrill>
+    <Backdrill type="MAX_STUB_LENGTH">
+     <Property value="0.1" unit="MM"/>
+    </Backdrill>
+   </Spec>
+   <Spec name="BD_2">
+    <Backdrill type="MAX_STUB_LENGTH">
+     <Property value="150" unit="MICRON"/>
+    </Backdrill>
+   </Spec>
+  </CadHeader>
+  <CadData>
+   <Layer name="TOP" layerFunction="SIGNAL" side="TOP" polarity="POSITIVE"/>
+   <Layer name="D1" layerFunction="DIELPREG" side="INTERNAL"/>
+   <Layer name="IN1" layerFunction="SIGNAL" side="INTERNAL" polarity="POSITIVE"/>
+   <Layer name="D2" layerFunction="DIELCORE" side="INTERNAL"/>
+   <Layer name="IN2" layerFunction="PLANE" side="INTERNAL" polarity="POSITIVE"/>
+   <Layer name="D3" layerFunction="DIELPREG" side="INTERNAL"/>
+   <Layer name="BOTTOM" layerFunction="SIGNAL" side="BOTTOM" polarity="POSITIVE"/>
+   <Layer name="DRILL_TOP_BOTTOM" layerFunction="DRILL" side="ALL" polarity="POSITIVE">
+    <Span fromLayer="TOP" toLayer="BOTTOM"/>
+   </Layer>
+   <Layer name="BACKDRILL_BOTTOM_IN2" layerFunction="DRILL" side="ALL" polarity="POSITIVE">
+    <Span fromLayer="BOTTOM" toLayer="IN2"/>
+    <SpecRef id="BD_2"/>
+   </Layer>
+   <Stackup overallThickness="1.34">
+    <StackupGroup name="PILE" thickness="1.34">
+     <StackupLayer layerOrGroupRef="TOP" thickness="0.035" sequence="1"/>
+     <StackupLayer layerOrGroupRef="D1" thickness="0.2" sequence="2"/>
+     <StackupLayer layerOrGroupRef="IN1" thickness="0.035" sequence="3"/>
+     <StackupLayer layerOrGroupRef="D2" thickness="0.8" sequence="4"/>
+     <StackupLayer layerOrGroupRef="IN2" thickness="0.035" sequence="5"/>
+     <StackupLayer layerOrGroupRef="D3" thickness="0.2" sequence="6"/>
+     <StackupLayer layerOrGroupRef="BOTTOM" thickness="0.035" sequence="7"/>
+    </StackupGroup>
+   </Stackup>
+   <Step name="CP-ESSAI">
+    <Datum x="0" y="0"/>
+    <Profile>
+     <Polygon>
+      <PolyBegin x="0" y="0"/>
+      <PolyStepSegment x="50" y="0"/>
+      <PolyStepSegment x="50" y="20"/>
+      <PolyStepSegment x="0" y="20"/>
+      <PolyStepSegment x="0" y="0"/>
+     </Polygon>
+    </Profile>
+    <LogicalNet name="SIG" netClass="SIGNAL"/>
+    <LogicalNet name="GND" netClass="GROUND"/>
+    <LayerFeature layerRef="TOP">
+     <Set net="SIG">
+      <Features>
+       <Line startX="5" startY="10" endX="10" endY="10">
+        <LineDesc lineEnd="ROUND" lineWidth="0.2"/>
+       </Line>
+       <Line startX="20" startY="10" endX="30" endY="10">
+        <LineDesc lineEnd="ROUND" lineWidth="0.2"/>
+       </Line>
+      </Features>
+     </Set>
+    </LayerFeature>
+    <LayerFeature layerRef="IN1">
+     <Set net="SIG">
+      <Features>
+       <Line startX="10" startY="10" endX="20" endY="10">
+        <LineDesc lineEnd="ROUND" lineWidth="0.2"/>
+       </Line>
+       <Line startX="30" startY="10" endX="35" endY="10">
+        <LineDesc lineEnd="ROUND" lineWidth="0.2"/>
+       </Line>
+      </Features>
+     </Set>
+    </LayerFeature>
+    <LayerFeature layerRef="DRILL_TOP_BOTTOM">
+     <Set net="SIG" geometry="VIA_0.3">
+      <Hole name="H1" diameter="0.3" platingStatus="VIA" plusTol="0.0" minusTol="0.0" x="10" y="10">
+       <SpecRef id="BD_1A"/>
+      </Hole>
+     </Set>
+     <Set net="SIG" geometry="VIA_0.3">
+      <Hole name="H2" diameter="0.3" platingStatus="VIA" plusTol="0.0" minusTol="0.0" x="20" y="10"/>
+     </Set>
+     <Set net="SIG" geometry="VIA_0.3">
+      <Hole name="H3" diameter="0.3" platingStatus="VIA" plusTol="0.0" minusTol="0.0" x="30" y="10"/>
+     </Set>
+    </LayerFeature>
+    <LayerFeature layerRef="BACKDRILL_BOTTOM_IN2">
+     <Set>
+      <Hole name="B1" diameter="0.55" platingStatus="NONPLATED" plusTol="0.0" minusTol="0.0" x="20" y="10"/>
+      <Hole name="B2" diameter="0.55" platingStatus="NONPLATED" plusTol="0.0" minusTol="0.0" x="40" y="10"/>
+     </Set>
+    </LayerFeature>
+   </Step>
+  </CadData>
+ </Ecad>
+</IPC-2581>

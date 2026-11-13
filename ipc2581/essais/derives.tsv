@@ -1,0 +1,684 @@
+tout-INCH-MILLIMETER.xml	1	501279b3d7c66d0fd7580431e51d4346e5ac0b4cd353c6ecfecf26ea8a518406	<DictionaryLineDesc units="MILLIMETER">	<DictionaryLineDesc units="INCH">	<DictionaryStandard units="MILLIMETER">	<DictionaryStandard units="INCH">	<DictionaryUser units="MILLIMETER">	<DictionaryUser units="MICRON">	<CadHeader units="MILLIMETER">	<CadHeader units="MILLIMETER">
+tout-INCH-MILLIMETER.xml	0	4e53f7b716c5951a820612d5ee1417d94d8db5138eb004c41bcf9d9d55623046	<DictionaryLineDesc units="MILLIMETER">	<DictionaryLineDesc units="INCH">	<DictionaryStandard units="MILLIMETER">	<DictionaryStandard units="INCH">	<DictionaryUser units="MILLIMETER">	<DictionaryUser units="MICRON">	<CadHeader units="MILLIMETER">	<CadHeader units="MILLIMETER">
+tout-MILLIMETER-INCH.xml	1	79f347c6cbd361413caad1de7b87a9e63338f4ba191d5825cdf0f3a92a7e460e	<DictionaryLineDesc units="MILLIMETER">	<DictionaryLineDesc units="MILLIMETER">	<DictionaryStandard units="MILLIMETER">	<DictionaryStandard units="MILLIMETER">	<DictionaryUser units="MILLIMETER">	<DictionaryUser units="MIL">	<CadHeader units="MILLIMETER">	<CadHeader units="INCH">
+tout-MILLIMETER-INCH.xml	0	1e8dc9a46dd619332020692df870cdb0be77e3ab7aec9f30847c21fa89a66480	<DictionaryLineDesc units="MILLIMETER">	<DictionaryLineDesc units="MILLIMETER">	<DictionaryStandard units="MILLIMETER">	<DictionaryStandard units="MILLIMETER">	<DictionaryUser units="MILLIMETER">	<DictionaryUser units="MIL">	<CadHeader units="MILLIMETER">	<CadHeader units="INCH">
+tout-MM-MICRON.xml	1	e9ee4dddf2dd7630ccefa0735c05d715b89bda08337585d2314b8ced2feeee7f	<DictionaryLineDesc units="MILLIMETER">	<DictionaryLineDesc units="MM">	<DictionaryStandard units="MILLIMETER">	<DictionaryStandard units="MM">	<DictionaryUser units="MILLIMETER">	<DictionaryUser units="">	<CadHeader units="MILLIMETER">	<CadHeader units="MICRON">
+tout-MM-MICRON.xml	0	146bc3dac901c5e67cdfa0223e3863bedffbbb33ca516960d1d52d51c986e938	<DictionaryLineDesc units="MILLIMETER">	<DictionaryLineDesc units="MM">	<DictionaryStandard units="MILLIMETER">	<DictionaryStandard units="MM">	<DictionaryUser units="MILLIMETER">	<DictionaryUser units="">	<CadHeader units="MILLIMETER">	<CadHeader units="MICRON">
+tout-truc-.xml	1	056e4b1fcfef3baada7594452159af09cedd0e595c88344f19ce5a064991bf80	<DictionaryLineDesc units="MILLIMETER">	<DictionaryLineDesc units="truc">	<DictionaryStandard units="MILLIMETER">	<DictionaryStandard units="truc">	<DictionaryUser units="MILLIMETER">	<DictionaryUser units="INCH">	<CadHeader units="MILLIMETER">	<CadHeader units="">
+tout-truc-.xml	0	85fa3c03eada0b7c275a13032aa9223cba6fc64e02d641bf2a15a937a99a731e	<DictionaryLineDesc units="MILLIMETER">	<DictionaryLineDesc units="truc">	<DictionaryStandard units="MILLIMETER">	<DictionaryStandard units="truc">	<DictionaryUser units="MILLIMETER">	<DictionaryUser units="INCH">	<CadHeader units="MILLIMETER">	<CadHeader units="">
+sans-ns.xml	1	35aa43f7b5c45c2354c51570bb565c222343df8a7d63941e900dfc55ebcc7ace	 xmlns="http://webstds.ipc.org/2581"	
+sans-ns.xml	0	e424375fe0edd1540a9f18e263f8b65d97d81571d40dde321b8f59f511a6a3f2	 xmlns="http://webstds.ipc.org/2581"	
+racine-prefixee.xml	1	a56607215a402eb490c6ba9e0cadfacf3af9c59ab474623731ae37b6fc27be20	 xmlns="http://webstds.ipc.org/2581"	 xmlns:i="http://webstds.ipc.org/2581"	<IPC-2581	<i:IPC-2581	</IPC-2581>	</i:IPC-2581>
+step-autre-ns.xml	1	fac845e61bdd9294b9b829918f0ce2f4585658f7076b6b38f33ca0c55b82f42f	<Step name	<Step xmlns="urn:autre" name
+caddata-sans-ns.xml	1	a309615dac354c2200b4a573fafded78b47ebe28338bd9ef78d5b5cca14bbd3a	<CadData>	<CadData xmlns="">
+attribut-ns.xml	1	05b9f01a29f17f243eb92226ad8c1f1bb78c6e61499ad4856ad0be264592fd7d	<Features><Circle diameter="0.8"/><Location x="3" y="3"/>	<Features><Circle xmlns:z="urn:z" z:diameter="3" diameter="0.8"/><Location x="3" y="3"/>
+commentaires.xml	1	aa50915f68b78681637b7b1e40ef3fc3de5b34bc7b081ac2ecc20c8a87c14884	<Content>	<!-- commentaire --><?pi truc?><Content><![CDATA[<Spec/>]]>
+doctype.xml	1	170bc306b058fda61422b7c7ce1cd4e777893c3de91edb9488b75eb8129a0159	<IPC-2581 revision="C"	<?xml version="1.0" encoding="UTF-8"?>\n<!DOCTYPE IPC-2581 SYSTEM "ipc.dtd">\n<IPC-2581 revision="C"
+echappements.xml	1	5a317f466a5c93f2a5fac92bb77a014a2d7b80f80b6432db2fb92bb92629ff60	textString="T1"	textString="a&#10;b&#9;c &amp; &lt;d&gt; &quot;e&quot; \\ /  été ✓ 😀"
+blancs-attribut.xml	1	598f1fba85d177a74ab45f2843f76c1be1f49fc13d3475223ced7cba406fd92d	textString="T1"	textString="a\nb\tc"
+valeur-saut-de-ligne.xml	1	a6c18868a17e838e178efcc044fe24ecd07d29a82c56415b255ea6d4c5746912	value="33 Ohm"	value="10K&#10;"
+paquet-en-ligne-sans-nom.xml	1	bc15167c92f20243b1d74e6abb9ac6b5278f97f7994cfb4546e16acc0c7633c3	<Component refDes="U2"><Package name="ENLIGNE">	<Component refDes="U2"><Package>
+editeur-revision-1.xml	1	f725e5e0f99faca6ff718cde2fc43c9b11ab5f4b4cb97ce50847490d65145704	<Content>	<Content><FunctionMode mode="USERDEF"/>	<Ecad name="e">	<LogisticHeader><Role id="r"/></LogisticHeader><HistoryRecord number="1"><FileRevision fileRevisionId="1"><SoftwarePackage name="Editeur PCB" vendor="WEB_CAO" revision="1"/></FileRevision></HistoryRecord><Ecad name="e">
+nombre-ligne-0.xml	1	b3fe10231af9b12ac63426889c846319be620a9a2a91f42b3fc1c4e56a1f824d	endX="5" endY="0"	endX=" 1.5 " endY="0"
+nombre-profil-0.xml	1	30d3cb41c146eac084f2b84e387530a4265a056733aaf4e3c7b7622ab6c501c9	<PolyStepSegment x='30' y='0'/>	<PolyStepSegment x=' 1.5 ' y='0'/>
+nombre-centre-0.xml	1	2bf85e6007232f33b12a5e7cca809f37e571a0a83454cdd7447977df5361a700	centerX='15'	centerX=' 1.5 '
+nombre-trou-0.xml	1	097561123b903b1a00650a9614535bb6031ea0a3b64a290990801d7d76f52490	<Hole name="h1" diameter="0.3"	<Hole name="h1" diameter=" 1.5 "
+nombre-foret-0.xml	1	26084edbecfcca493e0a278ad27b64de2efc5399ddf6cec90c2a8cbcb3aecf67	diameter="0.7" platingStatus="NONPLATED" x="2"	diameter="0.7" platingStatus="NONPLATED" x=" 1.5 "
+nombre-sequence-0.xml	1	5676d57f9b60283a4ac520d182c65da4d1360a64f621f787da3a8f3c3b68b699	sequence="4.9"	sequence=" 1.5 "
+nombre-rayons-0.xml	1	a5cd0ff9fc7c0542f48c241531e3cbe9b08c96bf4f2ca6d89f6714f2cfe739e3	spokeCount="4"	spokeCount=" 1.5 "
+nombre-anneaux-0.xml	1	c20201e1c9c57681c7cdeff27d34f6874151eb0034a54ee54a32112ec9564003	ringNumber="5"	ringNumber=" 1.5 "
+nombre-epaisseur-0.xml	1	b10c395e6efea182e85be0f23d520d0c78ae5c7f32db915062138583df99b6d6	thickness="1.2"	thickness=" 1.5 "
+nombre-rugosite-0.xml	1	83d81532e1a80722a9368691e5bc49822f86a2b60b926864df62f308be036b6d	<Property value="1,5" unit="MICRON"/>	<Property value=" 1.5 " unit="MICRON"/>
+nombre-regle-0.xml	1	0674b714193338cf81382e8ead90a1ab5ddaff211de5852dc34f42c18f94f407	name="MAX_LENGTH" value="55.5"	name="MAX_LENGTH" value=" 1.5 "
+nombre-vias-0.xml	1	146a6deab2346587fb38577d129d3cdd978e8b69bec16f6e9016572f4504ea44	name="MAX_VIAS" value="3"	name="MAX_VIAS" value=" 1.5 "
+nombre-place-0.xml	1	f91dc171300b878602b324acb78af78c32877e6c21395aac50c1682f42984203	<Location x="1" y="2"/><Xform rotation="30"	<Location x=" 1.5 " y="2"/><Xform rotation=" 1.5 "
+nombre-fente-0.xml	1	40d9515d3b8c6539f67305931aef8d1177afc5e0e3da1d4342acd31c0f063bb1	<Oval width="1" height="3"/>	<Oval width=" 1.5 " height="3"/>	<Xform rotation="-30"/>	<Xform rotation=" 1.5 "/>
+nombre-moignon-0.xml	1	91418e0de1a9c50d2ec4866dace569105989cd3f0eecde14e5c8ee20e7207572	<Property value="0.1" unit="MM"/>	<Property value=" 1.5 " unit="MM"/>
+nombre-z-0.xml	1	a58c2a16fe6c09af6b4bf2ab66fd4edd43f5bbb5ab084f292d919fe86facf394	<Impedance value="50" tolPlus="10"	<Impedance value=" 1.5 " tolPlus=" 1.5 "
+nombre-hauteur-0.xml	1	9d7b3cb309e56544d5593715afdf338929ef2ccf5ba3773617ad91f6af2fd751	height="0.45"	height=" 1.5 "	fontSize="2"	fontSize=" 1.5 "
+nombre-ligne-1.xml	1	cf515a1213a49d6843f1cdbbba955fdd86453d40a1a28f23eff8478126068285	endX="5" endY="0"	endX="1_0.5" endY="0"
+nombre-profil-1.xml	1	b3d93690e6a07dced7a3d770f5fae9a8f2d581c8ae1d700d99c05e69737f6473	<PolyStepSegment x='30' y='0'/>	<PolyStepSegment x='1_0.5' y='0'/>
+nombre-centre-1.xml	1	b1ef3086610c343c85ade237dc9311292cc3a42f22ff359f6ea9a828e259a32c	centerX='15'	centerX='1_0.5'
+nombre-trou-1.xml	1	c954671b140329930d2fce0335628db2ca6bf9f64fe62575c449da33018f582f	<Hole name="h1" diameter="0.3"	<Hole name="h1" diameter="1_0.5"
+nombre-foret-1.xml	1	1b463987cfb14d94b2495434496332ed33a548dcb52d81d4be33f80b3b4b2e86	diameter="0.7" platingStatus="NONPLATED" x="2"	diameter="0.7" platingStatus="NONPLATED" x="1_0.5"
+nombre-sequence-1.xml	1	e088ca77b8ad981954e458a37c33e7cfc61e5a2ce3d8589779774aa90c54a720	sequence="4.9"	sequence="1_0.5"
+nombre-rayons-1.xml	1	ef88ca023223d35d00afc1493f204a1e59c253d8ba989b631598f391a4983c60	spokeCount="4"	spokeCount="1_0.5"
+nombre-anneaux-1.xml	1	d39e4a5072fd3db926794917b2e9269c8d239ca3b4e87dc25f33fa7837d30811	ringNumber="5"	ringNumber="1_0.5"
+nombre-epaisseur-1.xml	1	a378fd71ee8bae8bb09d37911b768e921751b66f1c9b90cc2bbf4a907d884773	thickness="1.2"	thickness="1_0.5"
+nombre-rugosite-1.xml	1	138f9373689a3ef5a16e2c4ba50a1f2d9c20e7f48346efd31d7906d28f9f8693	<Property value="1,5" unit="MICRON"/>	<Property value="1_0.5" unit="MICRON"/>
+nombre-regle-1.xml	1	61c14246ed1c1c950119254999bf9c339764bbdd9213ed2da7acd843f74c63ee	name="MAX_LENGTH" value="55.5"	name="MAX_LENGTH" value="1_0.5"
+nombre-vias-1.xml	1	313bd7dd1948a328dd9afa458f35ae1fd9419289378d04a659dcbe9dd1565a11	name="MAX_VIAS" value="3"	name="MAX_VIAS" value="1_0.5"
+nombre-place-1.xml	1	c6edec520f7584c019fdb2d5b33ad5b0ae3068634e0eb0391de6702fc5f33bd0	<Location x="1" y="2"/><Xform rotation="30"	<Location x="1_0.5" y="2"/><Xform rotation="1_0.5"
+nombre-fente-1.xml	1	8622bb65bdf2c5114455f6402c45c16ccb650f0715e91f51e71ea3174e6db860	<Oval width="1" height="3"/>	<Oval width="1_0.5" height="3"/>	<Xform rotation="-30"/>	<Xform rotation="1_0.5"/>
+nombre-moignon-1.xml	1	4440c380121c5fc916f63189b21acc56488a2207d519174cb47a93ac5e1c1c76	<Property value="0.1" unit="MM"/>	<Property value="1_0.5" unit="MM"/>
+nombre-z-1.xml	1	3d6dd4afd4d376c354af0b431a8d0a54166738c33ce3cec9209bf2ee7aaad415	<Impedance value="50" tolPlus="10"	<Impedance value="1_0.5" tolPlus="1_0.5"
+nombre-hauteur-1.xml	1	e7fe130b5a7bffe204daed330c87c7211ce37ad8a8c5039324dba67ccc805aac	height="0.45"	height="1_0.5"	fontSize="2"	fontSize="1_0.5"
+nombre-ligne-2.xml	1	0d432ac89dabffeb061da107516383a4a6846d95212ec945163286dc955d4631	endX="5" endY="0"	endX="1__0" endY="0"
+nombre-profil-2.xml	1	6a5003f24aa8cc567a16b09fb9c28ea009538c199a1c4efde69c8bf213b784ff	<PolyStepSegment x='30' y='0'/>	<PolyStepSegment x='1__0' y='0'/>
+nombre-centre-2.xml	1	6175a356d543e78e5cb67451d63c0ca323028a03b9e9a5b1da2bbaffc7161b6c	centerX='15'	centerX='1__0'
+nombre-trou-2.xml	1	0190150766900fe11799ad82ab2b1c5ae0b4e8f6d02401e9355939a501c73241	<Hole name="h1" diameter="0.3"	<Hole name="h1" diameter="1__0"
+nombre-foret-2.xml	1	16232cc97145bfdc4d518698ea4e18d387864f9be1f2b31d72ec3eb2c876d442	diameter="0.7" platingStatus="NONPLATED" x="2"	diameter="0.7" platingStatus="NONPLATED" x="1__0"
+nombre-sequence-2.xml	1	0931340dc767a11500d3a66f23185944257b93f84a66f6b929694465ff0baf11	sequence="4.9"	sequence="1__0"
+nombre-rayons-2.xml	1	9890ca0d994e17309f229792077ff3d4e60fd0c352b90f3fd035318abe3add6d	spokeCount="4"	spokeCount="1__0"
+nombre-anneaux-2.xml	1	35ffd9f20908686cffa7d945a532c8b373c3e605fe52872044142f31033a735d	ringNumber="5"	ringNumber="1__0"
+nombre-epaisseur-2.xml	1	46472816d52b9968337b44b330ab525712ad8d8bc44777311e73ffeaf02b95c6	thickness="1.2"	thickness="1__0"
+nombre-rugosite-2.xml	1	07b7f1e82b7e6ed39024e712d790aac701acbf1bd600d02d6cae83a8d9b26685	<Property value="1,5" unit="MICRON"/>	<Property value="1__0" unit="MICRON"/>
+nombre-regle-2.xml	1	a7cb942b32a9d423a0a4595ca596a8bb147feeb3cc99283b2652d85d097499c1	name="MAX_LENGTH" value="55.5"	name="MAX_LENGTH" value="1__0"
+nombre-vias-2.xml	1	22f9b2ccc4d38d8495a63437f35cae011087e5d760eb94a6fb6d00d8e1b0c8e5	name="MAX_VIAS" value="3"	name="MAX_VIAS" value="1__0"
+nombre-place-2.xml	1	b06aa0a1e3ecbf9d12dd5148b7ff17b685d7c48db0a0896b0eb820f32bb9a51a	<Location x="1" y="2"/><Xform rotation="30"	<Location x="1__0" y="2"/><Xform rotation="1__0"
+nombre-fente-2.xml	1	ecf8f54e14d3a1679168cec825d2fc1228a7bcdab4c9b8ae116e03c25cabc4fb	<Oval width="1" height="3"/>	<Oval width="1__0" height="3"/>	<Xform rotation="-30"/>	<Xform rotation="1__0"/>
+nombre-moignon-2.xml	1	7e64a00a987da1b26c92e167353ac7b0074db60404c7e9ff7fcb46706af33644	<Property value="0.1" unit="MM"/>	<Property value="1__0" unit="MM"/>
+nombre-z-2.xml	1	60fbb4e4570d996cc02f80cb29b2ed718eb03592b6d5425ac50d891551ec26fc	<Impedance value="50" tolPlus="10"	<Impedance value="1__0" tolPlus="1__0"
+nombre-hauteur-2.xml	1	e6befc58e2b6359045cdb8282084f5d06adb17d8ec166844e4f0b9a21d357834	height="0.45"	height="1__0"	fontSize="2"	fontSize="1__0"
+nombre-ligne-3.xml	1	7fdc67342df23fae19f5072f5f06db0893854dea9a44ece2b2ee00fa86f4175b	endX="5" endY="0"	endX="+.5" endY="0"
+nombre-profil-3.xml	1	7c04d554128309111223bee74b65f659958b7472332edb04d5cb303b6c128adc	<PolyStepSegment x='30' y='0'/>	<PolyStepSegment x='+.5' y='0'/>
+nombre-centre-3.xml	1	1fbcdfdf2c1d7a1e93f83161f6d7412df2fc4944df081f8c40c842e5cf32bdba	centerX='15'	centerX='+.5'
+nombre-trou-3.xml	1	28d0928f592a43a657355573c9a64f64bb60ae62a861f23dddeb6fa8721d5e0a	<Hole name="h1" diameter="0.3"	<Hole name="h1" diameter="+.5"
+nombre-foret-3.xml	1	0b893b3085b032b90032dd0ac836ac354836bfdcadb94726f39a554bab9b5e5e	diameter="0.7" platingStatus="NONPLATED" x="2"	diameter="0.7" platingStatus="NONPLATED" x="+.5"
+nombre-sequence-3.xml	1	5093846ad6d761cd5eb928330c0cedc35bbd2bdcd711250a4495a732d2c54a22	sequence="4.9"	sequence="+.5"
+nombre-rayons-3.xml	1	08e37d63b92eb210b5da471a41ee6c40a878e84bbc7271836b9a5fd8df103d80	spokeCount="4"	spokeCount="+.5"
+nombre-anneaux-3.xml	1	33dd9cb7846a056c199e1b666a4999075a6464c715764aa9266a7843997fc794	ringNumber="5"	ringNumber="+.5"
+nombre-epaisseur-3.xml	1	2ea3c575da771c970257b35611a75014fb7570c43685fba97ed22a9e54be2910	thickness="1.2"	thickness="+.5"
+nombre-rugosite-3.xml	1	12ab86a002ca2cc1bd72bc15990d9d88a3b767aaa7dfb26cf1fdda251572ec9d	<Property value="1,5" unit="MICRON"/>	<Property value="+.5" unit="MICRON"/>
+nombre-regle-3.xml	1	3cd6e78af1a505af4c37d1aaf899971983d947273180f2244c7560a97a35b438	name="MAX_LENGTH" value="55.5"	name="MAX_LENGTH" value="+.5"
+nombre-vias-3.xml	1	994fc5abbcdce3ae1e909a79c4e3c0bf48c78e198d05ebde116dceb910c59c1c	name="MAX_VIAS" value="3"	name="MAX_VIAS" value="+.5"
+nombre-place-3.xml	1	28b9039d1dfff2fa289661e83633c6cb09e6a7348caca1a9927f41226cd3dd1a	<Location x="1" y="2"/><Xform rotation="30"	<Location x="+.5" y="2"/><Xform rotation="+.5"
+nombre-fente-3.xml	1	e0020e9823244c5858cc86a3ad2a84e31358ec34bf6868244d4c3ab2e0b7a498	<Oval width="1" height="3"/>	<Oval width="+.5" height="3"/>	<Xform rotation="-30"/>	<Xform rotation="+.5"/>
+nombre-moignon-3.xml	1	a1aaa32084374a048317101cd4da16cb99f5cb6ee5916204db3447b6c75b01af	<Property value="0.1" unit="MM"/>	<Property value="+.5" unit="MM"/>
+nombre-z-3.xml	1	c104ab7afb09b158d6ad61afd1f12145d4a9c343c474a7cffe688bfa80526d68	<Impedance value="50" tolPlus="10"	<Impedance value="+.5" tolPlus="+.5"
+nombre-hauteur-3.xml	1	a5ec8cd2f3c4815e9eddb19e31cd808ccc46f35c4376d37120c37e0eee1facd0	height="0.45"	height="+.5"	fontSize="2"	fontSize="+.5"
+nombre-ligne-4.xml	1	fffb1b89195822c9da9028a4bd374db9dbb5b77313985a678469a2f377ba8b83	endX="5" endY="0"	endX="5." endY="0"
+nombre-profil-4.xml	1	3113a931dcafadf2d1f1c00aba9effd894628f50dc89cd29ffe72d05625bd3c4	<PolyStepSegment x='30' y='0'/>	<PolyStepSegment x='5.' y='0'/>
+nombre-centre-4.xml	1	6f61ceb7bd2d47bd2be6c358d0d8315c7bc0ce7fc22af29c185f05cd5f5c327c	centerX='15'	centerX='5.'
+nombre-trou-4.xml	1	9d40dee52b01613e05ca938de9a5f5af3b630ecc5755b555ba79e1cd699e9361	<Hole name="h1" diameter="0.3"	<Hole name="h1" diameter="5."
+nombre-foret-4.xml	1	8231b50b2c8c178fc13fcd4d729f2375e7ee95f84928ab318b888069adad6eef	diameter="0.7" platingStatus="NONPLATED" x="2"	diameter="0.7" platingStatus="NONPLATED" x="5."
+nombre-sequence-4.xml	1	a9fa893bcc3ed7c185f46472b11a555497a802f1bc781b5962c6b9d51898b9da	sequence="4.9"	sequence="5."
+nombre-rayons-4.xml	1	3b1ce25547d72f23c934dba9e8fe5b71d02e1b02e232104dd9e594c45dc4144d	spokeCount="4"	spokeCount="5."
+nombre-anneaux-4.xml	1	93233291d364a8d603d84e046a19465bc2068120a1f4b9aab26d9556839b79ec	ringNumber="5"	ringNumber="5."
+nombre-epaisseur-4.xml	1	a7946fab8dd9e25aaa518180d66ce9d90a1cfa60fa137085978062725b1f3a23	thickness="1.2"	thickness="5."
+nombre-rugosite-4.xml	1	4b28c4d79cf40824f0b6abe90239bf9236a5134df1f5fd5a6341533b532d9b96	<Property value="1,5" unit="MICRON"/>	<Property value="5." unit="MICRON"/>
+nombre-regle-4.xml	1	31c55afe59d4c7a74e76a4c46049b41d25f74b7ce83a2bf8316fa28a20f6953f	name="MAX_LENGTH" value="55.5"	name="MAX_LENGTH" value="5."
+nombre-vias-4.xml	1	329e4c4da1bc518bb2b39e8f47f78f4f4fcf4b510e42fc1f5e522228a4b5cbfa	name="MAX_VIAS" value="3"	name="MAX_VIAS" value="5."
+nombre-place-4.xml	1	9ced3209e45a79e1214cb26130e3cfd4b3e5ddb26ebec038c499afd4478bb129	<Location x="1" y="2"/><Xform rotation="30"	<Location x="5." y="2"/><Xform rotation="5."
+nombre-fente-4.xml	1	dda6619ccc23ba0caa7071abe55cb65da79a7ad531ed75736fab10c85dbea8cf	<Oval width="1" height="3"/>	<Oval width="5." height="3"/>	<Xform rotation="-30"/>	<Xform rotation="5."/>
+nombre-moignon-4.xml	1	f4e9ee63fe8143f6ea2b4a9712ba0532f77b182b7619087c1b7ee7790856a2a1	<Property value="0.1" unit="MM"/>	<Property value="5." unit="MM"/>
+nombre-z-4.xml	1	3b94701ce95dd93d77dca0204c7dd499537865853588d93f4cde5db1e3d53373	<Impedance value="50" tolPlus="10"	<Impedance value="5." tolPlus="5."
+nombre-hauteur-4.xml	1	e76ef6872ea0d36c3400ba8f98d5721293acb569ed989d2df26e54c1c69fb08a	height="0.45"	height="5."	fontSize="2"	fontSize="5."
+nombre-ligne-5.xml	1	aeb27de6ac7dda0a6ba2de80706b60417682d54b247a30386372268d2f83b161	endX="5" endY="0"	endX="0x10" endY="0"
+nombre-profil-5.xml	1	ed750d54f154cd4208e30d8d9c6d30643b8a827bfb3ef6c849befdd8d8a20d85	<PolyStepSegment x='30' y='0'/>	<PolyStepSegment x='0x10' y='0'/>
+nombre-centre-5.xml	1	5e94b7e9802cfc1a2f7fd7dafe2775a4bacd7eb43fd4d8a42e2b474a18d372a2	centerX='15'	centerX='0x10'
+nombre-trou-5.xml	1	85e7a97b1c460b8eac27864614a22865ca6aa3560560913bfa737b432de7b8da	<Hole name="h1" diameter="0.3"	<Hole name="h1" diameter="0x10"
+nombre-foret-5.xml	1	fe1eeeedf958886f0da95bcf11e0dcff18552285c5ffb7fda96061152b88c44b	diameter="0.7" platingStatus="NONPLATED" x="2"	diameter="0.7" platingStatus="NONPLATED" x="0x10"
+nombre-sequence-5.xml	1	520a296a98b2b0f3b9cd018fc2fafc439a6be62d99719dbc99f4d7cbc912b69b	sequence="4.9"	sequence="0x10"
+nombre-rayons-5.xml	1	b473185aa7cc828d7bb1bf325159946db8d1e2408f4985c43ed268c767beadc0	spokeCount="4"	spokeCount="0x10"
+nombre-anneaux-5.xml	1	6fc630758571c2a8945e2e16564cb79b9389d2e254012f1bf0aeb05f489c67a3	ringNumber="5"	ringNumber="0x10"
+nombre-epaisseur-5.xml	1	a5b6c961617669342e3d4059dbd118ff0ab5520aa99f7f2fb78d86f053445334	thickness="1.2"	thickness="0x10"
+nombre-rugosite-5.xml	1	469321ff8b95136bfe7d2580bd424d698a4ec91c3a66da7b0a04c11f5fea94c0	<Property value="1,5" unit="MICRON"/>	<Property value="0x10" unit="MICRON"/>
+nombre-regle-5.xml	1	0ea768282799da3c8f30988d59b03d1b1c5ac9a8601a75c33a96d2db8629c762	name="MAX_LENGTH" value="55.5"	name="MAX_LENGTH" value="0x10"
+nombre-vias-5.xml	1	bb5b20374e152ee322192baabc13d729d40382ea3f423fadd5268f1d0c55515c	name="MAX_VIAS" value="3"	name="MAX_VIAS" value="0x10"
+nombre-place-5.xml	1	26dfc3b259faf73e437ab3204fc2a856c2de77720e46a5250792ea2047f811d9	<Location x="1" y="2"/><Xform rotation="30"	<Location x="0x10" y="2"/><Xform rotation="0x10"
+nombre-fente-5.xml	1	8a3be3d80444f1152f03b3e65ae333408b351480f04398940a5b7eeae58b085f	<Oval width="1" height="3"/>	<Oval width="0x10" height="3"/>	<Xform rotation="-30"/>	<Xform rotation="0x10"/>
+nombre-moignon-5.xml	1	6552adc0b56e5c578428de6d4e9c43ac3d71aa42e8fb4e4e531cb4a8919c84c7	<Property value="0.1" unit="MM"/>	<Property value="0x10" unit="MM"/>
+nombre-z-5.xml	1	e998f5f17ffebfa90dc101682cd502fc8e73f5dd47228b8bc30407b831a1b629	<Impedance value="50" tolPlus="10"	<Impedance value="0x10" tolPlus="0x10"
+nombre-hauteur-5.xml	1	0a897482b03b9596048112c93cb078a6131c7a417bb288b4f077b11a98fd8726	height="0.45"	height="0x10"	fontSize="2"	fontSize="0x10"
+nombre-ligne-6.xml	1	568b1bc6f4452fd00b15edbe31271308129a571178b8f294195ff36a22532493	endX="5" endY="0"	endX="1e3" endY="0"
+nombre-profil-6.xml	1	69db002b656fddd2972de06c0ef5e6be67ffbd4d515c1c77fa4838a81e135280	<PolyStepSegment x='30' y='0'/>	<PolyStepSegment x='1e3' y='0'/>
+nombre-centre-6.xml	1	261596a1e7936ff5327a7bdb459b380db9431dad9fdfd10dc9a8ac357ec25258	centerX='15'	centerX='1e3'
+nombre-trou-6.xml	1	3b6e886b0f88a6177cda6dc21ec0fc3f880009a927de256e1e660613c76a336a	<Hole name="h1" diameter="0.3"	<Hole name="h1" diameter="1e3"
+nombre-foret-6.xml	1	a2d20373c0e9b96077fd42e87af0832f816f07e9ad49c4579291248d30a106d5	diameter="0.7" platingStatus="NONPLATED" x="2"	diameter="0.7" platingStatus="NONPLATED" x="1e3"
+nombre-sequence-6.xml	1	dc28fee795f787b508fe76e32e03072862f7df423e4aec745160f19197a60335	sequence="4.9"	sequence="1e3"
+nombre-rayons-6.xml	1	391560a6bef64df9f310987f5a7b69234345278687118cf694e170ed262b25a7	spokeCount="4"	spokeCount="1e3"
+nombre-anneaux-6.xml	1	db46653ef5f5fb6eb955d6b326157037df8d7c59a7a86b9a8130986651c3c8e2	ringNumber="5"	ringNumber="1e3"
+nombre-epaisseur-6.xml	1	57467eb7d0cddb9b647779f272805a679fa204faba4413a8913c848a3183666a	thickness="1.2"	thickness="1e3"
+nombre-rugosite-6.xml	1	8a49cbdac59be9816b5f7e3400f1194e6c336c567881ce05bac2a0097798cf5d	<Property value="1,5" unit="MICRON"/>	<Property value="1e3" unit="MICRON"/>
+nombre-regle-6.xml	1	373cbaa5b7be60e3bdd472ac597e4efb54987a5926cc9be774ed2674af9a1105	name="MAX_LENGTH" value="55.5"	name="MAX_LENGTH" value="1e3"
+nombre-vias-6.xml	1	2294fe6a32e84d4728dafdf8c4fadebad0182c4e19bc8ca50550f11d72fad032	name="MAX_VIAS" value="3"	name="MAX_VIAS" value="1e3"
+nombre-place-6.xml	1	51656d339bf3eb91a07c829d32286e38fde87b47e20ef4f2b03d98f30462f589	<Location x="1" y="2"/><Xform rotation="30"	<Location x="1e3" y="2"/><Xform rotation="1e3"
+nombre-fente-6.xml	1	e395198879e1cf728a3efbf903eb5e96affe9d99e35e6f671c4f01465ff21e3a	<Oval width="1" height="3"/>	<Oval width="1e3" height="3"/>	<Xform rotation="-30"/>	<Xform rotation="1e3"/>
+nombre-moignon-6.xml	1	bc6ce94c3def425afe5202c110b678d95f6d05984243bf72ef92b042f154278d	<Property value="0.1" unit="MM"/>	<Property value="1e3" unit="MM"/>
+nombre-z-6.xml	1	a75477aa36fee972edad4a2bb9c14a4e5ba944978574d6619003123aa1b6757e	<Impedance value="50" tolPlus="10"	<Impedance value="1e3" tolPlus="1e3"
+nombre-hauteur-6.xml	1	72f1d3869d125805d2b8ab3555cc33eaf272c7b62a6714ba8656926fc62a0293	height="0.45"	height="1e3"	fontSize="2"	fontSize="1e3"
+nombre-ligne-7.xml	1	93dadf8697b1c9b77644495148f35832cadbe79c2859e74d02cc6a22c038ac84	endX="5" endY="0"	endX="1E-3" endY="0"
+nombre-profil-7.xml	1	fe10a44a52b74f2577e3cc15dc4910c68d86502bb619966f08827c40845e85ed	<PolyStepSegment x='30' y='0'/>	<PolyStepSegment x='1E-3' y='0'/>
+nombre-centre-7.xml	1	70b4a9cc3db340414865cc9d68ea3cbb176d8e5b5f2c6f8eb49323eba594cd07	centerX='15'	centerX='1E-3'
+nombre-trou-7.xml	1	24838e22bd6d2d44341ce67c20fd7e9a36fdb9b08fa72a5f885cc51c901fd128	<Hole name="h1" diameter="0.3"	<Hole name="h1" diameter="1E-3"
+nombre-foret-7.xml	1	9282340cded4c6ef45090252801cab56f9a442ae517a478e1c48102b7466e933	diameter="0.7" platingStatus="NONPLATED" x="2"	diameter="0.7" platingStatus="NONPLATED" x="1E-3"
+nombre-sequence-7.xml	1	e284af4e8fd517fd5832dc05b8df0c61f4652cd894415da78ccb4651ec3b5479	sequence="4.9"	sequence="1E-3"
+nombre-rayons-7.xml	1	5a9483828f98842ede6708d119fe9540c73aa832b6a499eea8f7731add889ef0	spokeCount="4"	spokeCount="1E-3"
+nombre-anneaux-7.xml	1	57f9ecb4ceee6db3a1aeff931e9dad06af808d52489fa0adf1aa1effb31750c2	ringNumber="5"	ringNumber="1E-3"
+nombre-epaisseur-7.xml	1	ff04cc88c7f96a1b8f56f3818a11c4a1895833e1659a1cb3cccd62276375a019	thickness="1.2"	thickness="1E-3"
+nombre-rugosite-7.xml	1	905c94a6f854b25e2cde6e393ea2e165f659d20016bb60201fd7698056d299f3	<Property value="1,5" unit="MICRON"/>	<Property value="1E-3" unit="MICRON"/>
+nombre-regle-7.xml	1	9ab2f7ea7ffab415c6cb0c64c027753eb8f6fc1c7026c9e58c1bcdbf7a936214	name="MAX_LENGTH" value="55.5"	name="MAX_LENGTH" value="1E-3"
+nombre-vias-7.xml	1	46f61aab4d1c95edbd8f9ccd4e33c18ee5a178a6b5ca7ca6684cc8f2237144a4	name="MAX_VIAS" value="3"	name="MAX_VIAS" value="1E-3"
+nombre-place-7.xml	1	d91cd1efd27b4f4755eae2839ab64c0efc43bfb76e83810d948d9828272bc7d3	<Location x="1" y="2"/><Xform rotation="30"	<Location x="1E-3" y="2"/><Xform rotation="1E-3"
+nombre-fente-7.xml	1	bdb7081ab5ca0377c5769c91e14542d23b380249f9003d2ed3c74c3e8b2e692d	<Oval width="1" height="3"/>	<Oval width="1E-3" height="3"/>	<Xform rotation="-30"/>	<Xform rotation="1E-3"/>
+nombre-moignon-7.xml	1	af7855c9cec1ed045efc4a36b0fef81c3adb70e0e6127db6625518d5f41582b4	<Property value="0.1" unit="MM"/>	<Property value="1E-3" unit="MM"/>
+nombre-z-7.xml	1	7ef31e2ead4f3df71c14124b928ebb70cb839fdcf9d242eb8502ca2dc6180a7e	<Impedance value="50" tolPlus="10"	<Impedance value="1E-3" tolPlus="1E-3"
+nombre-hauteur-7.xml	1	82a83cf21c1f5e32feb595a18fef6b5c62db49a2993737e3f13f8213c682f4b0	height="0.45"	height="1E-3"	fontSize="2"	fontSize="1E-3"
+nombre-ligne-8.xml	1	f62b3e8c037db83e87c3b5de567f9daafdecaa76f31416768c3ab7839771bcb6	endX="5" endY="0"	endX="inf" endY="0"
+nombre-profil-8.xml	1	1ddae74f2ca27c4730754a928dfaac69e6e8d3b8ae0b605eb4291893d2a4aeaa	<PolyStepSegment x='30' y='0'/>	<PolyStepSegment x='inf' y='0'/>
+nombre-centre-8.xml	1	4303c82bea22bbb55935074a3f42cbd2d014fc326985ab05816c16f9da19041f	centerX='15'	centerX='inf'
+nombre-trou-8.xml	1	90f0ab66f4ff517e8ab2d5149f893d81935e7ba635860968234ae9edf4c07327	<Hole name="h1" diameter="0.3"	<Hole name="h1" diameter="inf"
+nombre-foret-8.xml	1	6729956cdbb61e9c2190c78ea32111a5286d2f621818fe37c39d092b01d253a4	diameter="0.7" platingStatus="NONPLATED" x="2"	diameter="0.7" platingStatus="NONPLATED" x="inf"
+nombre-sequence-8.xml	1	66e67a31c48849a0afe0e5cde5ba339caec884bfa0523702d58e3a1303a257b3	sequence="4.9"	sequence="inf"
+nombre-rayons-8.xml	1	2b89a579834eaec3304fb4f1bdc5192f836fa28d6da7ca3419c8edf30cd29de4	spokeCount="4"	spokeCount="inf"
+nombre-anneaux-8.xml	1	fe9a2919c9807cca5084ba8d92d3bb82af6b53ef1934669dc00ce03483346c74	ringNumber="5"	ringNumber="inf"
+nombre-epaisseur-8.xml	1	7d32eaf6aa94e236f71c977d13aff8907286b56658fafa248c3fee6940330884	thickness="1.2"	thickness="inf"
+nombre-rugosite-8.xml	1	c2dc1bce80986395e9e72e19378af1736df772f185ded8fada9cca807b493b97	<Property value="1,5" unit="MICRON"/>	<Property value="inf" unit="MICRON"/>
+nombre-regle-8.xml	1	b91fcda976aadd23dd5eb48d3f8658312f454124031ecf374c1eb63ee1889b76	name="MAX_LENGTH" value="55.5"	name="MAX_LENGTH" value="inf"
+nombre-vias-8.xml	1	0f11d79cabe2077c9a6a31ce8590059db1496f8bd0157d05981ba9686f774138	name="MAX_VIAS" value="3"	name="MAX_VIAS" value="inf"
+nombre-place-8.xml	1	6f8d18c28566a329be34755a0d128e625be6e47ba076c3e5c7edfe20ea1f557a	<Location x="1" y="2"/><Xform rotation="30"	<Location x="inf" y="2"/><Xform rotation="inf"
+nombre-fente-8.xml	1	2f23a78f5bccaef7e36378adb1b040399556fee147c848c3297d0bbdbf256c4c	<Oval width="1" height="3"/>	<Oval width="inf" height="3"/>	<Xform rotation="-30"/>	<Xform rotation="inf"/>
+nombre-moignon-8.xml	1	dcc781aaba4c7410d35a92879396ffc430f4369edda9082083dd88daf374ab53	<Property value="0.1" unit="MM"/>	<Property value="inf" unit="MM"/>
+nombre-z-8.xml	1	2e3de4597e9741fd0b1a87634b4c1bacc531673b952fa75d1cec3de1f28ab4f9	<Impedance value="50" tolPlus="10"	<Impedance value="inf" tolPlus="inf"
+nombre-hauteur-8.xml	1	ecd48094e80791804ff0a7dbec61b950a1696d3887c728a2e2cf4896a1cc7e27	height="0.45"	height="inf"	fontSize="2"	fontSize="inf"
+nombre-ligne-9.xml	1	e475e4e4a5b7e281cbe18b1280b3812472ca390002fc1cd509739892d5b51719	endX="5" endY="0"	endX="-inf" endY="0"
+nombre-profil-9.xml	1	18772363e8293dc8c090c14274c04566c0094b0a27abed0e9126e539c0a7cc92	<PolyStepSegment x='30' y='0'/>	<PolyStepSegment x='-inf' y='0'/>
+nombre-centre-9.xml	1	d45af65d864a44bd195f464c3bdb6b94827d191a949b70fbc5d5bcba5bdab705	centerX='15'	centerX='-inf'
+nombre-trou-9.xml	1	eed209ab4dff7405aef3341b21342e5977690b3067b858656ef8ae556a1169a6	<Hole name="h1" diameter="0.3"	<Hole name="h1" diameter="-inf"
+nombre-foret-9.xml	1	11f4db2f4df0297763e24ce1d0cfc7e23c7c8d757761ac1a7c36a67468d668ef	diameter="0.7" platingStatus="NONPLATED" x="2"	diameter="0.7" platingStatus="NONPLATED" x="-inf"
+nombre-sequence-9.xml	1	8de162c1fe3e5b18d8da508f20170edecdab85c4d0a9d26164be72f42a3d344a	sequence="4.9"	sequence="-inf"
+nombre-rayons-9.xml	1	7201af4f814d1c6e55557a186b845f9a40dd30ca5ba3c2145780dda429361260	spokeCount="4"	spokeCount="-inf"
+nombre-anneaux-9.xml	1	c174dbbb2e3befa624428884d3ea1805fb791cac69a16b605fa5ba46de56e581	ringNumber="5"	ringNumber="-inf"
+nombre-epaisseur-9.xml	1	f5ad41cd9c3c4df307973cb6472528c73d9e2f724fef5cbd501a0c9ddcb52dcd	thickness="1.2"	thickness="-inf"
+nombre-rugosite-9.xml	1	91e47381975b244e85305bda5644ab7c2ec3012f9328673dc1fda6212658d367	<Property value="1,5" unit="MICRON"/>	<Property value="-inf" unit="MICRON"/>
+nombre-regle-9.xml	1	1ea077c744b65f59578f5d0e824598c9dd58579aec452a6c50acf67ef5b12622	name="MAX_LENGTH" value="55.5"	name="MAX_LENGTH" value="-inf"
+nombre-vias-9.xml	1	99cbef44acb1c22fb333804652c8a2312cd72a1f6b6329a6e9dab43ae5375359	name="MAX_VIAS" value="3"	name="MAX_VIAS" value="-inf"
+nombre-place-9.xml	1	0d6357aea3a7359dbb99f364fe7887ac60f825dfc7c7f1fc5ba363c600773a68	<Location x="1" y="2"/><Xform rotation="30"	<Location x="-inf" y="2"/><Xform rotation="-inf"
+nombre-fente-9.xml	1	75b1812bbe0673e1fbc68bb874586f9cdd5359b76925ea5b228a21f71ce42e39	<Oval width="1" height="3"/>	<Oval width="-inf" height="3"/>	<Xform rotation="-30"/>	<Xform rotation="-inf"/>
+nombre-moignon-9.xml	1	d1282f55454dafb4f824de258e6c88fe4049ee07dd4f23a6faa4e3312651bb81	<Property value="0.1" unit="MM"/>	<Property value="-inf" unit="MM"/>
+nombre-z-9.xml	1	f6c05cda750f3075ccc8b1442f00c0efb974bea8d1711c8dfa5567404d3f8788	<Impedance value="50" tolPlus="10"	<Impedance value="-inf" tolPlus="-inf"
+nombre-hauteur-9.xml	1	7040accf3576b65b7106f1b7e6e69d8dc7a80542f2872570f653e6dc6ceaa33f	height="0.45"	height="-inf"	fontSize="2"	fontSize="-inf"
+nombre-ligne-10.xml	1	4aaf8e65ccc9357aa4482f62e0821055e616f25c961ed59307b25a1490675694	endX="5" endY="0"	endX="nan" endY="0"
+nombre-profil-10.xml	1	ad1303cc12c1280dd6f84d26ceeacd16fb8b126116b07dd6eafe03a41ea7427f	<PolyStepSegment x='30' y='0'/>	<PolyStepSegment x='nan' y='0'/>
+nombre-centre-10.xml	1	63362d4765f6d53e4845d84046e80a2cc02480f67a8006d9ba154364d03972b4	centerX='15'	centerX='nan'
+nombre-trou-10.xml	1	f3a6e26f2007b66fb5cd186b7c607a4eb3340850ef251a33dea1d62a4a6438b9	<Hole name="h1" diameter="0.3"	<Hole name="h1" diameter="nan"
+nombre-foret-10.xml	1	0a9a92130a492f3c4d7a7a2d563af5300cb625ff47aed583fdf22aa952e0ef3a	diameter="0.7" platingStatus="NONPLATED" x="2"	diameter="0.7" platingStatus="NONPLATED" x="nan"
+nombre-sequence-10.xml	1	1901e053fd1f5cc59d4255e323a45727ccd96bdb2cfd27b1e7faf61727e8e04f	sequence="4.9"	sequence="nan"
+nombre-rayons-10.xml	1	692b1ae67b0153fd66623556972e7a1b01b8722bddcd304bb73af589f225412e	spokeCount="4"	spokeCount="nan"
+nombre-anneaux-10.xml	1	21cb497c5046938c49e77a7218401e2cd16e21b7f3b11145ba51d655b700528d	ringNumber="5"	ringNumber="nan"
+nombre-epaisseur-10.xml	1	e42ae080b8832f5ec76e5bf1573b3d53e0a7e8d0b8d0aa44395cc38175ffe9e8	thickness="1.2"	thickness="nan"
+nombre-rugosite-10.xml	1	e421c410819e7441f2873418f096910d63839a091c4477421f004c317ae7784e	<Property value="1,5" unit="MICRON"/>	<Property value="nan" unit="MICRON"/>
+nombre-regle-10.xml	1	4670975bedeced988636aafa6369850b8da26c1882634da3c8256497af6eea4e	name="MAX_LENGTH" value="55.5"	name="MAX_LENGTH" value="nan"
+nombre-vias-10.xml	1	afde19d749f101eb4ebb724401eac179554031db05b2e4ca3de4acda3d9038ba	name="MAX_VIAS" value="3"	name="MAX_VIAS" value="nan"
+nombre-place-10.xml	1	60d12cc08a64ea40124f118578bd554557c4468528eb0f790bab78d8f6f3e2bc	<Location x="1" y="2"/><Xform rotation="30"	<Location x="nan" y="2"/><Xform rotation="nan"
+nombre-fente-10.xml	1	330c768323e111b2983e9c30aa9ba7c723d3b6439f0d2b4cf9ad8a36d4145125	<Oval width="1" height="3"/>	<Oval width="nan" height="3"/>	<Xform rotation="-30"/>	<Xform rotation="nan"/>
+nombre-moignon-10.xml	1	8731341ddcf9e665cb83e34f816fc4523d65c8b99d7ba6d26094277139c1c529	<Property value="0.1" unit="MM"/>	<Property value="nan" unit="MM"/>
+nombre-z-10.xml	1	e5f75a205d4ad26afe146a538e7eea49d7319c3a7b1452ebe481d15c196fc833	<Impedance value="50" tolPlus="10"	<Impedance value="nan" tolPlus="nan"
+nombre-hauteur-10.xml	1	3afa6cf96d9039891acf3372f639eeab666df5440d537688cb5fb5a1d8baeadb	height="0.45"	height="nan"	fontSize="2"	fontSize="nan"
+nombre-ligne-11.xml	1	4d4723be68bb338040567eb3988610bc76533421011de5b4bd0a0f0ffe5cc98e	endX="5" endY="0"	endX="1e400" endY="0"
+nombre-profil-11.xml	1	de023a665f87a8ab950086d62e18bfbd0d2171f12762b2e4d08b3dc56b92fff7	<PolyStepSegment x='30' y='0'/>	<PolyStepSegment x='1e400' y='0'/>
+nombre-centre-11.xml	1	5df76d20123cedb9ac9824895e3e44289607e52d449f44660dab0d3e66980ffa	centerX='15'	centerX='1e400'
+nombre-trou-11.xml	1	5c46f6dd6ec26b2fedbf0b52ad80ef7bc86e47bd3d4dc88814852f9548da64ec	<Hole name="h1" diameter="0.3"	<Hole name="h1" diameter="1e400"
+nombre-foret-11.xml	1	ac10bb98d2f0eb680b593ab297a8c0ad7744c603c4ce909583f3918b97a5885d	diameter="0.7" platingStatus="NONPLATED" x="2"	diameter="0.7" platingStatus="NONPLATED" x="1e400"
+nombre-sequence-11.xml	1	1a6d89c5446ff295209c2f20e2193dd859b6f44e3cdec94cc32979c0ff5955fb	sequence="4.9"	sequence="1e400"
+nombre-rayons-11.xml	1	2ee54b351a301196fb68a57fd9576ad869d63bf5cc094bd09b4de2961f3a1609	spokeCount="4"	spokeCount="1e400"
+nombre-anneaux-11.xml	1	7a479e07b319d14f0974feba883ca5b3349047d37efd124d3720303e2d19cb44	ringNumber="5"	ringNumber="1e400"
+nombre-epaisseur-11.xml	1	35e0c0533f76720ba7ca533dcbf5206a1fe5601ce25e32f5edfca61df7a827a8	thickness="1.2"	thickness="1e400"
+nombre-rugosite-11.xml	1	0b2b797ffbafd9fbf3ab38b4296fd1857f45fc66f052f202576c6fb6de053464	<Property value="1,5" unit="MICRON"/>	<Property value="1e400" unit="MICRON"/>
+nombre-regle-11.xml	1	9bceeee0a39cf5de20987151465d5140ed46944866d8c8c1f1cca98e15572fab	name="MAX_LENGTH" value="55.5"	name="MAX_LENGTH" value="1e400"
+nombre-vias-11.xml	1	f0f77b0a8c2413a52903302d17329d205a7b275e015a75ddf99aca9860d19911	name="MAX_VIAS" value="3"	name="MAX_VIAS" value="1e400"
+nombre-place-11.xml	1	1e437b04ede3a2c5d7043470d62895d9fadc46139d012da7ee13cf56778f2c89	<Location x="1" y="2"/><Xform rotation="30"	<Location x="1e400" y="2"/><Xform rotation="1e400"
+nombre-fente-11.xml	1	203605a7c56bf11bedf90dbf059e0fc47e9c539d1caade97b4524e0b395bcca2	<Oval width="1" height="3"/>	<Oval width="1e400" height="3"/>	<Xform rotation="-30"/>	<Xform rotation="1e400"/>
+nombre-moignon-11.xml	1	d6d8fce15cddcfb907806512d232125516b6109a6ed63c64510c71e39093a607	<Property value="0.1" unit="MM"/>	<Property value="1e400" unit="MM"/>
+nombre-z-11.xml	1	d12ffd2423a2018dc1eeb37950f88f71891b112067b0f24922eafc8fa8cdc722	<Impedance value="50" tolPlus="10"	<Impedance value="1e400" tolPlus="1e400"
+nombre-hauteur-11.xml	1	60058be2134163c41de97b3a749a85ed506c705bf5b94af2faee7130ea5fe41b	height="0.45"	height="1e400"	fontSize="2"	fontSize="1e400"
+nombre-ligne-12.xml	1	7dd8dbbb70f5ff0e856c3bf0744d94bd2bab64d5c5d2215b97b5dbcb0e3062c1	endX="5" endY="0"	endX="-1e400" endY="0"
+nombre-profil-12.xml	1	d8c1df75f7e751b2361b6aac82d7cfde49a901699ac4a296dc25d4027d8a56d8	<PolyStepSegment x='30' y='0'/>	<PolyStepSegment x='-1e400' y='0'/>
+nombre-centre-12.xml	1	82b1f6205a9aa3cb16ed905a7c114da8fb9b7cc12a4f416dcfaf6c6bb2c79035	centerX='15'	centerX='-1e400'
+nombre-trou-12.xml	1	b3ba4ae96a58a7f36dc0eb4ae5c70ea72c54f23d0f249dd51c9c6185f7a3fb99	<Hole name="h1" diameter="0.3"	<Hole name="h1" diameter="-1e400"
+nombre-foret-12.xml	1	15fa1a4302c746601a62dbb342081d39a9d5b14f599f364ce89de9c8240ccbdc	diameter="0.7" platingStatus="NONPLATED" x="2"	diameter="0.7" platingStatus="NONPLATED" x="-1e400"
+nombre-sequence-12.xml	1	6d84aa33f40c81f3b221da130fc4cdbe89e4105a4083d5979e0ffa920b061179	sequence="4.9"	sequence="-1e400"
+nombre-rayons-12.xml	1	a6c06193f3ec5c2e612079ebdf6b84ff69169b22e1a7295961b7ef24feee5c7d	spokeCount="4"	spokeCount="-1e400"
+nombre-anneaux-12.xml	1	dd4f738602dbd7b3034691fc2e3a80cc47be5f4c2fee98d9539f8cd3b59c7562	ringNumber="5"	ringNumber="-1e400"
+nombre-epaisseur-12.xml	1	91238953b2f8741c1525cb9dada692fa2c32c0da2feeed98f47f511239eeb470	thickness="1.2"	thickness="-1e400"
+nombre-rugosite-12.xml	1	dd7bfc1c6b272c194ef71c3ab8a42b6243b35875829b86985efc452208152f78	<Property value="1,5" unit="MICRON"/>	<Property value="-1e400" unit="MICRON"/>
+nombre-regle-12.xml	1	11da13e09e190924003f4bd4838a15cc38a1ed21914cd8c71a0364453c814557	name="MAX_LENGTH" value="55.5"	name="MAX_LENGTH" value="-1e400"
+nombre-vias-12.xml	1	b76c7d05743713088dcebe44c9b4a454d0052055afe0590feb10d7fb59c68cfe	name="MAX_VIAS" value="3"	name="MAX_VIAS" value="-1e400"
+nombre-place-12.xml	1	f3a563d595c5e2487c26c6adec6dfc2d2dfd4a5dd66efaa6b0d34ed7cbd63b41	<Location x="1" y="2"/><Xform rotation="30"	<Location x="-1e400" y="2"/><Xform rotation="-1e400"
+nombre-fente-12.xml	1	ce2a1f363aeb790717694352dd631664effb61ffcc83552da0af6ca53e220f1a	<Oval width="1" height="3"/>	<Oval width="-1e400" height="3"/>	<Xform rotation="-30"/>	<Xform rotation="-1e400"/>
+nombre-moignon-12.xml	1	778f1fc37c99d772491186c74ae4f6d9b42314a70949b030806aa3116faa4a20	<Property value="0.1" unit="MM"/>	<Property value="-1e400" unit="MM"/>
+nombre-z-12.xml	1	a66f41663fdfd8d85649e46f3a894a578afd33719d937b19df894c7cfc21c024	<Impedance value="50" tolPlus="10"	<Impedance value="-1e400" tolPlus="-1e400"
+nombre-hauteur-12.xml	1	01877873dde145f0363196cc9382d48d72a3c7da9092108a1b0b1d511ea5b64f	height="0.45"	height="-1e400"	fontSize="2"	fontSize="-1e400"
+nombre-ligne-13.xml	1	73e6bbd3534cb5727ed65bd7aa9c7d2b2bfa6cd93a86481ca938d82fff2f5185	endX="5" endY="0"	endX="1e308" endY="0"
+nombre-profil-13.xml	1	ebfd8819e9621530af4931325be7d076b864ae2041d691ecec3e33ae36d8a464	<PolyStepSegment x='30' y='0'/>	<PolyStepSegment x='1e308' y='0'/>
+nombre-centre-13.xml	1	ebfa80e566770de6e1501b4e1e2095c2124db71574a535bfde47f24644e94b52	centerX='15'	centerX='1e308'
+nombre-trou-13.xml	1	c37d6cd2610611885addc0a24f06a8f387a8896c2655eba1a29af9b0aefa616f	<Hole name="h1" diameter="0.3"	<Hole name="h1" diameter="1e308"
+nombre-foret-13.xml	1	94a53decfe34e1614eea6f16989b69dffa5bf36b3810c38f91ef12d660f0d267	diameter="0.7" platingStatus="NONPLATED" x="2"	diameter="0.7" platingStatus="NONPLATED" x="1e308"
+nombre-sequence-13.xml	1	019149a887c364e9024e36554963f69368bfbca00c9e2254bcef80ec1ad67665	sequence="4.9"	sequence="1e308"
+nombre-rayons-13.xml	1	81e803cf89228b492f33efd2ac7e3360a7149ed9673f138c7e9f5ab899c32b80	spokeCount="4"	spokeCount="1e308"
+nombre-anneaux-13.xml	1	5d71fd7b26611c113f5946b7c37904c704db4222292490cdf1baced27d7c0b11	ringNumber="5"	ringNumber="1e308"
+nombre-epaisseur-13.xml	1	5d8eadfdfeb1e917283559fab3e84557397886b8928f2f9029f8416ae21d22a2	thickness="1.2"	thickness="1e308"
+nombre-rugosite-13.xml	1	bef46de0b869ad27649e9f44e4c9f3f2b036c7bb255d1ac8999eac25f7a37dac	<Property value="1,5" unit="MICRON"/>	<Property value="1e308" unit="MICRON"/>
+nombre-regle-13.xml	1	e2291f5cd498a822cfe04be2d121b8f6d43007f51fd2d3860df0af4d8a728d85	name="MAX_LENGTH" value="55.5"	name="MAX_LENGTH" value="1e308"
+nombre-vias-13.xml	1	d057c7887bd603769cddda0d33a6f3b49b6fda67663c6a1e55aea9ec483ee7b5	name="MAX_VIAS" value="3"	name="MAX_VIAS" value="1e308"
+nombre-place-13.xml	1	9cf77720a74e3157e1525e26e2370f2a2e2d211ebf7bbbb71332575cbab6c309	<Location x="1" y="2"/><Xform rotation="30"	<Location x="1e308" y="2"/><Xform rotation="1e308"
+nombre-fente-13.xml	1	2ea9598598185e009fef3fdae7c7a24ac8baac7ccf088e024f17b4957e0a3b64	<Oval width="1" height="3"/>	<Oval width="1e308" height="3"/>	<Xform rotation="-30"/>	<Xform rotation="1e308"/>
+nombre-moignon-13.xml	1	186a676dcf7ef112bf810a76ac3b853a646db6479523fb69b31b62375b77632e	<Property value="0.1" unit="MM"/>	<Property value="1e308" unit="MM"/>
+nombre-z-13.xml	1	a3c04c67c2ea471baf76dfaedf290f28ac4916dfef9a7dbeed1915caf199f216	<Impedance value="50" tolPlus="10"	<Impedance value="1e308" tolPlus="1e308"
+nombre-hauteur-13.xml	1	5d079322c30b6d106d19cb99b75df6e14eeb2c271819847289e2e54f95f3dce5	height="0.45"	height="1e308"	fontSize="2"	fontSize="1e308"
+nombre-ligne-14.xml	1	96e5eb749d042767a3e3c924148fde4ded2f5cf6c1b9a35f98cecd81e54c0a79	endX="5" endY="0"	endX="1e300" endY="0"
+nombre-profil-14.xml	1	3488e42c33ff41d0ad844c4fce916704429f11deab54ba44f516f1bf60d2f85d	<PolyStepSegment x='30' y='0'/>	<PolyStepSegment x='1e300' y='0'/>
+nombre-centre-14.xml	1	bf24e1fdeca8b144e475cadf2cdfabf0261499a5abaef0a7d094f5356010dd40	centerX='15'	centerX='1e300'
+nombre-trou-14.xml	1	8ca80a547c18c1e822ba0647882abddf099413ebe432429c967805d284578eb8	<Hole name="h1" diameter="0.3"	<Hole name="h1" diameter="1e300"
+nombre-foret-14.xml	1	bb537431d51bf089b302d2b8589114ae2ebdeb3235cc1da86efe50fd5d2ad27e	diameter="0.7" platingStatus="NONPLATED" x="2"	diameter="0.7" platingStatus="NONPLATED" x="1e300"
+nombre-sequence-14.xml	1	6210ebc283f6adede3ba2bc4629d451f4aa2b4df074c643917dcee3c1a3f5b11	sequence="4.9"	sequence="1e300"
+nombre-rayons-14.xml	1	b4df05aa77fdee42373618d7cba04aad5135a7aa20bee069b2e87e06b9763f21	spokeCount="4"	spokeCount="1e300"
+nombre-anneaux-14.xml	1	5c3a9425c4258b4b2558a048ccc73aefeeca892b639460bd6c17098c70dd59a7	ringNumber="5"	ringNumber="1e300"
+nombre-epaisseur-14.xml	1	47006859ec0ce283d916a6ea51fd32731905f78d46244e93d02fe344ebccfd78	thickness="1.2"	thickness="1e300"
+nombre-rugosite-14.xml	1	1a7b0a847f1d836d3ca370aeb4d88342448fd443706cbd00efb15a4259da8050	<Property value="1,5" unit="MICRON"/>	<Property value="1e300" unit="MICRON"/>
+nombre-regle-14.xml	1	fd4e06a0b8171c8a688e2b9e07450c2af07aed7fdc91946044938a3a21362554	name="MAX_LENGTH" value="55.5"	name="MAX_LENGTH" value="1e300"
+nombre-vias-14.xml	1	cd2f9827b6e27a4fa03fad18f06073133fca66ff49080fc03cb2322417467916	name="MAX_VIAS" value="3"	name="MAX_VIAS" value="1e300"
+nombre-place-14.xml	1	430d0f3a64aff374310a5c5f3558729e9cec654f0064de369f9aff2bc8638c9e	<Location x="1" y="2"/><Xform rotation="30"	<Location x="1e300" y="2"/><Xform rotation="1e300"
+nombre-fente-14.xml	1	358da0ff474f8028f776ef00d924e23561c06c8efc9ec3e612b28a149da73ecd	<Oval width="1" height="3"/>	<Oval width="1e300" height="3"/>	<Xform rotation="-30"/>	<Xform rotation="1e300"/>
+nombre-moignon-14.xml	1	de3e59086c60b38ca19155425931ea61cb2e5ceeae27f589d9a4d5e64c7c9a3c	<Property value="0.1" unit="MM"/>	<Property value="1e300" unit="MM"/>
+nombre-z-14.xml	1	cf3a0189c02c9ad20f78a23badaaf2a6b780a04dea84b205e1be8d644a32c269	<Impedance value="50" tolPlus="10"	<Impedance value="1e300" tolPlus="1e300"
+nombre-hauteur-14.xml	1	42882129fbd519f9d4c7a8a244ab1136d7f5961421ee1cba97665a4f4e04b277	height="0.45"	height="1e300"	fontSize="2"	fontSize="1e300"
+nombre-ligne-15.xml	1	6ca647ba3ca787dfdf7fdd04de4063d52513aa6ef65fb56dd9599c9626a57370	endX="5" endY="0"	endX="-1e300" endY="0"
+nombre-profil-15.xml	1	7b657c88184fad49372c92f669e27b67edd289e5fa00ef5a664c8c38374779cb	<PolyStepSegment x='30' y='0'/>	<PolyStepSegment x='-1e300' y='0'/>
+nombre-centre-15.xml	1	2a0d8daa37dda9ec0f00c7481daa8d24232527eb96f9fd2d31bfed5f7460568b	centerX='15'	centerX='-1e300'
+nombre-trou-15.xml	1	39e3036ac29d886ec1126d8584b325475373aba8a214b55f16e39e836c6b6ebd	<Hole name="h1" diameter="0.3"	<Hole name="h1" diameter="-1e300"
+nombre-foret-15.xml	1	e94bd6e273b7023210f1d2d64f5986251750095209703d225ea87d75f6db27ca	diameter="0.7" platingStatus="NONPLATED" x="2"	diameter="0.7" platingStatus="NONPLATED" x="-1e300"
+nombre-sequence-15.xml	1	d4a5de6e47d0905ace59ee54c1a9585ef592b9a8fcbbb8315ec3766366b99b9e	sequence="4.9"	sequence="-1e300"
+nombre-rayons-15.xml	1	cbd8df0a13ae9f5dd4a92c853c1d145c81b514b38ca8b9f7bea46952e11a4726	spokeCount="4"	spokeCount="-1e300"
+nombre-anneaux-15.xml	1	56dba851eebf0f2ebad9cb08f14cd9c743869f7e020288506319241f7377bcc5	ringNumber="5"	ringNumber="-1e300"
+nombre-epaisseur-15.xml	1	6ae5e3bdf78c6ce0da0c8e39bea2719679fd94236afc879dc4549c20dbb87334	thickness="1.2"	thickness="-1e300"
+nombre-rugosite-15.xml	1	647eca9d978001a8e112a4e847f5ecb024cce92910bed68ded7df31d446c0978	<Property value="1,5" unit="MICRON"/>	<Property value="-1e300" unit="MICRON"/>
+nombre-regle-15.xml	1	e8d2b87bfc3c784440ae935a0a60f67225d8eb0a13e65e872148beec54679a9b	name="MAX_LENGTH" value="55.5"	name="MAX_LENGTH" value="-1e300"
+nombre-vias-15.xml	1	c292aabf97270b67ca2c7c9fa630bea12a367e98663053312602da4b11e4950f	name="MAX_VIAS" value="3"	name="MAX_VIAS" value="-1e300"
+nombre-place-15.xml	1	087d983cfa5a6dcd230af741f660f621edd1b2ef26091d6f6330d2df9a5025d6	<Location x="1" y="2"/><Xform rotation="30"	<Location x="-1e300" y="2"/><Xform rotation="-1e300"
+nombre-fente-15.xml	1	8fa4b786eccf23738dc11c890f092b0e17af688240507814e43030c1eef4a9d2	<Oval width="1" height="3"/>	<Oval width="-1e300" height="3"/>	<Xform rotation="-30"/>	<Xform rotation="-1e300"/>
+nombre-moignon-15.xml	1	aa757c79af1a6d09e82b8403601a33952b42dd99e988833f364012467c130047	<Property value="0.1" unit="MM"/>	<Property value="-1e300" unit="MM"/>
+nombre-z-15.xml	1	451080bd5d2ae4fe0eee88a860dc33ea50aa23b1ed662d66a2cc86ece278f2ea	<Impedance value="50" tolPlus="10"	<Impedance value="-1e300" tolPlus="-1e300"
+nombre-hauteur-15.xml	1	7186a926faa3348e495313dd71ea82915dbdb474e84640d8a2892663619d3a25	height="0.45"	height="-1e300"	fontSize="2"	fontSize="-1e300"
+nombre-ligne-16.xml	1	2203f0a66dace0b91e42c1e18dc913846df773b69504da2d5bf4be533e604f83	endX="5" endY="0"	endX="1e19" endY="0"
+nombre-profil-16.xml	1	a6f0d014ebabc2209f0e413452dbdbc470df94269d131dbe1492ec6a914818af	<PolyStepSegment x='30' y='0'/>	<PolyStepSegment x='1e19' y='0'/>
+nombre-centre-16.xml	1	5a3ce75ba945eabb4f57b5631387d4a2aa4f2662cee37012cac59780732bd074	centerX='15'	centerX='1e19'
+nombre-trou-16.xml	1	a52c12e7504bc13734998411a78a336336894fc0d3272ff6c3226f291380bcb7	<Hole name="h1" diameter="0.3"	<Hole name="h1" diameter="1e19"
+nombre-foret-16.xml	1	17d1f8230c14f46de1ce278bcdcadee8d8ccd6a461234a0bd0d2b95900d30df7	diameter="0.7" platingStatus="NONPLATED" x="2"	diameter="0.7" platingStatus="NONPLATED" x="1e19"
+nombre-sequence-16.xml	1	fec6d711286fe7e1b32906be4e0ee2e324fd211e351a9b0d2b6f9963bb81db61	sequence="4.9"	sequence="1e19"
+nombre-rayons-16.xml	1	1bceb22f1e14175078a3f4b4da47ffbcb6f216ffb7049dbfd420c66cbf2f2f63	spokeCount="4"	spokeCount="1e19"
+nombre-anneaux-16.xml	1	37f3bf72d0d7a3d4dedaa6b50e8219dbe41583a07cfeb6dc2e2f2e035c0ec8f4	ringNumber="5"	ringNumber="1e19"
+nombre-epaisseur-16.xml	1	398c06f0fb5e79548ef98e5b61157cb2602673ea9735f49e819bf8d1e414bf86	thickness="1.2"	thickness="1e19"
+nombre-rugosite-16.xml	1	43feca0f680dc2e9788328b8216ebf625e95c40249b5b4f90234ef0a1ab09366	<Property value="1,5" unit="MICRON"/>	<Property value="1e19" unit="MICRON"/>
+nombre-regle-16.xml	1	2f55a44300de6a0acae532e877b6b7b7bc8d7d8aaa1254af120bcad236ffd8ff	name="MAX_LENGTH" value="55.5"	name="MAX_LENGTH" value="1e19"
+nombre-vias-16.xml	1	5cf54cc2467b4e703b8deeb858121abf629d0218d1a85328a1e03fada87d23f1	name="MAX_VIAS" value="3"	name="MAX_VIAS" value="1e19"
+nombre-place-16.xml	1	1e224dc6fbbe3cc28523c7d2152a4c89823edd34f98c8176d0b089dd5f171332	<Location x="1" y="2"/><Xform rotation="30"	<Location x="1e19" y="2"/><Xform rotation="1e19"
+nombre-fente-16.xml	1	a6a2d1a8b119af4a6a58200bcc9efba9e8220e73d494b7477b40f128dfae0c5e	<Oval width="1" height="3"/>	<Oval width="1e19" height="3"/>	<Xform rotation="-30"/>	<Xform rotation="1e19"/>
+nombre-moignon-16.xml	1	4295b152bd1eeec87c6d1b346420a4ea30517d4379a0813bae57de849ebdf696	<Property value="0.1" unit="MM"/>	<Property value="1e19" unit="MM"/>
+nombre-z-16.xml	1	818c490f6929aa9222aede33a78dfe7d9849b247bf27f067b85a7906eb61131d	<Impedance value="50" tolPlus="10"	<Impedance value="1e19" tolPlus="1e19"
+nombre-hauteur-16.xml	1	f9d102776a59173cd97ae659f2112c9e7f7319169d484535e975eb38715a9b92	height="0.45"	height="1e19"	fontSize="2"	fontSize="1e19"
+nombre-ligne-17.xml	1	5a26334e411226595f2adbe6b47f3bbeee87da551eaece92a9254604d4c45a34	endX="5" endY="0"	endX="9007199254740993" endY="0"
+nombre-profil-17.xml	1	54b9bc027c6a02151de1b9d6757ee84c48f79a67c70dd36e4d7275cc40e2583a	<PolyStepSegment x='30' y='0'/>	<PolyStepSegment x='9007199254740993' y='0'/>
+nombre-centre-17.xml	1	0cd9a0f409b1f082b39580a4456c674028500fda029f90361bae23e402b7db16	centerX='15'	centerX='9007199254740993'
+nombre-trou-17.xml	1	ef17682b9cf345e261aad54ca923c4c76378cea137fe60dc4f3edaa028ab95d5	<Hole name="h1" diameter="0.3"	<Hole name="h1" diameter="9007199254740993"
+nombre-foret-17.xml	1	b073d328f765ff444729497d521d02de2a17e96fd91a4161ca422ae9c4740cfa	diameter="0.7" platingStatus="NONPLATED" x="2"	diameter="0.7" platingStatus="NONPLATED" x="9007199254740993"
+nombre-sequence-17.xml	1	b6e111437eca3ddbb91036f224c9d3beb2b807315d2374a910e3509756b188b7	sequence="4.9"	sequence="9007199254740993"
+nombre-rayons-17.xml	1	717a19a8076aec1401f9f998cab5e36c5e557d1e1de7856d911feb1677b9cdd3	spokeCount="4"	spokeCount="9007199254740993"
+nombre-anneaux-17.xml	1	32ba28932a287291cdf3b04444933864a02bab438654bb94c8ad0603e2991929	ringNumber="5"	ringNumber="9007199254740993"
+nombre-epaisseur-17.xml	1	40d6a03b1c85b8ff03b5e57f100c292e6a6672ac9f269374dc326feacee43039	thickness="1.2"	thickness="9007199254740993"
+nombre-rugosite-17.xml	1	3b6eedcb6f20609a9444d4de21f510d899efcb730b4c55971d30418cb6844c99	<Property value="1,5" unit="MICRON"/>	<Property value="9007199254740993" unit="MICRON"/>
+nombre-regle-17.xml	1	13d45d7e5d288341cf42cbed89ae93212db8d3a76913361d4d4774b145c0b9a3	name="MAX_LENGTH" value="55.5"	name="MAX_LENGTH" value="9007199254740993"
+nombre-vias-17.xml	1	c0f479c42e08e42918c36004d9b7b85e2d3b57ed2e7cef444ea88ded89ed88c6	name="MAX_VIAS" value="3"	name="MAX_VIAS" value="9007199254740993"
+nombre-place-17.xml	1	63d43baffb40c50d86d80bcf96249d5b0d706cdd2cc6494c617ea38c3adb176f	<Location x="1" y="2"/><Xform rotation="30"	<Location x="9007199254740993" y="2"/><Xform rotation="9007199254740993"
+nombre-fente-17.xml	1	d576b63841d3c38d23eeb0715cde32512f3728a15cdcbb90e2ede5ade0aeb67a	<Oval width="1" height="3"/>	<Oval width="9007199254740993" height="3"/>	<Xform rotation="-30"/>	<Xform rotation="9007199254740993"/>
+nombre-moignon-17.xml	1	c38312140d1333a2401a223c20f0271792e1f6cbf7555b35a7223a861fd1227a	<Property value="0.1" unit="MM"/>	<Property value="9007199254740993" unit="MM"/>
+nombre-z-17.xml	1	ab44367d1ad2f00f51d71bf6361c9038de049444a24375588ddc29d46ba34173	<Impedance value="50" tolPlus="10"	<Impedance value="9007199254740993" tolPlus="9007199254740993"
+nombre-hauteur-17.xml	1	33d5f1152b57acfb31157b563eb090e70ed583c3ded34e51a182686419f48085	height="0.45"	height="9007199254740993"	fontSize="2"	fontSize="9007199254740993"
+nombre-ligne-18.xml	1	ebf413c2a096d6f76fcff91aa0d74b2384e14a0d3b8ba14e3f0da1f3a5eb4ce5	endX="5" endY="0"	endX="1e-7" endY="0"
+nombre-profil-18.xml	1	87db8a101f11862d89f83a2cf74c45232e1ce647abf3d915e168dcc4f77d8425	<PolyStepSegment x='30' y='0'/>	<PolyStepSegment x='1e-7' y='0'/>
+nombre-centre-18.xml	1	db5ef7183fc4d88f7a5c57d04e9391cb491665535495057639ed189fdc3b73be	centerX='15'	centerX='1e-7'
+nombre-trou-18.xml	1	f2ecda3c307ed78bc08d353c940fe8ff0f4c498fbf548c202d7df6916d41d9a4	<Hole name="h1" diameter="0.3"	<Hole name="h1" diameter="1e-7"
+nombre-foret-18.xml	1	fa28a57d89d586324d875459fccfe74cdbe3876934a2db32d26e336ca2fe323e	diameter="0.7" platingStatus="NONPLATED" x="2"	diameter="0.7" platingStatus="NONPLATED" x="1e-7"
+nombre-sequence-18.xml	1	3321a75ade883a801ef6c53edc72893ae853f554909b98da423c72123837ce0b	sequence="4.9"	sequence="1e-7"
+nombre-rayons-18.xml	1	e51aa6a3ac5d2739cbdf6d4c4afe80b41b01c8dcf6c775cda1199707a09321d8	spokeCount="4"	spokeCount="1e-7"
+nombre-anneaux-18.xml	1	b2898a4f8dffefb05f9c4451e5332ceacdc4bd5f6c27a2bd9e568af1d4eb668a	ringNumber="5"	ringNumber="1e-7"
+nombre-epaisseur-18.xml	1	52bf6c4bd78dcf9f9ea5d5e782fa831fc09150c11a295286b8e28019838e704c	thickness="1.2"	thickness="1e-7"
+nombre-rugosite-18.xml	1	b17ea82c294ba81f4a825acd3a61abb0acb165891e5967f58d9c289a667ae600	<Property value="1,5" unit="MICRON"/>	<Property value="1e-7" unit="MICRON"/>
+nombre-regle-18.xml	1	09900a93c26a96910ee6f69fc01091ec4ed7fd9257e5d46091a16db6d94f8bff	name="MAX_LENGTH" value="55.5"	name="MAX_LENGTH" value="1e-7"
+nombre-vias-18.xml	1	cf50bab9c86fc595669fb1f2f8e8bd04f9488291a605bba26232168bd18b8acb	name="MAX_VIAS" value="3"	name="MAX_VIAS" value="1e-7"
+nombre-place-18.xml	1	eb649998bf4e0844fcab749a80efcc80bab0dc34495e933e4924c41785942c91	<Location x="1" y="2"/><Xform rotation="30"	<Location x="1e-7" y="2"/><Xform rotation="1e-7"
+nombre-fente-18.xml	1	dbee22e00dacb3ffb9b65b1092a51f73e8278f7392f94c1b21ec7c85a0d8302b	<Oval width="1" height="3"/>	<Oval width="1e-7" height="3"/>	<Xform rotation="-30"/>	<Xform rotation="1e-7"/>
+nombre-moignon-18.xml	1	5a5466d0f134b676a73d0ee13e445819833d5ef887a98e708b35b536059e4ddc	<Property value="0.1" unit="MM"/>	<Property value="1e-7" unit="MM"/>
+nombre-z-18.xml	1	78c0f4ccae31f0e054c6de71fe2b670e1ece2aa105e49247cd1b80bcddd554a4	<Impedance value="50" tolPlus="10"	<Impedance value="1e-7" tolPlus="1e-7"
+nombre-hauteur-18.xml	1	608431144d7927a67f60b81d8506f63710ba12a4e07c201dad37725458b02fd7	height="0.45"	height="1e-7"	fontSize="2"	fontSize="1e-7"
+nombre-ligne-19.xml	1	c9200d93420221daf6437c56227871f04dcd23e9108bff5052d796189ccdf2c8	endX="5" endY="0"	endX="5e-7" endY="0"
+nombre-profil-19.xml	1	acdf10324b90e8ec9c62bd7cfed61f3ca4ea507276b8e08a7d36630b21f0d0da	<PolyStepSegment x='30' y='0'/>	<PolyStepSegment x='5e-7' y='0'/>
+nombre-centre-19.xml	1	09be8cfbad7738a78e612c4ee251332a08c697257437771d4daf6f722db53f34	centerX='15'	centerX='5e-7'
+nombre-trou-19.xml	1	c97d10b4e5ed9b7d69e1aba52609e4a8a9553cf32437764af06054c608e18075	<Hole name="h1" diameter="0.3"	<Hole name="h1" diameter="5e-7"
+nombre-foret-19.xml	1	804d017242a99a9bdecb9e2ed0c2abfee1c88c193ad7d2517f967a2b55f7ee58	diameter="0.7" platingStatus="NONPLATED" x="2"	diameter="0.7" platingStatus="NONPLATED" x="5e-7"
+nombre-sequence-19.xml	1	2c57443830d0ca3bf188803b267f62bda891fbae7783037c16910b50649dff56	sequence="4.9"	sequence="5e-7"
+nombre-rayons-19.xml	1	5c3a188d27fb4570f8e0fa782b38eda4d640f931473c91fbe9612e0b5b42130c	spokeCount="4"	spokeCount="5e-7"
+nombre-anneaux-19.xml	1	a0447d9477d37448abd9bf59bc54e29131ba77633ce23de93cf45cd3abac8413	ringNumber="5"	ringNumber="5e-7"
+nombre-epaisseur-19.xml	1	2c6821391a89cb57cb31b6a65f9eba7664cf166e91ab1b787d8cb94b6ad397df	thickness="1.2"	thickness="5e-7"
+nombre-rugosite-19.xml	1	caff2d1f89351ab6e902d90a5f25eabb129ced39e46697204803fbcad7f22294	<Property value="1,5" unit="MICRON"/>	<Property value="5e-7" unit="MICRON"/>
+nombre-regle-19.xml	1	b7a5659c41e7cd9a28eb8d5515f5a0848258ab0f487bada516abe62bf3dba1d1	name="MAX_LENGTH" value="55.5"	name="MAX_LENGTH" value="5e-7"
+nombre-vias-19.xml	1	c86fcca1df5eb6723f1358e564d877f57470984ed33375edf071518f833caeb1	name="MAX_VIAS" value="3"	name="MAX_VIAS" value="5e-7"
+nombre-place-19.xml	1	a7b5cc6bfec67f49d1f813735418e056e7941ddd836c58d1eaaa6b1938af3abf	<Location x="1" y="2"/><Xform rotation="30"	<Location x="5e-7" y="2"/><Xform rotation="5e-7"
+nombre-fente-19.xml	1	11616aa98134d8d677eae48d58a60fef486a4fad7e5dbddea4cbc11ec9585c95	<Oval width="1" height="3"/>	<Oval width="5e-7" height="3"/>	<Xform rotation="-30"/>	<Xform rotation="5e-7"/>
+nombre-moignon-19.xml	1	af3dfb9b3ef7e6e9ad01dc98027f37e70275e2d283ff82e1189c362b426a71b1	<Property value="0.1" unit="MM"/>	<Property value="5e-7" unit="MM"/>
+nombre-z-19.xml	1	913e7e9985f0a3f993a1d8be6bf349dc4dc2b72c3f03ed74f507dc2a3d62a27b	<Impedance value="50" tolPlus="10"	<Impedance value="5e-7" tolPlus="5e-7"
+nombre-hauteur-19.xml	1	ef2a47ca58a354e78f13a1b9ea21393cb1e7a38fab45fdd6201bd07a3531633f	height="0.45"	height="5e-7"	fontSize="2"	fontSize="5e-7"
+nombre-ligne-20.xml	1	510641f9a5105710f113a8504c20b5178a02733d3817e470383bd7b6ba3f3aeb	endX="5" endY="0"	endX="0.0000005" endY="0"
+nombre-profil-20.xml	1	f0dc26783457004855e4d24181ad47a3eb7ed85169c78b45f2724d28fc48af8b	<PolyStepSegment x='30' y='0'/>	<PolyStepSegment x='0.0000005' y='0'/>
+nombre-centre-20.xml	1	ca31883d3cce9b60e07723f5c9b4e1e085ebda4db2757ab7a88208f670eaeb2e	centerX='15'	centerX='0.0000005'
+nombre-trou-20.xml	1	ece2e8b76a1375dee9721ecf28632aa4cf1be5cd342b6fe98e5545b7ff8ec9b0	<Hole name="h1" diameter="0.3"	<Hole name="h1" diameter="0.0000005"
+nombre-foret-20.xml	1	fd5dc265d41df2bd2a2ef0c3e51eb9c75ffd8e21c1db8b0c93ba37f2f3eacca6	diameter="0.7" platingStatus="NONPLATED" x="2"	diameter="0.7" platingStatus="NONPLATED" x="0.0000005"
+nombre-sequence-20.xml	1	78e240af6c90965c50efe4946423a21f72cc2c69712bdb51609183ccb97736cd	sequence="4.9"	sequence="0.0000005"
+nombre-rayons-20.xml	1	4afab76360cad3bc1ba91dd630e702f93ff48b85f8cae074432fc0d60922df2e	spokeCount="4"	spokeCount="0.0000005"
+nombre-anneaux-20.xml	1	f2b757c35500aa2647468a418537cdd1bbbd3bc40bf9005d57fa63e0ed2e1137	ringNumber="5"	ringNumber="0.0000005"
+nombre-epaisseur-20.xml	1	7f90bcf5d4728f1e342612c566eb431f6c0d76a615c04bf193bb89204a07a76e	thickness="1.2"	thickness="0.0000005"
+nombre-rugosite-20.xml	1	67f151c8854b5b61b7e6fd54b73bf975a14fd81e1f254763cadeb93c4169aa2f	<Property value="1,5" unit="MICRON"/>	<Property value="0.0000005" unit="MICRON"/>
+nombre-regle-20.xml	1	c9caf6d06a0ab2cc460ecdf98b466d9a6dad78235296f69d9f203f17d4d24354	name="MAX_LENGTH" value="55.5"	name="MAX_LENGTH" value="0.0000005"
+nombre-vias-20.xml	1	4c2dcbf3495b7bfd0c9605c229fa3e996c6dc74311cab7d0d3889a95be8605be	name="MAX_VIAS" value="3"	name="MAX_VIAS" value="0.0000005"
+nombre-place-20.xml	1	e33ee798f8d5f697c32617c06c7c8c7600162d8d7a6cdb3a3b37cfd4cdb9241e	<Location x="1" y="2"/><Xform rotation="30"	<Location x="0.0000005" y="2"/><Xform rotation="0.0000005"
+nombre-fente-20.xml	1	6d7f9d0ed77eaa65fef1a36fda5f004cc133e5e88af81aae347c020b81fb0677	<Oval width="1" height="3"/>	<Oval width="0.0000005" height="3"/>	<Xform rotation="-30"/>	<Xform rotation="0.0000005"/>
+nombre-moignon-20.xml	1	0a255f6f7b290e30baba4667ac069c8a1bc0adce463f7d215da2ed860bbf1d8d	<Property value="0.1" unit="MM"/>	<Property value="0.0000005" unit="MM"/>
+nombre-z-20.xml	1	558dad76e5234e218ee3d232293e3d50be5ce53e9be75dc24e46bc78a864f436	<Impedance value="50" tolPlus="10"	<Impedance value="0.0000005" tolPlus="0.0000005"
+nombre-hauteur-20.xml	1	be14d9864868e6509ad9071caad45adf9278e591b9e2b46550c769800c1ee4d5	height="0.45"	height="0.0000005"	fontSize="2"	fontSize="0.0000005"
+nombre-ligne-21.xml	1	5ba839cb014e4d5a7778ec048304c77dbd1c4b3ace3e968c9049665b64f2b6e5	endX="5" endY="0"	endX="-0.0000004" endY="0"
+nombre-profil-21.xml	1	cf4e5f8139edd22cee7fc3677a6ee50fdd98397fb8252ae020622a4c8a4860c0	<PolyStepSegment x='30' y='0'/>	<PolyStepSegment x='-0.0000004' y='0'/>
+nombre-centre-21.xml	1	c00c712d2f068f86c057bdacc2becebbe95ceff8b1452313623e7ccfc1316ef1	centerX='15'	centerX='-0.0000004'
+nombre-trou-21.xml	1	76465f265df29c180cd80409cb80297c3516b5d3c917d8f47551074420f48194	<Hole name="h1" diameter="0.3"	<Hole name="h1" diameter="-0.0000004"
+nombre-foret-21.xml	1	5b80d96f3f74b9eba1391018b4388b28090a4f7fe8e0686fa6612cd75bed3bab	diameter="0.7" platingStatus="NONPLATED" x="2"	diameter="0.7" platingStatus="NONPLATED" x="-0.0000004"
+nombre-sequence-21.xml	1	d8f44397fd426ee63c3da6053b032377fbf16ec1b525350fbfa97973602cf279	sequence="4.9"	sequence="-0.0000004"
+nombre-rayons-21.xml	1	ac1dcc0ee9215808ef075b4fcff80d7b4a22bf70a7028dc43ec98a6a5d5975d2	spokeCount="4"	spokeCount="-0.0000004"
+nombre-anneaux-21.xml	1	2730a50e5af0a86d89368d343dac3d0289b17640ea9d44c3ffeb1537ef8d3627	ringNumber="5"	ringNumber="-0.0000004"
+nombre-epaisseur-21.xml	1	326e1a7b20923170127439f7f02720a324d642524f145286ad7990fcb50e06c1	thickness="1.2"	thickness="-0.0000004"
+nombre-rugosite-21.xml	1	b8b72e675f5b5821e9e6026f75e8dd0cae80bac6c4f275cf47a2d45d54ffecc6	<Property value="1,5" unit="MICRON"/>	<Property value="-0.0000004" unit="MICRON"/>
+nombre-regle-21.xml	1	bd286b809748a6a24db2247897d3a83a4d2c0f21f44c96462e841941cd9b2824	name="MAX_LENGTH" value="55.5"	name="MAX_LENGTH" value="-0.0000004"
+nombre-vias-21.xml	1	d1b239afbf09adbeb58b90c279bb969ca212398053d118ba3477fd75cf3fefcb	name="MAX_VIAS" value="3"	name="MAX_VIAS" value="-0.0000004"
+nombre-place-21.xml	1	f1e34634e8091ba8880b8b7f6b0dc37c2f554ff1ec15368d36d4076e8b77ae60	<Location x="1" y="2"/><Xform rotation="30"	<Location x="-0.0000004" y="2"/><Xform rotation="-0.0000004"
+nombre-fente-21.xml	1	c6f8b4cd4c86c3cde8fb01940ed5c4cf8d9b6db38ebee1d2f8f571b83dbc0998	<Oval width="1" height="3"/>	<Oval width="-0.0000004" height="3"/>	<Xform rotation="-30"/>	<Xform rotation="-0.0000004"/>
+nombre-moignon-21.xml	1	9f4a75bf8037a2349d97e7fc2444674d9607a8793fefab7c41ee0deb9bc6e147	<Property value="0.1" unit="MM"/>	<Property value="-0.0000004" unit="MM"/>
+nombre-z-21.xml	1	6e24b9244b0a20ce37d270613fa59d915e33602457e70a32f56c30c37dc89511	<Impedance value="50" tolPlus="10"	<Impedance value="-0.0000004" tolPlus="-0.0000004"
+nombre-hauteur-21.xml	1	69271945ef424336fb239f0665ba4bb82bb8c44f113939522018c8e607e707cd	height="0.45"	height="-0.0000004"	fontSize="2"	fontSize="-0.0000004"
+nombre-ligne-22.xml	1	cdd7d76f9f908819a7e0ed2efb29a1142555cef86a424fa1216e1d7b83f29c6c	endX="5" endY="0"	endX="1,5" endY="0"
+nombre-profil-22.xml	1	22a9fb674924597c9520516ca681478a522dce0948790e02305c3bd482fa09bf	<PolyStepSegment x='30' y='0'/>	<PolyStepSegment x='1,5' y='0'/>
+nombre-centre-22.xml	1	93335aef71910bde103ee3ab908fa5480c9dcc20a91616adcd753a44d569726c	centerX='15'	centerX='1,5'
+nombre-trou-22.xml	1	adc2350dfc181470ca2d8fde20b11c75b214d79d232ec88be10b7a6a54f7a6e4	<Hole name="h1" diameter="0.3"	<Hole name="h1" diameter="1,5"
+nombre-foret-22.xml	1	69ea2df7b53eafee4e10728cff691c8534dc2b95b97bdfd1a1c39d0cc2d1d235	diameter="0.7" platingStatus="NONPLATED" x="2"	diameter="0.7" platingStatus="NONPLATED" x="1,5"
+nombre-sequence-22.xml	1	c88d159318f535e7b169df36cd68c6622f88c91c10831a4e9f7efa1aa1a70143	sequence="4.9"	sequence="1,5"
+nombre-rayons-22.xml	1	a2a7646552e8627a61f9751f78c6424438dbebd09062ab861b40ec91e37f7cca	spokeCount="4"	spokeCount="1,5"
+nombre-anneaux-22.xml	1	68b865cc07da02185fef8a14c5cb3cc9b4a2ec708f755086761ccf139b56f61f	ringNumber="5"	ringNumber="1,5"
+nombre-epaisseur-22.xml	1	d2443ac2cf7c11cc14a6508c0617fe5503c857efe25efcf303d462cd34cdf757	thickness="1.2"	thickness="1,5"
+nombre-rugosite-22.xml	1	af2f31a665c64b65ad3758ef1de039d567191a7ee4b9ce9e500c2fbcefdadeec	<Property value="1,5" unit="MICRON"/>	<Property value="1,5" unit="MICRON"/>
+nombre-regle-22.xml	1	e393f6707d9297aed3b3588fa46518c13d05fdbbd9e14aa2912f8c87cc9639c1	name="MAX_LENGTH" value="55.5"	name="MAX_LENGTH" value="1,5"
+nombre-vias-22.xml	1	88e0a8614249a5abcba70e3c968848bb32f90fd485211b66ef8d617d524e2ba9	name="MAX_VIAS" value="3"	name="MAX_VIAS" value="1,5"
+nombre-place-22.xml	1	b9deca8692e9f69b0e4119b9852bc0a8d24ba9aef5e02265f5deb64828e4ec90	<Location x="1" y="2"/><Xform rotation="30"	<Location x="1,5" y="2"/><Xform rotation="1,5"
+nombre-fente-22.xml	1	081894147468e233a294934b810ff47217eb609b5845ed39cfd8706f3fb8265e	<Oval width="1" height="3"/>	<Oval width="1,5" height="3"/>	<Xform rotation="-30"/>	<Xform rotation="1,5"/>
+nombre-moignon-22.xml	1	02bfb1724c68e71fe665457f5623a6b2f3ba2067f4e298e67dc25c08ca6e1453	<Property value="0.1" unit="MM"/>	<Property value="1,5" unit="MM"/>
+nombre-z-22.xml	1	3416f5796d0f79be98e64221d42b95e517f706fd60ae9e174e1acc040f3de919	<Impedance value="50" tolPlus="10"	<Impedance value="1,5" tolPlus="1,5"
+nombre-hauteur-22.xml	1	f9950cc9a5a4c94b7c567fa2039cefca541b30a8770a7244f7f892437e9911dc	height="0.45"	height="1,5"	fontSize="2"	fontSize="1,5"
+nombre-ligne-23.xml	1	90b22247c0cbdb82ac51e9a94fb0a216310fe7d4f13be0579d3996da2042921d	endX="5" endY="0"	endX="" endY="0"
+nombre-profil-23.xml	1	509d7b051985240728eb034f8e2849fb8576fb3ffbbc3b6d29acda0ee24623e6	<PolyStepSegment x='30' y='0'/>	<PolyStepSegment x='' y='0'/>
+nombre-centre-23.xml	1	e5e275b1afe47da13a0a7e40398cd6f1b815870e152ee56b2592424b27b58b6f	centerX='15'	centerX=''
+nombre-trou-23.xml	1	2fc96d4e3eb98777b63cddc3553e367ca9b713d4369b3b7228283b987a4d25be	<Hole name="h1" diameter="0.3"	<Hole name="h1" diameter=""
+nombre-foret-23.xml	1	61cf5220420a85f1603359fcf5559e1e65252c13407a8cef7688a7ac6617e4db	diameter="0.7" platingStatus="NONPLATED" x="2"	diameter="0.7" platingStatus="NONPLATED" x=""
+nombre-sequence-23.xml	1	e8267f254ca175c0cc2694f26ff303630faa5942f0f8a7a6d9706e05612182be	sequence="4.9"	sequence=""
+nombre-rayons-23.xml	1	decc4dab0f83573765c397dce80c2edf03116f705117856b05ea8a428cf014f0	spokeCount="4"	spokeCount=""
+nombre-anneaux-23.xml	1	c80215f0c6ff8eb12cf87f2e1d603b1228c2d664f8c9f5591c0ef10b94b49188	ringNumber="5"	ringNumber=""
+nombre-epaisseur-23.xml	1	a8a1cd6707d70f414612c4908c6d81fb352c881f228a8feb6813aabe07833382	thickness="1.2"	thickness=""
+nombre-rugosite-23.xml	1	3d1eeb205142bf4160f57958bb3f83fbc11ab1651a8f25c375d50107be8b86b4	<Property value="1,5" unit="MICRON"/>	<Property value="" unit="MICRON"/>
+nombre-regle-23.xml	1	78e3ed13754d277b6bb4bd46de84552747fe658a0772e4bd7725192727137d5a	name="MAX_LENGTH" value="55.5"	name="MAX_LENGTH" value=""
+nombre-vias-23.xml	1	f86107ed51a7c766648941aa95cc6e8a0552246494399752ebcd37c1a9be956c	name="MAX_VIAS" value="3"	name="MAX_VIAS" value=""
+nombre-place-23.xml	1	f452851977bf57d3070ce70bf04a6eea6d1722bc45c58f576234099716229d77	<Location x="1" y="2"/><Xform rotation="30"	<Location x="" y="2"/><Xform rotation=""
+nombre-fente-23.xml	1	e14c2d09eae10abe7ea350acb8efb9ae708164846ab3257444fc8c9748c76e01	<Oval width="1" height="3"/>	<Oval width="" height="3"/>	<Xform rotation="-30"/>	<Xform rotation=""/>
+nombre-moignon-23.xml	1	bbd43043a958d49270acd4cfe9249c525c233fb65fbbf5b28b4d194432197afb	<Property value="0.1" unit="MM"/>	<Property value="" unit="MM"/>
+nombre-z-23.xml	1	548834f5a68038a14cad2930e0b28be405765c82dab32a2ef26ac5ececf8306c	<Impedance value="50" tolPlus="10"	<Impedance value="" tolPlus=""
+nombre-hauteur-23.xml	1	ae283795fd116fb976167af5ce092549ad91efa9c86b78d2a0f858ec92c1d749	height="0.45"	height=""	fontSize="2"	fontSize=""
+nombre-ligne-24.xml	1	a64de948f45e54d8ac08c98d8c03e88fe7135566052112e2b61eaa1862d6ed22	endX="5" endY="0"	endX="abc" endY="0"
+nombre-profil-24.xml	1	f24eae4d36b786f4140ee6efd0f25743ca1deb533e1517bb8802e665f2e383e5	<PolyStepSegment x='30' y='0'/>	<PolyStepSegment x='abc' y='0'/>
+nombre-centre-24.xml	1	1938c969ee4ca2d586be71ecbe3df2a4f96376d5767c36dd058dece39ff95f28	centerX='15'	centerX='abc'
+nombre-trou-24.xml	1	1ec8d7d7d56a8b06f1a508f43b27592397f628fb1607f442424bdf14ed6b79bb	<Hole name="h1" diameter="0.3"	<Hole name="h1" diameter="abc"
+nombre-foret-24.xml	1	eda06f587d66cd2c21c3034d4e0c6674043670b5053e818ee9515cd2fa3638b2	diameter="0.7" platingStatus="NONPLATED" x="2"	diameter="0.7" platingStatus="NONPLATED" x="abc"
+nombre-sequence-24.xml	1	f2bf4bb3d6b115d0d2dd1a946e4e8489932f51120ced37d888b6c37b4a530d30	sequence="4.9"	sequence="abc"
+nombre-rayons-24.xml	1	2fa8ccb6e4ac734070d353d9209bf9e11f36da2221610e8c8c9eb215093ed6e8	spokeCount="4"	spokeCount="abc"
+nombre-anneaux-24.xml	1	48e1dcd5e587ecefb5351d1b495ea8d15d693f3b471332901c82ab063fbc37e1	ringNumber="5"	ringNumber="abc"
+nombre-epaisseur-24.xml	1	f7b1297aca0ad5b74b639b3c65ced28b9661a8e075bbfb97037bf143e303afd4	thickness="1.2"	thickness="abc"
+nombre-rugosite-24.xml	1	368eda157697873a1defbde5451d589c43ec328f350e8170e2663d8c1006edb5	<Property value="1,5" unit="MICRON"/>	<Property value="abc" unit="MICRON"/>
+nombre-regle-24.xml	1	61240a919738d848b8eb8c7e88936aeaa147d8640eb56079466aef733128d182	name="MAX_LENGTH" value="55.5"	name="MAX_LENGTH" value="abc"
+nombre-vias-24.xml	1	deb2ee1b6af21f47983645453777c39d8d54b9f7f1ebb9e63b44d20028588f2f	name="MAX_VIAS" value="3"	name="MAX_VIAS" value="abc"
+nombre-place-24.xml	1	d162f7490333e94ba9576d5ba392a7edf49632f46598551de9f3b55c75867f93	<Location x="1" y="2"/><Xform rotation="30"	<Location x="abc" y="2"/><Xform rotation="abc"
+nombre-fente-24.xml	1	a9d8a7866fe62ce7fe08376ba28f42fabea4225fb5f9ff356bde1cdd326ec76c	<Oval width="1" height="3"/>	<Oval width="abc" height="3"/>	<Xform rotation="-30"/>	<Xform rotation="abc"/>
+nombre-moignon-24.xml	1	8f802a7365c00e6ad1232ffd99ac657a22a4f6ab86690faaffde53eab9985c26	<Property value="0.1" unit="MM"/>	<Property value="abc" unit="MM"/>
+nombre-z-24.xml	1	8a9df0029c592449797c88cb6edb16af1edca6bea018bbca02ec1decf2b9d45d	<Impedance value="50" tolPlus="10"	<Impedance value="abc" tolPlus="abc"
+nombre-hauteur-24.xml	1	d67fe2429442e151586aa9f12a1a44bd75047a4061054f3986ea9be6ca5554aa	height="0.45"	height="abc"	fontSize="2"	fontSize="abc"
+nombre-ligne-25.xml	1	43b05439c64bd63fa19265b41f0a30f6f6474c35f61409bdb4b6ae70f7ed1687	endX="5" endY="0"	endX="١٢" endY="0"
+nombre-profil-25.xml	1	d75e0d2ffe72789e2ff87b6ff3f1ef86a52ecfe64d0b181ca0be9c9da52bb64b	<PolyStepSegment x='30' y='0'/>	<PolyStepSegment x='١٢' y='0'/>
+nombre-centre-25.xml	1	34f268e2b3956d9a2f70320467a77e9a63a51c5780c81ebd894f60ac8537685e	centerX='15'	centerX='١٢'
+nombre-trou-25.xml	1	dc4d935fb64b423215752fcb2e0f60c14d8f4debfed84bc61fcf5a83c33c0d36	<Hole name="h1" diameter="0.3"	<Hole name="h1" diameter="١٢"
+nombre-foret-25.xml	1	5b6bcdf25d482aea6f165afdd0f91cf784d59bad7d2cd51de641638583dc84ab	diameter="0.7" platingStatus="NONPLATED" x="2"	diameter="0.7" platingStatus="NONPLATED" x="١٢"
+nombre-sequence-25.xml	1	edc56108fe5166dae31e86fd9aa2e0d16171f2edd2b00aa4872a3d7c01512e2b	sequence="4.9"	sequence="١٢"
+nombre-rayons-25.xml	1	825144d64af0b2f4d51e958967c60c8831a870530866b035fa3afd8460575968	spokeCount="4"	spokeCount="١٢"
+nombre-anneaux-25.xml	1	1a63f8c0a494fd899ad319aefc8c296fb38e71266333ae4bb9d471203fa66f3c	ringNumber="5"	ringNumber="١٢"
+nombre-epaisseur-25.xml	1	2bbdd50b9d14d2de904741cb96890bbd368c77b853cd92cc1a0eb870364ab035	thickness="1.2"	thickness="١٢"
+nombre-rugosite-25.xml	1	a0bbb48e04d0a91e6813be9f403ab827f0a360c6e163bc11748d190598ae2a2e	<Property value="1,5" unit="MICRON"/>	<Property value="١٢" unit="MICRON"/>
+nombre-regle-25.xml	1	03ae9f48e8540eb73bf37a7b5c89e75a87ce6a6a7f46ab5aec2f0f9b3fa1e1cd	name="MAX_LENGTH" value="55.5"	name="MAX_LENGTH" value="١٢"
+nombre-vias-25.xml	1	8f0b492119bf149906d5d824ef148d42df5285ec5527c4f81fcb30a231d37bb1	name="MAX_VIAS" value="3"	name="MAX_VIAS" value="١٢"
+nombre-place-25.xml	1	c3bfbb3981ee4e9e58ae07f7de0b5297f3cf07c557b319b30c5312236f96ea08	<Location x="1" y="2"/><Xform rotation="30"	<Location x="١٢" y="2"/><Xform rotation="١٢"
+nombre-fente-25.xml	1	1b55cae18ad08db238fc9e65aeb32cdc279dbbdc1c07b134be5cf76d98b2c9fd	<Oval width="1" height="3"/>	<Oval width="١٢" height="3"/>	<Xform rotation="-30"/>	<Xform rotation="١٢"/>
+nombre-moignon-25.xml	1	1f25f15749ca492b0d38800729f8d519e022a03885918abaf1db93a81d007976	<Property value="0.1" unit="MM"/>	<Property value="١٢" unit="MM"/>
+nombre-z-25.xml	1	45a73f55fa758b15066e775ba68efacd58c4ab00831c1e4e5cc3fc04b707737c	<Impedance value="50" tolPlus="10"	<Impedance value="١٢" tolPlus="١٢"
+nombre-hauteur-25.xml	1	c38b7fce21bd751eae960cac5dec07de64284f9116fcc29bad609ce771e13cc6	height="0.45"	height="١٢"	fontSize="2"	fontSize="١٢"
+nombre-ligne-26.xml	1	eeeeb663360c108cc306565b24c0950680701d749da4c614a4ba75482a304bef	endX="5" endY="0"	endX="1e" endY="0"
+nombre-profil-26.xml	1	0a7027c7c6518d019db29effc50e32fde129690ec0bebb812c8ed7cec8042c14	<PolyStepSegment x='30' y='0'/>	<PolyStepSegment x='1e' y='0'/>
+nombre-centre-26.xml	1	f4c72f50e097cc35cfbde2c44783a1886dc2617421ab91780ddd07b73b3b617d	centerX='15'	centerX='1e'
+nombre-trou-26.xml	1	a8528b2e8a01c78a1c82e312f24be1551dffc59cdb0ca43153b8af947f317234	<Hole name="h1" diameter="0.3"	<Hole name="h1" diameter="1e"
+nombre-foret-26.xml	1	2adbad7d7856312e09df8907a8f934d406beae01b1dbf131f3a8f0448a989e30	diameter="0.7" platingStatus="NONPLATED" x="2"	diameter="0.7" platingStatus="NONPLATED" x="1e"
+nombre-sequence-26.xml	1	4a109798b8daed6af2f991ac797616d1cc71f4ae20d861fcf659e9a11759a2bd	sequence="4.9"	sequence="1e"
+nombre-rayons-26.xml	1	85f6b9c69075f23b2bbb148ea541e51e00ebce866b3018f2f97f2a44ba54a94c	spokeCount="4"	spokeCount="1e"
+nombre-anneaux-26.xml	1	393afd735f661b76269b654c3575c604f0578eb309c12e5b3df71135858fc18a	ringNumber="5"	ringNumber="1e"
+nombre-epaisseur-26.xml	1	c1dbd0b358d7404ecb6a30d6cb24e9a8397d245f94c744c41efba1459810001d	thickness="1.2"	thickness="1e"
+nombre-rugosite-26.xml	1	59783d29dcbac205af046854c699b79564e56bd0b08c2c028d9f0aff34882441	<Property value="1,5" unit="MICRON"/>	<Property value="1e" unit="MICRON"/>
+nombre-regle-26.xml	1	6bb936b46bdb4887ea12c1748b2b8c7db45bc6ef614a5b136380f1c6e5146cc3	name="MAX_LENGTH" value="55.5"	name="MAX_LENGTH" value="1e"
+nombre-vias-26.xml	1	0cd19ddad6fd8e4a7f1bdbae66f5953bf59d946ff82baf0c4249276e9e379331	name="MAX_VIAS" value="3"	name="MAX_VIAS" value="1e"
+nombre-place-26.xml	1	6e7c2bc006fbed2a19a2d298e55463e4ffb0ee65e15fcde5e919b020f39a2108	<Location x="1" y="2"/><Xform rotation="30"	<Location x="1e" y="2"/><Xform rotation="1e"
+nombre-fente-26.xml	1	c93764d82bd58f5f5b85cb13f9b5d06ea0fc2cddcdd40dec4ee209a3f8e84918	<Oval width="1" height="3"/>	<Oval width="1e" height="3"/>	<Xform rotation="-30"/>	<Xform rotation="1e"/>
+nombre-moignon-26.xml	1	c8d05a55090f3e366523f33007e3718a1e6ba7a69a335d19939fb3bfbe69f224	<Property value="0.1" unit="MM"/>	<Property value="1e" unit="MM"/>
+nombre-z-26.xml	1	b595a9cf59885fd62377a4bbfe2b6c20c94dc50a7262897d3491a9500fb691aa	<Impedance value="50" tolPlus="10"	<Impedance value="1e" tolPlus="1e"
+nombre-hauteur-26.xml	1	c5460ab6db56aaa90e46883db76683cb7f0960b0532261fc5219696909dac9ef	height="0.45"	height="1e"	fontSize="2"	fontSize="1e"
+nombre-ligne-27.xml	1	e06c88897106a4bfb8cecf4a0678d6b40dcede1bc6d96ccc594b42ac6ad72321	endX="5" endY="0"	endX="1d3" endY="0"
+nombre-profil-27.xml	1	b87e7f8ce587742d601d210c965cd1d7b1877473fd3ce22587e28dd89c00ad45	<PolyStepSegment x='30' y='0'/>	<PolyStepSegment x='1d3' y='0'/>
+nombre-centre-27.xml	1	b08bbfb16a151d905366da313945cd648c08804efd9a6ad69ef9db6df96b9308	centerX='15'	centerX='1d3'
+nombre-trou-27.xml	1	8bf0fbb7c884e1f9278e3321cad2b3a051ae60397706e8979427914056881d8d	<Hole name="h1" diameter="0.3"	<Hole name="h1" diameter="1d3"
+nombre-foret-27.xml	1	0b5a4b9ccb85197736aac944191525950b7bda61de1a7ad1cf5fb5dd9ff45513	diameter="0.7" platingStatus="NONPLATED" x="2"	diameter="0.7" platingStatus="NONPLATED" x="1d3"
+nombre-sequence-27.xml	1	bf135b1c76653b4b60f1535c9169db08e8370751a59f33899fed9907ba7d73c4	sequence="4.9"	sequence="1d3"
+nombre-rayons-27.xml	1	d7c9d06e32b58c21c5b5fab95f51163fcc48eceb2798fcc60923fd5f27469ba9	spokeCount="4"	spokeCount="1d3"
+nombre-anneaux-27.xml	1	ba8b4792770e91fa9b16e4089afa6c85de73477633832ba9106c933d7200aa3d	ringNumber="5"	ringNumber="1d3"
+nombre-epaisseur-27.xml	1	3d3ffc80c15901e2ac61eba3deb32281cb0898796912eaf6e53c2158033d8be3	thickness="1.2"	thickness="1d3"
+nombre-rugosite-27.xml	1	c86678a866cb12027d77cbdaecdb973ebb38a9221d4e9fa4c4a0145681c9eee7	<Property value="1,5" unit="MICRON"/>	<Property value="1d3" unit="MICRON"/>
+nombre-regle-27.xml	1	507882bf69b0223f9c77cd064b2cc97cd6c942b243eadfabe574869ad26712b4	name="MAX_LENGTH" value="55.5"	name="MAX_LENGTH" value="1d3"
+nombre-vias-27.xml	1	c9ff101a4d0df74eb5e5ae3aea1ee8ee06d0b2e777e167085940501c4297aaa5	name="MAX_VIAS" value="3"	name="MAX_VIAS" value="1d3"
+nombre-place-27.xml	1	85dd2846c97d4e1304245ac7b06b600c2a63438925fe77e825fb55c169402094	<Location x="1" y="2"/><Xform rotation="30"	<Location x="1d3" y="2"/><Xform rotation="1d3"
+nombre-fente-27.xml	1	e7429d6d00eb4ca50daa24583a10da3497ad0b82e983d0f837542cb145165e9a	<Oval width="1" height="3"/>	<Oval width="1d3" height="3"/>	<Xform rotation="-30"/>	<Xform rotation="1d3"/>
+nombre-moignon-27.xml	1	7a8aeabce16fe22152683ad274fb9e807c6ffcce6c0dffb7bb58c8db24b6043b	<Property value="0.1" unit="MM"/>	<Property value="1d3" unit="MM"/>
+nombre-z-27.xml	1	78fdc7ea08649dd2269a66724dca4dbef6660414bdfb9b9c9ecb2fea8cb12a2e	<Impedance value="50" tolPlus="10"	<Impedance value="1d3" tolPlus="1d3"
+nombre-hauteur-27.xml	1	7e7809bf56ea5d29d0432d54a79eaf7c0e99bf84539fd0d4c7f4f9b4c130b642	height="0.45"	height="1d3"	fontSize="2"	fontSize="1d3"
+nombre-ligne-28.xml	1	978df44c6fe8f05a7293318c63d48eefb2dfe19f3e33ce9b04672aeff55aea77	endX="5" endY="0"	endX="infinity" endY="0"
+nombre-profil-28.xml	1	589aab6065d98f5f023456625f20e107677fc9f634996079d484f63b94202a17	<PolyStepSegment x='30' y='0'/>	<PolyStepSegment x='infinity' y='0'/>
+nombre-centre-28.xml	1	8628f98b860190bf91458caacd3a6a7b2e804758b28622263afbdde7c0fee6d6	centerX='15'	centerX='infinity'
+nombre-trou-28.xml	1	75f7375a0ad32f6d468c548341cec38f32b6f6e56350d2e6c85db10d6f17aa5b	<Hole name="h1" diameter="0.3"	<Hole name="h1" diameter="infinity"
+nombre-foret-28.xml	1	6c0c5dbace7bc5e566444f0beb1317b262b394df3d17ba6f33906284cf411673	diameter="0.7" platingStatus="NONPLATED" x="2"	diameter="0.7" platingStatus="NONPLATED" x="infinity"
+nombre-sequence-28.xml	1	eedcf63cec9f8b16c18c400e05f68d1a01f48ad0a223c2b76de22bc76ca0b4cf	sequence="4.9"	sequence="infinity"
+nombre-rayons-28.xml	1	e8d96aae8d2713bc49671a1f74d0d7ef06b0b4cc0cfe4418c83c94903567a42d	spokeCount="4"	spokeCount="infinity"
+nombre-anneaux-28.xml	1	6e7288cec799f30a8cd9aef0a576673b052789c1f9ae5b87d09ba2c2fab3b584	ringNumber="5"	ringNumber="infinity"
+nombre-epaisseur-28.xml	1	449e563ffd904a466bc0359370a4c7f4746bc756911cabd9c4c3690316f8b77e	thickness="1.2"	thickness="infinity"
+nombre-rugosite-28.xml	1	0bf5952241fcc07d791963301f2d3b69f5c5d7cc2fa6d830b4554a2da3d08265	<Property value="1,5" unit="MICRON"/>	<Property value="infinity" unit="MICRON"/>
+nombre-regle-28.xml	1	d9f6d4822cfebd1c7e24922bc7fbb4a47bac6e8bbafa96775589a706fa0eb856	name="MAX_LENGTH" value="55.5"	name="MAX_LENGTH" value="infinity"
+nombre-vias-28.xml	1	640f8694d196cfd36cdfa504fb83015a6a8374eec075efb6912ecfc41ecba667	name="MAX_VIAS" value="3"	name="MAX_VIAS" value="infinity"
+nombre-place-28.xml	1	ba0d4bf8ee0194b123d318fc54621c4757795c67ddd260896273034dd46cc5e4	<Location x="1" y="2"/><Xform rotation="30"	<Location x="infinity" y="2"/><Xform rotation="infinity"
+nombre-fente-28.xml	1	142ad9d7f2ab6caed3b080ad3f2a1ea8ee0850d87315630920c93379bd21c678	<Oval width="1" height="3"/>	<Oval width="infinity" height="3"/>	<Xform rotation="-30"/>	<Xform rotation="infinity"/>
+nombre-moignon-28.xml	1	20d8252cebd76e91d245fb54df83e7de0a9fc546060387107853b8e0e7c454b4	<Property value="0.1" unit="MM"/>	<Property value="infinity" unit="MM"/>
+nombre-z-28.xml	1	9f2da7a99a2a8b3550751d2fc90cbbdb01c4bc9298d3a60883d97701dc9509bb	<Impedance value="50" tolPlus="10"	<Impedance value="infinity" tolPlus="infinity"
+nombre-hauteur-28.xml	1	e45166b14ca893273c6addddb0026acff74e8666d7b83f51a75e3e1c7b54c630	height="0.45"	height="infinity"	fontSize="2"	fontSize="infinity"
+nombre-ligne-29.xml	1	e4f981f07ff1ccea30a6d66872b44071f38386869db21c58a2eacad9eb75e1dc	endX="5" endY="0"	endX="NaN" endY="0"
+nombre-profil-29.xml	1	e155f06a58070d9711a276f117d8ff8faa6cff98cae9ca5e3c0662bff6a561bd	<PolyStepSegment x='30' y='0'/>	<PolyStepSegment x='NaN' y='0'/>
+nombre-centre-29.xml	1	8c1e4e15072c861b3d6f7c80866d6af1597135f5c90bb1871e472a593d78cc64	centerX='15'	centerX='NaN'
+nombre-trou-29.xml	1	5f01190e5421f581347456e74d8dd6b2a3c4699f7c8e76c3f3b834f76d05f802	<Hole name="h1" diameter="0.3"	<Hole name="h1" diameter="NaN"
+nombre-foret-29.xml	1	96c9ef219f9308898b62b4f13987cfd2a2f518a3840eac52f15b987a91547abc	diameter="0.7" platingStatus="NONPLATED" x="2"	diameter="0.7" platingStatus="NONPLATED" x="NaN"
+nombre-sequence-29.xml	1	21bbe9093011476f102af4cfcbac7554e8f4d6e35744c13dcda78c7d2c459939	sequence="4.9"	sequence="NaN"
+nombre-rayons-29.xml	1	89b09ca57a74b8d5b183d4cfc30d9d16863e39a164e853b9c0095faf8bb0392e	spokeCount="4"	spokeCount="NaN"
+nombre-anneaux-29.xml	1	123ae374593af82d6f5ca110b133b47904e710a82e23f332f0491e8f7b362428	ringNumber="5"	ringNumber="NaN"
+nombre-epaisseur-29.xml	1	ad103f7e31783120445b1436a7db0c28bee846305a2d2c2981e8d3c7e45f1143	thickness="1.2"	thickness="NaN"
+nombre-rugosite-29.xml	1	25bc127eff283d1950ee8ae2275275f6fc7dd4102ad15c1ae783cde151fb0977	<Property value="1,5" unit="MICRON"/>	<Property value="NaN" unit="MICRON"/>
+nombre-regle-29.xml	1	66b57628570698688bd87c832434077d8245c93f0bc6f6431a77dd906fab9160	name="MAX_LENGTH" value="55.5"	name="MAX_LENGTH" value="NaN"
+nombre-vias-29.xml	1	4ca7d089fe144ad2a0751b5f9aa2f874a68236c475f779f50a0bc622e9b02d43	name="MAX_VIAS" value="3"	name="MAX_VIAS" value="NaN"
+nombre-place-29.xml	1	05cfa14b01242f93c20a01e5efd4988bfe2b757ad7dcdeed0e086a4d365d489a	<Location x="1" y="2"/><Xform rotation="30"	<Location x="NaN" y="2"/><Xform rotation="NaN"
+nombre-fente-29.xml	1	a57630169911bae8b0f5e8bf3874239d3204911c7b3b3cd4fc1955d000f46ac7	<Oval width="1" height="3"/>	<Oval width="NaN" height="3"/>	<Xform rotation="-30"/>	<Xform rotation="NaN"/>
+nombre-moignon-29.xml	1	fa56bf761b58e2dca27cc6472d072596361ae1154955bb05fc8931741c7d4a01	<Property value="0.1" unit="MM"/>	<Property value="NaN" unit="MM"/>
+nombre-z-29.xml	1	db203b32f5007c4796cc4fe1ebd3b0eeb80b46fc4368defa9767133725866e2c	<Impedance value="50" tolPlus="10"	<Impedance value="NaN" tolPlus="NaN"
+nombre-hauteur-29.xml	1	da80c1f8bda27ab123523104ce5c761024d1caed149d8c635c41578f59a93e20	height="0.45"	height="NaN"	fontSize="2"	fontSize="NaN"
+nombre-ligne-30.xml	1	02bafa106ef520d7606f06d81e5cf2eeeaa513090c1be9beb9170dbbd6eedb72	endX="5" endY="0"	endX="\t2\n" endY="0"
+nombre-profil-30.xml	1	dd179a8efed7125a80ed3ce7854fab88ebb7e38257a25115615fe68d17eef897	<PolyStepSegment x='30' y='0'/>	<PolyStepSegment x='\t2\n' y='0'/>
+nombre-centre-30.xml	1	f3dd530bf33cf4b35fa8f7c1c54d8c0382c4cfc4d3b9ffd950be0cdf4a6bf9e1	centerX='15'	centerX='\t2\n'
+nombre-trou-30.xml	1	3385909b11350d6ba62340bfe04aa488c80b8be25e126277a4b9e4bea2a5fd44	<Hole name="h1" diameter="0.3"	<Hole name="h1" diameter="\t2\n"
+nombre-foret-30.xml	1	710dd42a6f173b23fbcf48953b1cdd660080806b72cb06eaa79e4ced50314f73	diameter="0.7" platingStatus="NONPLATED" x="2"	diameter="0.7" platingStatus="NONPLATED" x="\t2\n"
+nombre-sequence-30.xml	1	0ab35706fc8e31d934bd47a4c35f4fd639565b193474ee9a1a61850537a46908	sequence="4.9"	sequence="\t2\n"
+nombre-rayons-30.xml	1	4d201d8af9c0ffb8a8f7e63d2cebe8303a5231e4204302bcfc472bcb0d09d348	spokeCount="4"	spokeCount="\t2\n"
+nombre-anneaux-30.xml	1	9a66850ff65aee0b52a1829811b0ccd64e289ae6a85862fee0004c4f83c24c8e	ringNumber="5"	ringNumber="\t2\n"
+nombre-epaisseur-30.xml	1	ce1aacad8e4826076ec6bdab0c0722ad74531d9dd1639abb000720624b9cc7c3	thickness="1.2"	thickness="\t2\n"
+nombre-rugosite-30.xml	1	a49e2fa5186051798fd0682852422e26aeae20433a58c2647fd09e2e08372347	<Property value="1,5" unit="MICRON"/>	<Property value="\t2\n" unit="MICRON"/>
+nombre-regle-30.xml	1	89e88f5c522468589fcdf8cdfafe782633c9c073371e093eb318b3ebd77e6d0b	name="MAX_LENGTH" value="55.5"	name="MAX_LENGTH" value="\t2\n"
+nombre-vias-30.xml	1	1938035c793de469d391b31ca149c8e5bc452816106795ca1b85fe93ce3b7e04	name="MAX_VIAS" value="3"	name="MAX_VIAS" value="\t2\n"
+nombre-place-30.xml	1	f1017de675bad8444c4819c172b255abbd3686fca21268cae0efb8869622a90d	<Location x="1" y="2"/><Xform rotation="30"	<Location x="\t2\n" y="2"/><Xform rotation="\t2\n"
+nombre-fente-30.xml	1	1822ea473ea3d260776a1b014ab32985e11d8bdfcb885e2ef550e0abad1e436a	<Oval width="1" height="3"/>	<Oval width="\t2\n" height="3"/>	<Xform rotation="-30"/>	<Xform rotation="\t2\n"/>
+nombre-moignon-30.xml	1	3ee81584bd6809e9faaac222bba8176f6954d3db2bdf47010879c25547373b84	<Property value="0.1" unit="MM"/>	<Property value="\t2\n" unit="MM"/>
+nombre-z-30.xml	1	4fbd25c9280ca8b1b54f418bfae5fd3f23525198b83e66be65f115dd199b5e94	<Impedance value="50" tolPlus="10"	<Impedance value="\t2\n" tolPlus="\t2\n"
+nombre-hauteur-30.xml	1	2c4c230e5fa5feb14d6835b4bf1bcd7403e487193e7ba66694da4811a4694bc2	height="0.45"	height="\t2\n"	fontSize="2"	fontSize="\t2\n"
+nombre-ligne-31.xml	1	0bfb07f46e7583217c9176e61d419e5a621debcd1005e75a3c2bc02f6fc0fdca	endX="5" endY="0"	endX="0.1234565" endY="0"
+nombre-profil-31.xml	1	6d6a6567e7adc208c89e37292a374153b0f135695d5cb575212c0d0f88f9360e	<PolyStepSegment x='30' y='0'/>	<PolyStepSegment x='0.1234565' y='0'/>
+nombre-centre-31.xml	1	78ea413f53917e248288ebd04f8f3a68ac37aeba99cc10dc6a8f4f54bbd11a6f	centerX='15'	centerX='0.1234565'
+nombre-trou-31.xml	1	74dee94cd93c07c04543cf7a7914cdf34b7599e85bafd611fa23fc0e1e7a0561	<Hole name="h1" diameter="0.3"	<Hole name="h1" diameter="0.1234565"
+nombre-foret-31.xml	1	2cdab003405fdcc88116a0a93299695ad90c034719dae8c2fda1974a5ea5e021	diameter="0.7" platingStatus="NONPLATED" x="2"	diameter="0.7" platingStatus="NONPLATED" x="0.1234565"
+nombre-sequence-31.xml	1	a59b1a76da9aac4eb5bbf7160635acaf6344400cc5846b52d0192f3e27eec1c1	sequence="4.9"	sequence="0.1234565"
+nombre-rayons-31.xml	1	d7467945bf542d7dfcc515b1710806c4cea8191147a740ee6e61b5d7a0a8f0ae	spokeCount="4"	spokeCount="0.1234565"
+nombre-anneaux-31.xml	1	caef95318054ab3b06f5cc1f9e3dc11b96f2bc5cfa455d422c2581c9c718c3d0	ringNumber="5"	ringNumber="0.1234565"
+nombre-epaisseur-31.xml	1	0bb5c0b4a0c0c8caf872971f4a4b0bc5b93d8eaf66daa785dc59f227ca21e174	thickness="1.2"	thickness="0.1234565"
+nombre-rugosite-31.xml	1	3637eb75377d1b64604bf7b1e57e8851b26f0e68148f31f6e53ee929cddb0070	<Property value="1,5" unit="MICRON"/>	<Property value="0.1234565" unit="MICRON"/>
+nombre-regle-31.xml	1	c79c4ec84a6cfc8dec2d82493f2344b066c4d9864ebba9b15aeea4f9bc2ed598	name="MAX_LENGTH" value="55.5"	name="MAX_LENGTH" value="0.1234565"
+nombre-vias-31.xml	1	f08a25a0385b49f5fdc10efa25a7087348382645479c42759d48fca7a0442710	name="MAX_VIAS" value="3"	name="MAX_VIAS" value="0.1234565"
+nombre-place-31.xml	1	813bf3cfad3d1edee6332763d77257f30f21c6434a833ecb69ed36fcbfb332f3	<Location x="1" y="2"/><Xform rotation="30"	<Location x="0.1234565" y="2"/><Xform rotation="0.1234565"
+nombre-fente-31.xml	1	a5d940a1fed83545a510a7f0c6da44f3c30484bc47b952baaa916d5ad57d1021	<Oval width="1" height="3"/>	<Oval width="0.1234565" height="3"/>	<Xform rotation="-30"/>	<Xform rotation="0.1234565"/>
+nombre-moignon-31.xml	1	88761ff163250068d11cdc862ce0c68a094eb6c504b541d3f421ef53176cafbf	<Property value="0.1" unit="MM"/>	<Property value="0.1234565" unit="MM"/>
+nombre-z-31.xml	1	373687c6caadaaeca86cd270d2f1b2e3a22b01463cbf289a48ca1d260eafad36	<Impedance value="50" tolPlus="10"	<Impedance value="0.1234565" tolPlus="0.1234565"
+nombre-hauteur-31.xml	1	a06368e1bb101f089d0b0f64cd5c23e7e80a3346037e9a249972aa5912aa96c1	height="0.45"	height="0.1234565"	fontSize="2"	fontSize="0.1234565"
+nombre-ligne-32.xml	1	d8f2701fc7f4bfa806fe6f99632f9f9a58481261dfa8d4b0a737589918099870	endX="5" endY="0"	endX="0.1234575" endY="0"
+nombre-profil-32.xml	1	d9f6553454abc103e671146feac1a3d2bae52e84775586bf0da7ae1b8099134e	<PolyStepSegment x='30' y='0'/>	<PolyStepSegment x='0.1234575' y='0'/>
+nombre-centre-32.xml	1	9143e86384ef371e955b334e89d817d75020313e391dea6f1b44246c8d3346e0	centerX='15'	centerX='0.1234575'
+nombre-trou-32.xml	1	e2f0211fda37bf084a7815aee1615e9b1e6a8b7c44de3f1963b0158fc4359dcf	<Hole name="h1" diameter="0.3"	<Hole name="h1" diameter="0.1234575"
+nombre-foret-32.xml	1	a199fbd0818504c957030d9f2cc3866b855f9eede360bc08911f9beba6a307a1	diameter="0.7" platingStatus="NONPLATED" x="2"	diameter="0.7" platingStatus="NONPLATED" x="0.1234575"
+nombre-sequence-32.xml	1	bf859bc5d5a23ef908557eda424fee0d438adca43ff8819bdfab1266ada97bce	sequence="4.9"	sequence="0.1234575"
+nombre-rayons-32.xml	1	ace672d3e619054bc27307f58a446fb203c5111900685243fc568a3222272447	spokeCount="4"	spokeCount="0.1234575"
+nombre-anneaux-32.xml	1	3ed89a6a1c757521fe2aab5967ecc2cbd2fb7a4b40698736373ef7f6ab226e0d	ringNumber="5"	ringNumber="0.1234575"
+nombre-epaisseur-32.xml	1	a4683dace1a0d89f0a0e5c5cb5c6f61d7ca853376d8cc1615eb07df2508f5c25	thickness="1.2"	thickness="0.1234575"
+nombre-rugosite-32.xml	1	c0a23bfa8899a246900e3299641011f614cd4f62b0a5b7ca735573171fd0372d	<Property value="1,5" unit="MICRON"/>	<Property value="0.1234575" unit="MICRON"/>
+nombre-regle-32.xml	1	304f826b3b9599ad1f2d6e17ab44cb849226b4a948bb3491eba0d15c726a975c	name="MAX_LENGTH" value="55.5"	name="MAX_LENGTH" value="0.1234575"
+nombre-vias-32.xml	1	ae10457fc520d705f478ecb3f53379920de36edfd28b5519a6cbf1b70432870a	name="MAX_VIAS" value="3"	name="MAX_VIAS" value="0.1234575"
+nombre-place-32.xml	1	77ec2ce47b6cb4f1a06c0cc4a73c37b8d2b5ba0c4b6830047739a8ac4dc265a1	<Location x="1" y="2"/><Xform rotation="30"	<Location x="0.1234575" y="2"/><Xform rotation="0.1234575"
+nombre-fente-32.xml	1	8854fdbca5d397b5ea188fd5fc8a29612f9e323fd439cb1504d0a2ea4d747139	<Oval width="1" height="3"/>	<Oval width="0.1234575" height="3"/>	<Xform rotation="-30"/>	<Xform rotation="0.1234575"/>
+nombre-moignon-32.xml	1	b3d9009f758f71eae9c84d27a6abef541f7f36bee1ac99b118486b2700989f67	<Property value="0.1" unit="MM"/>	<Property value="0.1234575" unit="MM"/>
+nombre-z-32.xml	1	6cd21d651fe4b8aa42407d1bcf0bbdfba8bf5d1591c082ed136d950965dd25c5	<Impedance value="50" tolPlus="10"	<Impedance value="0.1234575" tolPlus="0.1234575"
+nombre-hauteur-32.xml	1	1867ff7ac0b6b89d9e2efd077d038f5f4d9d232c8be5e020e83266c225487378	height="0.45"	height="0.1234575"	fontSize="2"	fontSize="0.1234575"
+nombre-ligne-33.xml	1	a3ef0ca54dafdda96ad2bb6611d7a4eb3d93a45f59ef787ecc4fab508f503e3d	endX="5" endY="0"	endX="2.5e-6" endY="0"
+nombre-profil-33.xml	1	b7087a40e8be8007ac5775054a1441175ab640bffecd549b6c9fd306cfbb6270	<PolyStepSegment x='30' y='0'/>	<PolyStepSegment x='2.5e-6' y='0'/>
+nombre-centre-33.xml	1	47622ff9367cbd840141ae6687d4b7daa5a499ba92b0aee5c13a33631c184894	centerX='15'	centerX='2.5e-6'
+nombre-trou-33.xml	1	686fd3e93bb6679869b677c658b17e0ce0783650dae0b191f773233f2026ed3e	<Hole name="h1" diameter="0.3"	<Hole name="h1" diameter="2.5e-6"
+nombre-foret-33.xml	1	b17c3edd55f2455812fd4c1ae977915a7b205d1c3a48de59bbc597ed0a737949	diameter="0.7" platingStatus="NONPLATED" x="2"	diameter="0.7" platingStatus="NONPLATED" x="2.5e-6"
+nombre-sequence-33.xml	1	e9fa9d23932c948729248eb45f8fcdc06b3b0318780786c750ecb2204b9ea2fb	sequence="4.9"	sequence="2.5e-6"
+nombre-rayons-33.xml	1	6b59aba8a2c44e174d0893a584f0c9ee1b3a3ab66245300228f1c893e97c3d7e	spokeCount="4"	spokeCount="2.5e-6"
+nombre-anneaux-33.xml	1	573e5213186e0ff36fe8647c1a4fecf1298abcb0d4097541ccb627951ef16a40	ringNumber="5"	ringNumber="2.5e-6"
+nombre-epaisseur-33.xml	1	8477bed9da578e201603f1d354e313728e37cb04be8b3f321bcb62cb4ebdb5d4	thickness="1.2"	thickness="2.5e-6"
+nombre-rugosite-33.xml	1	d02cb013aed8d7e9eb7c44eef72352b78f9d2bed6d0165de146609bb6853c6f8	<Property value="1,5" unit="MICRON"/>	<Property value="2.5e-6" unit="MICRON"/>
+nombre-regle-33.xml	1	c785fa438a59b1d84e9cba4f731fd9c9c658a54dea4c634f07b4fdb6325031e7	name="MAX_LENGTH" value="55.5"	name="MAX_LENGTH" value="2.5e-6"
+nombre-vias-33.xml	1	59227e5f4d644daa150d4eddc3b90bb0cfcafa9afee59705d463031dbce11925	name="MAX_VIAS" value="3"	name="MAX_VIAS" value="2.5e-6"
+nombre-place-33.xml	1	3bca5d12067ad5b0e5eadb7f0709cf759702e2de0549f33a99d6207b1020511f	<Location x="1" y="2"/><Xform rotation="30"	<Location x="2.5e-6" y="2"/><Xform rotation="2.5e-6"
+nombre-fente-33.xml	1	3ee350f4c601af257788205a3deececf4f8ad8ac3dcfa85d641892c59cb1f105	<Oval width="1" height="3"/>	<Oval width="2.5e-6" height="3"/>	<Xform rotation="-30"/>	<Xform rotation="2.5e-6"/>
+nombre-moignon-33.xml	1	aee79ffe05cac2caf6b43708a149ddc0471079f473b4640ddea6a5e676080b0c	<Property value="0.1" unit="MM"/>	<Property value="2.5e-6" unit="MM"/>
+nombre-z-33.xml	1	3a50c4e2178dff3c40a703e94801bf21eb350649adf819da4a5f1b3d8785767c	<Impedance value="50" tolPlus="10"	<Impedance value="2.5e-6" tolPlus="2.5e-6"
+nombre-hauteur-33.xml	1	f8828090283a6b2fc9e8bb77af2eb8203ed71351ebb193f8b4ba2132776fc5bf	height="0.45"	height="2.5e-6"	fontSize="2"	fontSize="2.5e-6"
+nombre-ligne-34.xml	1	09a22d0a86c2ed8852de9d18be89f69a43c323a6eef59a818d22143b52eb359b	endX="5" endY="0"	endX="123456789.1234565" endY="0"
+nombre-profil-34.xml	1	6f9bd2ebac3394d6371b836377ca1d43cb4fa4f1e41df844a8893ebaf108703e	<PolyStepSegment x='30' y='0'/>	<PolyStepSegment x='123456789.1234565' y='0'/>
+nombre-centre-34.xml	1	d53b5521ff6a853fd91706aa806322dcd406aef8fd2253cecad8cc250f36c05d	centerX='15'	centerX='123456789.1234565'
+nombre-trou-34.xml	1	bb8c4712254e42d18ae2f2bfac0b03a03ac31cef2808ca39ad2a1399bab56344	<Hole name="h1" diameter="0.3"	<Hole name="h1" diameter="123456789.1234565"
+nombre-foret-34.xml	1	12530292e2099d6e4d7c1f933cff352967a74a3634341710070acb3e62be4261	diameter="0.7" platingStatus="NONPLATED" x="2"	diameter="0.7" platingStatus="NONPLATED" x="123456789.1234565"
+nombre-sequence-34.xml	1	53d05da80c4cd8de37073734e9c3a2f10d01da502cf4325d147ae2872cb2e5cf	sequence="4.9"	sequence="123456789.1234565"
+nombre-rayons-34.xml	1	3c3bcb48d024b6b73586a046749c43c090acea1691f318ac33e076d33719f57b	spokeCount="4"	spokeCount="123456789.1234565"
+nombre-anneaux-34.xml	1	0378f4c47b77acd0fa2a9a66cbc8050779fc2f46de689dde432685c7894942f7	ringNumber="5"	ringNumber="123456789.1234565"
+nombre-epaisseur-34.xml	1	9d7e874e6b18a30a2ae8ae55b2814ba9156c30bbb0c1430098482fc8181efb11	thickness="1.2"	thickness="123456789.1234565"
+nombre-rugosite-34.xml	1	6cf7bf3947469e33d651f80ec8f485f9f3a6e3a924b05b4f4f95a8ac5e93aa67	<Property value="1,5" unit="MICRON"/>	<Property value="123456789.1234565" unit="MICRON"/>
+nombre-regle-34.xml	1	f83955d0d76922a60c70900022d3f52ac4ea61235255f33182bb1151924a5fd4	name="MAX_LENGTH" value="55.5"	name="MAX_LENGTH" value="123456789.1234565"
+nombre-vias-34.xml	1	d727bec257fb254aa64a657000695e08e2d60adfbae0549707552578e9b02e11	name="MAX_VIAS" value="3"	name="MAX_VIAS" value="123456789.1234565"
+nombre-place-34.xml	1	2b7b0d056fc0198fe595bd763dc8123f6990805d893e43e721176d94ef19c724	<Location x="1" y="2"/><Xform rotation="30"	<Location x="123456789.1234565" y="2"/><Xform rotation="123456789.1234565"
+nombre-fente-34.xml	1	d38ddf0c86a48dfc68a0b37672d3b5ebb0d893f0d8bf255a73cfa642da4f4f18	<Oval width="1" height="3"/>	<Oval width="123456789.1234565" height="3"/>	<Xform rotation="-30"/>	<Xform rotation="123456789.1234565"/>
+nombre-moignon-34.xml	1	8be3ee1f07655fbfb51908a78329e1505c633ad37a2263c682480eae7dcebb0a	<Property value="0.1" unit="MM"/>	<Property value="123456789.1234565" unit="MM"/>
+nombre-z-34.xml	1	a366bc10c19e50c00a1376709d687bd5d93531436bf872b9ef352332e995dc7e	<Impedance value="50" tolPlus="10"	<Impedance value="123456789.1234565" tolPlus="123456789.1234565"
+nombre-hauteur-34.xml	1	a94f94dc64ff8e4cc5e253a52f6bb4d0992967052439f1c1db1e7c339b6b2462	height="0.45"	height="123456789.1234565"	fontSize="2"	fontSize="123456789.1234565"
+nombre-ligne-35.xml	1	0fec2ba1baa0d42392404503b417b10a6be983ec5aaf84f57bfe066ac8f95342	endX="5" endY="0"	endX="1e16" endY="0"
+nombre-profil-35.xml	1	ef40e37f9c2e44934fb7d5100a4752bda0d5a1feb3420b41415f2b0240c5d89e	<PolyStepSegment x='30' y='0'/>	<PolyStepSegment x='1e16' y='0'/>
+nombre-centre-35.xml	1	866c711429172405dd201af349313253d2196cf31c8c69dfdea8e02ef03864dc	centerX='15'	centerX='1e16'
+nombre-trou-35.xml	1	018cd2cb358ccfcc7faa0b5585513337f3478f1a30645dc014dedc7a9219975e	<Hole name="h1" diameter="0.3"	<Hole name="h1" diameter="1e16"
+nombre-foret-35.xml	1	220f6c5245d9f2b615a16b62703987e872c308756d98d90b52e2826efe87f836	diameter="0.7" platingStatus="NONPLATED" x="2"	diameter="0.7" platingStatus="NONPLATED" x="1e16"
+nombre-sequence-35.xml	1	c497684ceba5c3a5ef8da6d562828f3b79f3356e57995713cb621a1b95f80746	sequence="4.9"	sequence="1e16"
+nombre-rayons-35.xml	1	a7308c7dce15aad84150cdf6ed062a9fe473bcdec3c9857d6b8ad3ee41ba3a1e	spokeCount="4"	spokeCount="1e16"
+nombre-anneaux-35.xml	1	eca2eac9b24f732ff56547c893e15e635177559f7716bc1cfebc18030072d6e2	ringNumber="5"	ringNumber="1e16"
+nombre-epaisseur-35.xml	1	a755e7a1096fbaa318acde14084af35643642e2921721bdd2ea7fdee530618a6	thickness="1.2"	thickness="1e16"
+nombre-rugosite-35.xml	1	0f4a8a4ec8fbddf1c377ab2b3390c5d4119fb28ea78cd0e1f229111ab9202a71	<Property value="1,5" unit="MICRON"/>	<Property value="1e16" unit="MICRON"/>
+nombre-regle-35.xml	1	e3f10e721e358584f7e69fdfd10a603009746ca13fb0f8224b0f88aa746ecaed	name="MAX_LENGTH" value="55.5"	name="MAX_LENGTH" value="1e16"
+nombre-vias-35.xml	1	1694230383a4a06726d6d8f7bceb1b76b19dbd9a65209cf64b22d44efb05258e	name="MAX_VIAS" value="3"	name="MAX_VIAS" value="1e16"
+nombre-place-35.xml	1	80a7dd342e7a0285665d83f48bb66fbd79b5d248ce4a39aefdd09e38ebada5b2	<Location x="1" y="2"/><Xform rotation="30"	<Location x="1e16" y="2"/><Xform rotation="1e16"
+nombre-fente-35.xml	1	39369c5b087e2844f0c5b3a1160b87e326e3848ecd1cd5bba84168a6657bb259	<Oval width="1" height="3"/>	<Oval width="1e16" height="3"/>	<Xform rotation="-30"/>	<Xform rotation="1e16"/>
+nombre-moignon-35.xml	1	f8c3b5cd4251b5c471614654ff51aeade559852e31a1f93ac536230192c3e859	<Property value="0.1" unit="MM"/>	<Property value="1e16" unit="MM"/>
+nombre-z-35.xml	1	bdfc4c19d38767af3bce1142e2386188a06766aaf22dd0860590d6882c743e36	<Impedance value="50" tolPlus="10"	<Impedance value="1e16" tolPlus="1e16"
+nombre-hauteur-35.xml	1	b7b371978cf33f8352c1e1dd3a6ad08608e1903e9a3b2e20a1ceb0d8bd8110b6	height="0.45"	height="1e16"	fontSize="2"	fontSize="1e16"
+nombre-ligne-36.xml	1	cf529753fdd6a659dd95847840b28ddd024a51fd1a869ad21930ad91d5cdd976	endX="5" endY="0"	endX="1e22" endY="0"
+nombre-profil-36.xml	1	95589080a17e2e0f43804a6b54abb2fb048776ce5eefcd4cb0299191f73b0e51	<PolyStepSegment x='30' y='0'/>	<PolyStepSegment x='1e22' y='0'/>
+nombre-centre-36.xml	1	2fa3324ed2a7fee93683a4abde5e36c9abb8b981eedbd5fa4be3f44ce109dfde	centerX='15'	centerX='1e22'
+nombre-trou-36.xml	1	45038776162978d5446020dba45fcedf220604e4ca6505d2d6fd1c3293a4b3fd	<Hole name="h1" diameter="0.3"	<Hole name="h1" diameter="1e22"
+nombre-foret-36.xml	1	40d3b3dcaa9bc68545538eebcbf499d81f6b6c489e92dc63a691bd4734ebcffd	diameter="0.7" platingStatus="NONPLATED" x="2"	diameter="0.7" platingStatus="NONPLATED" x="1e22"
+nombre-sequence-36.xml	1	746f56db8781ba7a512f1cf31c5461797d331e47aa2d71ab830019b635b57ac8	sequence="4.9"	sequence="1e22"
+nombre-rayons-36.xml	1	d69b6fa0dc9af0edd2fa6fd2ca56138fbcd678f046ea66480fed2e821d170c58	spokeCount="4"	spokeCount="1e22"
+nombre-anneaux-36.xml	1	9a765f63612e302b34fcfe0bb8c27bc18de3ef5d2c9f866fb1562ba84daf8b2d	ringNumber="5"	ringNumber="1e22"
+nombre-epaisseur-36.xml	1	0dea5e92f5779bfbfc895c1a023343aab04d48f595d32eec7ef1f97ffcab7fce	thickness="1.2"	thickness="1e22"
+nombre-rugosite-36.xml	1	a3533bfbb4c250fe9b42f93378108ff94352f07aeebf68333ed97d55a950f1e2	<Property value="1,5" unit="MICRON"/>	<Property value="1e22" unit="MICRON"/>
+nombre-regle-36.xml	1	e99872ce49acd8b0af5402372a2355288b4c6fe4c643b31f685c58bdcc9ee961	name="MAX_LENGTH" value="55.5"	name="MAX_LENGTH" value="1e22"
+nombre-vias-36.xml	1	4e3ba689d4d486c886e5fe3bdf71d001a6fcf31722b74c6159a03ebf78a0c05b	name="MAX_VIAS" value="3"	name="MAX_VIAS" value="1e22"
+nombre-place-36.xml	1	7e13c5347550e126247e6a65ff1b663630e04012e32018af3d36a324e257dbde	<Location x="1" y="2"/><Xform rotation="30"	<Location x="1e22" y="2"/><Xform rotation="1e22"
+nombre-fente-36.xml	1	5021ab506281932788789c1595096adfe7c04d8f263a84c32894cc3c120d23a4	<Oval width="1" height="3"/>	<Oval width="1e22" height="3"/>	<Xform rotation="-30"/>	<Xform rotation="1e22"/>
+nombre-moignon-36.xml	1	d7e397f773f41eeb1dd8590d00ac07d69a7861c62ef91134e4db4f1a0bc94cea	<Property value="0.1" unit="MM"/>	<Property value="1e22" unit="MM"/>
+nombre-z-36.xml	1	b373604cdb66d6304ed6a4a6c7abde49c49f96809acfc1fc49f75c6edf16be37	<Impedance value="50" tolPlus="10"	<Impedance value="1e22" tolPlus="1e22"
+nombre-hauteur-36.xml	1	4d46ab7c2c3a73cfda90dfb60988c804284ebe9812d2bcfb9c2b9b8e46460f46	height="0.45"	height="1e22"	fontSize="2"	fontSize="1e22"
+nombre-ligne-37.xml	1	c0f419c9eb2b92c4f74acd9c068e0e93c2b781cb69c7174c765c2a54427f072f	endX="5" endY="0"	endX="-0" endY="0"
+nombre-profil-37.xml	1	90da56524269f8f5b4ff652f814a7fe060c7e4bdefb9bee5331a67a22e1476ec	<PolyStepSegment x='30' y='0'/>	<PolyStepSegment x='-0' y='0'/>
+nombre-centre-37.xml	1	50be2ea2156b6409ac9d3fad6596602c9a53d6fd3eb4c2f200e994c07e9ab7c1	centerX='15'	centerX='-0'
+nombre-trou-37.xml	1	16daf4180dd8c13dbb6243e3b5e14235eade60e2bb13099582ffc534b282c843	<Hole name="h1" diameter="0.3"	<Hole name="h1" diameter="-0"
+nombre-foret-37.xml	1	422d41d86c959d50e5f662d1240219df30a385f6b2638b1a8e64d509cd366e93	diameter="0.7" platingStatus="NONPLATED" x="2"	diameter="0.7" platingStatus="NONPLATED" x="-0"
+nombre-sequence-37.xml	1	347cb60becb22cb293956bf222cdd53264089f36b1071fb08a590ba3341e38af	sequence="4.9"	sequence="-0"
+nombre-rayons-37.xml	1	a52ad18e4a04a011c9220ba80381d52fc74f1b5f6152cc6295df26957e15a699	spokeCount="4"	spokeCount="-0"
+nombre-anneaux-37.xml	1	687a269deba21d394edb97af4532573572bc37999d8825aa009f30a8d78d8791	ringNumber="5"	ringNumber="-0"
+nombre-epaisseur-37.xml	1	d17276158f91f50e64efbc3332414e4f451d71b5c60f5a599fc27632bdc2eeba	thickness="1.2"	thickness="-0"
+nombre-rugosite-37.xml	1	876fe8eb5713a13dfc71684b4efeb4e19c27d4bb5944ec5a58a8a546961f1864	<Property value="1,5" unit="MICRON"/>	<Property value="-0" unit="MICRON"/>
+nombre-regle-37.xml	1	13c4ef9796a533bb7680ea5c32bda592d949df3772a61a209532edc7bc5ba4d6	name="MAX_LENGTH" value="55.5"	name="MAX_LENGTH" value="-0"
+nombre-vias-37.xml	1	62d7eadfeec8c839cf5f0ef964a2aa46b7a45a559162d4ad1685759df89c8ca0	name="MAX_VIAS" value="3"	name="MAX_VIAS" value="-0"
+nombre-place-37.xml	1	d9ccf07f8f86ba73dd160ae4ce9a0e64ca33700eaf488270b3bf42f1a339c48b	<Location x="1" y="2"/><Xform rotation="30"	<Location x="-0" y="2"/><Xform rotation="-0"
+nombre-fente-37.xml	1	69c0cc47f56052f0438c7159972735980bc01220eb2ff43ed6e02928a586f498	<Oval width="1" height="3"/>	<Oval width="-0" height="3"/>	<Xform rotation="-30"/>	<Xform rotation="-0"/>
+nombre-moignon-37.xml	1	2e08cb0bbcfe9cfad39c5e27b93da7dd4c6b456358314f2b5c41bd21ea2b3b9d	<Property value="0.1" unit="MM"/>	<Property value="-0" unit="MM"/>
+nombre-z-37.xml	1	4ceee0b37f3b8e1a35ae68c5ad6f0fcffefe86662796ac0283383e064f8340fb	<Impedance value="50" tolPlus="10"	<Impedance value="-0" tolPlus="-0"
+nombre-hauteur-37.xml	1	e3aed920a6527d724ca1f43f0590b12f52e83ee94d99e6b8182fd75bfcd7e089	height="0.45"	height="-0"	fontSize="2"	fontSize="-0"
+nombre-ligne-38.xml	1	4435ff04ff6d8db225737888e528d72277c473ed094e50f2452ab43ca97f505e	endX="5" endY="0"	endX="1.0000000000000002" endY="0"
+nombre-profil-38.xml	1	2111ca61f74d43e9f0774d8ff213396fe8d6c08e5514837d6557ef15f2f5400d	<PolyStepSegment x='30' y='0'/>	<PolyStepSegment x='1.0000000000000002' y='0'/>
+nombre-centre-38.xml	1	a5ebf8a576ec22479021cb591b695ef15663dff4ee87d41e4a54092838b12173	centerX='15'	centerX='1.0000000000000002'
+nombre-trou-38.xml	1	12c2a71252efdf77d244c53d7a6843e8d6a971af9bf3b8f228dbd55a4b1ee0b9	<Hole name="h1" diameter="0.3"	<Hole name="h1" diameter="1.0000000000000002"
+nombre-foret-38.xml	1	018748c8d9ca0abca6f2f685c0dfe2c00dbe901672c4cb116d17b2f3e6b89c99	diameter="0.7" platingStatus="NONPLATED" x="2"	diameter="0.7" platingStatus="NONPLATED" x="1.0000000000000002"
+nombre-sequence-38.xml	1	4e313df62e1bfaec365086a917f4309d63715f2452da42939020a9594883c09a	sequence="4.9"	sequence="1.0000000000000002"
+nombre-rayons-38.xml	1	2a51fa6f9bda55808e467e62295c9bb84261daa61d1ca35df2df9b88a3580d08	spokeCount="4"	spokeCount="1.0000000000000002"
+nombre-anneaux-38.xml	1	b448c2d806e3da687b5f2cbf4a56c3466a9fe1d884e523ade32e2d3f0b6926a0	ringNumber="5"	ringNumber="1.0000000000000002"
+nombre-epaisseur-38.xml	1	9fb26a2ffb1c42d88f10d7209a5bf5903d16dbd560f6c8a04e5d532f996f7ad7	thickness="1.2"	thickness="1.0000000000000002"
+nombre-rugosite-38.xml	1	25b771516ca7d0f472d77d229cc6326420a157e4d8d5c92840c69dfd6a7bde5b	<Property value="1,5" unit="MICRON"/>	<Property value="1.0000000000000002" unit="MICRON"/>
+nombre-regle-38.xml	1	38bd7767d9c1389e126f8bd83ef6d6ae67c94570aec04903a9a0f38bb1661fbe	name="MAX_LENGTH" value="55.5"	name="MAX_LENGTH" value="1.0000000000000002"
+nombre-vias-38.xml	1	a77a1f9b3649a1b05feeb2ec885639a80046b318cb0b0091852a7202b05412d1	name="MAX_VIAS" value="3"	name="MAX_VIAS" value="1.0000000000000002"
+nombre-place-38.xml	1	806ab38cfb657160fc13b63ddee78ef91e346660859535cb313b7879bb592ed6	<Location x="1" y="2"/><Xform rotation="30"	<Location x="1.0000000000000002" y="2"/><Xform rotation="1.0000000000000002"
+nombre-fente-38.xml	1	ec53691bcf7ca5b408106cfe844a9033cede0cdf05e6355d0e5453346efad8e9	<Oval width="1" height="3"/>	<Oval width="1.0000000000000002" height="3"/>	<Xform rotation="-30"/>	<Xform rotation="1.0000000000000002"/>
+nombre-moignon-38.xml	1	70e787cd9b3e12890226d09be7dbde365caa0ecf04af4a80d92fe04bfe7d75c3	<Property value="0.1" unit="MM"/>	<Property value="1.0000000000000002" unit="MM"/>
+nombre-z-38.xml	1	e9536a5ec06c172b6f0b105011ac319c952ccbd07e1ad505645735dfa43b8ddf	<Impedance value="50" tolPlus="10"	<Impedance value="1.0000000000000002" tolPlus="1.0000000000000002"
+nombre-hauteur-38.xml	1	82441f23fe7e9b5765f9db9559bae04c66e8556bd60cfcaafced4ec210ee682f	height="0.45"	height="1.0000000000000002"	fontSize="2"	fontSize="1.0000000000000002"
