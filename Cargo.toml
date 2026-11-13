@@ -1,6 +1,6 @@
 [workspace]
 resolver = "2"
-members = ["commun"]
+members = ["commun", "lanceur", "web_bench"]
 
 [profile.release]
 opt-level = "s"

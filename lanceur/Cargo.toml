@@ -1,0 +1,15 @@
+[package]
+name = "web_suite_lanceur"
+version = "0.1.0"
+edition = "2021"
+description = "WEB·SUITE : lanceur des outils, installateur, serveur MCP"
+
+[lib]
+path = "src/lib.rs"
+
+# Les exécutables sont les fichiers de src/bin/ (web_suite, mcp_web_suite, installer…).
+
+[dependencies]
+web_tools_commun = { path = "../commun" }
+serde_json = { version = "1", features = ["preserve_order"] }
+ureq = "2"
