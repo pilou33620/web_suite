@@ -2,253 +2,166 @@
 
     python lanceur/banc_serveur.py
 
-Démarre le serveur en mémoire sur 127.0.0.1 avec un gestionnaire factice (rien
-n'est lancé, cloné ni poussé) et joue un appareil distant en masquant la boucle
-locale. Affiche OK si tout passe.
+Pilote l'exécutable Rust web_suite en boîte noire, sur 127.0.0.1, dans un dossier
+temporaire sans aucun outil (rien n'est lancé, cloné ni poussé : un dépôt nu local
+joue GitHub). L'appareil distant est joué par WEB_TOOLS_BANC_DISTANT=1 : le serveur
+ne fait alors plus confiance à la boucle locale. Affiche OK si tout passe.
+
+Ce que l'ancien banc vérifiait en touchant l'intérieur du serveur est devenu des
+tests Rust (cargo test) :
+  - client d'Internet refusé (8.8.8.8, 2a01:…, ::ffff:8.8.8.8), fin de la pause après
+    cinq erreurs, code expiré refusé et remplacé : commun/src/appairage/essais.rs ;
+  - journal tourné en .log.1, pas de bouton openEMS hors Windows, archive openEMS à
+    l'empreinte fausse refusée, code d'appairage lu dans le journal d'un outil :
+    lanceur/src/outils/essais.rs.
 """
-import http.client
 import json
 import os
+import ssl
+import subprocess
 import sys
-import tempfile
-import threading
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-import web_suite  # noqa: E402
-
-
-class Factice:
-    racine = tempfile.gettempdir()
-
-    def etat(self):
-        return []
-
-    def arreter(self, oid):
-        Factice.arrete = oid
-
-    installer = lancer = installer_openems = arreter
-
-
-class Distant(web_suite.Lanceur):
-    distant = False
-    client = None                                      # une adresse de client simulée
-
-    def parse_request(self):
-        if Distant.client:
-            self.client_address = (Distant.client, 0)
-        return super().parse_request()
-
-    def _de_ce_poste(self):
-        return not Distant.distant and super()._de_ce_poste()
-
-
-Distant.gestionnaire = Factice()
-serveur = web_suite.Serveur(("127.0.0.1", 0), Distant)
-threading.Thread(target=serveur.serve_forever, daemon=True).start()
-PORT = serveur.server_address[1]
-
-
-def req(chemin, methode="GET", hote=None, entetes=None, corps=b""):
-    c = http.client.HTTPConnection("127.0.0.1", PORT, timeout=10)
-    c.putrequest(methode, chemin, skip_host=True)
-    c.putheader("Host", hote or "127.0.0.1:%d" % PORT)
-    for k, v in (entetes or {}).items():
-        c.putheader(k, v)
-    if methode == "POST":
-        c.putheader("Content-Length", (entetes or {}).get("Content-Length") or str(len(corps)))
-    c.endheaders(corps if methode == "POST" and corps else None)
-    r = c.getresponse()
-    r.corps = r.read()
-    c.close()
-    return r
+from banc_lanceur import Poste  # noqa: E402
 
 
 def verifier(nom, obtenu, attendu):
     assert obtenu == attendu, "%s : attendu %r, obtenu %r" % (nom, attendu, obtenu)
 
 
-# Écoute locale : pas de jeton, mais Host contrôlé
-verifier("page locale", req("/").status, 200)
-verifier("Host étranger", req("/", hote="evil.example:8100").status, 403)
-verifier("Host étranger en POST", req("/api/arreter", "POST", hote="evil.example",
-                                      entetes={"X-WebSuite": "1"}, corps=b'{"id":"web_3d"}').status, 403)
-verifier("sans X-WebSuite", req("/api/arreter", "POST", corps=b'{"id":"web_3d"}').status, 403)
-verifier("corps géant", req("/api/arreter", "POST", entetes={"X-WebSuite": "1",
-                            "Content-Length": str(10 ** 9)}).status, 413)
-verifier("JSON non objet", req("/api/arreter", "POST", entetes={"X-WebSuite": "1"}, corps=b"[]").status, 400)
-
-# Mode réseau, appareil distant
-Distant.jeton = "j" * 22
-affiches = []
-Distant.appairage = web_suite.Appairage(afficher=affiches.append)
-Distant.distant = True
-r = req("/")
-verifier("distant sans jeton : renvoyé vers la page du code", (r.status, r.getheader("Location")), (303, "/appairage"))
-r = req("/appairage")
-verifier("distant sans jeton : page du code", (r.status, "appairer" in r.corps.decode()), (200, True))
-verifier("page du code jamais en cache", r.getheader("Cache-Control"), "no-store")
-verifier("le code s'affiche dans le terminal", len(affiches), 1)
-verifier("distant sans jeton : pas l'état", req("/api/etat").status, 403)
-verifier("distant sans jeton : pas l'intro", req("/websuite-intro.html").status, 403)
-verifier("distant sans jeton : pas d'action", req("/api/arreter", "POST", entetes={"X-WebSuite": "1"},
-                                                corps=b'{"id":"web_3d"}').status, 403)
-verifier("distant, faux jeton", req("/?jeton=faux").getheader("Location"), "/appairage")
-verifier("distant, faux biscuit", req("/api/etat", entetes={"Cookie": "websuite_jeton=faux"}).status, 403)
-r = req("/?jeton=" + Distant.jeton)
-verifier("bon jeton -> redirection", r.status, 303)
-verifier("redirection sans jeton", r.getheader("Location"), "/")
-biscuit = r.getheader("Set-Cookie").split(";")[0]
-verifier("biscuit -> page", req("/", entetes={"Cookie": biscuit}).status, 200)
-verifier("biscuit -> action", req("/api/arreter", "POST", entetes={"Cookie": biscuit, "X-WebSuite": "1"},
-                                  corps=b'{"id":"web_3d"}').status, 200)
-verifier("action reçue", Factice.arrete, "web_3d")
-verifier("biscuit illisible -> page du code", req("/", entetes={"Cookie": '";;=='}).getheader("Location"), "/appairage")
-# Client Internet (le lanceur écoute « :: », donc l'IPv6 publique du poste) : refusé, jeton ou pas
-for ip in ("8.8.8.8", "2a01:cb19:690:a100::1", "::ffff:8.8.8.8"):
-    Distant.client = ip
-    verifier("Internet %s refusé" % ip, req("/?jeton=" + Distant.jeton).status, 403)
-Distant.client = None
+def arret_propre(lanceur):
+    if os.name != "nt":                                   # sous Windows, terminate() tue sans prévenir
+        verifier("SIGTERM : arrêt propre", (lanceur.arreter(), "Arrêt." in lanceur.sortie()), (0, True))
 
 
-# Code d'appairage : le bon donne le cookie du jeton, une seule fois.
-def appairer(code, x=True):
-    return req("/api/appairer", "POST", entetes={"X-WebSuite": "1"} if x else {},
-               corps=json.dumps({"code": code}).encode())
+with Poste() as poste:
+    # Écoute locale : pas de jeton, mais Host contrôlé
+    with poste.lanceur("--local") as l:
+        req = l.req
+        verifier("page locale", req("/").status, 200)
+        verifier("Host étranger", req("/", hote="evil.example:8100").status, 403)
+        verifier("Host étranger en POST", req("/api/arreter", "POST", hote="evil.example",
+                                              entetes={"X-WebSuite": "1"}, corps=b'{"id":"web_3d"}').status, 403)
+        verifier("sans X-WebSuite", req("/api/arreter", "POST", corps=b'{"id":"web_3d"}').status, 403)
+        verifier("corps géant", req("/api/arreter", "POST", entetes={"X-WebSuite": "1",
+                                    "Content-Length": str(10 ** 9)}).status, 413)
+        verifier("JSON non objet", req("/api/arreter", "POST", entetes={"X-WebSuite": "1"}, corps=b"[]").status, 400)
+        arret_propre(l)
 
+    # Mode réseau, appareil distant
+    with poste.lanceur("--reseau", WEB_TOOLS_BANC_DISTANT="1", WEB_TOOLS_HTTP="1") as l:
+        req = l.req
+        jeton = poste.jeton()
+        r = req("/")
+        verifier("distant sans jeton : renvoyé vers la page du code", (r.status, r.getheader("Location")), (303, "/appairage"))
+        r = req("/appairage")
+        verifier("distant sans jeton : page du code", (r.status, "appairer" in r.corps.decode()), (200, True))
+        verifier("page du code jamais en cache", r.getheader("Cache-Control"), "no-store")
+        verifier("le code s'affiche dans le terminal", len(l.codes()), 1)
+        verifier("distant sans jeton : pas l'état", req("/api/etat").status, 403)
+        verifier("distant sans jeton : pas l'intro", req("/websuite-intro.html").status, 403)
+        verifier("distant sans jeton : pas d'action", req("/api/arreter", "POST", entetes={"X-WebSuite": "1"},
+                                                        corps=b'{"id":"web_3d"}').status, 403)
+        verifier("distant, faux jeton", req("/?jeton=faux").getheader("Location"), "/appairage")
+        verifier("distant, faux biscuit", req("/api/etat", entetes={"Cookie": "websuite_jeton=faux"}).status, 403)
+        r = req("/?jeton=" + jeton)
+        verifier("bon jeton -> redirection", r.status, 303)
+        verifier("redirection sans jeton", r.getheader("Location"), "/")
+        biscuit = r.getheader("Set-Cookie").split(";")[0]
+        verifier("biscuit -> page", req("/", entetes={"Cookie": biscuit}).status, 200)
+        r = req("/api/arreter", "POST", entetes={"Cookie": biscuit, "X-WebSuite": "1"}, corps=b'{"id":"web_3d"}')
+        verifier("biscuit -> action", (r.status, json.loads(r.corps)["ok"]), (200, True))
+        l.attendre("arrête WEB_3D")                         # action reçue, et dite dans le terminal
+        verifier("biscuit illisible -> page du code", req("/", entetes={"Cookie": '";;=='}).getheader("Location"), "/appairage")
 
-A = Distant.appairage
-code = A.code
-verifier("code à 6 chiffres", (len(code), code.isdigit()), (6, True))
-verifier("appairer sans X-WebSuite", appairer(code, x=False).status, 403)
-faux = "%06d" % ((int(code) + 1) % 10 ** 6)
-r = appairer(faux)
-verifier("faux code refusé", (r.status, r.getheader("Set-Cookie")), (403, None))
-r = appairer(code[:3] + " " + code[3:])                   # tel qu'affiché, espace compris
-verifier("bon code accepté", r.status, 200)
-biscuit = r.getheader("Set-Cookie").split(";")[0]
-verifier("le cookie est celui du jeton", biscuit, "websuite_jeton=" + Distant.jeton)
-verifier("cookie du code -> outils", req("/api/etat", entetes={"Cookie": biscuit}).status, 200)
-verifier("code à usage unique", appairer(code).status, 403)
-# Le cas de l'iPad : code accepté, puis la page renvoie le code (copie en cache,
-# double validation). L'appareil est déjà autorisé : pas d'erreur 404.
-r = req("/api/appairer", "POST", entetes={"X-WebSuite": "1", "Cookie": biscuit},
-        corps=json.dumps({"code": "999999"}).encode())
-verifier("déjà autorisé : le code renvoyé passe", (r.status, json.loads(r.corps)["ok"]), (200, True))
-r = req("/appairage", entetes={"Cookie": biscuit})
-verifier("déjà autorisé : la page du code renvoie au lanceur", (r.status, r.getheader("Location")), (303, "/"))
-r = req("/", entetes={"Cookie": biscuit})
-verifier("le lanceur jamais en cache", (r.status, r.getheader("Cache-Control")), (200, "no-store"))
-req("/appairage")                                         # un nouveau code pour la suite
-verifier("nouveau code affiché après usage", len(affiches) >= 2, True)
-# Cinq erreurs brûlent le code, et l'on attend avant le suivant.
-A.preparer()
-code = A.code
-for _ in range(A.ESSAIS):
-    r = appairer("000000" if code != "000000" else "111111")
-verifier("cinq erreurs : code annulé", A.code, None)
-verifier("pendant la pause, même le bon code échoue", appairer(code).status, 403)
-verifier("la pause est annoncée", "attendez" in json.loads(appairer(code).corps)["message"], True)
-A.bloque = 0
-r = req("/appairage")
-verifier("après la pause, la page affiche un nouveau code", (r.status, A.code is not None and A.code != code), (200, True))
-# Un code trop vieux ne sert plus.
-A.expire = 0
-r = appairer(A.code)
-verifier("code expiré refusé", r.status, 403)
-verifier("et remplacé", "nouveau code" in json.loads(r.corps)["message"], True)
-Distant.distant = False
-verifier("ce poste sans jeton", req("/").status, 200)
+        # Code d'appairage : le bon donne le cookie du jeton, une seule fois.
+        def appairer(code, x=True):
+            return req("/api/appairer", "POST", entetes={"X-WebSuite": "1"} if x else {},
+                       corps=json.dumps({"code": code}).encode())
 
-# HTTPS en réseau : même port, la boucle locale garde HTTP, un autre appareil en
-# HTTP est renvoyé vers https://, le cookie y est Secure.
-ap = web_suite.appairage_commun
-if ap._openssl():
-    import ssl
-    with tempfile.TemporaryDirectory() as tmp:
-        os.environ["WEB_TOOLS_JETON_FICHIER"] = os.path.join(tmp, "jeton.txt")
-        ctx, raison = ap.contexte_tls()
-        verifier("certificat créé", raison, None)
-        ap.brancher_tls(serveur, ctx)
-        client = ssl.create_default_context(cafile=os.path.join(ap.dossier_tls(), "ca.pem"))
+        code = l.codes()[-1]
+        verifier("code à 6 chiffres", (len(code), code.isdigit()), (6, True))
+        verifier("appairer sans X-WebSuite", appairer(code, x=False).status, 403)
+        faux = "%06d" % ((int(code) + 1) % 10 ** 6)
+        r = appairer(faux)
+        verifier("faux code refusé", (r.status, r.getheader("Set-Cookie")), (403, None))
+        r = appairer(code[:3] + " " + code[3:])                   # tel qu'affiché, espace compris
+        verifier("bon code accepté", r.status, 200)
+        biscuit = r.getheader("Set-Cookie").split(";")[0]
+        verifier("le cookie est celui du jeton", biscuit, "websuite_jeton=" + jeton)
+        verifier("cookie du code -> outils", req("/api/etat", entetes={"Cookie": biscuit}).status, 200)
+        verifier("code à usage unique", appairer(code).status, 403)
+        # Le cas de l'iPad : code accepté, puis la page renvoie le code (copie en cache,
+        # double validation). L'appareil est déjà autorisé : pas d'erreur 404.
+        r = req("/api/appairer", "POST", entetes={"X-WebSuite": "1", "Cookie": biscuit},
+                corps=json.dumps({"code": "999999"}).encode())
+        verifier("déjà autorisé : le code renvoyé passe", (r.status, json.loads(r.corps)["ok"]), (200, True))
+        r = req("/appairage", entetes={"Cookie": biscuit})
+        verifier("déjà autorisé : la page du code renvoie au lanceur", (r.status, r.getheader("Location")), (303, "/"))
+        r = req("/", entetes={"Cookie": biscuit})
+        verifier("le lanceur jamais en cache", (r.status, r.getheader("Cache-Control")), (200, "no-store"))
+        req("/appairage")                                         # un nouveau code pour la suite
+        verifier("nouveau code affiché après usage", len(l.codes()) >= 2, True)
+        # Cinq erreurs brûlent le code, et l'on attend avant le suivant.
+        code = l.codes()[-1]
+        for _ in range(5):                                        # Appairage::ESSAIS
+            r = appairer("000000" if code != "000000" else "111111")
+        verifier("cinq erreurs : code annulé", "code annulé" in json.loads(r.corps)["message"], True)
+        verifier("pendant la pause, même le bon code échoue", appairer(code).status, 403)
+        verifier("la pause est annoncée", "attendez" in json.loads(appairer(code).corps)["message"], True)
+        verifier("pendant la pause, pas de nouveau code", (req("/appairage").status, l.codes()[-1]), (200, code))
+        arret_propre(l)
 
-        def reqs(chemin):
-            c = http.client.HTTPSConnection("127.0.0.1", PORT, timeout=10, context=client)
-            c.request("GET", chemin)
-            r = c.getresponse()
-            r.corps = r.read()
-            c.close()
-            return r
-        verifier("ce poste en HTTP", req("/").status, 200)
-        verifier("ce poste en HTTPS", reqs("/").status, 200)
-        Distant.distant = True
-        r = req("/api/etat")
-        verifier("distant en HTTP : vers https", (r.status, r.getheader("Location")),
-                 (307, "https://127.0.0.1:%d/api/etat" % PORT))
-        verifier("la CA, sans jeton", req(ap.CA).corps.startswith(b"-----BEGIN"), True)
-        r = reqs("/?jeton=" + Distant.jeton)
-        verifier("cookie Secure", (r.status, "; Secure" in r.getheader("Set-Cookie")), (303, True))
-        verifier("page du code en HTTPS", 'id="ca"' in reqs("/appairage").corps.decode(), True)
-        Distant.distant = False
-        del os.environ["WEB_TOOLS_JETON_FICHIER"]
-else:
-    print("  (openssl absent : HTTPS non vérifié)")
+    # HTTPS en réseau : même port, la boucle locale garde HTTP, un autre appareil en
+    # HTTP est renvoyé vers https://, le cookie y est Secure.
+    with poste.lanceur("--reseau") as l:
+        verifier("ce poste sans jeton", l.req("/").status, 200)
+        https = "HTTPS : la première fois" in l.sortie()
+        if https:
+            ca = os.path.join(os.path.dirname(poste.fichier_jeton), "tls", "ca.pem")
+            client = ssl.create_default_context(cafile=ca)
+            verifier("ce poste en HTTP", l.req("/").status, 200)
+            verifier("ce poste en HTTPS", l.req("/", contexte=client).status, 200)
+        else:
+            verifier("pas de HTTPS : le terminal dit pourquoi", "HTTP en clair sur le réseau" in l.sortie()
+                     or "adresse IP du poste introuvable" in l.sortie(), True)
+            print("  (openssl absent : HTTPS non vérifié)")
+    if https:
+        with poste.lanceur("--reseau", WEB_TOOLS_BANC_DISTANT="1") as l:
+            r = l.req("/api/etat")
+            verifier("distant en HTTP : vers https", (r.status, r.getheader("Location")),
+                     (307, "https://127.0.0.1:%d/api/etat" % l.port))
+            verifier("la CA, sans jeton", l.req("/appairage/ca.pem").corps.startswith(b"-----BEGIN"), True)
+            r = l.req("/?jeton=" + poste.jeton(), contexte=client)
+            verifier("cookie Secure", (r.status, "; Secure" in r.getheader("Set-Cookie")), (303, True))
+            verifier("page du code en HTTPS", 'id="ca"' in l.req("/appairage", contexte=client).corps.decode(), True)
 
-serveur.shutdown()
+    # Mise à jour de WEB_SUITE au démarrage : avec un script relanceur (WEB_SUITE_RELANCEUR=1)
+    # le lanceur sort en 75 ; sinon il se relance lui-même et le bilan suit.
+    def git(cwd, *args):
+        subprocess.run(["git", "-c", "user.name=banc", "-c", "user.email=banc@example.com", *args], cwd=cwd,
+                       env=poste.env, check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
-# Journaux : un journal trop gros passe en .log.1 au lancement suivant.
-outils = web_suite.outils
-with tempfile.TemporaryDirectory() as tmp:
-    journal = os.path.join(tmp, "web_3d.log")
-    with open(journal, "w") as f:
-        f.write("a" * (outils.JOURNAL_MAX + 1))
-    outils._tourner(journal)
-    verifier("journal tourné", (os.path.exists(journal), os.path.exists(journal + ".1")), (False, True))
-    with open(journal, "w") as f:
-        f.write("petit")
-    outils._tourner(journal)
-    verifier("petit journal gardé", os.path.exists(journal), True)
+    def publier(n):                                           # un commit de plus sur le « GitHub » de WEB_SUITE
+        with open(os.path.join(origine, "lanceur", "index.html"), "w", encoding="utf-8") as f:
+            f.write("version %d" % n)
+        git(origine, "add", "-A")
+        git(origine, "commit", "-m", "version %d" % n)
 
-# Hors Windows (Pi), l'installation d'openEMS est refusée : pas de bouton.
-windows, outils.WINDOWS = outils.WINDOWS, False
-verifier("pas de bouton openEMS hors Windows", outils.openems_pret(outils.PAR_ID["web_antenna"]), None)
-outils.WINDOWS = windows
-
-# openEMS : une archive dont l'empreinte n'est pas la bonne n'est pas extraite.
-import io            # noqa: E402
-import zipfile       # noqa: E402
-fausse = io.BytesIO()
-with zipfile.ZipFile(fausse, "w") as z:
-    z.writestr("openEMS/CSXCAD.dll", b"pas la vraie")
-
-
-class Reponse(io.BytesIO):
-    headers = {}
-
-    def __enter__(self):
-        return self
-
-    def __exit__(self, *_):
-        return False
-
-
-vraie_urlopen, outils.urllib.request.urlopen = outils.urllib.request.urlopen, lambda *a, **k: Reponse(fausse.getvalue())
-with tempfile.TemporaryDirectory() as tmp:
-    cible = os.path.join(tmp, "openEMS")
-    verifier("archive refusée", outils._telecharger_openems(cible, lambda t: None), False)
-    verifier("rien d'extrait ni de .part laissé", sorted(os.listdir(tmp)), [])
-outils.urllib.request.urlopen = vraie_urlopen
-
-# Le code d'appairage d'un outil : lu dans son journal, le dernier depuis le lancement, 10 min
-g = outils.Gestionnaire.__new__(outils.Gestionnaire)   # sans __init__ : seul le journal sert
-with tempfile.TemporaryDirectory() as tmp:
-    g.journal = lambda oid: os.path.join(tmp, oid + ".log")
-    with open(g.journal("x"), "w", encoding="utf-8") as f:
-        f.write("  Code d'appairage WEB_CAO : 111 111\n=== lancement\n"
-                "  Code d'appairage WEB_CAO : 222 222   (à saisir…)\n  Code d'appairage WEB_CAO : 333 333\n")
-    e = {"phase": "actif"}
-    verifier("code : le dernier depuis le lancement", g._code("x", e), "333 333")
-    e["code"] = ("333 333", 0.0)                     # vu il y a très longtemps
-    verifier("code expiré : plus montré", g._code("x", e), None)
-    verifier("outil arrêté : pas de code", g._code("x", {"phase": None}), None)
-    verifier("pas de journal : pas de code", g._code("absent", {"phase": "actif"}), None)
+    origine, suite = os.path.join(poste.tmp, "suite-origine"), os.path.join(poste.tmp, "suite")
+    os.makedirs(os.path.join(origine, "lanceur"))
+    git(origine, "init")
+    publier(1)
+    git(poste.tmp, "clone", origine, suite)
+    publier(2)
+    code, sortie = poste.lancer("web_suite", "--port", "0", "--racine", poste.racine, "--sans-navigateur", "--local",
+                                WEB_SUITE_DEPOT=suite, WEB_SUITE_RELANCEUR="1")
+    verifier("mise à jour avec relanceur : code 75", (code, "[*] WEB_SUITE mis à jour, redémarrage." in sortie), (75, True))
+    if os.name != "nt":                                       # sous Windows le relancé est un enfant, que terminate() laisserait
+        publier(3)
+        with poste.lanceur("--local", maj=True, WEB_SUITE_DEPOT=suite) as l:
+            verifier("mise à jour sans relanceur : relancé, bilan transmis",
+                     "WEB_SUITE    Mis à jour (1 commit(s))." in l.sortie(), True)
+            verifier("le relancé sert la nouvelle page", l.req("/").corps, b"version 3")
+            arret_propre(l)
 print("OK")

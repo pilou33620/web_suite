@@ -167,7 +167,7 @@ fn ignorer(chemin: &Path, motif: &str) {
     }
     let debut = if !texte.is_empty() && !texte.ends_with(b"\n") { "\n" } else { "" };
     if let Ok(mut f) = fs::OpenOptions::new().append(true).open(chemin) {
-        let _ = write!(f, "{}{}\n", debut, motif);
+        let _ = writeln!(f, "{}{}", debut, motif);
     }
 }
 
