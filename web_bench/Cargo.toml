@@ -12,3 +12,10 @@ path = "src/main.rs"
 web_tools_commun = { path = "../commun" }
 serde_json = { version = "1", features = ["preserve_order"] }
 ureq = "2"
+serde = "1"
+chrono = { version = "0.4", default-features = false, features = ["clock"] }
+# SIGINT, SIGTERM, SIGHUP ; sous Windows Ctrl+C, Ctrl+Pause et la fermeture de la console
+ctrlc = { version = "3", features = ["termination"] }
+
+[target.'cfg(unix)'.dependencies]
+libc = "0.2"
