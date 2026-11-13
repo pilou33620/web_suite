@@ -94,6 +94,9 @@ pub fn dossier(outil: &Outil, racine: &Path) -> PathBuf {
     racine.join(outil.nom)
 }
 
+pub use web_tools_commun::demarreur;
+
 pub fn est_installe(outil: &Outil, racine: &Path) -> bool {
-    dossier(outil, racine).join(outil.script).is_file()
+    let d = dossier(outil, racine);
+    d.join(outil.script).is_file() || demarreur(&d, outil.nom, outil.script).is_some()
 }

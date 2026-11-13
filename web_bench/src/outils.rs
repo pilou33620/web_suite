@@ -359,7 +359,9 @@ impl Outil {
             .map_err(es)?;
         }
         let port = port_libre().map_err(es)?;
-        let mut cmd = vec![python().to_string(), self.conf.script.to_string(), "--port".into(), port.to_string()];
+        let mut cmd = web_tools_commun::demarreur(&self.dossier, self.conf.nom, self.conf.script)
+            .unwrap_or_else(|| vec![python().to_string(), self.conf.script.to_string()]);
+        cmd.extend(["--port".into(), port.to_string()]);
         cmd.extend(self.conf.args.iter().map(|a| remplir(a, &projets, &lib)));
         let env = [("WEB_TOOLS_HTTP", "1"), ("PYTHONUNBUFFERED", "1"), ("PYTHONIOENCODING", "utf-8")]
             .map(|(k, v)| (k.to_string(), v.to_string()));
@@ -470,7 +472,10 @@ fn lire(sortie: PipeReader, journal: &Mutex<Journal>) {
 pub fn trouver_outils(racine: &Path) -> Vec<Arc<Outil>> {
     CATALOGUE
         .iter()
-        .filter(|conf| racine.join(conf.nom).join(conf.script).is_file())
+        .filter(|conf| {
+            let d = racine.join(conf.nom);
+            d.join(conf.script).is_file() || web_tools_commun::demarreur(&d, conf.nom, conf.script).is_some()
+        })
         .map(|conf| {
             let dossier = racine.join(conf.nom);
             Arc::new(Outil::new(conf, std::path::absolute(&dossier).unwrap_or(dossier)))

@@ -1025,7 +1025,9 @@ impl Gestionnaire {
             return true;
         }
         let port = port_libre(o.port);
-        let mut cmd: Vec<String> = vec![python(), "-u".into(), o.script.into(), "--port".into(), port.to_string()];
+        let mut cmd: Vec<String> = crate::catalogue::demarreur(&dossier(o, &self.racine), o.nom, o.script)
+            .unwrap_or_else(|| vec![python(), "-u".into(), o.script.into()]);
+        cmd.extend(["--port".into(), port.to_string()]);
         cmd.extend(o.args.iter().filter(|x| !(self.reseau && **x == "--local")).map(|x| x.to_string()));
         let deja_maj = self.maj_deja_faite(o.id);
         if deja_maj {

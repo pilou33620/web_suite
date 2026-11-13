@@ -54,7 +54,7 @@ jobs:
             git clone --quiet --depth 1 https://github.com/pilou33620/$o.git ../$o
           done
           python - <<'EOF'
-          import ast
+          import ast, os
           def corps(f):
               src = open(f, encoding="utf-8").read()
               for n in ast.walk(ast.parse(src)):
@@ -65,8 +65,10 @@ jobs:
                       return [l.split("#")[0].rstrip() for l in texte.splitlines()]
           ref = corps("../WEB_CAO/web_CAO.py")
           for f in ("../WEB_ANTENNA/web_antenna.py", "../WEB_3D/web_3D.py"):
+              if not os.path.exists(f):      # outil porté en Rust : plus de copie Python à comparer
+                  continue
               assert corps(f) == ref, f + " : verifier_et_appliquer_maj diverge de WEB_CAO"
-          print("les trois copies sont identiques")
+          print("les copies Python restantes sont identiques")
           EOF
 
       # L'appairage (code à 6 chiffres, jeton et cookie partagés) est recopié
@@ -74,6 +76,7 @@ jobs:
       - name: Outils — appairage.py est le même partout
         run: |
           for o in WEB_ANTENNA WEB_3D; do
+            [ -f ../$o/appairage.py ] || continue   # outil porté en Rust : il prend commun/
             diff <(tr -d '\r' < ../WEB_CAO/appairage.py) <(tr -d '\r' < ../$o/appairage.py) > /dev/null \
               || { echo "appairage.py diffère entre WEB_CAO et $o"; exit 1; }
           done
@@ -90,7 +93,7 @@ jobs:
           verifier lanceur/pilote.js WEB_CAO/commun/pilote.js
           verifier lanceur/pilote.css WEB_CAO/commun/pilote.css
           for o in WEB_ANTENNA WEB_3D; do
-            verifier ../WEB_CAO/pilote.py $o/pilote.py
+            [ ! -f ../$o/pilote.py ] || verifier ../WEB_CAO/pilote.py $o/pilote.py
             verifier lanceur/pilote.js $o/js/pilote.js
             verifier lanceur/pilote.css $o/css/pilote.css
           done
