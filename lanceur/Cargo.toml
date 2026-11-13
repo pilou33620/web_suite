@@ -6,6 +6,7 @@ description = "WEB·SUITE : lanceur des outils, installateur, serveur MCP"
 
 [lib]
 path = "src/lib.rs"
+doctest = false # les schémas indentés des en-têtes de module ne sont pas du code
 
 # Les exécutables sont les fichiers de src/bin/ (web_suite, mcp_web_suite, installer…).
 
@@ -13,3 +14,13 @@ path = "src/lib.rs"
 web_tools_commun = { path = "../commun" }
 serde_json = { version = "1", features = ["preserve_order"] }
 ureq = "2"
+zip = { version = "2", default-features = false, features = ["deflate"] }
+sha2 = "0.10"
+regex = "1"
+chrono = { version = "0.4", default-features = false, features = ["clock"] }
+
+[target.'cfg(unix)'.dependencies]
+libc = "0.2"
+
+[target.'cfg(windows)'.dependencies]
+windows-sys = { version = "0.59", features = ["Win32_Foundation", "Win32_Security", "Win32_System_JobObjects", "Win32_System_Threading", "Win32_System_Console"] }
