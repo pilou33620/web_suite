@@ -35,3 +35,6 @@ Desktop.ini
 
 # Rapports du banc d'essai (web_bench)
 web_bench/rapports/
+
+# Rust
+target/
