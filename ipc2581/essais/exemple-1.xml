@@ -1,0 +1,4338 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Editeur PCB (WEB_CAO) - IPC-2581 revision C, millimetres, Y vers le haut,
+     origine celle des Gerber du meme dossier. -->
+<IPC-2581 revision="C" xmlns="http://webstds.ipc.org/2581">
+ <Content roleRef="Proprietaire">
+  <FunctionMode mode="USERDEF" comment="Fabrication, assemblage et nomenclature de la carte"/>
+  <StepRef name="carte"/>
+  <LayerRef name="SERIGRAPHIE_DESSUS"/>
+  <LayerRef name="PATE_DESSUS"/>
+  <LayerRef name="MASQUE_DESSUS"/>
+  <LayerRef name="Top"/>
+  <LayerRef name="DIELECTRIQUE_1"/>
+  <LayerRef name="Inner 1"/>
+  <LayerRef name="DIELECTRIQUE_2"/>
+  <LayerRef name="Inner 2"/>
+  <LayerRef name="DIELECTRIQUE_3"/>
+  <LayerRef name="Bottom"/>
+  <LayerRef name="MASQUE_DESSOUS"/>
+  <LayerRef name="PATE_DESSOUS"/>
+  <LayerRef name="SERIGRAPHIE_DESSOUS"/>
+  <LayerRef name="CONTOUR"/>
+  <LayerRef name="PERCAGE_L1_L4"/>
+  <BomRef name="carte_BOM"/>
+  <DictionaryLineDesc units="MILLIMETER">
+   <EntryLineDesc id="TRAIT_1">
+    <LineDesc lineEnd="ROUND" lineWidth="0.15"/>
+   </EntryLineDesc>
+   <EntryLineDesc id="TRAIT_2">
+    <LineDesc lineEnd="ROUND" lineWidth="0.4"/>
+   </EntryLineDesc>
+   <EntryLineDesc id="TRAIT_3">
+    <LineDesc lineEnd="ROUND" lineWidth="0.25"/>
+   </EntryLineDesc>
+   <EntryLineDesc id="TRAIT_4">
+    <LineDesc lineEnd="ROUND" lineWidth="0.38"/>
+   </EntryLineDesc>
+   <EntryLineDesc id="TRAIT_5">
+    <LineDesc lineEnd="ROUND" lineWidth="0.1"/>
+   </EntryLineDesc>
+  </DictionaryLineDesc>
+  <DictionaryStandard units="MILLIMETER">
+   <EntryStandard id="FORME_1">
+    <RectRound width="1.4" height="0.4" radius="0.088" upperRight="true" upperLeft="true" lowerLeft="true" lowerRight="true"/>
+   </EntryStandard>
+   <EntryStandard id="FORME_2">
+    <RectRound width="1.8" height="1.4" radius="0.308" upperRight="true" upperLeft="true" lowerLeft="true" lowerRight="true"/>
+   </EntryStandard>
+   <EntryStandard id="FORME_3">
+    <RectRound width="1.1" height="0.6" radius="0.132" upperRight="true" upperLeft="true" lowerLeft="true" lowerRight="true"/>
+   </EntryStandard>
+   <EntryStandard id="FORME_4">
+    <RectRound width="1.045" height="1.178" radius="0.2299" upperRight="true" upperLeft="true" lowerLeft="true" lowerRight="true"/>
+   </EntryStandard>
+   <EntryStandard id="FORME_5">
+    <RectRound width="0.825" height="0.93" radius="0.1815" upperRight="true" upperLeft="true" lowerLeft="true" lowerRight="true"/>
+   </EntryStandard>
+   <EntryStandard id="FORME_6">
+    <RectRound width="1.44" height="0.44" radius="0.0968" upperRight="true" upperLeft="true" lowerLeft="true" lowerRight="true"/>
+   </EntryStandard>
+   <EntryStandard id="FORME_7">
+    <RectRound width="0.44" height="1.44" radius="0.0968" upperRight="true" upperLeft="true" lowerLeft="true" lowerRight="true"/>
+   </EntryStandard>
+   <EntryStandard id="FORME_8">
+    <RectRound width="0.5225" height="0.589" radius="0.11495" upperRight="true" upperLeft="true" lowerLeft="true" lowerRight="true"/>
+   </EntryStandard>
+   <EntryStandard id="FORME_9">
+    <RectRound width="1.62" height="0.6985" radius="0.15367" upperRight="true" upperLeft="true" lowerLeft="true" lowerRight="true"/>
+   </EntryStandard>
+   <EntryStandard id="FORME_10">
+    <RectRound width="2" height="0.8" radius="0.176" upperRight="true" upperLeft="true" lowerLeft="true" lowerRight="true"/>
+   </EntryStandard>
+   <EntryStandard id="FORME_11">
+    <RectRound width="2" height="1.5" radius="0.33" upperRight="true" upperLeft="true" lowerLeft="true" lowerRight="true"/>
+   </EntryStandard>
+   <EntryStandard id="FORME_12">
+    <RectRound width="1.7272" height="1.7272" radius="0.379984" upperRight="true" upperLeft="true" lowerLeft="true" lowerRight="true"/>
+   </EntryStandard>
+   <EntryStandard id="FORME_13">
+    <Circle diameter="1.7272"/>
+   </EntryStandard>
+   <EntryStandard id="FORME_14">
+    <Circle diameter="0.8"/>
+   </EntryStandard>
+   <EntryStandard id="FORME_15">
+    <Circle diameter="0.6"/>
+   </EntryStandard>
+   <EntryStandard id="FORME_16">
+    <RectRound width="1.5" height="0.5" radius="0.138" upperRight="true" upperLeft="true" lowerLeft="true" lowerRight="true"/>
+   </EntryStandard>
+   <EntryStandard id="FORME_17">
+    <RectRound width="1.9" height="1.5" radius="0.358" upperRight="true" upperLeft="true" lowerLeft="true" lowerRight="true"/>
+   </EntryStandard>
+   <EntryStandard id="FORME_18">
+    <RectRound width="1.2" height="0.7" radius="0.182" upperRight="true" upperLeft="true" lowerLeft="true" lowerRight="true"/>
+   </EntryStandard>
+   <EntryStandard id="FORME_19">
+    <RectRound width="1.145" height="1.278" radius="0.2799" upperRight="true" upperLeft="true" lowerLeft="true" lowerRight="true"/>
+   </EntryStandard>
+   <EntryStandard id="FORME_20">
+    <RectRound width="0.925" height="1.03" radius="0.2315" upperRight="true" upperLeft="true" lowerLeft="true" lowerRight="true"/>
+   </EntryStandard>
+   <EntryStandard id="FORME_21">
+    <RectRound width="1.54" height="0.54" radius="0.1468" upperRight="true" upperLeft="true" lowerLeft="true" lowerRight="true"/>
+   </EntryStandard>
+   <EntryStandard id="FORME_22">
+    <RectRound width="0.54" height="1.54" radius="0.1468" upperRight="true" upperLeft="true" lowerLeft="true" lowerRight="true"/>
+   </EntryStandard>
+   <EntryStandard id="FORME_23">
+    <RectRound width="0.6225" height="0.689" radius="0.16495" upperRight="true" upperLeft="true" lowerLeft="true" lowerRight="true"/>
+   </EntryStandard>
+   <EntryStandard id="FORME_24">
+    <RectRound width="1.72" height="0.7985" radius="0.20367" upperRight="true" upperLeft="true" lowerLeft="true" lowerRight="true"/>
+   </EntryStandard>
+   <EntryStandard id="FORME_25">
+    <RectRound width="2.1" height="0.9" radius="0.226" upperRight="true" upperLeft="true" lowerLeft="true" lowerRight="true"/>
+   </EntryStandard>
+   <EntryStandard id="FORME_26">
+    <RectRound width="2.1" height="1.6" radius="0.38" upperRight="true" upperLeft="true" lowerLeft="true" lowerRight="true"/>
+   </EntryStandard>
+   <EntryStandard id="FORME_27">
+    <RectRound width="1.8272" height="1.8272" radius="0.429984" upperRight="true" upperLeft="true" lowerLeft="true" lowerRight="true"/>
+   </EntryStandard>
+   <EntryStandard id="FORME_28">
+    <Circle diameter="1.8272"/>
+   </EntryStandard>
+  </DictionaryStandard>
+ </Content>
+ <LogisticHeader>
+  <Role id="Proprietaire" roleFunction="SENDER"/>
+  <Enterprise id="WEB_CAO" code="NONE"/>
+  <Person name="Inconnu" enterpriseRef="WEB_CAO" roleRef="Proprietaire"/>
+ </LogisticHeader>
+ <HistoryRecord number="1" origination="2026-10-10T12:00:00Z" software="Editeur PCB (WEB_CAO)" lastChange="2026-10-10T12:00:00Z">
+  <FileRevision fileRevisionId="A" comment="Export IPC-2581 de l'editeur PCB">
+   <SoftwarePackage name="Editeur PCB" vendor="WEB_CAO" revision="2">
+    <Certification certificationStatus="SELFTEST"/>
+   </SoftwarePackage>
+  </FileRevision>
+ </HistoryRecord>
+ <Bom name="carte_BOM">
+  <BomHeader assembly="carte" revision="A">
+   <StepRef name="carte"/>
+  </BomHeader>
+  <BomItem OEMDesignNumberRef="USB micro-B_MICRO-USB-B" quantity="1" pinCount="7" category="ELECTRICAL" description="USB micro-B MICRO-USB-B">
+   <RefDes name="J1" packageRef="MICRO-USB-B" populate="true" layerRef="Top"/>
+   <Characteristics category="ELECTRICAL">
+    <Textual definitionSource="WEB_CAO" textualCharacteristicName="VALUE" textualCharacteristicValue="USB micro-B"/>
+    <Textual definitionSource="WEB_CAO" textualCharacteristicName="PACKAGE" textualCharacteristicValue="MICRO-USB-B"/>
+    <Textual definitionSource="WEB_CAO" textualCharacteristicName="PART_NAME" textualCharacteristicValue="CONN-USB_Mini_651005136421"/>
+   </Characteristics>
+  </BomItem>
+  <BomItem OEMDesignNumberRef="LP2980-3.3_SOT-23-5" quantity="1" pinCount="5" category="ELECTRICAL" description="LP2980-3.3 SOT-23-5">
+   <RefDes name="U3" packageRef="SOT-23-5" populate="true" layerRef="Top"/>
+   <Characteristics category="ELECTRICAL">
+    <Textual definitionSource="WEB_CAO" textualCharacteristicName="VALUE" textualCharacteristicValue="LP2980-3.3"/>
+    <Textual definitionSource="WEB_CAO" textualCharacteristicName="PACKAGE" textualCharacteristicValue="SOT-23-5"/>
+    <Textual definitionSource="WEB_CAO" textualCharacteristicName="PART_NAME" textualCharacteristicValue="REG_LP2980AIM5X-3.3"/>
+   </Characteristics>
+  </BomItem>
+  <BomItem OEMDesignNumberRef="10µ_0805" quantity="1" pinCount="2" category="ELECTRICAL" description="10µ 0805">
+   <RefDes name="C1" packageRef="0805" populate="true" layerRef="Top"/>
+   <Characteristics category="ELECTRICAL">
+    <Textual definitionSource="WEB_CAO" textualCharacteristicName="VALUE" textualCharacteristicValue="10µ"/>
+    <Textual definitionSource="WEB_CAO" textualCharacteristicName="PACKAGE" textualCharacteristicValue="0805"/>
+    <Textual definitionSource="WEB_CAO" textualCharacteristicName="PART_NAME" textualCharacteristicValue="C0805_10uF_X5R_16V_AUTO_TY"/>
+   </Characteristics>
+  </BomItem>
+  <BomItem OEMDesignNumberRef="1µ_0603" quantity="1" pinCount="2" category="ELECTRICAL" description="1µ 0603">
+   <RefDes name="C2" packageRef="0603" populate="true" layerRef="Top"/>
+   <Characteristics category="ELECTRICAL">
+    <Textual definitionSource="WEB_CAO" textualCharacteristicName="VALUE" textualCharacteristicValue="1µ"/>
+    <Textual definitionSource="WEB_CAO" textualCharacteristicName="PACKAGE" textualCharacteristicValue="0603"/>
+    <Textual definitionSource="WEB_CAO" textualCharacteristicName="PART_NAME" textualCharacteristicValue="C0603_1uF_X7R_25V_AUTO_MU"/>
+   </Characteristics>
+  </BomItem>
+  <BomItem OEMDesignNumberRef="STM32WL55_TQFP-32" quantity="1" pinCount="32" category="ELECTRICAL" description="STM32WL55 TQFP-32">
+   <RefDes name="U1" packageRef="TQFP-32" populate="true" layerRef="Top"/>
+   <Characteristics category="ELECTRICAL">
+    <Textual definitionSource="WEB_CAO" textualCharacteristicName="VALUE" textualCharacteristicValue="STM32WL55"/>
+    <Textual definitionSource="WEB_CAO" textualCharacteristicName="PACKAGE" textualCharacteristicValue="TQFP-32"/>
+    <Textual definitionSource="WEB_CAO" textualCharacteristicName="PART_NAME" textualCharacteristicValue="MCU_STM32WL55CCU6"/>
+   </Characteristics>
+  </BomItem>
+  <BomItem OEMDesignNumberRef="100n_0402" quantity="3" pinCount="2" category="ELECTRICAL" description="100n 0402">
+   <RefDes name="C3" packageRef="0402" populate="true" layerRef="Top"/>
+   <RefDes name="C4" packageRef="0402" populate="true" layerRef="Top"/>
+   <RefDes name="C5" packageRef="0402" populate="true" layerRef="Top"/>
+   <Characteristics category="ELECTRICAL">
+    <Textual definitionSource="WEB_CAO" textualCharacteristicName="VALUE" textualCharacteristicValue="100n"/>
+    <Textual definitionSource="WEB_CAO" textualCharacteristicName="PACKAGE" textualCharacteristicValue="0402"/>
+    <Textual definitionSource="WEB_CAO" textualCharacteristicName="PART_NAME" textualCharacteristicValue="C0402_100nF_X7R_50V_MU"/>
+   </Characteristics>
+  </BomItem>
+  <BomItem OEMDesignNumberRef="M95P08_SOIC-8" quantity="1" pinCount="8" category="ELECTRICAL" description="M95P08 SOIC-8">
+   <RefDes name="U2" packageRef="SOIC-8" populate="true" layerRef="Top"/>
+   <Characteristics category="ELECTRICAL">
+    <Textual definitionSource="WEB_CAO" textualCharacteristicName="VALUE" textualCharacteristicValue="M95P08"/>
+    <Textual definitionSource="WEB_CAO" textualCharacteristicName="PACKAGE" textualCharacteristicValue="SOIC-8"/>
+    <Textual definitionSource="WEB_CAO" textualCharacteristicName="PART_NAME" textualCharacteristicValue="IC_FLASH_M95P08-IXMNT/E"/>
+   </Characteristics>
+  </BomItem>
+  <BomItem OEMDesignNumberRef="SMA 50Ω_SMA-EDGE" quantity="1" pinCount="5" category="ELECTRICAL" description="SMA 50Ω SMA-EDGE">
+   <RefDes name="J3" packageRef="SMA-EDGE" populate="true" layerRef="Top"/>
+   <Characteristics category="ELECTRICAL">
+    <Textual definitionSource="WEB_CAO" textualCharacteristicName="VALUE" textualCharacteristicValue="SMA 50Ω"/>
+    <Textual definitionSource="WEB_CAO" textualCharacteristicName="PACKAGE" textualCharacteristicValue="SMA-EDGE"/>
+    <Textual definitionSource="WEB_CAO" textualCharacteristicName="PART_NAME" textualCharacteristicValue="CONN_Embase_SMA_CI_Bord_de_carte"/>
+   </Characteristics>
+  </BomItem>
+  <BomItem OEMDesignNumberRef="SWD_HEADER-2.54-1x4" quantity="1" pinCount="4" category="ELECTRICAL" description="SWD HEADER-2.54-1x4">
+   <RefDes name="J2" packageRef="HEADER-2.54-1x4" populate="true" layerRef="Top"/>
+   <Characteristics category="ELECTRICAL">
+    <Textual definitionSource="WEB_CAO" textualCharacteristicName="VALUE" textualCharacteristicValue="SWD"/>
+    <Textual definitionSource="WEB_CAO" textualCharacteristicName="PACKAGE" textualCharacteristicValue="HEADER-2.54-1x4"/>
+    <Textual definitionSource="WEB_CAO" textualCharacteristicName="PART_NAME" textualCharacteristicValue="CONN_4-2.54mm-TRAV"/>
+   </Characteristics>
+  </BomItem>
+ </Bom>
+ <Ecad name="carte">
+  <CadHeader units="MILLIMETER">
+   <Spec name="SPEC_Top">
+    <General type="MATERIAL">
+     <Property text="COPPER"/>
+    </General>
+    <Conductor type="CONDUCTIVITY">
+     <Property value="58000000" unit="SIEMENS/M"/>
+    </Conductor>
+   </Spec>
+   <Spec name="SPEC_Inner 1">
+    <General type="MATERIAL">
+     <Property text="COPPER"/>
+    </General>
+    <Conductor type="CONDUCTIVITY">
+     <Property value="58000000" unit="SIEMENS/M"/>
+    </Conductor>
+   </Spec>
+   <Spec name="SPEC_Inner 2">
+    <General type="MATERIAL">
+     <Property text="COPPER"/>
+    </General>
+    <Conductor type="CONDUCTIVITY">
+     <Property value="58000000" unit="SIEMENS/M"/>
+    </Conductor>
+   </Spec>
+   <Spec name="SPEC_Bottom">
+    <General type="MATERIAL">
+     <Property text="COPPER"/>
+    </General>
+    <Conductor type="CONDUCTIVITY">
+     <Property value="58000000" unit="SIEMENS/M"/>
+    </Conductor>
+   </Spec>
+   <Spec name="SPEC_DIELECTRIQUE_1">
+    <General type="MATERIAL">
+     <Property text="FR-4 1080 x2"/>
+     <Property text="Type : Prépreg"/>
+    </General>
+    <Dielectric type="DIELECTRIC_CONSTANT">
+     <Property value="4.3"/>
+    </Dielectric>
+    <Dielectric type="LOSS_TANGENT">
+     <Property value="0.02"/>
+    </Dielectric>
+   </Spec>
+   <Spec name="SPEC_DIELECTRIQUE_2">
+    <General type="MATERIAL">
+     <Property text="FR-4"/>
+     <Property text="Type : Âme (core)"/>
+    </General>
+    <Dielectric type="DIELECTRIC_CONSTANT">
+     <Property value="4.5"/>
+    </Dielectric>
+    <Dielectric type="LOSS_TANGENT">
+     <Property value="0.02"/>
+    </Dielectric>
+   </Spec>
+   <Spec name="SPEC_DIELECTRIQUE_3">
+    <General type="MATERIAL">
+     <Property text="FR-4 1080 x2"/>
+     <Property text="Type : Prépreg"/>
+    </General>
+    <Dielectric type="DIELECTRIC_CONSTANT">
+     <Property value="4.3"/>
+    </Dielectric>
+    <Dielectric type="LOSS_TANGENT">
+     <Property value="0.02"/>
+    </Dielectric>
+   </Spec>
+   <Spec name="SPEC_MASQUE_DESSUS">
+    <General type="MATERIAL">
+     <Property text="SOLDERMASK"/>
+     <Property text="Couleur : vert"/>
+    </General>
+    <Dielectric type="DIELECTRIC_CONSTANT">
+     <Property value="3.8"/>
+    </Dielectric>
+   </Spec>
+   <Spec name="SPEC_MASQUE_DESSOUS">
+    <General type="MATERIAL">
+     <Property text="SOLDERMASK"/>
+     <Property text="Couleur : vert"/>
+    </General>
+    <Dielectric type="DIELECTRIC_CONSTANT">
+     <Property value="3.8"/>
+    </Dielectric>
+   </Spec>
+   <Spec name="FINITION">
+    <SurfaceFinish type="ENIG-N" comment="ENIG (or chimique)"/>
+   </Spec>
+   <Spec name="CLASSE_Défaut">
+    <General type="ELECTRICAL" comment="Classe de nets de l'editeur PCB : regles physiques et contraintes">
+     <Property name="NET_CLASS" text="Défaut"/>
+     <Property name="TRACE_WIDTH" value="0.25" unit="MM"/>
+     <Property name="CLEARANCE" value="0.2" unit="MM"/>
+     <Property name="VIA_DIAMETER" value="0.6" unit="MM"/>
+     <Property name="VIA_DRILL" value="0.3" unit="MM"/>
+    </General>
+   </Spec>
+   <Spec name="CLASSE_Alimentation">
+    <General type="ELECTRICAL" comment="Classe de nets de l'editeur PCB : regles physiques et contraintes">
+     <Property name="NET_CLASS" text="Alimentation"/>
+     <Property name="TRACE_WIDTH" value="0.4" unit="MM"/>
+     <Property name="CLEARANCE" value="0.2" unit="MM"/>
+     <Property name="VIA_DIAMETER" value="0.8" unit="MM"/>
+     <Property name="VIA_DRILL" value="0.4" unit="MM"/>
+    </General>
+   </Spec>
+   <Spec name="CLASSE_Impédance 50Ω">
+    <General type="ELECTRICAL" comment="Classe de nets de l'editeur PCB : regles physiques et contraintes">
+     <Property name="NET_CLASS" text="Impédance 50Ω"/>
+     <Property name="TRACE_WIDTH" value="0.38" unit="MM"/>
+     <Property name="CLEARANCE" value="0.25" unit="MM"/>
+     <Property name="VIA_DIAMETER" value="0.8" unit="MM"/>
+     <Property name="VIA_DRILL" value="0.4" unit="MM"/>
+    </General>
+   </Spec>
+   <Spec name="CLASSE_Rapide">
+    <General type="ELECTRICAL" comment="Classe de nets de l'editeur PCB : regles physiques et contraintes">
+     <Property name="NET_CLASS" text="Rapide"/>
+     <Property name="TRACE_WIDTH" value="0.25" unit="MM"/>
+     <Property name="CLEARANCE" value="0.2" unit="MM"/>
+     <Property name="VIA_DIAMETER" value="0.6" unit="MM"/>
+     <Property name="VIA_DRILL" value="0.3" unit="MM"/>
+    </General>
+   </Spec>
+   <Spec name="CLASSE_Horloge">
+    <General type="ELECTRICAL" comment="Classe de nets de l'editeur PCB : regles physiques et contraintes">
+     <Property name="NET_CLASS" text="Horloge"/>
+     <Property name="TRACE_WIDTH" value="0.25" unit="MM"/>
+     <Property name="CLEARANCE" value="0.2" unit="MM"/>
+     <Property name="VIA_DIAMETER" value="0.6" unit="MM"/>
+     <Property name="VIA_DRILL" value="0.3" unit="MM"/>
+    </General>
+   </Spec>
+   <Spec name="PAIRE_USB">
+    <General type="ELECTRICAL" comment="Paire differentielle de l'editeur PCB et sa regle : Paire USB vers MCU">
+     <Property name="DIFF_PAIR" text="USB"/>
+     <Property name="NET_P" text="USB_DP"/>
+     <Property name="NET_N" text="USB_DM"/>
+     <Property name="RULE" text="USB 2.0 — 90 Ω"/>
+     <Property name="TRACE_WIDTH" value="0.25" unit="MM" tolPlus="0.1" tolMinus="0.05"/>
+     <Property name="GAP" value="0.15" unit="MM" tolPlus="0.25" tolMinus="0.02"/>
+     <Property name="MAX_UNCOUPLED_LENGTH" value="12.7" unit="MM"/>
+    </General>
+    <Impedance value="90" tolPlus="10" tolMinus="10" tolPercent="true" comment="Impedance differentielle cible, profil D90 - couche Top">
+     <EdgeCoupled structure="MICROSTRIP_MASK_COVERED">
+      <LineWidth value="0.25" unit="MM"/>
+      <Spacing value="0.15" unit="MM"/>
+      <RefPlane layerOrGroupRef="Inner 1"/>
+     </EdgeCoupled>
+    </Impedance>
+    <Impedance value="90" tolPlus="10" tolMinus="10" tolPercent="true" comment="Impedance differentielle cible, profil D90 - couche Bottom">
+     <EdgeCoupled structure="MICROSTRIP_MASK_COVERED">
+      <LineWidth value="0.25" unit="MM"/>
+      <Spacing value="0.15" unit="MM"/>
+      <RefPlane layerOrGroupRef="Inner 2"/>
+     </EdgeCoupled>
+    </Impedance>
+   </Spec>
+  </CadHeader>
+  <CadData>
+   <Layer name="SERIGRAPHIE_DESSUS" layerFunction="SILKSCREEN" side="TOP" polarity="POSITIVE"/>
+   <Layer name="PATE_DESSUS" layerFunction="SOLDERPASTE" side="TOP" polarity="POSITIVE"/>
+   <Layer name="MASQUE_DESSUS" layerFunction="SOLDERMASK" side="TOP" polarity="POSITIVE"/>
+   <Layer name="Top" layerFunction="SIGNAL" side="TOP" polarity="POSITIVE"/>
+   <Layer name="DIELECTRIQUE_1" layerFunction="DIELPREG" side="INTERNAL" polarity="POSITIVE"/>
+   <Layer name="Inner 1" layerFunction="PLANE" side="INTERNAL" polarity="POSITIVE"/>
+   <Layer name="DIELECTRIQUE_2" layerFunction="DIELCORE" side="INTERNAL" polarity="POSITIVE"/>
+   <Layer name="Inner 2" layerFunction="PLANE" side="INTERNAL" polarity="POSITIVE"/>
+   <Layer name="DIELECTRIQUE_3" layerFunction="DIELPREG" side="INTERNAL" polarity="POSITIVE"/>
+   <Layer name="Bottom" layerFunction="SIGNAL" side="BOTTOM" polarity="POSITIVE"/>
+   <Layer name="MASQUE_DESSOUS" layerFunction="SOLDERMASK" side="BOTTOM" polarity="POSITIVE"/>
+   <Layer name="PATE_DESSOUS" layerFunction="SOLDERPASTE" side="BOTTOM" polarity="POSITIVE"/>
+   <Layer name="SERIGRAPHIE_DESSOUS" layerFunction="SILKSCREEN" side="BOTTOM" polarity="POSITIVE"/>
+   <Layer name="CONTOUR" layerFunction="BOARD_OUTLINE" side="ALL" polarity="POSITIVE"/>
+   <Layer name="PERCAGE_L1_L4" layerFunction="DRILL" side="ALL" polarity="POSITIVE">
+    <Span fromLayer="Top" toLayer="Bottom"/>
+   </Layer>
+   <Stackup name="EMPILAGE" overallThickness="1.6" tolPlus="0" tolMinus="0" whereMeasured="MASK" stackupStatus="PROPOSED">
+    <SpecRef id="FINITION"/>
+    <StackupGroup name="EMPILAGE_GROUPE" thickness="1.6" tolPlus="0" tolMinus="0">
+     <StackupLayer layerOrGroupRef="MASQUE_DESSUS" thickness="0.025" tolPlus="0" tolMinus="0" sequence="1">
+      <SpecRef id="SPEC_MASQUE_DESSUS"/>
+     </StackupLayer>
+     <StackupLayer layerOrGroupRef="Top" thickness="0.035" tolPlus="0" tolMinus="0" sequence="2">
+      <SpecRef id="SPEC_Top"/>
+     </StackupLayer>
+     <StackupLayer layerOrGroupRef="DIELECTRIQUE_1" thickness="0.21" tolPlus="0" tolMinus="0" sequence="3">
+      <SpecRef id="SPEC_DIELECTRIQUE_1"/>
+     </StackupLayer>
+     <StackupLayer layerOrGroupRef="Inner 1" thickness="0.0175" tolPlus="0" tolMinus="0" sequence="4">
+      <SpecRef id="SPEC_Inner 1"/>
+     </StackupLayer>
+     <StackupLayer layerOrGroupRef="DIELECTRIQUE_2" thickness="1.025" tolPlus="0" tolMinus="0" sequence="5">
+      <SpecRef id="SPEC_DIELECTRIQUE_2"/>
+     </StackupLayer>
+     <StackupLayer layerOrGroupRef="Inner 2" thickness="0.0175" tolPlus="0" tolMinus="0" sequence="6">
+      <SpecRef id="SPEC_Inner 2"/>
+     </StackupLayer>
+     <StackupLayer layerOrGroupRef="DIELECTRIQUE_3" thickness="0.21" tolPlus="0" tolMinus="0" sequence="7">
+      <SpecRef id="SPEC_DIELECTRIQUE_3"/>
+     </StackupLayer>
+     <StackupLayer layerOrGroupRef="Bottom" thickness="0.035" tolPlus="0" tolMinus="0" sequence="8">
+      <SpecRef id="SPEC_Bottom"/>
+     </StackupLayer>
+     <StackupLayer layerOrGroupRef="MASQUE_DESSOUS" thickness="0.025" tolPlus="0" tolMinus="0" sequence="9">
+      <SpecRef id="SPEC_MASQUE_DESSOUS"/>
+     </StackupLayer>
+    </StackupGroup>
+   </Stackup>
+   <Step name="carte" type="BOARD" stackupRef="EMPILAGE">
+    <PadStackDef name="PASTILLE_1">
+     <PadstackPadDef layerRef="Top" padUse="REGULAR">
+      <Location x="0" y="0"/>
+      <StandardPrimitiveRef id="FORME_1"/>
+     </PadstackPadDef>
+    </PadStackDef>
+    <PadStackDef name="PASTILLE_2">
+     <PadstackPadDef layerRef="Top" padUse="REGULAR">
+      <Location x="0" y="0"/>
+      <StandardPrimitiveRef id="FORME_2"/>
+     </PadstackPadDef>
+    </PadStackDef>
+    <PadStackDef name="PASTILLE_3">
+     <PadstackPadDef layerRef="Top" padUse="REGULAR">
+      <Location x="0" y="0"/>
+      <StandardPrimitiveRef id="FORME_3"/>
+     </PadstackPadDef>
+    </PadStackDef>
+    <PadStackDef name="PASTILLE_4">
+     <PadstackPadDef layerRef="Top" padUse="REGULAR">
+      <Location x="0" y="0"/>
+      <StandardPrimitiveRef id="FORME_4"/>
+     </PadstackPadDef>
+    </PadStackDef>
+    <PadStackDef name="PASTILLE_5">
+     <PadstackPadDef layerRef="Top" padUse="REGULAR">
+      <Location x="0" y="0"/>
+      <StandardPrimitiveRef id="FORME_5"/>
+     </PadstackPadDef>
+    </PadStackDef>
+    <PadStackDef name="PASTILLE_6">
+     <PadstackPadDef layerRef="Top" padUse="REGULAR">
+      <Location x="0" y="0"/>
+      <StandardPrimitiveRef id="FORME_6"/>
+     </PadstackPadDef>
+    </PadStackDef>
+    <PadStackDef name="PASTILLE_7">
+     <PadstackPadDef layerRef="Top" padUse="REGULAR">
+      <Location x="0" y="0"/>
+      <StandardPrimitiveRef id="FORME_7"/>
+     </PadstackPadDef>
+    </PadStackDef>
+    <PadStackDef name="PASTILLE_8">
+     <PadstackPadDef layerRef="Top" padUse="REGULAR">
+      <Location x="0" y="0"/>
+      <StandardPrimitiveRef id="FORME_8"/>
+     </PadstackPadDef>
+    </PadStackDef>
+    <PadStackDef name="PASTILLE_9">
+     <PadstackPadDef layerRef="Top" padUse="REGULAR">
+      <Location x="0" y="0"/>
+      <StandardPrimitiveRef id="FORME_9"/>
+     </PadstackPadDef>
+    </PadStackDef>
+    <PadStackDef name="PASTILLE_10">
+     <PadstackPadDef layerRef="Top" padUse="REGULAR">
+      <Location x="0" y="0"/>
+      <StandardPrimitiveRef id="FORME_10"/>
+     </PadstackPadDef>
+    </PadStackDef>
+    <PadStackDef name="PASTILLE_11">
+     <PadstackPadDef layerRef="Top" padUse="REGULAR">
+      <Location x="0" y="0"/>
+      <StandardPrimitiveRef id="FORME_11"/>
+     </PadstackPadDef>
+    </PadStackDef>
+    <PadStackDef name="PASTILLE_12">
+     <PadstackHoleDef name="T0.8636" diameter="0.8636" platingStatus="PLATED" plusTol="0" minusTol="0" x="0" y="0"/>
+     <PadstackPadDef layerRef="Top" padUse="REGULAR">
+      <Location x="0" y="0"/>
+      <StandardPrimitiveRef id="FORME_12"/>
+     </PadstackPadDef>
+     <PadstackPadDef layerRef="Inner 1" padUse="REGULAR">
+      <Location x="0" y="0"/>
+      <StandardPrimitiveRef id="FORME_12"/>
+     </PadstackPadDef>
+     <PadstackPadDef layerRef="Inner 2" padUse="REGULAR">
+      <Location x="0" y="0"/>
+      <StandardPrimitiveRef id="FORME_12"/>
+     </PadstackPadDef>
+     <PadstackPadDef layerRef="Bottom" padUse="REGULAR">
+      <Location x="0" y="0"/>
+      <StandardPrimitiveRef id="FORME_12"/>
+     </PadstackPadDef>
+    </PadStackDef>
+    <PadStackDef name="PASTILLE_13">
+     <PadstackHoleDef name="T0.8636" diameter="0.8636" platingStatus="PLATED" plusTol="0" minusTol="0" x="0" y="0"/>
+     <PadstackPadDef layerRef="Top" padUse="REGULAR">
+      <Location x="0" y="0"/>
+      <StandardPrimitiveRef id="FORME_13"/>
+     </PadstackPadDef>
+     <PadstackPadDef layerRef="Inner 1" padUse="REGULAR">
+      <Location x="0" y="0"/>
+      <StandardPrimitiveRef id="FORME_13"/>
+     </PadstackPadDef>
+     <PadstackPadDef layerRef="Inner 2" padUse="REGULAR">
+      <Location x="0" y="0"/>
+      <StandardPrimitiveRef id="FORME_13"/>
+     </PadstackPadDef>
+     <PadstackPadDef layerRef="Bottom" padUse="REGULAR">
+      <Location x="0" y="0"/>
+      <StandardPrimitiveRef id="FORME_13"/>
+     </PadstackPadDef>
+    </PadStackDef>
+    <PadStackDef name="VIA_14">
+     <PadstackHoleDef name="T0.4" diameter="0.4" platingStatus="VIA" plusTol="0" minusTol="0" x="0" y="0"/>
+     <PadstackPadDef layerRef="Top" padUse="REGULAR">
+      <Location x="0" y="0"/>
+      <StandardPrimitiveRef id="FORME_14"/>
+     </PadstackPadDef>
+     <PadstackPadDef layerRef="Inner 1" padUse="REGULAR">
+      <Location x="0" y="0"/>
+      <StandardPrimitiveRef id="FORME_14"/>
+     </PadstackPadDef>
+     <PadstackPadDef layerRef="Inner 2" padUse="REGULAR">
+      <Location x="0" y="0"/>
+      <StandardPrimitiveRef id="FORME_14"/>
+     </PadstackPadDef>
+     <PadstackPadDef layerRef="Bottom" padUse="REGULAR">
+      <Location x="0" y="0"/>
+      <StandardPrimitiveRef id="FORME_14"/>
+     </PadstackPadDef>
+    </PadStackDef>
+    <PadStackDef name="VIA_15">
+     <PadstackHoleDef name="T0.3" diameter="0.3" platingStatus="VIA" plusTol="0" minusTol="0" x="0" y="0"/>
+     <PadstackPadDef layerRef="Top" padUse="REGULAR">
+      <Location x="0" y="0"/>
+      <StandardPrimitiveRef id="FORME_15"/>
+     </PadstackPadDef>
+     <PadstackPadDef layerRef="Inner 1" padUse="REGULAR">
+      <Location x="0" y="0"/>
+      <StandardPrimitiveRef id="FORME_15"/>
+     </PadstackPadDef>
+     <PadstackPadDef layerRef="Inner 2" padUse="REGULAR">
+      <Location x="0" y="0"/>
+      <StandardPrimitiveRef id="FORME_15"/>
+     </PadstackPadDef>
+     <PadstackPadDef layerRef="Bottom" padUse="REGULAR">
+      <Location x="0" y="0"/>
+      <StandardPrimitiveRef id="FORME_15"/>
+     </PadstackPadDef>
+    </PadStackDef>
+    <Datum x="0" y="0"/>
+    <Profile>
+     <Polygon>
+      <PolyBegin x="0" y="42"/>
+      <PolyStepSegment x="66" y="42"/>
+      <PolyStepSegment x="66" y="0"/>
+      <PolyStepSegment x="0" y="0"/>
+      <PolyStepSegment x="0" y="42"/>
+     </Polygon>
+    </Profile>
+    <Package name="MICRO-USB-B" type="CHIP" pinOne="1" pinOneOrientation="UPPER_RIGHT">
+     <Outline>
+      <Polygon>
+       <PolyBegin x="-1.6" y="4.57"/>
+       <PolyStepSegment x="1" y="4.57"/>
+       <PolyStepSegment x="1" y="-4.6"/>
+       <PolyStepSegment x="-1.6" y="-4.6"/>
+       <PolyStepSegment x="-1.6" y="4.57"/>
+      </Polygon>
+      <LineDescRef id="TRAIT_1"/>
+     </Outline>
+     <Pin number="1" type="SURFACE">
+      <Location x="0" y="1.3"/>
+      <StandardPrimitiveRef id="FORME_1"/>
+     </Pin>
+     <Pin number="2" type="SURFACE">
+      <Location x="0" y="0.65"/>
+      <StandardPrimitiveRef id="FORME_1"/>
+     </Pin>
+     <Pin number="3" type="SURFACE">
+      <Location x="0" y="0"/>
+      <StandardPrimitiveRef id="FORME_1"/>
+     </Pin>
+     <Pin number="4" type="SURFACE">
+      <Location x="0" y="-0.65"/>
+      <StandardPrimitiveRef id="FORME_1"/>
+     </Pin>
+     <Pin number="5" type="SURFACE">
+      <Location x="0" y="-1.3"/>
+      <StandardPrimitiveRef id="FORME_1"/>
+     </Pin>
+     <Pin number="6" type="SURFACE">
+      <Location x="-0.6" y="3.6"/>
+      <StandardPrimitiveRef id="FORME_2"/>
+     </Pin>
+     <Pin number="7" type="SURFACE">
+      <Location x="-0.6" y="-3.6"/>
+      <StandardPrimitiveRef id="FORME_2"/>
+     </Pin>
+    </Package>
+    <Package name="SOT-23-5" type="SOT23" pinOne="1" pinOneOrientation="UPPER_LEFT">
+     <Outline>
+      <Polygon>
+       <PolyBegin x="-0.4" y="1.65"/>
+       <PolyStepSegment x="0.4" y="1.65"/>
+       <PolyStepSegment x="0.4" y="-1.65"/>
+       <PolyStepSegment x="-0.4" y="-1.65"/>
+       <PolyStepSegment x="-0.4" y="1.65"/>
+      </Polygon>
+      <LineDescRef id="TRAIT_1"/>
+     </Outline>
+     <Pin number="1" type="SURFACE">
+      <Location x="-1.3" y="0.95"/>
+      <StandardPrimitiveRef id="FORME_3"/>
+     </Pin>
+     <Pin number="2" type="SURFACE">
+      <Location x="-1.3" y="0"/>
+      <StandardPrimitiveRef id="FORME_3"/>
+     </Pin>
+     <Pin number="3" type="SURFACE">
+      <Location x="-1.3" y="-0.95"/>
+      <StandardPrimitiveRef id="FORME_3"/>
+     </Pin>
+     <Pin number="4" type="SURFACE">
+      <Location x="1.3" y="-0.95"/>
+      <StandardPrimitiveRef id="FORME_3"/>
+     </Pin>
+     <Pin number="5" type="SURFACE">
+      <Location x="1.3" y="0.95"/>
+      <StandardPrimitiveRef id="FORME_3"/>
+     </Pin>
+    </Package>
+    <Package name="0805" type="CHIP" pinOne="1" pinOneOrientation="LEFT">
+     <Outline>
+      <Polygon>
+       <PolyBegin x="-1.7225" y="0.939"/>
+       <PolyStepSegment x="1.7225" y="0.939"/>
+       <PolyStepSegment x="1.7225" y="-0.939"/>
+       <PolyStepSegment x="-1.7225" y="-0.939"/>
+       <PolyStepSegment x="-1.7225" y="0.939"/>
+      </Polygon>
+      <LineDescRef id="TRAIT_1"/>
+     </Outline>
+     <Pin number="1" type="SURFACE">
+      <Location x="-0.95" y="0"/>
+      <StandardPrimitiveRef id="FORME_4"/>
+     </Pin>
+     <Pin number="2" type="SURFACE">
+      <Location x="0.95" y="0"/>
+      <StandardPrimitiveRef id="FORME_4"/>
+     </Pin>
+    </Package>
+    <Package name="0603" type="CHIP" pinOne="1" pinOneOrientation="LEFT">
+     <Outline>
+      <Polygon>
+       <PolyBegin x="-1.4125" y="0.815"/>
+       <PolyStepSegment x="1.4125" y="0.815"/>
+       <PolyStepSegment x="1.4125" y="-0.815"/>
+       <PolyStepSegment x="-1.4125" y="-0.815"/>
+       <PolyStepSegment x="-1.4125" y="0.815"/>
+      </Polygon>
+      <LineDescRef id="TRAIT_1"/>
+     </Outline>
+     <Pin number="1" type="SURFACE">
+      <Location x="-0.75" y="0"/>
+      <StandardPrimitiveRef id="FORME_5"/>
+     </Pin>
+     <Pin number="2" type="SURFACE">
+      <Location x="0.75" y="0"/>
+      <StandardPrimitiveRef id="FORME_5"/>
+     </Pin>
+    </Package>
+    <Package name="TQFP-32" type="SQUARE_QUAD_FLATPACK" pinOne="1" pinOneOrientation="UPPER_LEFT">
+     <Outline>
+      <Polygon>
+       <PolyBegin x="-5.57" y="5.67"/>
+       <PolyStepSegment x="5.57" y="5.67"/>
+       <PolyStepSegment x="5.57" y="-5.67"/>
+       <PolyStepSegment x="-5.57" y="-5.67"/>
+       <PolyStepSegment x="-5.57" y="5.67"/>
+      </Polygon>
+      <LineDescRef id="TRAIT_1"/>
+     </Outline>
+     <Pin number="1" type="SURFACE">
+      <Location x="-4.6" y="2.8"/>
+      <StandardPrimitiveRef id="FORME_6"/>
+     </Pin>
+     <Pin number="2" type="SURFACE">
+      <Location x="-4.6" y="2"/>
+      <StandardPrimitiveRef id="FORME_6"/>
+     </Pin>
+     <Pin number="3" type="SURFACE">
+      <Location x="-4.6" y="1.2"/>
+      <StandardPrimitiveRef id="FORME_6"/>
+     </Pin>
+     <Pin number="4" type="SURFACE">
+      <Location x="-4.6" y="0.4"/>
+      <StandardPrimitiveRef id="FORME_6"/>
+     </Pin>
+     <Pin number="5" type="SURFACE">
+      <Location x="-4.6" y="-0.4"/>
+      <StandardPrimitiveRef id="FORME_6"/>
+     </Pin>
+     <Pin number="6" type="SURFACE">
+      <Location x="-4.6" y="-1.2"/>
+      <StandardPrimitiveRef id="FORME_6"/>
+     </Pin>
+     <Pin number="7" type="SURFACE">
+      <Location x="-4.6" y="-2"/>
+      <StandardPrimitiveRef id="FORME_6"/>
+     </Pin>
+     <Pin number="8" type="SURFACE">
+      <Location x="-4.6" y="-2.8"/>
+      <StandardPrimitiveRef id="FORME_6"/>
+     </Pin>
+     <Pin number="9" type="SURFACE">
+      <Location x="-2.8" y="-4.6"/>
+      <StandardPrimitiveRef id="FORME_7"/>
+     </Pin>
+     <Pin number="10" type="SURFACE">
+      <Location x="-2" y="-4.6"/>
+      <StandardPrimitiveRef id="FORME_7"/>
+     </Pin>
+     <Pin number="11" type="SURFACE">
+      <Location x="-1.2" y="-4.6"/>
+      <StandardPrimitiveRef id="FORME_7"/>
+     </Pin>
+     <Pin number="12" type="SURFACE">
+      <Location x="-0.4" y="-4.6"/>
+      <StandardPrimitiveRef id="FORME_7"/>
+     </Pin>
+     <Pin number="13" type="SURFACE">
+      <Location x="0.4" y="-4.6"/>
+      <StandardPrimitiveRef id="FORME_7"/>
+     </Pin>
+     <Pin number="14" type="SURFACE">
+      <Location x="1.2" y="-4.6"/>
+      <StandardPrimitiveRef id="FORME_7"/>
+     </Pin>
+     <Pin number="15" type="SURFACE">
+      <Location x="2" y="-4.6"/>
+      <StandardPrimitiveRef id="FORME_7"/>
+     </Pin>
+     <Pin number="16" type="SURFACE">
+      <Location x="2.8" y="-4.6"/>
+      <StandardPrimitiveRef id="FORME_7"/>
+     </Pin>
+     <Pin number="17" type="SURFACE">
+      <Location x="4.6" y="-2.8"/>
+      <StandardPrimitiveRef id="FORME_6"/>
+     </Pin>
+     <Pin number="18" type="SURFACE">
+      <Location x="4.6" y="-2"/>
+      <StandardPrimitiveRef id="FORME_6"/>
+     </Pin>
+     <Pin number="19" type="SURFACE">
+      <Location x="4.6" y="-1.2"/>
+      <StandardPrimitiveRef id="FORME_6"/>
+     </Pin>
+     <Pin number="20" type="SURFACE">
+      <Location x="4.6" y="-0.4"/>
+      <StandardPrimitiveRef id="FORME_6"/>
+     </Pin>
+     <Pin number="21" type="SURFACE">
+      <Location x="4.6" y="0.4"/>
+      <StandardPrimitiveRef id="FORME_6"/>
+     </Pin>
+     <Pin number="22" type="SURFACE">
+      <Location x="4.6" y="1.2"/>
+      <StandardPrimitiveRef id="FORME_6"/>
+     </Pin>
+     <Pin number="23" type="SURFACE">
+      <Location x="4.6" y="2"/>
+      <StandardPrimitiveRef id="FORME_6"/>
+     </Pin>
+     <Pin number="24" type="SURFACE">
+      <Location x="4.6" y="2.8"/>
+      <StandardPrimitiveRef id="FORME_6"/>
+     </Pin>
+     <Pin number="25" type="SURFACE">
+      <Location x="2.8" y="4.6"/>
+      <StandardPrimitiveRef id="FORME_7"/>
+     </Pin>
+     <Pin number="26" type="SURFACE">
+      <Location x="2" y="4.6"/>
+      <StandardPrimitiveRef id="FORME_7"/>
+     </Pin>
+     <Pin number="27" type="SURFACE">
+      <Location x="1.2" y="4.6"/>
+      <StandardPrimitiveRef id="FORME_7"/>
+     </Pin>
+     <Pin number="28" type="SURFACE">
+      <Location x="0.4" y="4.6"/>
+      <StandardPrimitiveRef id="FORME_7"/>
+     </Pin>
+     <Pin number="29" type="SURFACE">
+      <Location x="-0.4" y="4.6"/>
+      <StandardPrimitiveRef id="FORME_7"/>
+     </Pin>
+     <Pin number="30" type="SURFACE">
+      <Location x="-1.2" y="4.6"/>
+      <StandardPrimitiveRef id="FORME_7"/>
+     </Pin>
+     <Pin number="31" type="SURFACE">
+      <Location x="-2" y="4.6"/>
+      <StandardPrimitiveRef id="FORME_7"/>
+     </Pin>
+     <Pin number="32" type="SURFACE">
+      <Location x="-2.8" y="4.6"/>
+      <StandardPrimitiveRef id="FORME_7"/>
+     </Pin>
+    </Package>
+    <Package name="0402" type="CHIP" pinOne="1" pinOneOrientation="LEFT">
+     <Outline>
+      <Polygon>
+       <PolyBegin x="-0.9862" y="0.6445"/>
+       <PolyStepSegment x="0.9863" y="0.6445"/>
+       <PolyStepSegment x="0.9863" y="-0.6445"/>
+       <PolyStepSegment x="-0.9862" y="-0.6445"/>
+       <PolyStepSegment x="-0.9862" y="0.6445"/>
+      </Polygon>
+      <LineDescRef id="TRAIT_1"/>
+     </Outline>
+     <Pin number="1" type="SURFACE">
+      <Location x="-0.475" y="0"/>
+      <StandardPrimitiveRef id="FORME_8"/>
+     </Pin>
+     <Pin number="2" type="SURFACE">
+      <Location x="0.475" y="0"/>
+      <StandardPrimitiveRef id="FORME_8"/>
+     </Pin>
+    </Package>
+    <Package name="SOIC-8" type="SOIC" pinOne="1" pinOneOrientation="UPPER_LEFT">
+     <Outline>
+      <Polygon>
+       <PolyBegin x="-1.8" y="2.6542"/>
+       <PolyStepSegment x="1.8" y="2.6542"/>
+       <PolyStepSegment x="1.8" y="-2.6542"/>
+       <PolyStepSegment x="-1.8" y="-2.6542"/>
+       <PolyStepSegment x="-1.8" y="2.6542"/>
+      </Polygon>
+      <LineDescRef id="TRAIT_1"/>
+     </Outline>
+     <Pin number="1" type="SURFACE">
+      <Location x="-2.7" y="1.905"/>
+      <StandardPrimitiveRef id="FORME_9"/>
+     </Pin>
+     <Pin number="2" type="SURFACE">
+      <Location x="-2.7" y="0.635"/>
+      <StandardPrimitiveRef id="FORME_9"/>
+     </Pin>
+     <Pin number="3" type="SURFACE">
+      <Location x="-2.7" y="-0.635"/>
+      <StandardPrimitiveRef id="FORME_9"/>
+     </Pin>
+     <Pin number="4" type="SURFACE">
+      <Location x="-2.7" y="-1.905"/>
+      <StandardPrimitiveRef id="FORME_9"/>
+     </Pin>
+     <Pin number="5" type="SURFACE">
+      <Location x="2.7" y="-1.905"/>
+      <StandardPrimitiveRef id="FORME_9"/>
+     </Pin>
+     <Pin number="6" type="SURFACE">
+      <Location x="2.7" y="-0.635"/>
+      <StandardPrimitiveRef id="FORME_9"/>
+     </Pin>
+     <Pin number="7" type="SURFACE">
+      <Location x="2.7" y="0.635"/>
+      <StandardPrimitiveRef id="FORME_9"/>
+     </Pin>
+     <Pin number="8" type="SURFACE">
+      <Location x="2.7" y="1.905"/>
+      <StandardPrimitiveRef id="FORME_9"/>
+     </Pin>
+    </Package>
+    <Package name="SMA-EDGE" type="PLASTIC_DIP" pinOne="1" pinOneOrientation="LEFT">
+     <Outline>
+      <Polygon>
+       <PolyBegin x="-2.5" y="3.5"/>
+       <PolyStepSegment x="2.5" y="3.5"/>
+       <PolyStepSegment x="2.5" y="-3.5"/>
+       <PolyStepSegment x="-2.5" y="-3.5"/>
+       <PolyStepSegment x="-2.5" y="3.5"/>
+      </Polygon>
+      <LineDescRef id="TRAIT_1"/>
+     </Outline>
+     <Pin number="1" type="SURFACE">
+      <Location x="-1.5" y="0"/>
+      <StandardPrimitiveRef id="FORME_10"/>
+     </Pin>
+     <Pin number="2" type="SURFACE">
+      <Location x="-1.5" y="2.5"/>
+      <StandardPrimitiveRef id="FORME_11"/>
+     </Pin>
+     <Pin number="3" type="SURFACE">
+      <Location x="-1.5" y="-2.5"/>
+      <StandardPrimitiveRef id="FORME_11"/>
+     </Pin>
+     <Pin number="4" type="SURFACE">
+      <Location x="1.5" y="2.5"/>
+      <StandardPrimitiveRef id="FORME_11"/>
+     </Pin>
+     <Pin number="5" type="SURFACE">
+      <Location x="1.5" y="-2.5"/>
+      <StandardPrimitiveRef id="FORME_11"/>
+     </Pin>
+    </Package>
+    <Package name="HEADER-2.54-1x4" type="CONNECTOR_TH" pinOne="1" pinOneOrientation="LEFT">
+     <Outline>
+      <Polygon>
+       <PolyBegin x="-4.9236" y="1.2136"/>
+       <PolyStepSegment x="4.9236" y="1.2136"/>
+       <PolyStepSegment x="4.9236" y="-1.2136"/>
+       <PolyStepSegment x="-4.9236" y="-1.2136"/>
+       <PolyStepSegment x="-4.9236" y="1.2136"/>
+      </Polygon>
+      <LineDescRef id="TRAIT_1"/>
+     </Outline>
+     <Pin number="1" type="THRU">
+      <Location x="-3.81" y="0"/>
+      <StandardPrimitiveRef id="FORME_12"/>
+     </Pin>
+     <Pin number="2" type="THRU">
+      <Location x="-1.27" y="0"/>
+      <StandardPrimitiveRef id="FORME_13"/>
+     </Pin>
+     <Pin number="3" type="THRU">
+      <Location x="1.27" y="0"/>
+      <StandardPrimitiveRef id="FORME_13"/>
+     </Pin>
+     <Pin number="4" type="THRU">
+      <Location x="3.81" y="0"/>
+      <StandardPrimitiveRef id="FORME_13"/>
+     </Pin>
+    </Package>
+    <Component refDes="J1" packageRef="MICRO-USB-B" part="USB micro-B_MICRO-USB-B" layerRef="Top" mountType="SMT">
+     <NonstandardAttribute name="VALUE" type="STRING" value="USB micro-B"/>
+     <NonstandardAttribute name="PART_NAME" type="STRING" value="CONN-USB_Mini_651005136421"/>
+     <NonstandardAttribute name="PACKAGE" type="STRING" value="MICRO-USB-B"/>
+     <Location x="7" y="22"/>
+    </Component>
+    <Component refDes="U3" packageRef="SOT-23-5" part="LP2980-3.3_SOT-23-5" layerRef="Top" mountType="SMT">
+     <NonstandardAttribute name="VALUE" type="STRING" value="LP2980-3.3"/>
+     <NonstandardAttribute name="PART_NAME" type="STRING" value="REG_LP2980AIM5X-3.3"/>
+     <NonstandardAttribute name="PACKAGE" type="STRING" value="SOT-23-5"/>
+     <Location x="14" y="32"/>
+    </Component>
+    <Component refDes="C1" packageRef="0805" part="10µ_0805" layerRef="Top" mountType="SMT">
+     <NonstandardAttribute name="VALUE" type="STRING" value="10µ"/>
+     <NonstandardAttribute name="PART_NAME" type="STRING" value="C0805_10uF_X5R_16V_AUTO_TY"/>
+     <NonstandardAttribute name="PACKAGE" type="STRING" value="0805"/>
+     <Xform rotation="90"/>
+     <Location x="8.05" y="28.3"/>
+    </Component>
+    <Component refDes="C2" packageRef="0603" part="1µ_0603" layerRef="Top" mountType="SMT">
+     <NonstandardAttribute name="VALUE" type="STRING" value="1µ"/>
+     <NonstandardAttribute name="PART_NAME" type="STRING" value="C0603_1uF_X7R_25V_AUTO_MU"/>
+     <NonstandardAttribute name="PACKAGE" type="STRING" value="0603"/>
+     <Xform rotation="270"/>
+     <Location x="18.525" y="28.5"/>
+    </Component>
+    <Component refDes="U1" packageRef="TQFP-32" part="STM32WL55_TQFP-32" layerRef="Top" mountType="SMT">
+     <NonstandardAttribute name="VALUE" type="STRING" value="STM32WL55"/>
+     <NonstandardAttribute name="PART_NAME" type="STRING" value="MCU_STM32WL55CCU6"/>
+     <NonstandardAttribute name="PACKAGE" type="STRING" value="TQFP-32"/>
+     <Location x="40" y="22"/>
+    </Component>
+    <Component refDes="C3" packageRef="0402" part="100n_0402" layerRef="Top" mountType="SMT">
+     <NonstandardAttribute name="VALUE" type="STRING" value="100n"/>
+     <NonstandardAttribute name="PART_NAME" type="STRING" value="C0402_100nF_X7R_50V_MU"/>
+     <NonstandardAttribute name="PACKAGE" type="STRING" value="0402"/>
+     <Xform rotation="270"/>
+     <Location x="32" y="28"/>
+    </Component>
+    <Component refDes="C4" packageRef="0402" part="100n_0402" layerRef="Top" mountType="SMT">
+     <NonstandardAttribute name="VALUE" type="STRING" value="100n"/>
+     <NonstandardAttribute name="PART_NAME" type="STRING" value="C0402_100nF_X7R_50V_MU"/>
+     <NonstandardAttribute name="PACKAGE" type="STRING" value="0402"/>
+     <Xform rotation="270"/>
+     <Location x="47" y="28"/>
+    </Component>
+    <Component refDes="U2" packageRef="SOIC-8" part="M95P08_SOIC-8" layerRef="Top" mountType="SMT">
+     <NonstandardAttribute name="VALUE" type="STRING" value="M95P08"/>
+     <NonstandardAttribute name="PART_NAME" type="STRING" value="IC_FLASH_M95P08-IXMNT/E"/>
+     <NonstandardAttribute name="PACKAGE" type="STRING" value="SOIC-8"/>
+     <Location x="27" y="9"/>
+    </Component>
+    <Component refDes="C5" packageRef="0402" part="100n_0402" layerRef="Top" mountType="SMT">
+     <NonstandardAttribute name="VALUE" type="STRING" value="100n"/>
+     <NonstandardAttribute name="PART_NAME" type="STRING" value="C0402_100nF_X7R_50V_MU"/>
+     <NonstandardAttribute name="PACKAGE" type="STRING" value="0402"/>
+     <Location x="27" y="3"/>
+    </Component>
+    <Component refDes="J3" packageRef="SMA-EDGE" part="SMA 50Ω_SMA-EDGE" layerRef="Top" mountType="SMT">
+     <NonstandardAttribute name="VALUE" type="STRING" value="SMA 50Ω"/>
+     <NonstandardAttribute name="PART_NAME" type="STRING" value="CONN_Embase_SMA_CI_Bord_de_carte"/>
+     <NonstandardAttribute name="PACKAGE" type="STRING" value="SMA-EDGE"/>
+     <Location x="58" y="24"/>
+    </Component>
+    <Component refDes="J2" packageRef="HEADER-2.54-1x4" part="SWD_HEADER-2.54-1x4" layerRef="Top" mountType="THMT">
+     <NonstandardAttribute name="VALUE" type="STRING" value="SWD"/>
+     <NonstandardAttribute name="PART_NAME" type="STRING" value="CONN_4-2.54mm-TRAV"/>
+     <NonstandardAttribute name="PACKAGE" type="STRING" value="HEADER-2.54-1x4"/>
+     <Location x="54" y="10"/>
+    </Component>
+    <LogicalNet name="+5V" netClass="POWER">
+     <NonstandardAttribute name="NET_CLASS" type="STRING" value="Alimentation"/>
+     <PinRef componentRef="J1" pin="1"/>
+     <PinRef componentRef="U3" pin="1"/>
+     <PinRef componentRef="U3" pin="3"/>
+     <PinRef componentRef="C1" pin="1"/>
+     <SpecRef id="CLASSE_Alimentation"/>
+    </LogicalNet>
+    <LogicalNet name="USB_DM" netClass="SIGNAL" netPair="USB_DP">
+     <NonstandardAttribute name="NET_CLASS" type="STRING" value="Rapide"/>
+     <NonstandardAttribute name="DIFF_PAIR" type="STRING" value="USB"/>
+     <NonstandardAttribute name="DIFF_PAIR_POLARITY" type="STRING" value="N"/>
+     <PinRef componentRef="J1" pin="2"/>
+     <PinRef componentRef="U1" pin="4"/>
+     <SpecRef id="CLASSE_Rapide"/>
+     <SpecRef id="PAIRE_USB"/>
+    </LogicalNet>
+    <LogicalNet name="USB_DP" netClass="SIGNAL" netPair="USB_DM">
+     <NonstandardAttribute name="NET_CLASS" type="STRING" value="Rapide"/>
+     <NonstandardAttribute name="DIFF_PAIR" type="STRING" value="USB"/>
+     <NonstandardAttribute name="DIFF_PAIR_POLARITY" type="STRING" value="P"/>
+     <PinRef componentRef="J1" pin="3"/>
+     <PinRef componentRef="U1" pin="5"/>
+     <SpecRef id="CLASSE_Rapide"/>
+     <SpecRef id="PAIRE_USB"/>
+    </LogicalNet>
+    <LogicalNet name="GND" netClass="GROUND">
+     <NonstandardAttribute name="NET_CLASS" type="STRING" value="Alimentation"/>
+     <PinRef componentRef="J1" pin="5"/>
+     <PinRef componentRef="J1" pin="6"/>
+     <PinRef componentRef="J1" pin="7"/>
+     <PinRef componentRef="U3" pin="2"/>
+     <PinRef componentRef="C1" pin="2"/>
+     <PinRef componentRef="C2" pin="2"/>
+     <PinRef componentRef="U1" pin="8"/>
+     <PinRef componentRef="U1" pin="24"/>
+     <PinRef componentRef="C3" pin="2"/>
+     <PinRef componentRef="C4" pin="2"/>
+     <PinRef componentRef="U2" pin="4"/>
+     <PinRef componentRef="C5" pin="2"/>
+     <PinRef componentRef="J3" pin="2"/>
+     <PinRef componentRef="J3" pin="3"/>
+     <PinRef componentRef="J3" pin="4"/>
+     <PinRef componentRef="J3" pin="5"/>
+     <PinRef componentRef="J2" pin="4"/>
+     <SpecRef id="CLASSE_Alimentation"/>
+    </LogicalNet>
+    <LogicalNet name="+3V3" netClass="POWER">
+     <NonstandardAttribute name="NET_CLASS" type="STRING" value="Alimentation"/>
+     <PinRef componentRef="U3" pin="5"/>
+     <PinRef componentRef="C2" pin="1"/>
+     <PinRef componentRef="U1" pin="1"/>
+     <PinRef componentRef="U1" pin="17"/>
+     <PinRef componentRef="C3" pin="1"/>
+     <PinRef componentRef="C4" pin="1"/>
+     <PinRef componentRef="U2" pin="3"/>
+     <PinRef componentRef="U2" pin="7"/>
+     <PinRef componentRef="U2" pin="8"/>
+     <PinRef componentRef="C5" pin="1"/>
+     <PinRef componentRef="J2" pin="1"/>
+     <SpecRef id="CLASSE_Alimentation"/>
+    </LogicalNet>
+    <LogicalNet name="SPI_SCK" netClass="CLK">
+     <NonstandardAttribute name="NET_CLASS" type="STRING" value="Horloge"/>
+     <PinRef componentRef="U1" pin="10"/>
+     <PinRef componentRef="U2" pin="6"/>
+     <SpecRef id="CLASSE_Horloge"/>
+    </LogicalNet>
+    <LogicalNet name="SPI_MOSI" netClass="SIGNAL">
+     <NonstandardAttribute name="NET_CLASS" type="STRING" value="Défaut"/>
+     <PinRef componentRef="U1" pin="11"/>
+     <PinRef componentRef="U2" pin="5"/>
+     <SpecRef id="CLASSE_Défaut"/>
+    </LogicalNet>
+    <LogicalNet name="SPI_MISO" netClass="SIGNAL">
+     <NonstandardAttribute name="NET_CLASS" type="STRING" value="Défaut"/>
+     <PinRef componentRef="U1" pin="12"/>
+     <PinRef componentRef="U2" pin="2"/>
+     <SpecRef id="CLASSE_Défaut"/>
+    </LogicalNet>
+    <LogicalNet name="SPI_CS" netClass="SIGNAL">
+     <NonstandardAttribute name="NET_CLASS" type="STRING" value="Défaut"/>
+     <PinRef componentRef="U1" pin="13"/>
+     <PinRef componentRef="U2" pin="1"/>
+     <SpecRef id="CLASSE_Défaut"/>
+    </LogicalNet>
+    <LogicalNet name="SWDIO" netClass="SIGNAL">
+     <NonstandardAttribute name="NET_CLASS" type="STRING" value="Défaut"/>
+     <PinRef componentRef="U1" pin="20"/>
+     <PinRef componentRef="J2" pin="2"/>
+     <SpecRef id="CLASSE_Défaut"/>
+    </LogicalNet>
+    <LogicalNet name="SWCLK" netClass="SIGNAL">
+     <NonstandardAttribute name="NET_CLASS" type="STRING" value="Défaut"/>
+     <PinRef componentRef="U1" pin="21"/>
+     <PinRef componentRef="J2" pin="3"/>
+     <SpecRef id="CLASSE_Défaut"/>
+    </LogicalNet>
+    <LogicalNet name="RF_ANT" netClass="SIGNAL">
+     <NonstandardAttribute name="NET_CLASS" type="STRING" value="Impédance 50Ω"/>
+     <PinRef componentRef="U1" pin="23"/>
+     <PinRef componentRef="J3" pin="1"/>
+     <SpecRef id="CLASSE_Impédance 50Ω"/>
+    </LogicalNet>
+    <PhyNetGroup name="RESEAU_PHYSIQUE">
+     <PhyNet name="+5V_PHY">
+      <PhyNetPoint x="7" y="23.3" layerRef="Top" netNode="END" exposure="EXPOSED">
+       <StandardPrimitiveRef id="FORME_1"/>
+      </PhyNetPoint>
+      <PhyNetPoint x="12.7" y="32.95" layerRef="Top" netNode="END" exposure="EXPOSED">
+       <StandardPrimitiveRef id="FORME_3"/>
+      </PhyNetPoint>
+      <PhyNetPoint x="12.7" y="31.05" layerRef="Top" netNode="END" exposure="EXPOSED">
+       <StandardPrimitiveRef id="FORME_3"/>
+      </PhyNetPoint>
+      <PhyNetPoint x="8.05" y="27.35" layerRef="Top" netNode="END" exposure="EXPOSED">
+       <Xform rotation="90"/>
+       <StandardPrimitiveRef id="FORME_4"/>
+      </PhyNetPoint>
+     </PhyNet>
+     <PhyNet name="USB_DM_PHY">
+      <PhyNetPoint x="7" y="22.65" layerRef="Top" netNode="END" exposure="EXPOSED">
+       <StandardPrimitiveRef id="FORME_1"/>
+      </PhyNetPoint>
+      <PhyNetPoint x="35.4" y="22.4" layerRef="Top" netNode="END" exposure="EXPOSED">
+       <StandardPrimitiveRef id="FORME_6"/>
+      </PhyNetPoint>
+     </PhyNet>
+     <PhyNet name="USB_DP_PHY">
+      <PhyNetPoint x="7" y="22" layerRef="Top" netNode="END" exposure="EXPOSED">
+       <StandardPrimitiveRef id="FORME_1"/>
+      </PhyNetPoint>
+      <PhyNetPoint x="35.4" y="21.6" layerRef="Top" netNode="END" exposure="EXPOSED">
+       <StandardPrimitiveRef id="FORME_6"/>
+      </PhyNetPoint>
+     </PhyNet>
+     <PhyNet name="GND_PHY">
+      <PhyNetPoint x="7" y="20.7" layerRef="Top" netNode="END" exposure="EXPOSED">
+       <StandardPrimitiveRef id="FORME_1"/>
+      </PhyNetPoint>
+      <PhyNetPoint x="6.4" y="25.6" layerRef="Top" netNode="END" exposure="EXPOSED">
+       <StandardPrimitiveRef id="FORME_2"/>
+      </PhyNetPoint>
+      <PhyNetPoint x="6.4" y="18.4" layerRef="Top" netNode="END" exposure="EXPOSED">
+       <StandardPrimitiveRef id="FORME_2"/>
+      </PhyNetPoint>
+      <PhyNetPoint x="12.7" y="32" layerRef="Top" netNode="END" exposure="EXPOSED">
+       <StandardPrimitiveRef id="FORME_3"/>
+      </PhyNetPoint>
+      <PhyNetPoint x="8.05" y="29.25" layerRef="Top" netNode="END" exposure="EXPOSED">
+       <Xform rotation="90"/>
+       <StandardPrimitiveRef id="FORME_4"/>
+      </PhyNetPoint>
+      <PhyNetPoint x="18.525" y="27.75" layerRef="Top" netNode="END" exposure="EXPOSED">
+       <Xform rotation="270"/>
+       <StandardPrimitiveRef id="FORME_5"/>
+      </PhyNetPoint>
+      <PhyNetPoint x="35.4" y="19.2" layerRef="Top" netNode="END" exposure="EXPOSED">
+       <StandardPrimitiveRef id="FORME_6"/>
+      </PhyNetPoint>
+      <PhyNetPoint x="44.6" y="24.8" layerRef="Top" netNode="END" exposure="EXPOSED">
+       <StandardPrimitiveRef id="FORME_6"/>
+      </PhyNetPoint>
+      <PhyNetPoint x="32" y="27.525" layerRef="Top" netNode="END" exposure="EXPOSED">
+       <Xform rotation="270"/>
+       <StandardPrimitiveRef id="FORME_8"/>
+      </PhyNetPoint>
+      <PhyNetPoint x="47" y="27.525" layerRef="Top" netNode="END" exposure="EXPOSED">
+       <Xform rotation="270"/>
+       <StandardPrimitiveRef id="FORME_8"/>
+      </PhyNetPoint>
+      <PhyNetPoint x="24.3" y="7.095" layerRef="Top" netNode="END" exposure="EXPOSED">
+       <StandardPrimitiveRef id="FORME_9"/>
+      </PhyNetPoint>
+      <PhyNetPoint x="27.475" y="3" layerRef="Top" netNode="END" exposure="EXPOSED">
+       <StandardPrimitiveRef id="FORME_8"/>
+      </PhyNetPoint>
+      <PhyNetPoint x="56.5" y="26.5" layerRef="Top" netNode="END" exposure="EXPOSED">
+       <StandardPrimitiveRef id="FORME_11"/>
+      </PhyNetPoint>
+      <PhyNetPoint x="56.5" y="21.5" layerRef="Top" netNode="END" exposure="EXPOSED">
+       <StandardPrimitiveRef id="FORME_11"/>
+      </PhyNetPoint>
+      <PhyNetPoint x="59.5" y="26.5" layerRef="Top" netNode="END" exposure="EXPOSED">
+       <StandardPrimitiveRef id="FORME_11"/>
+      </PhyNetPoint>
+      <PhyNetPoint x="59.5" y="21.5" layerRef="Top" netNode="END" exposure="EXPOSED">
+       <StandardPrimitiveRef id="FORME_11"/>
+      </PhyNetPoint>
+      <PhyNetPoint x="57.81" y="10" layerRef="Top" secondaryLayerRef="Bottom" netNode="END" exposure="EXPOSED">
+       <StandardPrimitiveRef id="FORME_13"/>
+      </PhyNetPoint>
+      <PhyNetPoint x="8.6" y="19.1" layerRef="Top" secondaryLayerRef="Bottom" netNode="MIDDLE" exposure="COVERED" via="true">
+       <StandardPrimitiveRef id="FORME_14"/>
+      </PhyNetPoint>
+      <PhyNetPoint x="6.4" y="27.2" layerRef="Top" secondaryLayerRef="Bottom" netNode="MIDDLE" exposure="COVERED" via="true">
+       <StandardPrimitiveRef id="FORME_14"/>
+      </PhyNetPoint>
+      <PhyNetPoint x="6.4" y="16.8" layerRef="Top" secondaryLayerRef="Bottom" netNode="MIDDLE" exposure="COVERED" via="true">
+       <StandardPrimitiveRef id="FORME_14"/>
+      </PhyNetPoint>
+      <PhyNetPoint x="8.05" y="30.65" layerRef="Top" secondaryLayerRef="Bottom" netNode="MIDDLE" exposure="COVERED" via="true">
+       <StandardPrimitiveRef id="FORME_14"/>
+      </PhyNetPoint>
+      <PhyNetPoint x="13.9" y="30.2" layerRef="Top" secondaryLayerRef="Bottom" netNode="MIDDLE" exposure="COVERED" via="true">
+       <StandardPrimitiveRef id="FORME_14"/>
+      </PhyNetPoint>
+      <PhyNetPoint x="18.525" y="26" layerRef="Top" secondaryLayerRef="Bottom" netNode="MIDDLE" exposure="COVERED" via="true">
+       <StandardPrimitiveRef id="FORME_14"/>
+      </PhyNetPoint>
+      <PhyNetPoint x="34" y="19.2" layerRef="Top" secondaryLayerRef="Bottom" netNode="MIDDLE" exposure="COVERED" via="true">
+       <StandardPrimitiveRef id="FORME_14"/>
+      </PhyNetPoint>
+      <PhyNetPoint x="44.6" y="27" layerRef="Top" secondaryLayerRef="Bottom" netNode="MIDDLE" exposure="COVERED" via="true">
+       <StandardPrimitiveRef id="FORME_14"/>
+      </PhyNetPoint>
+      <PhyNetPoint x="32" y="26.5" layerRef="Top" secondaryLayerRef="Bottom" netNode="MIDDLE" exposure="COVERED" via="true">
+       <StandardPrimitiveRef id="FORME_14"/>
+      </PhyNetPoint>
+      <PhyNetPoint x="47" y="26.5" layerRef="Top" secondaryLayerRef="Bottom" netNode="MIDDLE" exposure="COVERED" via="true">
+       <StandardPrimitiveRef id="FORME_14"/>
+      </PhyNetPoint>
+      <PhyNetPoint x="22" y="7.09" layerRef="Top" secondaryLayerRef="Bottom" netNode="MIDDLE" exposure="COVERED" via="true">
+       <StandardPrimitiveRef id="FORME_14"/>
+      </PhyNetPoint>
+      <PhyNetPoint x="29" y="3" layerRef="Top" secondaryLayerRef="Bottom" netNode="MIDDLE" exposure="COVERED" via="true">
+       <StandardPrimitiveRef id="FORME_14"/>
+      </PhyNetPoint>
+      <PhyNetPoint x="56.5" y="27.5" layerRef="Top" secondaryLayerRef="Bottom" netNode="MIDDLE" exposure="COVERED" via="true">
+       <StandardPrimitiveRef id="FORME_14"/>
+      </PhyNetPoint>
+      <PhyNetPoint x="56.5" y="20.5" layerRef="Top" secondaryLayerRef="Bottom" netNode="MIDDLE" exposure="COVERED" via="true">
+       <StandardPrimitiveRef id="FORME_14"/>
+      </PhyNetPoint>
+      <PhyNetPoint x="59.5" y="27.5" layerRef="Top" secondaryLayerRef="Bottom" netNode="MIDDLE" exposure="COVERED" via="true">
+       <StandardPrimitiveRef id="FORME_14"/>
+      </PhyNetPoint>
+      <PhyNetPoint x="59.5" y="20.5" layerRef="Top" secondaryLayerRef="Bottom" netNode="MIDDLE" exposure="COVERED" via="true">
+       <StandardPrimitiveRef id="FORME_14"/>
+      </PhyNetPoint>
+     </PhyNet>
+     <PhyNet name="+3V3_PHY">
+      <PhyNetPoint x="15.3" y="32.95" layerRef="Top" netNode="END" exposure="EXPOSED">
+       <StandardPrimitiveRef id="FORME_3"/>
+      </PhyNetPoint>
+      <PhyNetPoint x="18.525" y="29.25" layerRef="Top" netNode="END" exposure="EXPOSED">
+       <Xform rotation="270"/>
+       <StandardPrimitiveRef id="FORME_5"/>
+      </PhyNetPoint>
+      <PhyNetPoint x="35.4" y="24.8" layerRef="Top" netNode="END" exposure="EXPOSED">
+       <StandardPrimitiveRef id="FORME_6"/>
+      </PhyNetPoint>
+      <PhyNetPoint x="44.6" y="19.2" layerRef="Top" netNode="END" exposure="EXPOSED">
+       <StandardPrimitiveRef id="FORME_6"/>
+      </PhyNetPoint>
+      <PhyNetPoint x="32" y="28.475" layerRef="Top" netNode="END" exposure="EXPOSED">
+       <Xform rotation="270"/>
+       <StandardPrimitiveRef id="FORME_8"/>
+      </PhyNetPoint>
+      <PhyNetPoint x="47" y="28.475" layerRef="Top" netNode="END" exposure="EXPOSED">
+       <Xform rotation="270"/>
+       <StandardPrimitiveRef id="FORME_8"/>
+      </PhyNetPoint>
+      <PhyNetPoint x="24.3" y="8.365" layerRef="Top" netNode="END" exposure="EXPOSED">
+       <StandardPrimitiveRef id="FORME_9"/>
+      </PhyNetPoint>
+      <PhyNetPoint x="29.7" y="9.635" layerRef="Top" netNode="END" exposure="EXPOSED">
+       <StandardPrimitiveRef id="FORME_9"/>
+      </PhyNetPoint>
+      <PhyNetPoint x="29.7" y="10.905" layerRef="Top" netNode="END" exposure="EXPOSED">
+       <StandardPrimitiveRef id="FORME_9"/>
+      </PhyNetPoint>
+      <PhyNetPoint x="26.525" y="3" layerRef="Top" netNode="END" exposure="EXPOSED">
+       <StandardPrimitiveRef id="FORME_8"/>
+      </PhyNetPoint>
+      <PhyNetPoint x="50.19" y="10" layerRef="Top" secondaryLayerRef="Bottom" netNode="END" exposure="EXPOSED">
+       <StandardPrimitiveRef id="FORME_12"/>
+      </PhyNetPoint>
+      <PhyNetPoint x="20.5" y="29.25" layerRef="Top" secondaryLayerRef="Bottom" netNode="MIDDLE" exposure="COVERED" via="true">
+       <StandardPrimitiveRef id="FORME_14"/>
+      </PhyNetPoint>
+      <PhyNetPoint x="34" y="24.8" layerRef="Top" secondaryLayerRef="Bottom" netNode="MIDDLE" exposure="COVERED" via="true">
+       <StandardPrimitiveRef id="FORME_14"/>
+      </PhyNetPoint>
+      <PhyNetPoint x="46" y="19.2" layerRef="Top" secondaryLayerRef="Bottom" netNode="MIDDLE" exposure="COVERED" via="true">
+       <StandardPrimitiveRef id="FORME_14"/>
+      </PhyNetPoint>
+      <PhyNetPoint x="32" y="29.5" layerRef="Top" secondaryLayerRef="Bottom" netNode="MIDDLE" exposure="COVERED" via="true">
+       <StandardPrimitiveRef id="FORME_14"/>
+      </PhyNetPoint>
+      <PhyNetPoint x="47" y="29.5" layerRef="Top" secondaryLayerRef="Bottom" netNode="MIDDLE" exposure="COVERED" via="true">
+       <StandardPrimitiveRef id="FORME_14"/>
+      </PhyNetPoint>
+      <PhyNetPoint x="32.5" y="12.405" layerRef="Top" secondaryLayerRef="Bottom" netNode="MIDDLE" exposure="COVERED" via="true">
+       <StandardPrimitiveRef id="FORME_14"/>
+      </PhyNetPoint>
+      <PhyNetPoint x="22" y="8.37" layerRef="Top" secondaryLayerRef="Bottom" netNode="MIDDLE" exposure="COVERED" via="true">
+       <StandardPrimitiveRef id="FORME_14"/>
+      </PhyNetPoint>
+      <PhyNetPoint x="25" y="3" layerRef="Top" secondaryLayerRef="Bottom" netNode="MIDDLE" exposure="COVERED" via="true">
+       <StandardPrimitiveRef id="FORME_14"/>
+      </PhyNetPoint>
+      <PhyNetPoint x="50.19" y="12" layerRef="Top" secondaryLayerRef="Bottom" netNode="MIDDLE" exposure="COVERED" via="true">
+       <StandardPrimitiveRef id="FORME_14"/>
+      </PhyNetPoint>
+     </PhyNet>
+     <PhyNet name="SPI_SCK_PHY">
+      <PhyNetPoint x="38" y="17.4" layerRef="Top" netNode="END" exposure="EXPOSED">
+       <StandardPrimitiveRef id="FORME_7"/>
+      </PhyNetPoint>
+      <PhyNetPoint x="29.7" y="8.365" layerRef="Top" netNode="END" exposure="EXPOSED">
+       <StandardPrimitiveRef id="FORME_9"/>
+      </PhyNetPoint>
+     </PhyNet>
+     <PhyNet name="SPI_MOSI_PHY">
+      <PhyNetPoint x="38.8" y="17.4" layerRef="Top" netNode="END" exposure="EXPOSED">
+       <StandardPrimitiveRef id="FORME_7"/>
+      </PhyNetPoint>
+      <PhyNetPoint x="29.7" y="7.095" layerRef="Top" netNode="END" exposure="EXPOSED">
+       <StandardPrimitiveRef id="FORME_9"/>
+      </PhyNetPoint>
+     </PhyNet>
+     <PhyNet name="SPI_MISO_PHY">
+      <PhyNetPoint x="39.6" y="17.4" layerRef="Top" netNode="END" exposure="EXPOSED">
+       <StandardPrimitiveRef id="FORME_7"/>
+      </PhyNetPoint>
+      <PhyNetPoint x="24.3" y="9.635" layerRef="Top" netNode="END" exposure="EXPOSED">
+       <StandardPrimitiveRef id="FORME_9"/>
+      </PhyNetPoint>
+      <PhyNetPoint x="39.6" y="15.5" layerRef="Top" secondaryLayerRef="Bottom" netNode="MIDDLE" exposure="COVERED" via="true">
+       <StandardPrimitiveRef id="FORME_15"/>
+      </PhyNetPoint>
+      <PhyNetPoint x="22.8" y="9.635" layerRef="Top" secondaryLayerRef="Bottom" netNode="MIDDLE" exposure="COVERED" via="true">
+       <StandardPrimitiveRef id="FORME_15"/>
+      </PhyNetPoint>
+     </PhyNet>
+     <PhyNet name="SPI_CS_PHY">
+      <PhyNetPoint x="40.4" y="17.4" layerRef="Top" netNode="END" exposure="EXPOSED">
+       <StandardPrimitiveRef id="FORME_7"/>
+      </PhyNetPoint>
+      <PhyNetPoint x="24.3" y="10.905" layerRef="Top" netNode="END" exposure="EXPOSED">
+       <StandardPrimitiveRef id="FORME_9"/>
+      </PhyNetPoint>
+      <PhyNetPoint x="40.4" y="16" layerRef="Top" secondaryLayerRef="Bottom" netNode="MIDDLE" exposure="COVERED" via="true">
+       <StandardPrimitiveRef id="FORME_15"/>
+      </PhyNetPoint>
+      <PhyNetPoint x="22.8" y="10.905" layerRef="Top" secondaryLayerRef="Bottom" netNode="MIDDLE" exposure="COVERED" via="true">
+       <StandardPrimitiveRef id="FORME_15"/>
+      </PhyNetPoint>
+     </PhyNet>
+     <PhyNet name="SWDIO_PHY">
+      <PhyNetPoint x="44.6" y="21.6" layerRef="Top" netNode="END" exposure="EXPOSED">
+       <StandardPrimitiveRef id="FORME_6"/>
+      </PhyNetPoint>
+      <PhyNetPoint x="52.73" y="10" layerRef="Top" secondaryLayerRef="Bottom" netNode="END" exposure="EXPOSED">
+       <StandardPrimitiveRef id="FORME_13"/>
+      </PhyNetPoint>
+      <PhyNetPoint x="46.4" y="21.6" layerRef="Top" secondaryLayerRef="Bottom" netNode="MIDDLE" exposure="COVERED" via="true">
+       <StandardPrimitiveRef id="FORME_15"/>
+      </PhyNetPoint>
+     </PhyNet>
+     <PhyNet name="SWCLK_PHY">
+      <PhyNetPoint x="44.6" y="22.4" layerRef="Top" netNode="END" exposure="EXPOSED">
+       <StandardPrimitiveRef id="FORME_6"/>
+      </PhyNetPoint>
+      <PhyNetPoint x="55.27" y="10" layerRef="Top" secondaryLayerRef="Bottom" netNode="END" exposure="EXPOSED">
+       <StandardPrimitiveRef id="FORME_13"/>
+      </PhyNetPoint>
+      <PhyNetPoint x="47.6" y="22.4" layerRef="Top" secondaryLayerRef="Bottom" netNode="MIDDLE" exposure="COVERED" via="true">
+       <StandardPrimitiveRef id="FORME_15"/>
+      </PhyNetPoint>
+     </PhyNet>
+     <PhyNet name="RF_ANT_PHY">
+      <PhyNetPoint x="44.6" y="24" layerRef="Top" netNode="END" exposure="EXPOSED">
+       <StandardPrimitiveRef id="FORME_6"/>
+      </PhyNetPoint>
+      <PhyNetPoint x="56.5" y="24" layerRef="Top" netNode="END" exposure="EXPOSED">
+       <StandardPrimitiveRef id="FORME_10"/>
+      </PhyNetPoint>
+     </PhyNet>
+    </PhyNetGroup>
+    <LayerFeature layerRef="SERIGRAPHIE_DESSUS">
+     <Set>
+      <Features>
+       <Polyline>
+        <PolyBegin x="5.4" y="26.57"/>
+        <PolyStepSegment x="8" y="26.57"/>
+        <PolyStepSegment x="8" y="17.4"/>
+        <PolyStepSegment x="5.4" y="17.4"/>
+        <PolyStepSegment x="5.4" y="26.57"/>
+        <LineDescRef id="TRAIT_1"/>
+       </Polyline>
+      </Features>
+      <Features>
+       <Location x="7" y="24.4"/>
+       <Circle diameter="0.4">
+        <FillDesc fillProperty="FILL"/>
+       </Circle>
+      </Features>
+      <Features>
+       <Location x="4" y="27.3656"/>
+       <UserSpecial>
+        <Polyline>
+         <PolyBegin x="-0.073667" y="0.442"/>
+         <PolyStepSegment x="-0.073667" y="-0.294667"/>
+         <PolyStepSegment x="-0.221" y="-0.442"/>
+         <PolyStepSegment x="-0.515667" y="-0.442"/>
+         <PolyStepSegment x="-0.663" y="-0.294667"/>
+         <LineDescRef id="TRAIT_1"/>
+        </Polyline>
+        <Polyline>
+         <PolyBegin x="0.221" y="0.147333"/>
+         <PolyStepSegment x="0.368333" y="0.442"/>
+         <PolyStepSegment x="0.368333" y="-0.442"/>
+         <LineDescRef id="TRAIT_1"/>
+        </Polyline>
+        <Polyline>
+         <PolyBegin x="0.073667" y="-0.442"/>
+         <PolyStepSegment x="0.663" y="-0.442"/>
+         <LineDescRef id="TRAIT_1"/>
+        </Polyline>
+        <Text textString="J1" fontSize="3">
+         <BoundingBox lowerLeftX="-0.663" lowerLeftY="-0.442" upperRightX="0.663" upperRightY="0.442"/>
+        </Text>
+       </UserSpecial>
+      </Features>
+      <Features>
+       <Polyline>
+        <PolyBegin x="13.6" y="33.65"/>
+        <PolyStepSegment x="14.4" y="33.65"/>
+        <PolyStepSegment x="14.4" y="30.35"/>
+        <PolyStepSegment x="13.6" y="30.35"/>
+        <PolyStepSegment x="13.6" y="33.65"/>
+        <LineDescRef id="TRAIT_1"/>
+       </Polyline>
+      </Features>
+      <Features>
+       <Location x="11.933" y="33.5105"/>
+       <Circle diameter="0.4">
+        <FillDesc fillProperty="FILL"/>
+       </Circle>
+      </Features>
+      <Features>
+       <Location x="14" y="34.37"/>
+       <UserSpecial>
+        <Polyline>
+         <PolyBegin x="-0.6" y="0.4"/>
+         <PolyStepSegment x="-0.6" y="-0.266667"/>
+         <PolyStepSegment x="-0.466667" y="-0.4"/>
+         <PolyStepSegment x="-0.2" y="-0.4"/>
+         <PolyStepSegment x="-0.066667" y="-0.266667"/>
+         <PolyStepSegment x="-0.066667" y="0.4"/>
+         <LineDescRef id="TRAIT_1"/>
+        </Polyline>
+        <Polyline>
+         <PolyBegin x="0.066667" y="0.266667"/>
+         <PolyStepSegment x="0.2" y="0.4"/>
+         <PolyStepSegment x="0.466667" y="0.4"/>
+         <PolyStepSegment x="0.6" y="0.266667"/>
+         <PolyStepSegment x="0.6" y="0.133333"/>
+         <PolyStepSegment x="0.466667" y="0"/>
+         <PolyStepSegment x="0.2" y="0"/>
+         <LineDescRef id="TRAIT_1"/>
+        </Polyline>
+        <Polyline>
+         <PolyBegin x="0.466667" y="0"/>
+         <PolyStepSegment x="0.6" y="-0.133333"/>
+         <PolyStepSegment x="0.6" y="-0.266667"/>
+         <PolyStepSegment x="0.466667" y="-0.4"/>
+         <PolyStepSegment x="0.2" y="-0.4"/>
+         <PolyStepSegment x="0.066667" y="-0.266667"/>
+         <LineDescRef id="TRAIT_1"/>
+        </Polyline>
+        <Text textString="U3" fontSize="2">
+         <BoundingBox lowerLeftX="-0.6" lowerLeftY="-0.4" upperRightX="0.6" upperRightY="0.4"/>
+        </Text>
+       </UserSpecial>
+      </Features>
+      <Features>
+       <Polyline>
+        <PolyBegin x="7.111" y="26.5775"/>
+        <PolyStepSegment x="7.111" y="30.0225"/>
+        <PolyStepSegment x="8.989" y="30.0225"/>
+        <PolyStepSegment x="8.989" y="26.5775"/>
+        <PolyStepSegment x="7.111" y="26.5775"/>
+        <LineDescRef id="TRAIT_1"/>
+       </Polyline>
+      </Features>
+      <Features>
+       <Location x="8.05" y="31.07667"/>
+       <UserSpecial>
+        <Polyline>
+         <PolyBegin x="-0.097608" y="0.390433"/>
+         <PolyStepSegment x="-0.292825" y="0.58565"/>
+         <PolyStepSegment x="-0.683258" y="0.58565"/>
+         <PolyStepSegment x="-0.878475" y="0.390433"/>
+         <PolyStepSegment x="-0.878475" y="-0.390433"/>
+         <PolyStepSegment x="-0.683258" y="-0.58565"/>
+         <PolyStepSegment x="-0.292825" y="-0.58565"/>
+         <PolyStepSegment x="-0.097608" y="-0.390433"/>
+         <LineDescRef id="TRAIT_1"/>
+        </Polyline>
+        <Polyline>
+         <PolyBegin x="0.292825" y="0.195217"/>
+         <PolyStepSegment x="0.488042" y="0.58565"/>
+         <PolyStepSegment x="0.488042" y="-0.58565"/>
+         <LineDescRef id="TRAIT_1"/>
+        </Polyline>
+        <Polyline>
+         <PolyBegin x="0.097608" y="-0.58565"/>
+         <PolyStepSegment x="0.878475" y="-0.58565"/>
+         <LineDescRef id="TRAIT_1"/>
+        </Polyline>
+        <Text textString="C1" fontSize="3">
+         <BoundingBox lowerLeftX="-0.878475" lowerLeftY="-0.58565" upperRightX="0.878475" upperRightY="0.58565"/>
+        </Text>
+       </UserSpecial>
+      </Features>
+      <Features>
+       <Polyline>
+        <PolyBegin x="19.34" y="29.9125"/>
+        <PolyStepSegment x="19.34" y="27.0875"/>
+        <PolyStepSegment x="17.71" y="27.0875"/>
+        <PolyStepSegment x="17.71" y="29.9125"/>
+        <PolyStepSegment x="19.34" y="29.9125"/>
+        <LineDescRef id="TRAIT_1"/>
+       </Polyline>
+      </Features>
+      <Features>
+       <Location x="18.525" y="30.77695"/>
+       <UserSpecial>
+        <Polyline>
+         <PolyBegin x="-0.080042" y="0.320167"/>
+         <PolyStepSegment x="-0.240125" y="0.48025"/>
+         <PolyStepSegment x="-0.560292" y="0.48025"/>
+         <PolyStepSegment x="-0.720375" y="0.320167"/>
+         <PolyStepSegment x="-0.720375" y="-0.320167"/>
+         <PolyStepSegment x="-0.560292" y="-0.48025"/>
+         <PolyStepSegment x="-0.240125" y="-0.48025"/>
+         <PolyStepSegment x="-0.080042" y="-0.320167"/>
+         <LineDescRef id="TRAIT_1"/>
+        </Polyline>
+        <Polyline>
+         <PolyBegin x="0.080042" y="0.320167"/>
+         <PolyStepSegment x="0.240125" y="0.48025"/>
+         <PolyStepSegment x="0.560292" y="0.48025"/>
+         <PolyStepSegment x="0.720375" y="0.320167"/>
+         <PolyStepSegment x="0.720375" y="0.160083"/>
+         <PolyStepSegment x="0.080042" y="-0.48025"/>
+         <PolyStepSegment x="0.720375" y="-0.48025"/>
+         <LineDescRef id="TRAIT_1"/>
+        </Polyline>
+        <Text textString="C2" fontSize="3">
+         <BoundingBox lowerLeftX="-0.720375" lowerLeftY="-0.48025" upperRightX="0.720375" upperRightY="0.48025"/>
+        </Text>
+       </UserSpecial>
+      </Features>
+      <Features>
+       <Polyline>
+        <PolyBegin x="34.43" y="27.67"/>
+        <PolyStepSegment x="45.57" y="27.67"/>
+        <PolyStepSegment x="45.57" y="16.33"/>
+        <PolyStepSegment x="34.43" y="16.33"/>
+        <PolyStepSegment x="34.43" y="27.67"/>
+        <LineDescRef id="TRAIT_1"/>
+       </Polyline>
+      </Features>
+      <Features>
+       <Location x="34.4433" y="25.3823"/>
+       <Circle diameter="0.4">
+        <FillDesc fillProperty="FILL"/>
+       </Circle>
+      </Features>
+      <Features>
+       <Location x="40" y="29.11"/>
+       <UserSpecial>
+        <Polyline>
+         <PolyBegin x="-1.2" y="0.8"/>
+         <PolyStepSegment x="-1.2" y="-0.533333"/>
+         <PolyStepSegment x="-0.933333" y="-0.8"/>
+         <PolyStepSegment x="-0.4" y="-0.8"/>
+         <PolyStepSegment x="-0.133333" y="-0.533333"/>
+         <PolyStepSegment x="-0.133333" y="0.8"/>
+         <LineDescRef id="TRAIT_1"/>
+        </Polyline>
+        <Polyline>
+         <PolyBegin x="0.4" y="0.266667"/>
+         <PolyStepSegment x="0.666667" y="0.8"/>
+         <PolyStepSegment x="0.666667" y="-0.8"/>
+         <LineDescRef id="TRAIT_1"/>
+        </Polyline>
+        <Polyline>
+         <PolyBegin x="0.133333" y="-0.8"/>
+         <PolyStepSegment x="1.2" y="-0.8"/>
+         <LineDescRef id="TRAIT_1"/>
+        </Polyline>
+        <Text textString="U1" fontSize="5">
+         <BoundingBox lowerLeftX="-1.2" lowerLeftY="-0.8" upperRightX="1.2" upperRightY="0.8"/>
+        </Text>
+       </UserSpecial>
+      </Features>
+      <Features>
+       <Polyline>
+        <PolyBegin x="32.6445" y="28.9862"/>
+        <PolyStepSegment x="32.6445" y="27.0137"/>
+        <PolyStepSegment x="31.3555" y="27.0137"/>
+        <PolyStepSegment x="31.3555" y="28.9862"/>
+        <PolyStepSegment x="32.6445" y="28.9862"/>
+        <LineDescRef id="TRAIT_1"/>
+       </Polyline>
+      </Features>
+      <Features>
+       <Location x="32" y="29.7062"/>
+       <UserSpecial>
+        <Polyline>
+         <PolyBegin x="-0.066667" y="0.266667"/>
+         <PolyStepSegment x="-0.2" y="0.4"/>
+         <PolyStepSegment x="-0.466667" y="0.4"/>
+         <PolyStepSegment x="-0.6" y="0.266667"/>
+         <PolyStepSegment x="-0.6" y="-0.266667"/>
+         <PolyStepSegment x="-0.466667" y="-0.4"/>
+         <PolyStepSegment x="-0.2" y="-0.4"/>
+         <PolyStepSegment x="-0.066667" y="-0.266667"/>
+         <LineDescRef id="TRAIT_1"/>
+        </Polyline>
+        <Polyline>
+         <PolyBegin x="0.066667" y="0.266667"/>
+         <PolyStepSegment x="0.2" y="0.4"/>
+         <PolyStepSegment x="0.466667" y="0.4"/>
+         <PolyStepSegment x="0.6" y="0.266667"/>
+         <PolyStepSegment x="0.6" y="0.133333"/>
+         <PolyStepSegment x="0.466667" y="0"/>
+         <PolyStepSegment x="0.2" y="0"/>
+         <LineDescRef id="TRAIT_1"/>
+        </Polyline>
+        <Polyline>
+         <PolyBegin x="0.466667" y="0"/>
+         <PolyStepSegment x="0.6" y="-0.133333"/>
+         <PolyStepSegment x="0.6" y="-0.266667"/>
+         <PolyStepSegment x="0.466667" y="-0.4"/>
+         <PolyStepSegment x="0.2" y="-0.4"/>
+         <PolyStepSegment x="0.066667" y="-0.266667"/>
+         <LineDescRef id="TRAIT_1"/>
+        </Polyline>
+        <Text textString="C3" fontSize="2">
+         <BoundingBox lowerLeftX="-0.6" lowerLeftY="-0.4" upperRightX="0.6" upperRightY="0.4"/>
+        </Text>
+       </UserSpecial>
+      </Features>
+      <Features>
+       <Polyline>
+        <PolyBegin x="47.6445" y="28.9862"/>
+        <PolyStepSegment x="47.6445" y="27.0137"/>
+        <PolyStepSegment x="46.3555" y="27.0137"/>
+        <PolyStepSegment x="46.3555" y="28.9862"/>
+        <PolyStepSegment x="47.6445" y="28.9862"/>
+        <LineDescRef id="TRAIT_1"/>
+       </Polyline>
+      </Features>
+      <Features>
+       <Location x="47" y="29.7062"/>
+       <UserSpecial>
+        <Polyline>
+         <PolyBegin x="-0.066667" y="0.266667"/>
+         <PolyStepSegment x="-0.2" y="0.4"/>
+         <PolyStepSegment x="-0.466667" y="0.4"/>
+         <PolyStepSegment x="-0.6" y="0.266667"/>
+         <PolyStepSegment x="-0.6" y="-0.266667"/>
+         <PolyStepSegment x="-0.466667" y="-0.4"/>
+         <PolyStepSegment x="-0.2" y="-0.4"/>
+         <PolyStepSegment x="-0.066667" y="-0.266667"/>
+         <LineDescRef id="TRAIT_1"/>
+        </Polyline>
+        <Polyline>
+         <PolyBegin x="0.466667" y="0.4"/>
+         <PolyStepSegment x="0.066667" y="-0.133333"/>
+         <PolyStepSegment x="0.6" y="-0.133333"/>
+         <LineDescRef id="TRAIT_1"/>
+        </Polyline>
+        <Polyline>
+         <PolyBegin x="0.466667" y="0.4"/>
+         <PolyStepSegment x="0.466667" y="-0.4"/>
+         <LineDescRef id="TRAIT_1"/>
+        </Polyline>
+        <Text textString="C4" fontSize="2">
+         <BoundingBox lowerLeftX="-0.6" lowerLeftY="-0.4" upperRightX="0.6" upperRightY="0.4"/>
+        </Text>
+       </UserSpecial>
+      </Features>
+      <Features>
+       <Polyline>
+        <PolyBegin x="25.2" y="11.6542"/>
+        <PolyStepSegment x="28.8" y="11.6542"/>
+        <PolyStepSegment x="28.8" y="6.3458"/>
+        <PolyStepSegment x="25.2" y="6.3458"/>
+        <PolyStepSegment x="25.2" y="11.6542"/>
+        <LineDescRef id="TRAIT_1"/>
+       </Polyline>
+      </Features>
+      <Features>
+       <Location x="23.3113" y="11.6026"/>
+       <Circle diameter="0.4">
+        <FillDesc fillProperty="FILL"/>
+       </Circle>
+      </Features>
+      <Features>
+       <Location x="27" y="12.8166"/>
+       <UserSpecial>
+        <Polyline>
+         <PolyBegin x="-0.918" y="0.612"/>
+         <PolyStepSegment x="-0.918" y="-0.408"/>
+         <PolyStepSegment x="-0.714" y="-0.612"/>
+         <PolyStepSegment x="-0.306" y="-0.612"/>
+         <PolyStepSegment x="-0.102" y="-0.408"/>
+         <PolyStepSegment x="-0.102" y="0.612"/>
+         <LineDescRef id="TRAIT_1"/>
+        </Polyline>
+        <Polyline>
+         <PolyBegin x="0.102" y="0.408"/>
+         <PolyStepSegment x="0.306" y="0.612"/>
+         <PolyStepSegment x="0.714" y="0.612"/>
+         <PolyStepSegment x="0.918" y="0.408"/>
+         <PolyStepSegment x="0.918" y="0.204"/>
+         <PolyStepSegment x="0.102" y="-0.612"/>
+         <PolyStepSegment x="0.918" y="-0.612"/>
+         <LineDescRef id="TRAIT_1"/>
+        </Polyline>
+        <Text textString="U2" fontSize="3">
+         <BoundingBox lowerLeftX="-0.918" lowerLeftY="-0.612" upperRightX="0.918" upperRightY="0.612"/>
+        </Text>
+       </UserSpecial>
+      </Features>
+      <Features>
+       <Polyline>
+        <PolyBegin x="26.0138" y="3.6445"/>
+        <PolyStepSegment x="27.9863" y="3.6445"/>
+        <PolyStepSegment x="27.9863" y="2.3555"/>
+        <PolyStepSegment x="26.0138" y="2.3555"/>
+        <PolyStepSegment x="26.0138" y="3.6445"/>
+        <LineDescRef id="TRAIT_1"/>
+       </Polyline>
+      </Features>
+      <Features>
+       <Location x="27" y="4.3645"/>
+       <UserSpecial>
+        <Polyline>
+         <PolyBegin x="-0.066667" y="0.266667"/>
+         <PolyStepSegment x="-0.2" y="0.4"/>
+         <PolyStepSegment x="-0.466667" y="0.4"/>
+         <PolyStepSegment x="-0.6" y="0.266667"/>
+         <PolyStepSegment x="-0.6" y="-0.266667"/>
+         <PolyStepSegment x="-0.466667" y="-0.4"/>
+         <PolyStepSegment x="-0.2" y="-0.4"/>
+         <PolyStepSegment x="-0.066667" y="-0.266667"/>
+         <LineDescRef id="TRAIT_1"/>
+        </Polyline>
+        <Polyline>
+         <PolyBegin x="0.6" y="0.4"/>
+         <PolyStepSegment x="0.066667" y="0.4"/>
+         <PolyStepSegment x="0.066667" y="0"/>
+         <PolyStepSegment x="0.466667" y="0"/>
+         <PolyStepSegment x="0.6" y="-0.133333"/>
+         <PolyStepSegment x="0.6" y="-0.266667"/>
+         <PolyStepSegment x="0.466667" y="-0.4"/>
+         <PolyStepSegment x="0.2" y="-0.4"/>
+         <PolyStepSegment x="0.066667" y="-0.266667"/>
+         <LineDescRef id="TRAIT_1"/>
+        </Polyline>
+        <Text textString="C5" fontSize="2">
+         <BoundingBox lowerLeftX="-0.6" lowerLeftY="-0.4" upperRightX="0.6" upperRightY="0.4"/>
+        </Text>
+       </UserSpecial>
+      </Features>
+      <Features>
+       <Polyline>
+        <PolyBegin x="55.5" y="27.5"/>
+        <PolyStepSegment x="60.5" y="27.5"/>
+        <PolyStepSegment x="60.5" y="20.5"/>
+        <PolyStepSegment x="55.5" y="20.5"/>
+        <PolyStepSegment x="55.5" y="27.5"/>
+        <LineDescRef id="TRAIT_1"/>
+       </Polyline>
+      </Features>
+      <Features>
+       <Location x="55.1" y="24"/>
+       <Circle diameter="0.4">
+        <FillDesc fillProperty="FILL"/>
+       </Circle>
+      </Features>
+      <Features>
+       <Location x="58" y="28.94"/>
+       <UserSpecial>
+        <Polyline>
+         <PolyBegin x="-0.133333" y="0.8"/>
+         <PolyStepSegment x="-0.133333" y="-0.533333"/>
+         <PolyStepSegment x="-0.4" y="-0.8"/>
+         <PolyStepSegment x="-0.933333" y="-0.8"/>
+         <PolyStepSegment x="-1.2" y="-0.533333"/>
+         <LineDescRef id="TRAIT_1"/>
+        </Polyline>
+        <Polyline>
+         <PolyBegin x="0.133333" y="0.533333"/>
+         <PolyStepSegment x="0.4" y="0.8"/>
+         <PolyStepSegment x="0.933333" y="0.8"/>
+         <PolyStepSegment x="1.2" y="0.533333"/>
+         <PolyStepSegment x="1.2" y="0.266667"/>
+         <PolyStepSegment x="0.933333" y="0"/>
+         <PolyStepSegment x="0.4" y="0"/>
+         <LineDescRef id="TRAIT_1"/>
+        </Polyline>
+        <Polyline>
+         <PolyBegin x="0.933333" y="0"/>
+         <PolyStepSegment x="1.2" y="-0.266667"/>
+         <PolyStepSegment x="1.2" y="-0.533333"/>
+         <PolyStepSegment x="0.933333" y="-0.8"/>
+         <PolyStepSegment x="0.4" y="-0.8"/>
+         <PolyStepSegment x="0.133333" y="-0.533333"/>
+         <LineDescRef id="TRAIT_1"/>
+        </Polyline>
+        <Text textString="J3" fontSize="5">
+         <BoundingBox lowerLeftX="-1.2" lowerLeftY="-0.8" upperRightX="1.2" upperRightY="0.8"/>
+        </Text>
+       </UserSpecial>
+      </Features>
+      <Features>
+       <Polyline>
+        <PolyBegin x="49.0764" y="11.2136"/>
+        <PolyStepSegment x="58.9236" y="11.2136"/>
+        <PolyStepSegment x="58.9236" y="8.7864"/>
+        <PolyStepSegment x="49.0764" y="8.7864"/>
+        <PolyStepSegment x="49.0764" y="11.2136"/>
+        <LineDescRef id="TRAIT_1"/>
+       </Polyline>
+      </Features>
+      <Features>
+       <Location x="48.9264" y="10"/>
+       <Circle diameter="0.4">
+        <FillDesc fillProperty="FILL"/>
+       </Circle>
+      </Features>
+      <Features>
+       <Location x="54" y="12.6536"/>
+       <UserSpecial>
+        <Polyline>
+         <PolyBegin x="-0.133333" y="0.8"/>
+         <PolyStepSegment x="-0.133333" y="-0.533333"/>
+         <PolyStepSegment x="-0.4" y="-0.8"/>
+         <PolyStepSegment x="-0.933333" y="-0.8"/>
+         <PolyStepSegment x="-1.2" y="-0.533333"/>
+         <LineDescRef id="TRAIT_1"/>
+        </Polyline>
+        <Polyline>
+         <PolyBegin x="0.133333" y="0.533333"/>
+         <PolyStepSegment x="0.4" y="0.8"/>
+         <PolyStepSegment x="0.933333" y="0.8"/>
+         <PolyStepSegment x="1.2" y="0.533333"/>
+         <PolyStepSegment x="1.2" y="0.266667"/>
+         <PolyStepSegment x="0.133333" y="-0.8"/>
+         <PolyStepSegment x="1.2" y="-0.8"/>
+         <LineDescRef id="TRAIT_1"/>
+        </Polyline>
+        <Text textString="J2" fontSize="5">
+         <BoundingBox lowerLeftX="-1.2" lowerLeftY="-0.8" upperRightX="1.2" upperRightY="0.8"/>
+        </Text>
+       </UserSpecial>
+      </Features>
+     </Set>
+    </LayerFeature>
+    <LayerFeature layerRef="PATE_DESSUS">
+     <Set>
+      <Pad>
+       <Location x="7" y="23.3"/>
+       <StandardPrimitiveRef id="FORME_1"/>
+      </Pad>
+      <Pad>
+       <Location x="7" y="22.65"/>
+       <StandardPrimitiveRef id="FORME_1"/>
+      </Pad>
+      <Pad>
+       <Location x="7" y="22"/>
+       <StandardPrimitiveRef id="FORME_1"/>
+      </Pad>
+      <Pad>
+       <Location x="7" y="21.35"/>
+       <StandardPrimitiveRef id="FORME_1"/>
+      </Pad>
+      <Pad>
+       <Location x="7" y="20.7"/>
+       <StandardPrimitiveRef id="FORME_1"/>
+      </Pad>
+      <Pad>
+       <Location x="6.4" y="25.6"/>
+       <StandardPrimitiveRef id="FORME_2"/>
+      </Pad>
+      <Pad>
+       <Location x="6.4" y="18.4"/>
+       <StandardPrimitiveRef id="FORME_2"/>
+      </Pad>
+      <Pad>
+       <Location x="12.7" y="32.95"/>
+       <StandardPrimitiveRef id="FORME_3"/>
+      </Pad>
+      <Pad>
+       <Location x="12.7" y="32"/>
+       <StandardPrimitiveRef id="FORME_3"/>
+      </Pad>
+      <Pad>
+       <Location x="12.7" y="31.05"/>
+       <StandardPrimitiveRef id="FORME_3"/>
+      </Pad>
+      <Pad>
+       <Location x="15.3" y="31.05"/>
+       <StandardPrimitiveRef id="FORME_3"/>
+      </Pad>
+      <Pad>
+       <Location x="15.3" y="32.95"/>
+       <StandardPrimitiveRef id="FORME_3"/>
+      </Pad>
+      <Pad>
+       <Xform rotation="90"/>
+       <Location x="8.05" y="27.35"/>
+       <StandardPrimitiveRef id="FORME_4"/>
+      </Pad>
+      <Pad>
+       <Xform rotation="90"/>
+       <Location x="8.05" y="29.25"/>
+       <StandardPrimitiveRef id="FORME_4"/>
+      </Pad>
+      <Pad>
+       <Xform rotation="270"/>
+       <Location x="18.525" y="29.25"/>
+       <StandardPrimitiveRef id="FORME_5"/>
+      </Pad>
+      <Pad>
+       <Xform rotation="270"/>
+       <Location x="18.525" y="27.75"/>
+       <StandardPrimitiveRef id="FORME_5"/>
+      </Pad>
+      <Pad>
+       <Location x="35.4" y="24.8"/>
+       <StandardPrimitiveRef id="FORME_6"/>
+      </Pad>
+      <Pad>
+       <Location x="35.4" y="24"/>
+       <StandardPrimitiveRef id="FORME_6"/>
+      </Pad>
+      <Pad>
+       <Location x="35.4" y="23.2"/>
+       <StandardPrimitiveRef id="FORME_6"/>
+      </Pad>
+      <Pad>
+       <Location x="35.4" y="22.4"/>
+       <StandardPrimitiveRef id="FORME_6"/>
+      </Pad>
+      <Pad>
+       <Location x="35.4" y="21.6"/>
+       <StandardPrimitiveRef id="FORME_6"/>
+      </Pad>
+      <Pad>
+       <Location x="35.4" y="20.8"/>
+       <StandardPrimitiveRef id="FORME_6"/>
+      </Pad>
+      <Pad>
+       <Location x="35.4" y="20"/>
+       <StandardPrimitiveRef id="FORME_6"/>
+      </Pad>
+      <Pad>
+       <Location x="35.4" y="19.2"/>
+       <StandardPrimitiveRef id="FORME_6"/>
+      </Pad>
+      <Pad>
+       <Location x="37.2" y="17.4"/>
+       <StandardPrimitiveRef id="FORME_7"/>
+      </Pad>
+      <Pad>
+       <Location x="38" y="17.4"/>
+       <StandardPrimitiveRef id="FORME_7"/>
+      </Pad>
+      <Pad>
+       <Location x="38.8" y="17.4"/>
+       <StandardPrimitiveRef id="FORME_7"/>
+      </Pad>
+      <Pad>
+       <Location x="39.6" y="17.4"/>
+       <StandardPrimitiveRef id="FORME_7"/>
+      </Pad>
+      <Pad>
+       <Location x="40.4" y="17.4"/>
+       <StandardPrimitiveRef id="FORME_7"/>
+      </Pad>
+      <Pad>
+       <Location x="41.2" y="17.4"/>
+       <StandardPrimitiveRef id="FORME_7"/>
+      </Pad>
+      <Pad>
+       <Location x="42" y="17.4"/>
+       <StandardPrimitiveRef id="FORME_7"/>
+      </Pad>
+      <Pad>
+       <Location x="42.8" y="17.4"/>
+       <StandardPrimitiveRef id="FORME_7"/>
+      </Pad>
+      <Pad>
+       <Location x="44.6" y="19.2"/>
+       <StandardPrimitiveRef id="FORME_6"/>
+      </Pad>
+      <Pad>
+       <Location x="44.6" y="20"/>
+       <StandardPrimitiveRef id="FORME_6"/>
+      </Pad>
+      <Pad>
+       <Location x="44.6" y="20.8"/>
+       <StandardPrimitiveRef id="FORME_6"/>
+      </Pad>
+      <Pad>
+       <Location x="44.6" y="21.6"/>
+       <StandardPrimitiveRef id="FORME_6"/>
+      </Pad>
+      <Pad>
+       <Location x="44.6" y="22.4"/>
+       <StandardPrimitiveRef id="FORME_6"/>
+      </Pad>
+      <Pad>
+       <Location x="44.6" y="23.2"/>
+       <StandardPrimitiveRef id="FORME_6"/>
+      </Pad>
+      <Pad>
+       <Location x="44.6" y="24"/>
+       <StandardPrimitiveRef id="FORME_6"/>
+      </Pad>
+      <Pad>
+       <Location x="44.6" y="24.8"/>
+       <StandardPrimitiveRef id="FORME_6"/>
+      </Pad>
+      <Pad>
+       <Location x="42.8" y="26.6"/>
+       <StandardPrimitiveRef id="FORME_7"/>
+      </Pad>
+      <Pad>
+       <Location x="42" y="26.6"/>
+       <StandardPrimitiveRef id="FORME_7"/>
+      </Pad>
+      <Pad>
+       <Location x="41.2" y="26.6"/>
+       <StandardPrimitiveRef id="FORME_7"/>
+      </Pad>
+      <Pad>
+       <Location x="40.4" y="26.6"/>
+       <StandardPrimitiveRef id="FORME_7"/>
+      </Pad>
+      <Pad>
+       <Location x="39.6" y="26.6"/>
+       <StandardPrimitiveRef id="FORME_7"/>
+      </Pad>
+      <Pad>
+       <Location x="38.8" y="26.6"/>
+       <StandardPrimitiveRef id="FORME_7"/>
+      </Pad>
+      <Pad>
+       <Location x="38" y="26.6"/>
+       <StandardPrimitiveRef id="FORME_7"/>
+      </Pad>
+      <Pad>
+       <Location x="37.2" y="26.6"/>
+       <StandardPrimitiveRef id="FORME_7"/>
+      </Pad>
+      <Pad>
+       <Xform rotation="270"/>
+       <Location x="32" y="28.475"/>
+       <StandardPrimitiveRef id="FORME_8"/>
+      </Pad>
+      <Pad>
+       <Xform rotation="270"/>
+       <Location x="32" y="27.525"/>
+       <StandardPrimitiveRef id="FORME_8"/>
+      </Pad>
+      <Pad>
+       <Xform rotation="270"/>
+       <Location x="47" y="28.475"/>
+       <StandardPrimitiveRef id="FORME_8"/>
+      </Pad>
+      <Pad>
+       <Xform rotation="270"/>
+       <Location x="47" y="27.525"/>
+       <StandardPrimitiveRef id="FORME_8"/>
+      </Pad>
+      <Pad>
+       <Location x="24.3" y="10.905"/>
+       <StandardPrimitiveRef id="FORME_9"/>
+      </Pad>
+      <Pad>
+       <Location x="24.3" y="9.635"/>
+       <StandardPrimitiveRef id="FORME_9"/>
+      </Pad>
+      <Pad>
+       <Location x="24.3" y="8.365"/>
+       <StandardPrimitiveRef id="FORME_9"/>
+      </Pad>
+      <Pad>
+       <Location x="24.3" y="7.095"/>
+       <StandardPrimitiveRef id="FORME_9"/>
+      </Pad>
+      <Pad>
+       <Location x="29.7" y="7.095"/>
+       <StandardPrimitiveRef id="FORME_9"/>
+      </Pad>
+      <Pad>
+       <Location x="29.7" y="8.365"/>
+       <StandardPrimitiveRef id="FORME_9"/>
+      </Pad>
+      <Pad>
+       <Location x="29.7" y="9.635"/>
+       <StandardPrimitiveRef id="FORME_9"/>
+      </Pad>
+      <Pad>
+       <Location x="29.7" y="10.905"/>
+       <StandardPrimitiveRef id="FORME_9"/>
+      </Pad>
+      <Pad>
+       <Location x="26.525" y="3"/>
+       <StandardPrimitiveRef id="FORME_8"/>
+      </Pad>
+      <Pad>
+       <Location x="27.475" y="3"/>
+       <StandardPrimitiveRef id="FORME_8"/>
+      </Pad>
+      <Pad>
+       <Location x="56.5" y="24"/>
+       <StandardPrimitiveRef id="FORME_10"/>
+      </Pad>
+      <Pad>
+       <Location x="56.5" y="26.5"/>
+       <StandardPrimitiveRef id="FORME_11"/>
+      </Pad>
+      <Pad>
+       <Location x="56.5" y="21.5"/>
+       <StandardPrimitiveRef id="FORME_11"/>
+      </Pad>
+      <Pad>
+       <Location x="59.5" y="26.5"/>
+       <StandardPrimitiveRef id="FORME_11"/>
+      </Pad>
+      <Pad>
+       <Location x="59.5" y="21.5"/>
+       <StandardPrimitiveRef id="FORME_11"/>
+      </Pad>
+     </Set>
+    </LayerFeature>
+    <LayerFeature layerRef="MASQUE_DESSUS">
+     <Set>
+      <Pad>
+       <Location x="7" y="23.3"/>
+       <StandardPrimitiveRef id="FORME_16"/>
+      </Pad>
+      <Pad>
+       <Location x="7" y="22.65"/>
+       <StandardPrimitiveRef id="FORME_16"/>
+      </Pad>
+      <Pad>
+       <Location x="7" y="22"/>
+       <StandardPrimitiveRef id="FORME_16"/>
+      </Pad>
+      <Pad>
+       <Location x="7" y="21.35"/>
+       <StandardPrimitiveRef id="FORME_16"/>
+      </Pad>
+      <Pad>
+       <Location x="7" y="20.7"/>
+       <StandardPrimitiveRef id="FORME_16"/>
+      </Pad>
+      <Pad>
+       <Location x="6.4" y="25.6"/>
+       <StandardPrimitiveRef id="FORME_17"/>
+      </Pad>
+      <Pad>
+       <Location x="6.4" y="18.4"/>
+       <StandardPrimitiveRef id="FORME_17"/>
+      </Pad>
+      <Pad>
+       <Location x="12.7" y="32.95"/>
+       <StandardPrimitiveRef id="FORME_18"/>
+      </Pad>
+      <Pad>
+       <Location x="12.7" y="32"/>
+       <StandardPrimitiveRef id="FORME_18"/>
+      </Pad>
+      <Pad>
+       <Location x="12.7" y="31.05"/>
+       <StandardPrimitiveRef id="FORME_18"/>
+      </Pad>
+      <Pad>
+       <Location x="15.3" y="31.05"/>
+       <StandardPrimitiveRef id="FORME_18"/>
+      </Pad>
+      <Pad>
+       <Location x="15.3" y="32.95"/>
+       <StandardPrimitiveRef id="FORME_18"/>
+      </Pad>
+      <Pad>
+       <Xform rotation="90"/>
+       <Location x="8.05" y="27.35"/>
+       <StandardPrimitiveRef id="FORME_19"/>
+      </Pad>
+      <Pad>
+       <Xform rotation="90"/>
+       <Location x="8.05" y="29.25"/>
+       <StandardPrimitiveRef id="FORME_19"/>
+      </Pad>
+      <Pad>
+       <Xform rotation="270"/>
+       <Location x="18.525" y="29.25"/>
+       <StandardPrimitiveRef id="FORME_20"/>
+      </Pad>
+      <Pad>
+       <Xform rotation="270"/>
+       <Location x="18.525" y="27.75"/>
+       <StandardPrimitiveRef id="FORME_20"/>
+      </Pad>
+      <Pad>
+       <Location x="35.4" y="24.8"/>
+       <StandardPrimitiveRef id="FORME_21"/>
+      </Pad>
+      <Pad>
+       <Location x="35.4" y="24"/>
+       <StandardPrimitiveRef id="FORME_21"/>
+      </Pad>
+      <Pad>
+       <Location x="35.4" y="23.2"/>
+       <StandardPrimitiveRef id="FORME_21"/>
+      </Pad>
+      <Pad>
+       <Location x="35.4" y="22.4"/>
+       <StandardPrimitiveRef id="FORME_21"/>
+      </Pad>
+      <Pad>
+       <Location x="35.4" y="21.6"/>
+       <StandardPrimitiveRef id="FORME_21"/>
+      </Pad>
+      <Pad>
+       <Location x="35.4" y="20.8"/>
+       <StandardPrimitiveRef id="FORME_21"/>
+      </Pad>
+      <Pad>
+       <Location x="35.4" y="20"/>
+       <StandardPrimitiveRef id="FORME_21"/>
+      </Pad>
+      <Pad>
+       <Location x="35.4" y="19.2"/>
+       <StandardPrimitiveRef id="FORME_21"/>
+      </Pad>
+      <Pad>
+       <Location x="37.2" y="17.4"/>
+       <StandardPrimitiveRef id="FORME_22"/>
+      </Pad>
+      <Pad>
+       <Location x="38" y="17.4"/>
+       <StandardPrimitiveRef id="FORME_22"/>
+      </Pad>
+      <Pad>
+       <Location x="38.8" y="17.4"/>
+       <StandardPrimitiveRef id="FORME_22"/>
+      </Pad>
+      <Pad>
+       <Location x="39.6" y="17.4"/>
+       <StandardPrimitiveRef id="FORME_22"/>
+      </Pad>
+      <Pad>
+       <Location x="40.4" y="17.4"/>
+       <StandardPrimitiveRef id="FORME_22"/>
+      </Pad>
+      <Pad>
+       <Location x="41.2" y="17.4"/>
+       <StandardPrimitiveRef id="FORME_22"/>
+      </Pad>
+      <Pad>
+       <Location x="42" y="17.4"/>
+       <StandardPrimitiveRef id="FORME_22"/>
+      </Pad>
+      <Pad>
+       <Location x="42.8" y="17.4"/>
+       <StandardPrimitiveRef id="FORME_22"/>
+      </Pad>
+      <Pad>
+       <Location x="44.6" y="19.2"/>
+       <StandardPrimitiveRef id="FORME_21"/>
+      </Pad>
+      <Pad>
+       <Location x="44.6" y="20"/>
+       <StandardPrimitiveRef id="FORME_21"/>
+      </Pad>
+      <Pad>
+       <Location x="44.6" y="20.8"/>
+       <StandardPrimitiveRef id="FORME_21"/>
+      </Pad>
+      <Pad>
+       <Location x="44.6" y="21.6"/>
+       <StandardPrimitiveRef id="FORME_21"/>
+      </Pad>
+      <Pad>
+       <Location x="44.6" y="22.4"/>
+       <StandardPrimitiveRef id="FORME_21"/>
+      </Pad>
+      <Pad>
+       <Location x="44.6" y="23.2"/>
+       <StandardPrimitiveRef id="FORME_21"/>
+      </Pad>
+      <Pad>
+       <Location x="44.6" y="24"/>
+       <StandardPrimitiveRef id="FORME_21"/>
+      </Pad>
+      <Pad>
+       <Location x="44.6" y="24.8"/>
+       <StandardPrimitiveRef id="FORME_21"/>
+      </Pad>
+      <Pad>
+       <Location x="42.8" y="26.6"/>
+       <StandardPrimitiveRef id="FORME_22"/>
+      </Pad>
+      <Pad>
+       <Location x="42" y="26.6"/>
+       <StandardPrimitiveRef id="FORME_22"/>
+      </Pad>
+      <Pad>
+       <Location x="41.2" y="26.6"/>
+       <StandardPrimitiveRef id="FORME_22"/>
+      </Pad>
+      <Pad>
+       <Location x="40.4" y="26.6"/>
+       <StandardPrimitiveRef id="FORME_22"/>
+      </Pad>
+      <Pad>
+       <Location x="39.6" y="26.6"/>
+       <StandardPrimitiveRef id="FORME_22"/>
+      </Pad>
+      <Pad>
+       <Location x="38.8" y="26.6"/>
+       <StandardPrimitiveRef id="FORME_22"/>
+      </Pad>
+      <Pad>
+       <Location x="38" y="26.6"/>
+       <StandardPrimitiveRef id="FORME_22"/>
+      </Pad>
+      <Pad>
+       <Location x="37.2" y="26.6"/>
+       <StandardPrimitiveRef id="FORME_22"/>
+      </Pad>
+      <Pad>
+       <Xform rotation="270"/>
+       <Location x="32" y="28.475"/>
+       <StandardPrimitiveRef id="FORME_23"/>
+      </Pad>
+      <Pad>
+       <Xform rotation="270"/>
+       <Location x="32" y="27.525"/>
+       <StandardPrimitiveRef id="FORME_23"/>
+      </Pad>
+      <Pad>
+       <Xform rotation="270"/>
+       <Location x="47" y="28.475"/>
+       <StandardPrimitiveRef id="FORME_23"/>
+      </Pad>
+      <Pad>
+       <Xform rotation="270"/>
+       <Location x="47" y="27.525"/>
+       <StandardPrimitiveRef id="FORME_23"/>
+      </Pad>
+      <Pad>
+       <Location x="24.3" y="10.905"/>
+       <StandardPrimitiveRef id="FORME_24"/>
+      </Pad>
+      <Pad>
+       <Location x="24.3" y="9.635"/>
+       <StandardPrimitiveRef id="FORME_24"/>
+      </Pad>
+      <Pad>
+       <Location x="24.3" y="8.365"/>
+       <StandardPrimitiveRef id="FORME_24"/>
+      </Pad>
+      <Pad>
+       <Location x="24.3" y="7.095"/>
+       <StandardPrimitiveRef id="FORME_24"/>
+      </Pad>
+      <Pad>
+       <Location x="29.7" y="7.095"/>
+       <StandardPrimitiveRef id="FORME_24"/>
+      </Pad>
+      <Pad>
+       <Location x="29.7" y="8.365"/>
+       <StandardPrimitiveRef id="FORME_24"/>
+      </Pad>
+      <Pad>
+       <Location x="29.7" y="9.635"/>
+       <StandardPrimitiveRef id="FORME_24"/>
+      </Pad>
+      <Pad>
+       <Location x="29.7" y="10.905"/>
+       <StandardPrimitiveRef id="FORME_24"/>
+      </Pad>
+      <Pad>
+       <Location x="26.525" y="3"/>
+       <StandardPrimitiveRef id="FORME_23"/>
+      </Pad>
+      <Pad>
+       <Location x="27.475" y="3"/>
+       <StandardPrimitiveRef id="FORME_23"/>
+      </Pad>
+      <Pad>
+       <Location x="56.5" y="24"/>
+       <StandardPrimitiveRef id="FORME_25"/>
+      </Pad>
+      <Pad>
+       <Location x="56.5" y="26.5"/>
+       <StandardPrimitiveRef id="FORME_26"/>
+      </Pad>
+      <Pad>
+       <Location x="56.5" y="21.5"/>
+       <StandardPrimitiveRef id="FORME_26"/>
+      </Pad>
+      <Pad>
+       <Location x="59.5" y="26.5"/>
+       <StandardPrimitiveRef id="FORME_26"/>
+      </Pad>
+      <Pad>
+       <Location x="59.5" y="21.5"/>
+       <StandardPrimitiveRef id="FORME_26"/>
+      </Pad>
+      <Pad>
+       <Location x="50.19" y="10"/>
+       <StandardPrimitiveRef id="FORME_27"/>
+      </Pad>
+      <Pad>
+       <Location x="52.73" y="10"/>
+       <StandardPrimitiveRef id="FORME_28"/>
+      </Pad>
+      <Pad>
+       <Location x="55.27" y="10"/>
+       <StandardPrimitiveRef id="FORME_28"/>
+      </Pad>
+      <Pad>
+       <Location x="57.81" y="10"/>
+       <StandardPrimitiveRef id="FORME_28"/>
+      </Pad>
+     </Set>
+    </LayerFeature>
+    <LayerFeature layerRef="Top">
+     <Set net="+5V">
+      <Features>
+       <Line startX="7" startY="23.3" endX="8.05" endY="24.35">
+        <LineDescRef id="TRAIT_2"/>
+       </Line>
+      </Features>
+      <Features>
+       <Line startX="8.05" startY="24.35" endX="8.05" endY="25">
+        <LineDescRef id="TRAIT_2"/>
+       </Line>
+      </Features>
+      <Features>
+       <Line startX="8.05" startY="25" endX="8.05" endY="27.35">
+        <LineDescRef id="TRAIT_2"/>
+       </Line>
+      </Features>
+      <Features>
+       <Line startX="8.05" startY="25" endX="11" endY="27.95">
+        <LineDescRef id="TRAIT_2"/>
+       </Line>
+      </Features>
+      <Features>
+       <Line startX="11" startY="27.95" endX="11" endY="31.05">
+        <LineDescRef id="TRAIT_2"/>
+       </Line>
+      </Features>
+      <Features>
+       <Line startX="11" startY="31.05" endX="11" endY="32.95">
+        <LineDescRef id="TRAIT_2"/>
+       </Line>
+      </Features>
+      <Features>
+       <Line startX="11" startY="32.95" endX="12.7" endY="32.95">
+        <LineDescRef id="TRAIT_2"/>
+       </Line>
+      </Features>
+      <Features>
+       <Line startX="11" startY="31.05" endX="12.7" endY="31.05">
+        <LineDescRef id="TRAIT_2"/>
+       </Line>
+      </Features>
+     </Set>
+     <Set net="+3V3">
+      <Features>
+       <Line startX="15.3" startY="32.95" endX="16.025" endY="32.95">
+        <LineDescRef id="TRAIT_2"/>
+       </Line>
+      </Features>
+      <Features>
+       <Line startX="16.025" startY="32.95" endX="18.525" endY="30.45">
+        <LineDescRef id="TRAIT_2"/>
+       </Line>
+      </Features>
+      <Features>
+       <Line startX="18.525" startY="30.45" endX="18.525" endY="29.25">
+        <LineDescRef id="TRAIT_2"/>
+       </Line>
+      </Features>
+      <Features>
+       <Line startX="18.525" startY="29.25" endX="20.5" endY="29.25">
+        <LineDescRef id="TRAIT_2"/>
+       </Line>
+      </Features>
+      <Features>
+       <Line startX="35.4" startY="24.8" endX="34" endY="24.8">
+        <LineDescRef id="TRAIT_2"/>
+       </Line>
+      </Features>
+      <Features>
+       <Line startX="44.6" startY="19.2" endX="46" endY="19.2">
+        <LineDescRef id="TRAIT_2"/>
+       </Line>
+      </Features>
+      <Features>
+       <Line startX="32" startY="28.475" endX="32" endY="29.5">
+        <LineDescRef id="TRAIT_2"/>
+       </Line>
+      </Features>
+      <Features>
+       <Line startX="47" startY="28.475" endX="47" endY="29.5">
+        <LineDescRef id="TRAIT_2"/>
+       </Line>
+      </Features>
+      <Features>
+       <Line startX="29.7" startY="10.905" endX="29.7" endY="9.635">
+        <LineDescRef id="TRAIT_2"/>
+       </Line>
+      </Features>
+      <Features>
+       <Line startX="29.7" startY="10.905" endX="31.2" endY="12.405">
+        <LineDescRef id="TRAIT_2"/>
+       </Line>
+      </Features>
+      <Features>
+       <Line startX="31.2" startY="12.405" endX="32.5" endY="12.405">
+        <LineDescRef id="TRAIT_2"/>
+       </Line>
+      </Features>
+      <Features>
+       <Line startX="24.3" startY="8.365" endX="24.295" endY="8.37">
+        <LineDescRef id="TRAIT_2"/>
+       </Line>
+      </Features>
+      <Features>
+       <Line startX="24.295" startY="8.37" endX="22" endY="8.37">
+        <LineDescRef id="TRAIT_2"/>
+       </Line>
+      </Features>
+      <Features>
+       <Line startX="26.525" startY="3" endX="25" endY="3">
+        <LineDescRef id="TRAIT_2"/>
+       </Line>
+      </Features>
+      <Features>
+       <Line startX="50.19" startY="10" endX="50.19" endY="12">
+        <LineDescRef id="TRAIT_2"/>
+       </Line>
+      </Features>
+     </Set>
+     <Set net="GND">
+      <Features>
+       <Line startX="7" startY="20.7" endX="8.6" endY="19.1">
+        <LineDescRef id="TRAIT_2"/>
+       </Line>
+      </Features>
+      <Features>
+       <Line startX="6.4" startY="25.6" endX="6.4" endY="27.2">
+        <LineDescRef id="TRAIT_2"/>
+       </Line>
+      </Features>
+      <Features>
+       <Line startX="6.4" startY="18.4" endX="6.4" endY="16.8">
+        <LineDescRef id="TRAIT_2"/>
+       </Line>
+      </Features>
+      <Features>
+       <Line startX="8.05" startY="29.25" endX="8.05" endY="30.65">
+        <LineDescRef id="TRAIT_2"/>
+       </Line>
+      </Features>
+      <Features>
+       <Line startX="12.7" startY="32" endX="13.9" endY="32">
+        <LineDescRef id="TRAIT_2"/>
+       </Line>
+      </Features>
+      <Features>
+       <Line startX="13.9" startY="32" endX="13.9" endY="30.2">
+        <LineDescRef id="TRAIT_2"/>
+       </Line>
+      </Features>
+      <Features>
+       <Line startX="18.525" startY="27.75" endX="18.525" endY="26">
+        <LineDescRef id="TRAIT_2"/>
+       </Line>
+      </Features>
+      <Features>
+       <Line startX="35.4" startY="19.2" endX="34" endY="19.2">
+        <LineDescRef id="TRAIT_2"/>
+       </Line>
+      </Features>
+      <Features>
+       <Line startX="44.6" startY="24.8" endX="44.6" endY="27">
+        <LineDescRef id="TRAIT_2"/>
+       </Line>
+      </Features>
+      <Features>
+       <Line startX="32" startY="27.525" endX="32" endY="26.5">
+        <LineDescRef id="TRAIT_2"/>
+       </Line>
+      </Features>
+      <Features>
+       <Line startX="47" startY="27.525" endX="47" endY="26.5">
+        <LineDescRef id="TRAIT_2"/>
+       </Line>
+      </Features>
+      <Features>
+       <Line startX="24.3" startY="7.095" endX="24.295" endY="7.09">
+        <LineDescRef id="TRAIT_2"/>
+       </Line>
+      </Features>
+      <Features>
+       <Line startX="24.295" startY="7.09" endX="22" endY="7.09">
+        <LineDescRef id="TRAIT_2"/>
+       </Line>
+      </Features>
+      <Features>
+       <Line startX="27.475" startY="3" endX="29" endY="3">
+        <LineDescRef id="TRAIT_2"/>
+       </Line>
+      </Features>
+      <Features>
+       <Line startX="56.5" startY="26.5" endX="56.5" endY="27.5">
+        <LineDescRef id="TRAIT_2"/>
+       </Line>
+      </Features>
+      <Features>
+       <Line startX="56.5" startY="21.5" endX="56.5" endY="20.5">
+        <LineDescRef id="TRAIT_2"/>
+       </Line>
+      </Features>
+      <Features>
+       <Line startX="59.5" startY="26.5" endX="59.5" endY="27.5">
+        <LineDescRef id="TRAIT_2"/>
+       </Line>
+      </Features>
+      <Features>
+       <Line startX="59.5" startY="21.5" endX="59.5" endY="20.5">
+        <LineDescRef id="TRAIT_2"/>
+       </Line>
+      </Features>
+     </Set>
+     <Set net="USB_DP" netPair="USB_DM">
+      <Features>
+       <Line startX="7" startY="22" endX="7.125" endY="22.125">
+        <LineDescRef id="TRAIT_3"/>
+       </Line>
+      </Features>
+      <Features>
+       <Line startX="7.125" startY="22.125" endX="9" endY="22.125">
+        <LineDescRef id="TRAIT_3"/>
+       </Line>
+      </Features>
+      <Features>
+       <Line startX="9" startY="22.125" endX="30.917" endY="22.125">
+        <LineDescRef id="TRAIT_3"/>
+       </Line>
+      </Features>
+      <Features>
+       <Line startX="30.917" startY="22.125" endX="31.242" endY="21.8">
+        <LineDescRef id="TRAIT_3"/>
+       </Line>
+      </Features>
+      <Features>
+       <Line startX="31.242" startY="21.8" endX="33.4" endY="21.8">
+        <LineDescRef id="TRAIT_3"/>
+       </Line>
+      </Features>
+      <Features>
+       <Line startX="33.4" startY="21.8" endX="33.6" endY="21.6">
+        <LineDescRef id="TRAIT_3"/>
+       </Line>
+      </Features>
+      <Features>
+       <Line startX="33.6" startY="21.6" endX="35.4" endY="21.6">
+        <LineDescRef id="TRAIT_3"/>
+       </Line>
+      </Features>
+     </Set>
+     <Set net="USB_DM" netPair="USB_DP">
+      <Features>
+       <Line startX="7" startY="22.65" endX="7.125" endY="22.525">
+        <LineDescRef id="TRAIT_3"/>
+       </Line>
+      </Features>
+      <Features>
+       <Line startX="7.125" startY="22.525" endX="9" endY="22.525">
+        <LineDescRef id="TRAIT_3"/>
+       </Line>
+      </Features>
+      <Features>
+       <Line startX="9" startY="22.525" endX="31.083" endY="22.525">
+        <LineDescRef id="TRAIT_3"/>
+       </Line>
+      </Features>
+      <Features>
+       <Line startX="31.083" startY="22.525" endX="31.408" endY="22.2">
+        <LineDescRef id="TRAIT_3"/>
+       </Line>
+      </Features>
+      <Features>
+       <Line startX="31.408" startY="22.2" endX="33.4" endY="22.2">
+        <LineDescRef id="TRAIT_3"/>
+       </Line>
+      </Features>
+      <Features>
+       <Line startX="33.4" startY="22.2" endX="33.6" endY="22.4">
+        <LineDescRef id="TRAIT_3"/>
+       </Line>
+      </Features>
+      <Features>
+       <Line startX="33.6" startY="22.4" endX="35.4" endY="22.4">
+        <LineDescRef id="TRAIT_3"/>
+       </Line>
+      </Features>
+     </Set>
+     <Set net="RF_ANT">
+      <Features>
+       <Line startX="44.6" startY="24" endX="56.5" endY="24">
+        <LineDescRef id="TRAIT_4"/>
+       </Line>
+      </Features>
+     </Set>
+     <Set net="SPI_SCK">
+      <Features>
+       <Line startX="38" startY="17.4" endX="38" endY="10">
+        <LineDescRef id="TRAIT_3"/>
+       </Line>
+      </Features>
+      <Features>
+       <Line startX="38" startY="10" endX="36.365" endY="8.365">
+        <LineDescRef id="TRAIT_3"/>
+       </Line>
+      </Features>
+      <Features>
+       <Line startX="36.365" startY="8.365" endX="29.7" endY="8.365">
+        <LineDescRef id="TRAIT_3"/>
+       </Line>
+      </Features>
+     </Set>
+     <Set net="SPI_MOSI">
+      <Features>
+       <Line startX="38.8" startY="17.4" endX="38.8" endY="9">
+        <LineDescRef id="TRAIT_3"/>
+       </Line>
+      </Features>
+      <Features>
+       <Line startX="38.8" startY="9" endX="36.895" endY="7.095">
+        <LineDescRef id="TRAIT_3"/>
+       </Line>
+      </Features>
+      <Features>
+       <Line startX="36.895" startY="7.095" endX="29.7" endY="7.095">
+        <LineDescRef id="TRAIT_3"/>
+       </Line>
+      </Features>
+     </Set>
+     <Set net="SPI_MISO">
+      <Features>
+       <Line startX="39.6" startY="17.4" endX="39.6" endY="15.5">
+        <LineDescRef id="TRAIT_3"/>
+       </Line>
+      </Features>
+      <Features>
+       <Line startX="24.3" startY="9.635" endX="22.8" endY="9.635">
+        <LineDescRef id="TRAIT_3"/>
+       </Line>
+      </Features>
+     </Set>
+     <Set net="SPI_CS">
+      <Features>
+       <Line startX="40.4" startY="17.4" endX="40.4" endY="16">
+        <LineDescRef id="TRAIT_3"/>
+       </Line>
+      </Features>
+      <Features>
+       <Line startX="24.3" startY="10.905" endX="22.8" endY="10.905">
+        <LineDescRef id="TRAIT_3"/>
+       </Line>
+      </Features>
+     </Set>
+     <Set net="SWDIO">
+      <Features>
+       <Line startX="44.6" startY="21.6" endX="46.4" endY="21.6">
+        <LineDescRef id="TRAIT_3"/>
+       </Line>
+      </Features>
+     </Set>
+     <Set net="SWCLK">
+      <Features>
+       <Line startX="44.6" startY="22.4" endX="47.6" endY="22.4">
+        <LineDescRef id="TRAIT_3"/>
+       </Line>
+      </Features>
+     </Set>
+     <Set net="+5V" padUsage="TERMINATION">
+      <Pad padstackDefRef="PASTILLE_1">
+       <Location x="7" y="23.3"/>
+       <StandardPrimitiveRef id="FORME_1"/>
+       <PinRef componentRef="J1" pin="1"/>
+      </Pad>
+      <Pad padstackDefRef="PASTILLE_3">
+       <Location x="12.7" y="32.95"/>
+       <StandardPrimitiveRef id="FORME_3"/>
+       <PinRef componentRef="U3" pin="1"/>
+      </Pad>
+      <Pad padstackDefRef="PASTILLE_3">
+       <Location x="12.7" y="31.05"/>
+       <StandardPrimitiveRef id="FORME_3"/>
+       <PinRef componentRef="U3" pin="3"/>
+      </Pad>
+      <Pad padstackDefRef="PASTILLE_4">
+       <Xform rotation="90"/>
+       <Location x="8.05" y="27.35"/>
+       <StandardPrimitiveRef id="FORME_4"/>
+       <PinRef componentRef="C1" pin="1"/>
+      </Pad>
+     </Set>
+     <Set net="USB_DM" netPair="USB_DP" padUsage="TERMINATION">
+      <Pad padstackDefRef="PASTILLE_1">
+       <Location x="7" y="22.65"/>
+       <StandardPrimitiveRef id="FORME_1"/>
+       <PinRef componentRef="J1" pin="2"/>
+      </Pad>
+      <Pad padstackDefRef="PASTILLE_6">
+       <Location x="35.4" y="22.4"/>
+       <StandardPrimitiveRef id="FORME_6"/>
+       <PinRef componentRef="U1" pin="4"/>
+      </Pad>
+     </Set>
+     <Set net="USB_DP" netPair="USB_DM" padUsage="TERMINATION">
+      <Pad padstackDefRef="PASTILLE_1">
+       <Location x="7" y="22"/>
+       <StandardPrimitiveRef id="FORME_1"/>
+       <PinRef componentRef="J1" pin="3"/>
+      </Pad>
+      <Pad padstackDefRef="PASTILLE_6">
+       <Location x="35.4" y="21.6"/>
+       <StandardPrimitiveRef id="FORME_6"/>
+       <PinRef componentRef="U1" pin="5"/>
+      </Pad>
+     </Set>
+     <Set padUsage="TERMINATION">
+      <Pad padstackDefRef="PASTILLE_1">
+       <Location x="7" y="21.35"/>
+       <StandardPrimitiveRef id="FORME_1"/>
+       <PinRef componentRef="J1" pin="4"/>
+      </Pad>
+      <Pad padstackDefRef="PASTILLE_3">
+       <Location x="15.3" y="31.05"/>
+       <StandardPrimitiveRef id="FORME_3"/>
+       <PinRef componentRef="U3" pin="4"/>
+      </Pad>
+      <Pad padstackDefRef="PASTILLE_6">
+       <Location x="35.4" y="24"/>
+       <StandardPrimitiveRef id="FORME_6"/>
+       <PinRef componentRef="U1" pin="2"/>
+      </Pad>
+      <Pad padstackDefRef="PASTILLE_6">
+       <Location x="35.4" y="23.2"/>
+       <StandardPrimitiveRef id="FORME_6"/>
+       <PinRef componentRef="U1" pin="3"/>
+      </Pad>
+      <Pad padstackDefRef="PASTILLE_6">
+       <Location x="35.4" y="20.8"/>
+       <StandardPrimitiveRef id="FORME_6"/>
+       <PinRef componentRef="U1" pin="6"/>
+      </Pad>
+      <Pad padstackDefRef="PASTILLE_6">
+       <Location x="35.4" y="20"/>
+       <StandardPrimitiveRef id="FORME_6"/>
+       <PinRef componentRef="U1" pin="7"/>
+      </Pad>
+      <Pad padstackDefRef="PASTILLE_7">
+       <Location x="37.2" y="17.4"/>
+       <StandardPrimitiveRef id="FORME_7"/>
+       <PinRef componentRef="U1" pin="9"/>
+      </Pad>
+      <Pad padstackDefRef="PASTILLE_7">
+       <Location x="41.2" y="17.4"/>
+       <StandardPrimitiveRef id="FORME_7"/>
+       <PinRef componentRef="U1" pin="14"/>
+      </Pad>
+      <Pad padstackDefRef="PASTILLE_7">
+       <Location x="42" y="17.4"/>
+       <StandardPrimitiveRef id="FORME_7"/>
+       <PinRef componentRef="U1" pin="15"/>
+      </Pad>
+      <Pad padstackDefRef="PASTILLE_7">
+       <Location x="42.8" y="17.4"/>
+       <StandardPrimitiveRef id="FORME_7"/>
+       <PinRef componentRef="U1" pin="16"/>
+      </Pad>
+      <Pad padstackDefRef="PASTILLE_6">
+       <Location x="44.6" y="20"/>
+       <StandardPrimitiveRef id="FORME_6"/>
+       <PinRef componentRef="U1" pin="18"/>
+      </Pad>
+      <Pad padstackDefRef="PASTILLE_6">
+       <Location x="44.6" y="20.8"/>
+       <StandardPrimitiveRef id="FORME_6"/>
+       <PinRef componentRef="U1" pin="19"/>
+      </Pad>
+      <Pad padstackDefRef="PASTILLE_6">
+       <Location x="44.6" y="23.2"/>
+       <StandardPrimitiveRef id="FORME_6"/>
+       <PinRef componentRef="U1" pin="22"/>
+      </Pad>
+      <Pad padstackDefRef="PASTILLE_7">
+       <Location x="42.8" y="26.6"/>
+       <StandardPrimitiveRef id="FORME_7"/>
+       <PinRef componentRef="U1" pin="25"/>
+      </Pad>
+      <Pad padstackDefRef="PASTILLE_7">
+       <Location x="42" y="26.6"/>
+       <StandardPrimitiveRef id="FORME_7"/>
+       <PinRef componentRef="U1" pin="26"/>
+      </Pad>
+      <Pad padstackDefRef="PASTILLE_7">
+       <Location x="41.2" y="26.6"/>
+       <StandardPrimitiveRef id="FORME_7"/>
+       <PinRef componentRef="U1" pin="27"/>
+      </Pad>
+      <Pad padstackDefRef="PASTILLE_7">
+       <Location x="40.4" y="26.6"/>
+       <StandardPrimitiveRef id="FORME_7"/>
+       <PinRef componentRef="U1" pin="28"/>
+      </Pad>
+      <Pad padstackDefRef="PASTILLE_7">
+       <Location x="39.6" y="26.6"/>
+       <StandardPrimitiveRef id="FORME_7"/>
+       <PinRef componentRef="U1" pin="29"/>
+      </Pad>
+      <Pad padstackDefRef="PASTILLE_7">
+       <Location x="38.8" y="26.6"/>
+       <StandardPrimitiveRef id="FORME_7"/>
+       <PinRef componentRef="U1" pin="30"/>
+      </Pad>
+      <Pad padstackDefRef="PASTILLE_7">
+       <Location x="38" y="26.6"/>
+       <StandardPrimitiveRef id="FORME_7"/>
+       <PinRef componentRef="U1" pin="31"/>
+      </Pad>
+      <Pad padstackDefRef="PASTILLE_7">
+       <Location x="37.2" y="26.6"/>
+       <StandardPrimitiveRef id="FORME_7"/>
+       <PinRef componentRef="U1" pin="32"/>
+      </Pad>
+     </Set>
+     <Set net="GND" padUsage="TERMINATION">
+      <Pad padstackDefRef="PASTILLE_1">
+       <Location x="7" y="20.7"/>
+       <StandardPrimitiveRef id="FORME_1"/>
+       <PinRef componentRef="J1" pin="5"/>
+      </Pad>
+      <Pad padstackDefRef="PASTILLE_2">
+       <Location x="6.4" y="25.6"/>
+       <StandardPrimitiveRef id="FORME_2"/>
+       <PinRef componentRef="J1" pin="6"/>
+      </Pad>
+      <Pad padstackDefRef="PASTILLE_2">
+       <Location x="6.4" y="18.4"/>
+       <StandardPrimitiveRef id="FORME_2"/>
+       <PinRef componentRef="J1" pin="7"/>
+      </Pad>
+      <Pad padstackDefRef="PASTILLE_3">
+       <Location x="12.7" y="32"/>
+       <StandardPrimitiveRef id="FORME_3"/>
+       <PinRef componentRef="U3" pin="2"/>
+      </Pad>
+      <Pad padstackDefRef="PASTILLE_4">
+       <Xform rotation="90"/>
+       <Location x="8.05" y="29.25"/>
+       <StandardPrimitiveRef id="FORME_4"/>
+       <PinRef componentRef="C1" pin="2"/>
+      </Pad>
+      <Pad padstackDefRef="PASTILLE_5">
+       <Xform rotation="270"/>
+       <Location x="18.525" y="27.75"/>
+       <StandardPrimitiveRef id="FORME_5"/>
+       <PinRef componentRef="C2" pin="2"/>
+      </Pad>
+      <Pad padstackDefRef="PASTILLE_6">
+       <Location x="35.4" y="19.2"/>
+       <StandardPrimitiveRef id="FORME_6"/>
+       <PinRef componentRef="U1" pin="8"/>
+      </Pad>
+      <Pad padstackDefRef="PASTILLE_6">
+       <Location x="44.6" y="24.8"/>
+       <StandardPrimitiveRef id="FORME_6"/>
+       <PinRef componentRef="U1" pin="24"/>
+      </Pad>
+      <Pad padstackDefRef="PASTILLE_8">
+       <Xform rotation="270"/>
+       <Location x="32" y="27.525"/>
+       <StandardPrimitiveRef id="FORME_8"/>
+       <PinRef componentRef="C3" pin="2"/>
+      </Pad>
+      <Pad padstackDefRef="PASTILLE_8">
+       <Xform rotation="270"/>
+       <Location x="47" y="27.525"/>
+       <StandardPrimitiveRef id="FORME_8"/>
+       <PinRef componentRef="C4" pin="2"/>
+      </Pad>
+      <Pad padstackDefRef="PASTILLE_9">
+       <Location x="24.3" y="7.095"/>
+       <StandardPrimitiveRef id="FORME_9"/>
+       <PinRef componentRef="U2" pin="4"/>
+      </Pad>
+      <Pad padstackDefRef="PASTILLE_8">
+       <Location x="27.475" y="3"/>
+       <StandardPrimitiveRef id="FORME_8"/>
+       <PinRef componentRef="C5" pin="2"/>
+      </Pad>
+      <Pad padstackDefRef="PASTILLE_11">
+       <Location x="56.5" y="26.5"/>
+       <StandardPrimitiveRef id="FORME_11"/>
+       <PinRef componentRef="J3" pin="2"/>
+      </Pad>
+      <Pad padstackDefRef="PASTILLE_11">
+       <Location x="56.5" y="21.5"/>
+       <StandardPrimitiveRef id="FORME_11"/>
+       <PinRef componentRef="J3" pin="3"/>
+      </Pad>
+      <Pad padstackDefRef="PASTILLE_11">
+       <Location x="59.5" y="26.5"/>
+       <StandardPrimitiveRef id="FORME_11"/>
+       <PinRef componentRef="J3" pin="4"/>
+      </Pad>
+      <Pad padstackDefRef="PASTILLE_11">
+       <Location x="59.5" y="21.5"/>
+       <StandardPrimitiveRef id="FORME_11"/>
+       <PinRef componentRef="J3" pin="5"/>
+      </Pad>
+      <Pad padstackDefRef="PASTILLE_13">
+       <Location x="57.81" y="10"/>
+       <StandardPrimitiveRef id="FORME_13"/>
+       <PinRef componentRef="J2" pin="4"/>
+      </Pad>
+     </Set>
+     <Set net="+3V3" padUsage="TERMINATION">
+      <Pad padstackDefRef="PASTILLE_3">
+       <Location x="15.3" y="32.95"/>
+       <StandardPrimitiveRef id="FORME_3"/>
+       <PinRef componentRef="U3" pin="5"/>
+      </Pad>
+      <Pad padstackDefRef="PASTILLE_5">
+       <Xform rotation="270"/>
+       <Location x="18.525" y="29.25"/>
+       <StandardPrimitiveRef id="FORME_5"/>
+       <PinRef componentRef="C2" pin="1"/>
+      </Pad>
+      <Pad padstackDefRef="PASTILLE_6">
+       <Location x="35.4" y="24.8"/>
+       <StandardPrimitiveRef id="FORME_6"/>
+       <PinRef componentRef="U1" pin="1"/>
+      </Pad>
+      <Pad padstackDefRef="PASTILLE_6">
+       <Location x="44.6" y="19.2"/>
+       <StandardPrimitiveRef id="FORME_6"/>
+       <PinRef componentRef="U1" pin="17"/>
+      </Pad>
+      <Pad padstackDefRef="PASTILLE_8">
+       <Xform rotation="270"/>
+       <Location x="32" y="28.475"/>
+       <StandardPrimitiveRef id="FORME_8"/>
+       <PinRef componentRef="C3" pin="1"/>
+      </Pad>
+      <Pad padstackDefRef="PASTILLE_8">
+       <Xform rotation="270"/>
+       <Location x="47" y="28.475"/>
+       <StandardPrimitiveRef id="FORME_8"/>
+       <PinRef componentRef="C4" pin="1"/>
+      </Pad>
+      <Pad padstackDefRef="PASTILLE_9">
+       <Location x="24.3" y="8.365"/>
+       <StandardPrimitiveRef id="FORME_9"/>
+       <PinRef componentRef="U2" pin="3"/>
+      </Pad>
+      <Pad padstackDefRef="PASTILLE_9">
+       <Location x="29.7" y="9.635"/>
+       <StandardPrimitiveRef id="FORME_9"/>
+       <PinRef componentRef="U2" pin="7"/>
+      </Pad>
+      <Pad padstackDefRef="PASTILLE_9">
+       <Location x="29.7" y="10.905"/>
+       <StandardPrimitiveRef id="FORME_9"/>
+       <PinRef componentRef="U2" pin="8"/>
+      </Pad>
+      <Pad padstackDefRef="PASTILLE_8">
+       <Location x="26.525" y="3"/>
+       <StandardPrimitiveRef id="FORME_8"/>
+       <PinRef componentRef="C5" pin="1"/>
+      </Pad>
+      <Pad padstackDefRef="PASTILLE_12">
+       <Location x="50.19" y="10"/>
+       <StandardPrimitiveRef id="FORME_12"/>
+       <PinRef componentRef="J2" pin="1"/>
+      </Pad>
+     </Set>
+     <Set net="SPI_SCK" padUsage="TERMINATION">
+      <Pad padstackDefRef="PASTILLE_7">
+       <Location x="38" y="17.4"/>
+       <StandardPrimitiveRef id="FORME_7"/>
+       <PinRef componentRef="U1" pin="10"/>
+      </Pad>
+      <Pad padstackDefRef="PASTILLE_9">
+       <Location x="29.7" y="8.365"/>
+       <StandardPrimitiveRef id="FORME_9"/>
+       <PinRef componentRef="U2" pin="6"/>
+      </Pad>
+     </Set>
+     <Set net="SPI_MOSI" padUsage="TERMINATION">
+      <Pad padstackDefRef="PASTILLE_7">
+       <Location x="38.8" y="17.4"/>
+       <StandardPrimitiveRef id="FORME_7"/>
+       <PinRef componentRef="U1" pin="11"/>
+      </Pad>
+      <Pad padstackDefRef="PASTILLE_9">
+       <Location x="29.7" y="7.095"/>
+       <StandardPrimitiveRef id="FORME_9"/>
+       <PinRef componentRef="U2" pin="5"/>
+      </Pad>
+     </Set>
+     <Set net="SPI_MISO" padUsage="TERMINATION">
+      <Pad padstackDefRef="PASTILLE_7">
+       <Location x="39.6" y="17.4"/>
+       <StandardPrimitiveRef id="FORME_7"/>
+       <PinRef componentRef="U1" pin="12"/>
+      </Pad>
+      <Pad padstackDefRef="PASTILLE_9">
+       <Location x="24.3" y="9.635"/>
+       <StandardPrimitiveRef id="FORME_9"/>
+       <PinRef componentRef="U2" pin="2"/>
+      </Pad>
+     </Set>
+     <Set net="SPI_CS" padUsage="TERMINATION">
+      <Pad padstackDefRef="PASTILLE_7">
+       <Location x="40.4" y="17.4"/>
+       <StandardPrimitiveRef id="FORME_7"/>
+       <PinRef componentRef="U1" pin="13"/>
+      </Pad>
+      <Pad padstackDefRef="PASTILLE_9">
+       <Location x="24.3" y="10.905"/>
+       <StandardPrimitiveRef id="FORME_9"/>
+       <PinRef componentRef="U2" pin="1"/>
+      </Pad>
+     </Set>
+     <Set net="SWDIO" padUsage="TERMINATION">
+      <Pad padstackDefRef="PASTILLE_6">
+       <Location x="44.6" y="21.6"/>
+       <StandardPrimitiveRef id="FORME_6"/>
+       <PinRef componentRef="U1" pin="20"/>
+      </Pad>
+      <Pad padstackDefRef="PASTILLE_13">
+       <Location x="52.73" y="10"/>
+       <StandardPrimitiveRef id="FORME_13"/>
+       <PinRef componentRef="J2" pin="2"/>
+      </Pad>
+     </Set>
+     <Set net="SWCLK" padUsage="TERMINATION">
+      <Pad padstackDefRef="PASTILLE_6">
+       <Location x="44.6" y="22.4"/>
+       <StandardPrimitiveRef id="FORME_6"/>
+       <PinRef componentRef="U1" pin="21"/>
+      </Pad>
+      <Pad padstackDefRef="PASTILLE_13">
+       <Location x="55.27" y="10"/>
+       <StandardPrimitiveRef id="FORME_13"/>
+       <PinRef componentRef="J2" pin="3"/>
+      </Pad>
+     </Set>
+     <Set net="RF_ANT" padUsage="TERMINATION">
+      <Pad padstackDefRef="PASTILLE_6">
+       <Location x="44.6" y="24"/>
+       <StandardPrimitiveRef id="FORME_6"/>
+       <PinRef componentRef="U1" pin="23"/>
+      </Pad>
+      <Pad padstackDefRef="PASTILLE_10">
+       <Location x="56.5" y="24"/>
+       <StandardPrimitiveRef id="FORME_10"/>
+       <PinRef componentRef="J3" pin="1"/>
+      </Pad>
+     </Set>
+     <Set net="+3V3" padUsage="VIA">
+      <Pad padstackDefRef="VIA_14">
+       <Location x="20.5" y="29.25"/>
+       <StandardPrimitiveRef id="FORME_14"/>
+      </Pad>
+      <Pad padstackDefRef="VIA_14">
+       <Location x="34" y="24.8"/>
+       <StandardPrimitiveRef id="FORME_14"/>
+      </Pad>
+      <Pad padstackDefRef="VIA_14">
+       <Location x="46" y="19.2"/>
+       <StandardPrimitiveRef id="FORME_14"/>
+      </Pad>
+      <Pad padstackDefRef="VIA_14">
+       <Location x="32" y="29.5"/>
+       <StandardPrimitiveRef id="FORME_14"/>
+      </Pad>
+      <Pad padstackDefRef="VIA_14">
+       <Location x="47" y="29.5"/>
+       <StandardPrimitiveRef id="FORME_14"/>
+      </Pad>
+      <Pad padstackDefRef="VIA_14">
+       <Location x="32.5" y="12.405"/>
+       <StandardPrimitiveRef id="FORME_14"/>
+      </Pad>
+      <Pad padstackDefRef="VIA_14">
+       <Location x="22" y="8.37"/>
+       <StandardPrimitiveRef id="FORME_14"/>
+      </Pad>
+      <Pad padstackDefRef="VIA_14">
+       <Location x="25" y="3"/>
+       <StandardPrimitiveRef id="FORME_14"/>
+      </Pad>
+      <Pad padstackDefRef="VIA_14">
+       <Location x="50.19" y="12"/>
+       <StandardPrimitiveRef id="FORME_14"/>
+      </Pad>
+     </Set>
+     <Set net="GND" padUsage="VIA">
+      <Pad padstackDefRef="VIA_14">
+       <Location x="8.6" y="19.1"/>
+       <StandardPrimitiveRef id="FORME_14"/>
+      </Pad>
+      <Pad padstackDefRef="VIA_14">
+       <Location x="6.4" y="27.2"/>
+       <StandardPrimitiveRef id="FORME_14"/>
+      </Pad>
+      <Pad padstackDefRef="VIA_14">
+       <Location x="6.4" y="16.8"/>
+       <StandardPrimitiveRef id="FORME_14"/>
+      </Pad>
+      <Pad padstackDefRef="VIA_14">
+       <Location x="8.05" y="30.65"/>
+       <StandardPrimitiveRef id="FORME_14"/>
+      </Pad>
+      <Pad padstackDefRef="VIA_14">
+       <Location x="13.9" y="30.2"/>
+       <StandardPrimitiveRef id="FORME_14"/>
+      </Pad>
+      <Pad padstackDefRef="VIA_14">
+       <Location x="18.525" y="26"/>
+       <StandardPrimitiveRef id="FORME_14"/>
+      </Pad>
+      <Pad padstackDefRef="VIA_14">
+       <Location x="34" y="19.2"/>
+       <StandardPrimitiveRef id="FORME_14"/>
+      </Pad>
+      <Pad padstackDefRef="VIA_14">
+       <Location x="44.6" y="27"/>
+       <StandardPrimitiveRef id="FORME_14"/>
+      </Pad>
+      <Pad padstackDefRef="VIA_14">
+       <Location x="32" y="26.5"/>
+       <StandardPrimitiveRef id="FORME_14"/>
+      </Pad>
+      <Pad padstackDefRef="VIA_14">
+       <Location x="47" y="26.5"/>
+       <StandardPrimitiveRef id="FORME_14"/>
+      </Pad>
+      <Pad padstackDefRef="VIA_14">
+       <Location x="22" y="7.09"/>
+       <StandardPrimitiveRef id="FORME_14"/>
+      </Pad>
+      <Pad padstackDefRef="VIA_14">
+       <Location x="29" y="3"/>
+       <StandardPrimitiveRef id="FORME_14"/>
+      </Pad>
+      <Pad padstackDefRef="VIA_14">
+       <Location x="56.5" y="27.5"/>
+       <StandardPrimitiveRef id="FORME_14"/>
+      </Pad>
+      <Pad padstackDefRef="VIA_14">
+       <Location x="56.5" y="20.5"/>
+       <StandardPrimitiveRef id="FORME_14"/>
+      </Pad>
+      <Pad padstackDefRef="VIA_14">
+       <Location x="59.5" y="27.5"/>
+       <StandardPrimitiveRef id="FORME_14"/>
+      </Pad>
+      <Pad padstackDefRef="VIA_14">
+       <Location x="59.5" y="20.5"/>
+       <StandardPrimitiveRef id="FORME_14"/>
+      </Pad>
+     </Set>
+     <Set net="SPI_MISO" padUsage="VIA">
+      <Pad padstackDefRef="VIA_15">
+       <Location x="39.6" y="15.5"/>
+       <StandardPrimitiveRef id="FORME_15"/>
+      </Pad>
+      <Pad padstackDefRef="VIA_15">
+       <Location x="22.8" y="9.635"/>
+       <StandardPrimitiveRef id="FORME_15"/>
+      </Pad>
+     </Set>
+     <Set net="SPI_CS" padUsage="VIA">
+      <Pad padstackDefRef="VIA_15">
+       <Location x="40.4" y="16"/>
+       <StandardPrimitiveRef id="FORME_15"/>
+      </Pad>
+      <Pad padstackDefRef="VIA_15">
+       <Location x="22.8" y="10.905"/>
+       <StandardPrimitiveRef id="FORME_15"/>
+      </Pad>
+     </Set>
+     <Set net="SWDIO" padUsage="VIA">
+      <Pad padstackDefRef="VIA_15">
+       <Location x="46.4" y="21.6"/>
+       <StandardPrimitiveRef id="FORME_15"/>
+      </Pad>
+     </Set>
+     <Set net="SWCLK" padUsage="VIA">
+      <Pad padstackDefRef="VIA_15">
+       <Location x="47.6" y="22.4"/>
+       <StandardPrimitiveRef id="FORME_15"/>
+      </Pad>
+     </Set>
+    </LayerFeature>
+    <LayerFeature layerRef="Inner 1">
+     <Set net="+3V3" padUsage="TERMINATION">
+      <Pad padstackDefRef="PASTILLE_12">
+       <Location x="50.19" y="10"/>
+       <StandardPrimitiveRef id="FORME_12"/>
+       <PinRef componentRef="J2" pin="1"/>
+      </Pad>
+     </Set>
+     <Set net="SWDIO" padUsage="TERMINATION">
+      <Pad padstackDefRef="PASTILLE_13">
+       <Location x="52.73" y="10"/>
+       <StandardPrimitiveRef id="FORME_13"/>
+       <PinRef componentRef="J2" pin="2"/>
+      </Pad>
+     </Set>
+     <Set net="SWCLK" padUsage="TERMINATION">
+      <Pad padstackDefRef="PASTILLE_13">
+       <Location x="55.27" y="10"/>
+       <StandardPrimitiveRef id="FORME_13"/>
+       <PinRef componentRef="J2" pin="3"/>
+      </Pad>
+     </Set>
+     <Set net="GND" padUsage="TERMINATION">
+      <Pad padstackDefRef="PASTILLE_13">
+       <Location x="57.81" y="10"/>
+       <StandardPrimitiveRef id="FORME_13"/>
+       <PinRef componentRef="J2" pin="4"/>
+      </Pad>
+     </Set>
+     <Set net="+3V3" padUsage="VIA">
+      <Pad padstackDefRef="VIA_14">
+       <Location x="20.5" y="29.25"/>
+       <StandardPrimitiveRef id="FORME_14"/>
+      </Pad>
+      <Pad padstackDefRef="VIA_14">
+       <Location x="34" y="24.8"/>
+       <StandardPrimitiveRef id="FORME_14"/>
+      </Pad>
+      <Pad padstackDefRef="VIA_14">
+       <Location x="46" y="19.2"/>
+       <StandardPrimitiveRef id="FORME_14"/>
+      </Pad>
+      <Pad padstackDefRef="VIA_14">
+       <Location x="32" y="29.5"/>
+       <StandardPrimitiveRef id="FORME_14"/>
+      </Pad>
+      <Pad padstackDefRef="VIA_14">
+       <Location x="47" y="29.5"/>
+       <StandardPrimitiveRef id="FORME_14"/>
+      </Pad>
+      <Pad padstackDefRef="VIA_14">
+       <Location x="32.5" y="12.405"/>
+       <StandardPrimitiveRef id="FORME_14"/>
+      </Pad>
+      <Pad padstackDefRef="VIA_14">
+       <Location x="22" y="8.37"/>
+       <StandardPrimitiveRef id="FORME_14"/>
+      </Pad>
+      <Pad padstackDefRef="VIA_14">
+       <Location x="25" y="3"/>
+       <StandardPrimitiveRef id="FORME_14"/>
+      </Pad>
+      <Pad padstackDefRef="VIA_14">
+       <Location x="50.19" y="12"/>
+       <StandardPrimitiveRef id="FORME_14"/>
+      </Pad>
+     </Set>
+     <Set net="GND" padUsage="VIA">
+      <Pad padstackDefRef="VIA_14">
+       <Location x="8.6" y="19.1"/>
+       <StandardPrimitiveRef id="FORME_14"/>
+      </Pad>
+      <Pad padstackDefRef="VIA_14">
+       <Location x="6.4" y="27.2"/>
+       <StandardPrimitiveRef id="FORME_14"/>
+      </Pad>
+      <Pad padstackDefRef="VIA_14">
+       <Location x="6.4" y="16.8"/>
+       <StandardPrimitiveRef id="FORME_14"/>
+      </Pad>
+      <Pad padstackDefRef="VIA_14">
+       <Location x="8.05" y="30.65"/>
+       <StandardPrimitiveRef id="FORME_14"/>
+      </Pad>
+      <Pad padstackDefRef="VIA_14">
+       <Location x="13.9" y="30.2"/>
+       <StandardPrimitiveRef id="FORME_14"/>
+      </Pad>
+      <Pad padstackDefRef="VIA_14">
+       <Location x="18.525" y="26"/>
+       <StandardPrimitiveRef id="FORME_14"/>
+      </Pad>
+      <Pad padstackDefRef="VIA_14">
+       <Location x="34" y="19.2"/>
+       <StandardPrimitiveRef id="FORME_14"/>
+      </Pad>
+      <Pad padstackDefRef="VIA_14">
+       <Location x="44.6" y="27"/>
+       <StandardPrimitiveRef id="FORME_14"/>
+      </Pad>
+      <Pad padstackDefRef="VIA_14">
+       <Location x="32" y="26.5"/>
+       <StandardPrimitiveRef id="FORME_14"/>
+      </Pad>
+      <Pad padstackDefRef="VIA_14">
+       <Location x="47" y="26.5"/>
+       <StandardPrimitiveRef id="FORME_14"/>
+      </Pad>
+      <Pad padstackDefRef="VIA_14">
+       <Location x="22" y="7.09"/>
+       <StandardPrimitiveRef id="FORME_14"/>
+      </Pad>
+      <Pad padstackDefRef="VIA_14">
+       <Location x="29" y="3"/>
+       <StandardPrimitiveRef id="FORME_14"/>
+      </Pad>
+      <Pad padstackDefRef="VIA_14">
+       <Location x="56.5" y="27.5"/>
+       <StandardPrimitiveRef id="FORME_14"/>
+      </Pad>
+      <Pad padstackDefRef="VIA_14">
+       <Location x="56.5" y="20.5"/>
+       <StandardPrimitiveRef id="FORME_14"/>
+      </Pad>
+      <Pad padstackDefRef="VIA_14">
+       <Location x="59.5" y="27.5"/>
+       <StandardPrimitiveRef id="FORME_14"/>
+      </Pad>
+      <Pad padstackDefRef="VIA_14">
+       <Location x="59.5" y="20.5"/>
+       <StandardPrimitiveRef id="FORME_14"/>
+      </Pad>
+     </Set>
+     <Set net="SPI_MISO" padUsage="VIA">
+      <Pad padstackDefRef="VIA_15">
+       <Location x="39.6" y="15.5"/>
+       <StandardPrimitiveRef id="FORME_15"/>
+      </Pad>
+      <Pad padstackDefRef="VIA_15">
+       <Location x="22.8" y="9.635"/>
+       <StandardPrimitiveRef id="FORME_15"/>
+      </Pad>
+     </Set>
+     <Set net="SPI_CS" padUsage="VIA">
+      <Pad padstackDefRef="VIA_15">
+       <Location x="40.4" y="16"/>
+       <StandardPrimitiveRef id="FORME_15"/>
+      </Pad>
+      <Pad padstackDefRef="VIA_15">
+       <Location x="22.8" y="10.905"/>
+       <StandardPrimitiveRef id="FORME_15"/>
+      </Pad>
+     </Set>
+     <Set net="SWDIO" padUsage="VIA">
+      <Pad padstackDefRef="VIA_15">
+       <Location x="46.4" y="21.6"/>
+       <StandardPrimitiveRef id="FORME_15"/>
+      </Pad>
+     </Set>
+     <Set net="SWCLK" padUsage="VIA">
+      <Pad padstackDefRef="VIA_15">
+       <Location x="47.6" y="22.4"/>
+       <StandardPrimitiveRef id="FORME_15"/>
+      </Pad>
+     </Set>
+     <Set net="GND">
+      <Features>
+       <Contour>
+        <Polygon>
+         <PolyBegin x="0.404986" y="41.595014"/>
+         <PolyStepSegment x="65.595014" y="41.595014"/>
+         <PolyStepSegment x="65.595014" y="0.404986"/>
+         <PolyStepSegment x="0.404986" y="0.404986"/>
+         <PolyStepSegment x="0.404986" y="41.595014"/>
+         <FillDesc fillProperty="FILL"/>
+        </Polygon>
+        <Cutout>
+         <PolyBegin x="39.90735" y="16.094957"/>
+         <PolyStepSegment x="39.791805" y="15.962471"/>
+         <PolyStepSegment x="39.702684" y="15.994145"/>
+         <PolyStepCurve x="40.085985" y="15.363833" centerX="39.6" centerY="15.5" clockwise="false"/>
+         <PolyStepSegment x="40.091462" y="15.403681"/>
+         <PolyStepSegment x="40.207426" y="15.536648"/>
+         <PolyStepSegment x="40.230986" y="15.52444"/>
+         <PolyStepCurve x="39.937083" y="16.201073" centerX="40.4" centerY="16" clockwise="false"/>
+         <PolyStepSegment x="39.90735" y="16.094957"/>
+        </Cutout>
+        <Cutout>
+         <PolyBegin x="21.085769" y="29.0996"/>
+         <PolyStepCurve x="19.9377" y="29.47263" centerX="20.5" centerY="29.25" clockwise="false"/>
+         <PolyStepCurve x="21.085769" y="29.0996" centerX="20.5" centerY="29.25" clockwise="false"/>
+        </Cutout>
+        <Cutout>
+         <PolyBegin x="34.585769" y="24.6496"/>
+         <PolyStepCurve x="33.4377" y="25.02263" centerX="34" centerY="24.8" clockwise="false"/>
+         <PolyStepCurve x="34.585769" y="24.6496" centerX="34" centerY="24.8" clockwise="false"/>
+        </Cutout>
+        <Cutout>
+         <PolyBegin x="46.585769" y="19.0496"/>
+         <PolyStepCurve x="45.4377" y="19.42263" centerX="46" centerY="19.2" clockwise="false"/>
+         <PolyStepCurve x="46.585769" y="19.0496" centerX="46" centerY="19.2" clockwise="false"/>
+        </Cutout>
+        <Cutout>
+         <PolyBegin x="32.585769" y="29.3496"/>
+         <PolyStepCurve x="31.4377" y="29.72263" centerX="32" centerY="29.5" clockwise="false"/>
+         <PolyStepCurve x="32.585769" y="29.3496" centerX="32" centerY="29.5" clockwise="false"/>
+        </Cutout>
+        <Cutout>
+         <PolyBegin x="47.585769" y="29.3496"/>
+         <PolyStepCurve x="46.4377" y="29.72263" centerX="47" centerY="29.5" clockwise="false"/>
+         <PolyStepCurve x="47.585769" y="29.3496" centerX="47" centerY="29.5" clockwise="false"/>
+        </Cutout>
+        <Cutout>
+         <PolyBegin x="33.085769" y="12.2546"/>
+         <PolyStepCurve x="31.9377" y="12.62763" centerX="32.5" centerY="12.405" clockwise="false"/>
+         <PolyStepCurve x="33.085769" y="12.2546" centerX="32.5" centerY="12.405" clockwise="false"/>
+        </Cutout>
+        <Cutout>
+         <PolyBegin x="22.585769" y="8.2196"/>
+         <PolyStepCurve x="21.4377" y="8.59263" centerX="22" centerY="8.37" clockwise="false"/>
+         <PolyStepCurve x="22.585769" y="8.2196" centerX="22" centerY="8.37" clockwise="false"/>
+        </Cutout>
+        <Cutout>
+         <PolyBegin x="25.585769" y="2.8496"/>
+         <PolyStepCurve x="24.4377" y="3.22263" centerX="25" centerY="3" clockwise="false"/>
+         <PolyStepCurve x="25.585769" y="2.8496" centerX="25" centerY="3" clockwise="false"/>
+        </Cutout>
+        <Cutout>
+         <PolyBegin x="50.775769" y="11.8496"/>
+         <PolyStepCurve x="49.6277" y="12.22263" centerX="50.19" centerY="12" clockwise="false"/>
+         <PolyStepCurve x="50.775769" y="11.8496" centerX="50.19" centerY="12" clockwise="false"/>
+        </Cutout>
+        <Cutout>
+         <PolyBegin x="23.285985" y="9.498833"/>
+         <PolyStepCurve x="22.337083" y="9.836073" centerX="22.8" centerY="9.635" clockwise="false"/>
+         <PolyStepCurve x="23.285985" y="9.498833" centerX="22.8" centerY="9.635" clockwise="false"/>
+        </Cutout>
+        <Cutout>
+         <PolyBegin x="23.285985" y="10.768833"/>
+         <PolyStepCurve x="22.337083" y="11.106073" centerX="22.8" centerY="10.905" clockwise="false"/>
+         <PolyStepCurve x="23.285985" y="10.768833" centerX="22.8" centerY="10.905" clockwise="false"/>
+        </Cutout>
+        <Cutout>
+         <PolyBegin x="46.885985" y="21.463833"/>
+         <PolyStepCurve x="45.937083" y="21.801073" centerX="46.4" centerY="21.6" clockwise="false"/>
+         <PolyStepCurve x="46.885985" y="21.463833" centerX="46.4" centerY="21.6" clockwise="false"/>
+        </Cutout>
+        <Cutout>
+         <PolyBegin x="48.085985" y="22.263833"/>
+         <PolyStepCurve x="47.137083" y="22.601073" centerX="47.6" centerY="22.4" clockwise="false"/>
+         <PolyStepCurve x="48.085985" y="22.263833" centerX="47.6" centerY="22.4" clockwise="false"/>
+        </Cutout>
+        <Cutout>
+         <PolyBegin x="51.2536" y="11.0636"/>
+         <PolyStepSegment x="49.1264" y="11.0636"/>
+         <PolyStepSegment x="49.1264" y="8.9364"/>
+         <PolyStepSegment x="51.2536" y="8.9364"/>
+         <PolyStepSegment x="51.2536" y="11.0636"/>
+        </Cutout>
+        <Cutout>
+         <PolyBegin x="53.77913" y="9.797797"/>
+         <PolyStepCurve x="51.704841" y="10.301014" centerX="52.73" centerY="10" clockwise="false"/>
+         <PolyStepCurve x="53.77913" y="9.797797" centerX="52.73" centerY="10" clockwise="false"/>
+        </Cutout>
+        <Cutout>
+         <PolyBegin x="56.31913" y="9.797797"/>
+         <PolyStepCurve x="54.244841" y="10.301014" centerX="55.27" centerY="10" clockwise="false"/>
+         <PolyStepCurve x="56.31913" y="9.797797" centerX="55.27" centerY="10" clockwise="false"/>
+        </Cutout>
+        <Cutout>
+         <PolyBegin x="58.801904" y="9.602902"/>
+         <PolyStepSegment x="58.845096" y="9.75"/>
+         <PolyStepSegment x="58.06" y="9.75"/>
+         <PolyStepSegment x="58.06" y="8.961407"/>
+         <PolyStepSegment x="58.061894" y="8.96168"/>
+         <PolyStepCurve x="58.801904" y="9.602902" centerX="57.81" centerY="10" clockwise="false"/>
+        </Cutout>
+        <Cutout>
+         <PolyBegin x="57.460548" y="8.990325"/>
+         <PolyStepSegment x="57.56" y="8.966198"/>
+         <PolyStepSegment x="57.56" y="11.033802"/>
+         <PolyStepSegment x="57.460548" y="11.009675"/>
+         <PolyStepSegment x="57.275781" y="10.925294"/>
+         <PolyStepSegment x="57.110322" y="10.807472"/>
+         <PolyStepSegment x="56.970151" y="10.660465"/>
+         <PolyStepSegment x="56.860334" y="10.489587"/>
+         <PolyStepSegment x="56.784841" y="10.301014"/>
+         <PolyStepSegment x="56.7464" y="10.101561"/>
+         <PolyStepSegment x="56.7464" y="9.898439"/>
+         <PolyStepSegment x="56.784841" y="9.698986"/>
+         <PolyStepSegment x="56.860334" y="9.510413"/>
+         <PolyStepSegment x="56.970151" y="9.339535"/>
+         <PolyStepSegment x="57.110322" y="9.192528"/>
+         <PolyStepSegment x="57.275781" y="9.074706"/>
+         <PolyStepSegment x="57.460548" y="8.990325"/>
+        </Cutout>
+        <Cutout>
+         <PolyBegin x="58.061894" y="11.03832"/>
+         <PolyStepSegment x="58.06" y="11.038593"/>
+         <PolyStepSegment x="58.06" y="10.25"/>
+         <PolyStepSegment x="58.845096" y="10.25"/>
+         <PolyStepSegment x="58.801904" y="10.397098"/>
+         <PolyStepCurve x="58.061894" y="11.03832" centerX="57.81" centerY="10" clockwise="false"/>
+        </Cutout>
+       </Contour>
+      </Features>
+     </Set>
+    </LayerFeature>
+    <LayerFeature layerRef="Inner 2">
+     <Set net="+3V3" padUsage="TERMINATION">
+      <Pad padstackDefRef="PASTILLE_12">
+       <Location x="50.19" y="10"/>
+       <StandardPrimitiveRef id="FORME_12"/>
+       <PinRef componentRef="J2" pin="1"/>
+      </Pad>
+     </Set>
+     <Set net="SWDIO" padUsage="TERMINATION">
+      <Pad padstackDefRef="PASTILLE_13">
+       <Location x="52.73" y="10"/>
+       <StandardPrimitiveRef id="FORME_13"/>
+       <PinRef componentRef="J2" pin="2"/>
+      </Pad>
+     </Set>
+     <Set net="SWCLK" padUsage="TERMINATION">
+      <Pad padstackDefRef="PASTILLE_13">
+       <Location x="55.27" y="10"/>
+       <StandardPrimitiveRef id="FORME_13"/>
+       <PinRef componentRef="J2" pin="3"/>
+      </Pad>
+     </Set>
+     <Set net="GND" padUsage="TERMINATION">
+      <Pad padstackDefRef="PASTILLE_13">
+       <Location x="57.81" y="10"/>
+       <StandardPrimitiveRef id="FORME_13"/>
+       <PinRef componentRef="J2" pin="4"/>
+      </Pad>
+     </Set>
+     <Set net="+3V3" padUsage="VIA">
+      <Pad padstackDefRef="VIA_14">
+       <Location x="20.5" y="29.25"/>
+       <StandardPrimitiveRef id="FORME_14"/>
+      </Pad>
+      <Pad padstackDefRef="VIA_14">
+       <Location x="34" y="24.8"/>
+       <StandardPrimitiveRef id="FORME_14"/>
+      </Pad>
+      <Pad padstackDefRef="VIA_14">
+       <Location x="46" y="19.2"/>
+       <StandardPrimitiveRef id="FORME_14"/>
+      </Pad>
+      <Pad padstackDefRef="VIA_14">
+       <Location x="32" y="29.5"/>
+       <StandardPrimitiveRef id="FORME_14"/>
+      </Pad>
+      <Pad padstackDefRef="VIA_14">
+       <Location x="47" y="29.5"/>
+       <StandardPrimitiveRef id="FORME_14"/>
+      </Pad>
+      <Pad padstackDefRef="VIA_14">
+       <Location x="32.5" y="12.405"/>
+       <StandardPrimitiveRef id="FORME_14"/>
+      </Pad>
+      <Pad padstackDefRef="VIA_14">
+       <Location x="22" y="8.37"/>
+       <StandardPrimitiveRef id="FORME_14"/>
+      </Pad>
+      <Pad padstackDefRef="VIA_14">
+       <Location x="25" y="3"/>
+       <StandardPrimitiveRef id="FORME_14"/>
+      </Pad>
+      <Pad padstackDefRef="VIA_14">
+       <Location x="50.19" y="12"/>
+       <StandardPrimitiveRef id="FORME_14"/>
+      </Pad>
+     </Set>
+     <Set net="GND" padUsage="VIA">
+      <Pad padstackDefRef="VIA_14">
+       <Location x="8.6" y="19.1"/>
+       <StandardPrimitiveRef id="FORME_14"/>
+      </Pad>
+      <Pad padstackDefRef="VIA_14">
+       <Location x="6.4" y="27.2"/>
+       <StandardPrimitiveRef id="FORME_14"/>
+      </Pad>
+      <Pad padstackDefRef="VIA_14">
+       <Location x="6.4" y="16.8"/>
+       <StandardPrimitiveRef id="FORME_14"/>
+      </Pad>
+      <Pad padstackDefRef="VIA_14">
+       <Location x="8.05" y="30.65"/>
+       <StandardPrimitiveRef id="FORME_14"/>
+      </Pad>
+      <Pad padstackDefRef="VIA_14">
+       <Location x="13.9" y="30.2"/>
+       <StandardPrimitiveRef id="FORME_14"/>
+      </Pad>
+      <Pad padstackDefRef="VIA_14">
+       <Location x="18.525" y="26"/>
+       <StandardPrimitiveRef id="FORME_14"/>
+      </Pad>
+      <Pad padstackDefRef="VIA_14">
+       <Location x="34" y="19.2"/>
+       <StandardPrimitiveRef id="FORME_14"/>
+      </Pad>
+      <Pad padstackDefRef="VIA_14">
+       <Location x="44.6" y="27"/>
+       <StandardPrimitiveRef id="FORME_14"/>
+      </Pad>
+      <Pad padstackDefRef="VIA_14">
+       <Location x="32" y="26.5"/>
+       <StandardPrimitiveRef id="FORME_14"/>
+      </Pad>
+      <Pad padstackDefRef="VIA_14">
+       <Location x="47" y="26.5"/>
+       <StandardPrimitiveRef id="FORME_14"/>
+      </Pad>
+      <Pad padstackDefRef="VIA_14">
+       <Location x="22" y="7.09"/>
+       <StandardPrimitiveRef id="FORME_14"/>
+      </Pad>
+      <Pad padstackDefRef="VIA_14">
+       <Location x="29" y="3"/>
+       <StandardPrimitiveRef id="FORME_14"/>
+      </Pad>
+      <Pad padstackDefRef="VIA_14">
+       <Location x="56.5" y="27.5"/>
+       <StandardPrimitiveRef id="FORME_14"/>
+      </Pad>
+      <Pad padstackDefRef="VIA_14">
+       <Location x="56.5" y="20.5"/>
+       <StandardPrimitiveRef id="FORME_14"/>
+      </Pad>
+      <Pad padstackDefRef="VIA_14">
+       <Location x="59.5" y="27.5"/>
+       <StandardPrimitiveRef id="FORME_14"/>
+      </Pad>
+      <Pad padstackDefRef="VIA_14">
+       <Location x="59.5" y="20.5"/>
+       <StandardPrimitiveRef id="FORME_14"/>
+      </Pad>
+     </Set>
+     <Set net="SPI_MISO" padUsage="VIA">
+      <Pad padstackDefRef="VIA_15">
+       <Location x="39.6" y="15.5"/>
+       <StandardPrimitiveRef id="FORME_15"/>
+      </Pad>
+      <Pad padstackDefRef="VIA_15">
+       <Location x="22.8" y="9.635"/>
+       <StandardPrimitiveRef id="FORME_15"/>
+      </Pad>
+     </Set>
+     <Set net="SPI_CS" padUsage="VIA">
+      <Pad padstackDefRef="VIA_15">
+       <Location x="40.4" y="16"/>
+       <StandardPrimitiveRef id="FORME_15"/>
+      </Pad>
+      <Pad padstackDefRef="VIA_15">
+       <Location x="22.8" y="10.905"/>
+       <StandardPrimitiveRef id="FORME_15"/>
+      </Pad>
+     </Set>
+     <Set net="SWDIO" padUsage="VIA">
+      <Pad padstackDefRef="VIA_15">
+       <Location x="46.4" y="21.6"/>
+       <StandardPrimitiveRef id="FORME_15"/>
+      </Pad>
+     </Set>
+     <Set net="SWCLK" padUsage="VIA">
+      <Pad padstackDefRef="VIA_15">
+       <Location x="47.6" y="22.4"/>
+       <StandardPrimitiveRef id="FORME_15"/>
+      </Pad>
+     </Set>
+     <Set net="+3V3">
+      <Features>
+       <Contour>
+        <Polygon>
+         <PolyBegin x="0.404986" y="41.595014"/>
+         <PolyStepSegment x="65.595014" y="41.595014"/>
+         <PolyStepSegment x="65.595014" y="0.404986"/>
+         <PolyStepSegment x="0.404986" y="0.404986"/>
+         <PolyStepSegment x="0.404986" y="41.595014"/>
+         <FillDesc fillProperty="FILL"/>
+        </Polygon>
+        <Cutout>
+         <PolyBegin x="39.90735" y="16.094957"/>
+         <PolyStepSegment x="39.791805" y="15.962471"/>
+         <PolyStepSegment x="39.702684" y="15.994145"/>
+         <PolyStepCurve x="40.085985" y="15.363833" centerX="39.6" centerY="15.5" clockwise="false"/>
+         <PolyStepSegment x="40.091462" y="15.403681"/>
+         <PolyStepSegment x="40.207426" y="15.536648"/>
+         <PolyStepSegment x="40.230986" y="15.52444"/>
+         <PolyStepCurve x="39.937083" y="16.201073" centerX="40.4" centerY="16" clockwise="false"/>
+         <PolyStepSegment x="39.90735" y="16.094957"/>
+        </Cutout>
+        <Cutout>
+         <PolyBegin x="9.185769" y="18.9496"/>
+         <PolyStepCurve x="8.0377" y="19.32263" centerX="8.6" centerY="19.1" clockwise="false"/>
+         <PolyStepCurve x="9.185769" y="18.9496" centerX="8.6" centerY="19.1" clockwise="false"/>
+        </Cutout>
+        <Cutout>
+         <PolyBegin x="6.985769" y="27.0496"/>
+         <PolyStepCurve x="5.8377" y="27.42263" centerX="6.4" centerY="27.2" clockwise="false"/>
+         <PolyStepCurve x="6.985769" y="27.0496" centerX="6.4" centerY="27.2" clockwise="false"/>
+        </Cutout>
+        <Cutout>
+         <PolyBegin x="6.985769" y="16.6496"/>
+         <PolyStepCurve x="5.8377" y="17.02263" centerX="6.4" centerY="16.8" clockwise="false"/>
+         <PolyStepCurve x="6.985769" y="16.6496" centerX="6.4" centerY="16.8" clockwise="false"/>
+        </Cutout>
+        <Cutout>
+         <PolyBegin x="8.635769" y="30.4996"/>
+         <PolyStepCurve x="7.4877" y="30.87263" centerX="8.05" centerY="30.65" clockwise="false"/>
+         <PolyStepCurve x="8.635769" y="30.4996" centerX="8.05" centerY="30.65" clockwise="false"/>
+        </Cutout>
+        <Cutout>
+         <PolyBegin x="14.485769" y="30.0496"/>
+         <PolyStepCurve x="13.3377" y="30.42263" centerX="13.9" centerY="30.2" clockwise="false"/>
+         <PolyStepCurve x="14.485769" y="30.0496" centerX="13.9" centerY="30.2" clockwise="false"/>
+        </Cutout>
+        <Cutout>
+         <PolyBegin x="19.110769" y="25.8496"/>
+         <PolyStepCurve x="17.9627" y="26.22263" centerX="18.525" centerY="26" clockwise="false"/>
+         <PolyStepCurve x="19.110769" y="25.8496" centerX="18.525" centerY="26" clockwise="false"/>
+        </Cutout>
+        <Cutout>
+         <PolyBegin x="34.585769" y="19.0496"/>
+         <PolyStepCurve x="33.4377" y="19.42263" centerX="34" centerY="19.2" clockwise="false"/>
+         <PolyStepCurve x="34.585769" y="19.0496" centerX="34" centerY="19.2" clockwise="false"/>
+        </Cutout>
+        <Cutout>
+         <PolyBegin x="45.185769" y="26.8496"/>
+         <PolyStepCurve x="44.0377" y="27.22263" centerX="44.6" centerY="27" clockwise="false"/>
+         <PolyStepCurve x="45.185769" y="26.8496" centerX="44.6" centerY="27" clockwise="false"/>
+        </Cutout>
+        <Cutout>
+         <PolyBegin x="32.585769" y="26.3496"/>
+         <PolyStepCurve x="31.4377" y="26.72263" centerX="32" centerY="26.5" clockwise="false"/>
+         <PolyStepCurve x="32.585769" y="26.3496" centerX="32" centerY="26.5" clockwise="false"/>
+        </Cutout>
+        <Cutout>
+         <PolyBegin x="47.585769" y="26.3496"/>
+         <PolyStepCurve x="46.4377" y="26.72263" centerX="47" centerY="26.5" clockwise="false"/>
+         <PolyStepCurve x="47.585769" y="26.3496" centerX="47" centerY="26.5" clockwise="false"/>
+        </Cutout>
+        <Cutout>
+         <PolyBegin x="22.585769" y="6.9396"/>
+         <PolyStepCurve x="21.4377" y="7.31263" centerX="22" centerY="7.09" clockwise="false"/>
+         <PolyStepCurve x="22.585769" y="6.9396" centerX="22" centerY="7.09" clockwise="false"/>
+        </Cutout>
+        <Cutout>
+         <PolyBegin x="29.585769" y="2.8496"/>
+         <PolyStepCurve x="28.4377" y="3.22263" centerX="29" centerY="3" clockwise="false"/>
+         <PolyStepCurve x="29.585769" y="2.8496" centerX="29" centerY="3" clockwise="false"/>
+        </Cutout>
+        <Cutout>
+         <PolyBegin x="57.085769" y="27.3496"/>
+         <PolyStepCurve x="55.9377" y="27.72263" centerX="56.5" centerY="27.5" clockwise="false"/>
+         <PolyStepCurve x="57.085769" y="27.3496" centerX="56.5" centerY="27.5" clockwise="false"/>
+        </Cutout>
+        <Cutout>
+         <PolyBegin x="57.085769" y="20.3496"/>
+         <PolyStepCurve x="55.9377" y="20.72263" centerX="56.5" centerY="20.5" clockwise="false"/>
+         <PolyStepCurve x="57.085769" y="20.3496" centerX="56.5" centerY="20.5" clockwise="false"/>
+        </Cutout>
+        <Cutout>
+         <PolyBegin x="60.085769" y="27.3496"/>
+         <PolyStepCurve x="58.9377" y="27.72263" centerX="59.5" centerY="27.5" clockwise="false"/>
+         <PolyStepCurve x="60.085769" y="27.3496" centerX="59.5" centerY="27.5" clockwise="false"/>
+        </Cutout>
+        <Cutout>
+         <PolyBegin x="60.085769" y="20.3496"/>
+         <PolyStepCurve x="58.9377" y="20.72263" centerX="59.5" centerY="20.5" clockwise="false"/>
+         <PolyStepCurve x="60.085769" y="20.3496" centerX="59.5" centerY="20.5" clockwise="false"/>
+        </Cutout>
+        <Cutout>
+         <PolyBegin x="23.285985" y="9.498833"/>
+         <PolyStepCurve x="22.337083" y="9.836073" centerX="22.8" centerY="9.635" clockwise="false"/>
+         <PolyStepCurve x="23.285985" y="9.498833" centerX="22.8" centerY="9.635" clockwise="false"/>
+        </Cutout>
+        <Cutout>
+         <PolyBegin x="23.285985" y="10.768833"/>
+         <PolyStepCurve x="22.337083" y="11.106073" centerX="22.8" centerY="10.905" clockwise="false"/>
+         <PolyStepCurve x="23.285985" y="10.768833" centerX="22.8" centerY="10.905" clockwise="false"/>
+        </Cutout>
+        <Cutout>
+         <PolyBegin x="46.885985" y="21.463833"/>
+         <PolyStepCurve x="45.937083" y="21.801073" centerX="46.4" centerY="21.6" clockwise="false"/>
+         <PolyStepCurve x="46.885985" y="21.463833" centerX="46.4" centerY="21.6" clockwise="false"/>
+        </Cutout>
+        <Cutout>
+         <PolyBegin x="48.085985" y="22.263833"/>
+         <PolyStepCurve x="47.137083" y="22.601073" centerX="47.6" centerY="22.4" clockwise="false"/>
+         <PolyStepCurve x="48.085985" y="22.263833" centerX="47.6" centerY="22.4" clockwise="false"/>
+        </Cutout>
+        <Cutout>
+         <PolyBegin x="49.94" y="11.0636"/>
+         <PolyStepSegment x="49.1264" y="11.0636"/>
+         <PolyStepSegment x="49.1264" y="10.25"/>
+         <PolyStepSegment x="49.94" y="10.25"/>
+         <PolyStepSegment x="49.94" y="11.0636"/>
+        </Cutout>
+        <Cutout>
+         <PolyBegin x="51.2536" y="11.0636"/>
+         <PolyStepSegment x="50.44" y="11.0636"/>
+         <PolyStepSegment x="50.44" y="8.9364"/>
+         <PolyStepSegment x="51.2536" y="8.9364"/>
+         <PolyStepSegment x="51.2536" y="11.0636"/>
+        </Cutout>
+        <Cutout>
+         <PolyBegin x="49.1264" y="8.9364"/>
+         <PolyStepSegment x="49.94" y="8.9364"/>
+         <PolyStepSegment x="49.94" y="9.75"/>
+         <PolyStepSegment x="49.1264" y="9.75"/>
+         <PolyStepSegment x="49.1264" y="8.9364"/>
+        </Cutout>
+        <Cutout>
+         <PolyBegin x="53.77913" y="9.797797"/>
+         <PolyStepCurve x="51.704841" y="10.301014" centerX="52.73" centerY="10" clockwise="false"/>
+         <PolyStepCurve x="53.77913" y="9.797797" centerX="52.73" centerY="10" clockwise="false"/>
+        </Cutout>
+        <Cutout>
+         <PolyBegin x="56.31913" y="9.797797"/>
+         <PolyStepCurve x="54.244841" y="10.301014" centerX="55.27" centerY="10" clockwise="false"/>
+         <PolyStepCurve x="56.31913" y="9.797797" centerX="55.27" centerY="10" clockwise="false"/>
+        </Cutout>
+        <Cutout>
+         <PolyBegin x="58.85913" y="9.797797"/>
+         <PolyStepCurve x="56.784841" y="10.301014" centerX="57.81" centerY="10" clockwise="false"/>
+         <PolyStepCurve x="58.85913" y="9.797797" centerX="57.81" centerY="10" clockwise="false"/>
+        </Cutout>
+       </Contour>
+      </Features>
+     </Set>
+    </LayerFeature>
+    <LayerFeature layerRef="Bottom">
+     <Set net="SPI_MISO">
+      <Features>
+       <Line startX="39.6" startY="15.5" endX="39.6" endY="5">
+        <LineDescRef id="TRAIT_3"/>
+       </Line>
+      </Features>
+      <Features>
+       <Line startX="39.6" startY="5" endX="21" endY="5">
+        <LineDescRef id="TRAIT_3"/>
+       </Line>
+      </Features>
+      <Features>
+       <Line startX="21" startY="5" endX="21" endY="9.635">
+        <LineDescRef id="TRAIT_3"/>
+       </Line>
+      </Features>
+      <Features>
+       <Line startX="21" startY="9.635" endX="22.8" endY="9.635">
+        <LineDescRef id="TRAIT_3"/>
+       </Line>
+      </Features>
+     </Set>
+     <Set net="SPI_CS">
+      <Features>
+       <Line startX="40.4" startY="16" endX="40.4" endY="4">
+        <LineDescRef id="TRAIT_3"/>
+       </Line>
+      </Features>
+      <Features>
+       <Line startX="40.4" startY="4" endX="20" endY="4">
+        <LineDescRef id="TRAIT_3"/>
+       </Line>
+      </Features>
+      <Features>
+       <Line startX="20" startY="4" endX="20" endY="10.905">
+        <LineDescRef id="TRAIT_3"/>
+       </Line>
+      </Features>
+      <Features>
+       <Line startX="20" startY="10.905" endX="22.8" endY="10.905">
+        <LineDescRef id="TRAIT_3"/>
+       </Line>
+      </Features>
+     </Set>
+     <Set net="SWDIO">
+      <Features>
+       <Line startX="46.4" startY="21.6" endX="48.73" endY="19.27">
+        <LineDescRef id="TRAIT_3"/>
+       </Line>
+      </Features>
+      <Features>
+       <Line startX="48.73" startY="19.27" endX="52.73" endY="15.27">
+        <LineDescRef id="TRAIT_3"/>
+       </Line>
+      </Features>
+      <Features>
+       <Line startX="52.73" startY="15.27" endX="52.73" endY="10">
+        <LineDescRef id="TRAIT_3"/>
+       </Line>
+      </Features>
+     </Set>
+     <Set net="SWCLK">
+      <Features>
+       <Line startX="47.6" startY="22.4" endX="51.27" endY="18.73">
+        <LineDescRef id="TRAIT_3"/>
+       </Line>
+      </Features>
+      <Features>
+       <Line startX="51.27" startY="18.73" endX="55.27" endY="14.73">
+        <LineDescRef id="TRAIT_3"/>
+       </Line>
+      </Features>
+      <Features>
+       <Line startX="55.27" startY="14.73" endX="55.27" endY="10">
+        <LineDescRef id="TRAIT_3"/>
+       </Line>
+      </Features>
+     </Set>
+     <Set net="+3V3" padUsage="TERMINATION">
+      <Pad padstackDefRef="PASTILLE_12">
+       <Location x="50.19" y="10"/>
+       <StandardPrimitiveRef id="FORME_12"/>
+       <PinRef componentRef="J2" pin="1"/>
+      </Pad>
+     </Set>
+     <Set net="SWDIO" padUsage="TERMINATION">
+      <Pad padstackDefRef="PASTILLE_13">
+       <Location x="52.73" y="10"/>
+       <StandardPrimitiveRef id="FORME_13"/>
+       <PinRef componentRef="J2" pin="2"/>
+      </Pad>
+     </Set>
+     <Set net="SWCLK" padUsage="TERMINATION">
+      <Pad padstackDefRef="PASTILLE_13">
+       <Location x="55.27" y="10"/>
+       <StandardPrimitiveRef id="FORME_13"/>
+       <PinRef componentRef="J2" pin="3"/>
+      </Pad>
+     </Set>
+     <Set net="GND" padUsage="TERMINATION">
+      <Pad padstackDefRef="PASTILLE_13">
+       <Location x="57.81" y="10"/>
+       <StandardPrimitiveRef id="FORME_13"/>
+       <PinRef componentRef="J2" pin="4"/>
+      </Pad>
+     </Set>
+     <Set net="+3V3" padUsage="VIA">
+      <Pad padstackDefRef="VIA_14">
+       <Location x="20.5" y="29.25"/>
+       <StandardPrimitiveRef id="FORME_14"/>
+      </Pad>
+      <Pad padstackDefRef="VIA_14">
+       <Location x="34" y="24.8"/>
+       <StandardPrimitiveRef id="FORME_14"/>
+      </Pad>
+      <Pad padstackDefRef="VIA_14">
+       <Location x="46" y="19.2"/>
+       <StandardPrimitiveRef id="FORME_14"/>
+      </Pad>
+      <Pad padstackDefRef="VIA_14">
+       <Location x="32" y="29.5"/>
+       <StandardPrimitiveRef id="FORME_14"/>
+      </Pad>
+      <Pad padstackDefRef="VIA_14">
+       <Location x="47" y="29.5"/>
+       <StandardPrimitiveRef id="FORME_14"/>
+      </Pad>
+      <Pad padstackDefRef="VIA_14">
+       <Location x="32.5" y="12.405"/>
+       <StandardPrimitiveRef id="FORME_14"/>
+      </Pad>
+      <Pad padstackDefRef="VIA_14">
+       <Location x="22" y="8.37"/>
+       <StandardPrimitiveRef id="FORME_14"/>
+      </Pad>
+      <Pad padstackDefRef="VIA_14">
+       <Location x="25" y="3"/>
+       <StandardPrimitiveRef id="FORME_14"/>
+      </Pad>
+      <Pad padstackDefRef="VIA_14">
+       <Location x="50.19" y="12"/>
+       <StandardPrimitiveRef id="FORME_14"/>
+      </Pad>
+     </Set>
+     <Set net="GND" padUsage="VIA">
+      <Pad padstackDefRef="VIA_14">
+       <Location x="8.6" y="19.1"/>
+       <StandardPrimitiveRef id="FORME_14"/>
+      </Pad>
+      <Pad padstackDefRef="VIA_14">
+       <Location x="6.4" y="27.2"/>
+       <StandardPrimitiveRef id="FORME_14"/>
+      </Pad>
+      <Pad padstackDefRef="VIA_14">
+       <Location x="6.4" y="16.8"/>
+       <StandardPrimitiveRef id="FORME_14"/>
+      </Pad>
+      <Pad padstackDefRef="VIA_14">
+       <Location x="8.05" y="30.65"/>
+       <StandardPrimitiveRef id="FORME_14"/>
+      </Pad>
+      <Pad padstackDefRef="VIA_14">
+       <Location x="13.9" y="30.2"/>
+       <StandardPrimitiveRef id="FORME_14"/>
+      </Pad>
+      <Pad padstackDefRef="VIA_14">
+       <Location x="18.525" y="26"/>
+       <StandardPrimitiveRef id="FORME_14"/>
+      </Pad>
+      <Pad padstackDefRef="VIA_14">
+       <Location x="34" y="19.2"/>
+       <StandardPrimitiveRef id="FORME_14"/>
+      </Pad>
+      <Pad padstackDefRef="VIA_14">
+       <Location x="44.6" y="27"/>
+       <StandardPrimitiveRef id="FORME_14"/>
+      </Pad>
+      <Pad padstackDefRef="VIA_14">
+       <Location x="32" y="26.5"/>
+       <StandardPrimitiveRef id="FORME_14"/>
+      </Pad>
+      <Pad padstackDefRef="VIA_14">
+       <Location x="47" y="26.5"/>
+       <StandardPrimitiveRef id="FORME_14"/>
+      </Pad>
+      <Pad padstackDefRef="VIA_14">
+       <Location x="22" y="7.09"/>
+       <StandardPrimitiveRef id="FORME_14"/>
+      </Pad>
+      <Pad padstackDefRef="VIA_14">
+       <Location x="29" y="3"/>
+       <StandardPrimitiveRef id="FORME_14"/>
+      </Pad>
+      <Pad padstackDefRef="VIA_14">
+       <Location x="56.5" y="27.5"/>
+       <StandardPrimitiveRef id="FORME_14"/>
+      </Pad>
+      <Pad padstackDefRef="VIA_14">
+       <Location x="56.5" y="20.5"/>
+       <StandardPrimitiveRef id="FORME_14"/>
+      </Pad>
+      <Pad padstackDefRef="VIA_14">
+       <Location x="59.5" y="27.5"/>
+       <StandardPrimitiveRef id="FORME_14"/>
+      </Pad>
+      <Pad padstackDefRef="VIA_14">
+       <Location x="59.5" y="20.5"/>
+       <StandardPrimitiveRef id="FORME_14"/>
+      </Pad>
+     </Set>
+     <Set net="SPI_MISO" padUsage="VIA">
+      <Pad padstackDefRef="VIA_15">
+       <Location x="39.6" y="15.5"/>
+       <StandardPrimitiveRef id="FORME_15"/>
+      </Pad>
+      <Pad padstackDefRef="VIA_15">
+       <Location x="22.8" y="9.635"/>
+       <StandardPrimitiveRef id="FORME_15"/>
+      </Pad>
+     </Set>
+     <Set net="SPI_CS" padUsage="VIA">
+      <Pad padstackDefRef="VIA_15">
+       <Location x="40.4" y="16"/>
+       <StandardPrimitiveRef id="FORME_15"/>
+      </Pad>
+      <Pad padstackDefRef="VIA_15">
+       <Location x="22.8" y="10.905"/>
+       <StandardPrimitiveRef id="FORME_15"/>
+      </Pad>
+     </Set>
+     <Set net="SWDIO" padUsage="VIA">
+      <Pad padstackDefRef="VIA_15">
+       <Location x="46.4" y="21.6"/>
+       <StandardPrimitiveRef id="FORME_15"/>
+      </Pad>
+     </Set>
+     <Set net="SWCLK" padUsage="VIA">
+      <Pad padstackDefRef="VIA_15">
+       <Location x="47.6" y="22.4"/>
+       <StandardPrimitiveRef id="FORME_15"/>
+      </Pad>
+     </Set>
+    </LayerFeature>
+    <LayerFeature layerRef="MASQUE_DESSOUS">
+     <Set>
+      <Pad>
+       <Location x="50.19" y="10"/>
+       <StandardPrimitiveRef id="FORME_27"/>
+      </Pad>
+      <Pad>
+       <Location x="52.73" y="10"/>
+       <StandardPrimitiveRef id="FORME_28"/>
+      </Pad>
+      <Pad>
+       <Location x="55.27" y="10"/>
+       <StandardPrimitiveRef id="FORME_28"/>
+      </Pad>
+      <Pad>
+       <Location x="57.81" y="10"/>
+       <StandardPrimitiveRef id="FORME_28"/>
+      </Pad>
+     </Set>
+    </LayerFeature>
+    <LayerFeature layerRef="CONTOUR">
+     <Set>
+      <Features>
+       <Polyline>
+        <PolyBegin x="0" y="42"/>
+        <PolyStepSegment x="66" y="42"/>
+        <PolyStepSegment x="66" y="0"/>
+        <PolyStepSegment x="0" y="0"/>
+        <PolyStepSegment x="0" y="42"/>
+        <LineDescRef id="TRAIT_5"/>
+       </Polyline>
+      </Features>
+     </Set>
+    </LayerFeature>
+    <LayerFeature layerRef="PERCAGE_L1_L4">
+     <Set net="+3V3" padUsage="VIA" geometry="VIA_14">
+      <Hole name="H1" diameter="0.4" platingStatus="VIA" plusTol="0" minusTol="0" x="20.5" y="29.25"/>
+      <Hole name="H2" diameter="0.4" platingStatus="VIA" plusTol="0" minusTol="0" x="34" y="24.8"/>
+      <Hole name="H3" diameter="0.4" platingStatus="VIA" plusTol="0" minusTol="0" x="46" y="19.2"/>
+      <Hole name="H4" diameter="0.4" platingStatus="VIA" plusTol="0" minusTol="0" x="32" y="29.5"/>
+      <Hole name="H5" diameter="0.4" platingStatus="VIA" plusTol="0" minusTol="0" x="47" y="29.5"/>
+      <Hole name="H6" diameter="0.4" platingStatus="VIA" plusTol="0" minusTol="0" x="32.5" y="12.405"/>
+      <Hole name="H7" diameter="0.4" platingStatus="VIA" plusTol="0" minusTol="0" x="22" y="8.37"/>
+      <Hole name="H8" diameter="0.4" platingStatus="VIA" plusTol="0" minusTol="0" x="25" y="3"/>
+      <Hole name="H9" diameter="0.4" platingStatus="VIA" plusTol="0" minusTol="0" x="50.19" y="12"/>
+     </Set>
+     <Set net="GND" padUsage="VIA" geometry="VIA_14">
+      <Hole name="H10" diameter="0.4" platingStatus="VIA" plusTol="0" minusTol="0" x="8.6" y="19.1"/>
+      <Hole name="H11" diameter="0.4" platingStatus="VIA" plusTol="0" minusTol="0" x="6.4" y="27.2"/>
+      <Hole name="H12" diameter="0.4" platingStatus="VIA" plusTol="0" minusTol="0" x="6.4" y="16.8"/>
+      <Hole name="H13" diameter="0.4" platingStatus="VIA" plusTol="0" minusTol="0" x="8.05" y="30.65"/>
+      <Hole name="H14" diameter="0.4" platingStatus="VIA" plusTol="0" minusTol="0" x="13.9" y="30.2"/>
+      <Hole name="H15" diameter="0.4" platingStatus="VIA" plusTol="0" minusTol="0" x="18.525" y="26"/>
+      <Hole name="H16" diameter="0.4" platingStatus="VIA" plusTol="0" minusTol="0" x="34" y="19.2"/>
+      <Hole name="H17" diameter="0.4" platingStatus="VIA" plusTol="0" minusTol="0" x="44.6" y="27"/>
+      <Hole name="H18" diameter="0.4" platingStatus="VIA" plusTol="0" minusTol="0" x="32" y="26.5"/>
+      <Hole name="H19" diameter="0.4" platingStatus="VIA" plusTol="0" minusTol="0" x="47" y="26.5"/>
+      <Hole name="H20" diameter="0.4" platingStatus="VIA" plusTol="0" minusTol="0" x="22" y="7.09"/>
+      <Hole name="H21" diameter="0.4" platingStatus="VIA" plusTol="0" minusTol="0" x="29" y="3"/>
+      <Hole name="H22" diameter="0.4" platingStatus="VIA" plusTol="0" minusTol="0" x="56.5" y="27.5"/>
+      <Hole name="H23" diameter="0.4" platingStatus="VIA" plusTol="0" minusTol="0" x="56.5" y="20.5"/>
+      <Hole name="H24" diameter="0.4" platingStatus="VIA" plusTol="0" minusTol="0" x="59.5" y="27.5"/>
+      <Hole name="H25" diameter="0.4" platingStatus="VIA" plusTol="0" minusTol="0" x="59.5" y="20.5"/>
+     </Set>
+     <Set net="SPI_MISO" padUsage="VIA" geometry="VIA_15">
+      <Hole name="H26" diameter="0.3" platingStatus="VIA" plusTol="0" minusTol="0" x="39.6" y="15.5"/>
+      <Hole name="H27" diameter="0.3" platingStatus="VIA" plusTol="0" minusTol="0" x="22.8" y="9.635"/>
+     </Set>
+     <Set net="SPI_CS" padUsage="VIA" geometry="VIA_15">
+      <Hole name="H28" diameter="0.3" platingStatus="VIA" plusTol="0" minusTol="0" x="40.4" y="16"/>
+      <Hole name="H29" diameter="0.3" platingStatus="VIA" plusTol="0" minusTol="0" x="22.8" y="10.905"/>
+     </Set>
+     <Set net="SWDIO" padUsage="VIA" geometry="VIA_15">
+      <Hole name="H30" diameter="0.3" platingStatus="VIA" plusTol="0" minusTol="0" x="46.4" y="21.6"/>
+     </Set>
+     <Set net="SWCLK" padUsage="VIA" geometry="VIA_15">
+      <Hole name="H31" diameter="0.3" platingStatus="VIA" plusTol="0" minusTol="0" x="47.6" y="22.4"/>
+     </Set>
+     <Set net="+3V3" padUsage="TERMINATION" geometry="PASTILLE_12">
+      <Hole name="H32" diameter="0.8636" platingStatus="PLATED" plusTol="0" minusTol="0" x="50.19" y="10"/>
+     </Set>
+     <Set net="SWDIO" padUsage="TERMINATION" geometry="PASTILLE_13">
+      <Hole name="H33" diameter="0.8636" platingStatus="PLATED" plusTol="0" minusTol="0" x="52.73" y="10"/>
+     </Set>
+     <Set net="SWCLK" padUsage="TERMINATION" geometry="PASTILLE_13">
+      <Hole name="H34" diameter="0.8636" platingStatus="PLATED" plusTol="0" minusTol="0" x="55.27" y="10"/>
+     </Set>
+     <Set net="GND" padUsage="TERMINATION" geometry="PASTILLE_13">
+      <Hole name="H35" diameter="0.8636" platingStatus="PLATED" plusTol="0" minusTol="0" x="57.81" y="10"/>
+     </Set>
+    </LayerFeature>
+   </Step>
+  </CadData>
+ </Ecad>
+</IPC-2581>

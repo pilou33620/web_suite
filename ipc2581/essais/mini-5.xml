@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<IPC-2581 revision="C" xmlns="http://webstds.ipc.org/2581">
+ <Content roleRef="owner">
+  <DictionaryLineDesc units="MILLIMETER">
+   <EntryLineDesc id="l2"><LineDesc lineEnd="SQUARE" lineWidth="0.2"/></EntryLineDesc>
+  </DictionaryLineDesc>
+  <DictionaryStandard units="MILLIMETER">
+   <EntryStandard id="oct"><Octagon length="2"/></EntryStandard>
+   <EntryStandard id="hex"><Hexagon length="2"/></EntryStandard>
+   <EntryStandard id="ell"><Ellipse width="4" height="2"/></EntryStandard>
+   <EntryStandard id="dia"><Diamond width="2" height="1"/></EntryStandard>
+   <EntryStandard id="tri"><Triangle base="2" height="1"/></EntryStandard>
+   <EntryStandard id="rco"><RectCorner lowerLeftX="0" lowerLeftY="0" upperRightX="2" upperRightY="1"/></EntryStandard>
+   <EntryStandard id="but"><Butterfly shape="SQUARE" side="2"/></EntryStandard>
+   <EntryStandard id="don"><Donut shape="ROUND" outerDiameter="2" innerDiameter="1"/></EntryStandard>
+   <EntryStandard id="thm"><Thermal shape="ROUND" outerDiameter="2" innerDiameter="1"
+                   spokeCount="4" spokeWidth="0.2" spokeStartAngle="45"/></EntryStandard>
+   <EntryStandard id="moi"><Moire diameter="4" ringWidth="0.2" ringGap="0.3" ringNumber="3"
+                   lineWidth="0.1" lineLength="5" lineAngle="0"/></EntryStandard>
+   <EntryStandard id="trou"><Contour><Polygon><PolyBegin x="-1" y="-1"/><PolyStepSegment x="1" y="-1"/>
+     <PolyStepSegment x="1" y="1"/><PolyStepSegment x="-1" y="1"/><PolyStepSegment x="-1" y="-1"/></Polygon>
+     <Cutout><PolyBegin x="-0.5" y="-0.5"/><PolyStepSegment x="0.5" y="-0.5"/>
+     <PolyStepSegment x="0.5" y="0.5"/><PolyStepSegment x="-0.5" y="-0.5"/></Cutout></Contour></EntryStandard>
+  </DictionaryStandard>
+ </Content>
+ <Ecad name="mini">
+  <CadHeader units="MILLIMETER"/>
+  <CadData>
+   <Layer name="TOP" layerFunction="SIGNAL" side="TOP"/>
+   <Step name="MINI"></Step>
+  </CadData>
+ </Ecad>
+</IPC-2581>
