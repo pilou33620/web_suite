@@ -20,7 +20,10 @@ dans `PROJETS/`, synchronisé avec GitHub. Détails complets : [lanceur/docs/DET
 
 ## Installation
 
-Prérequis : Python 3.8+ et git (sans git, pas de mises à jour ni de synchronisation).
+Prérequis : git (sans git, pas de mises à jour ni de synchronisation). Le lanceur est en Rust :
+les scripts ci-dessous prennent ses exécutables dans `bin/` — téléchargés depuis la publication
+« binaires » de GitHub (Windows x86_64, Linux x86_64 et aarch64, macOS aarch64), ou compilés sur
+place si `cargo` est installé. Les trois outils, eux, demandent encore Python 3.8+.
 
 ```
 git clone https://github.com/pilou33620/WEB_SUITE.git WEB_TOOLS
@@ -32,7 +35,7 @@ git clone https://github.com/pilou33620/WEB_SUITE.git WEB_TOOLS
 | Linux, Raspberry Pi | `./installer.sh` | `./demarrer_WEB_SUITE.sh` |
 
 L'installateur demande quels outils télécharger (`1`, `1 3`, `4` = tous), ou directement :
-`python lanceur/installer.py cao 3d`.
+`installer.cmd cao 3d` (`./installer.sh cao 3d`).
 
 Dépendances des outils :
 
@@ -70,7 +73,7 @@ PROJETS/
 - Le dépôt est **privé** : chaque poste doit être connecté une fois à votre compte GitHub.
   Sous Windows, une fenêtre de connexion s'ouvre toute seule. Sur un Raspberry Pi,
   le lanceur le propose dans son terminal au démarrage (ou, à tout moment :
-  `python lanceur/connexion_github.py --connecter`).
+  `bin/connexion_github --connecter`).
 - Il est récupéré au démarrage et avant chaque lancement d'outil.
 - À l'arrêt d'un outil, la page propose d'envoyer les modifications sur GitHub (message de
   commit demandé). Le bouton **⇧ Envoyer sur GitHub** reste tant que quelque chose attend.
@@ -98,7 +101,7 @@ ensuite fait quand même sa propre vérification.
 ## Options
 
 ```
-python lanceur/web_suite.py [--port 8100] [--racine DOSSIER] [--installer]
+bin/web_suite [--port 8100] [--racine DOSSIER] [--installer]
                     [--navigateur | --sans-navigateur] [--reseau | --local] [--sans-maj]
 ```
 
@@ -112,17 +115,17 @@ python lanceur/web_suite.py [--port 8100] [--racine DOSSIER] [--installer]
 
 L'ancien assistant IA intégré aux outils est retiré : Claude, par ce serveur MCP, fait son travail.
 
-`lanceur/mcp_web_suite.py` branche Claude Code sur les outils du poste (serveur MCP, sans
+`bin/mcp_web_suite` branche Claude Code sur les outils du poste (serveur MCP, sans
 dépendance). Les outils doivent déjà tourner. Sur le poste des outils :
 
 ```
-claude mcp add -s user web_suite -- python3 /chemin/vers/WEB_TOOLS/lanceur/mcp_web_suite.py
+claude mcp add -s user web_suite -- /chemin/vers/WEB_TOOLS/bin/mcp_web_suite
 ```
 
 Depuis une autre machine, par SSH (clé SSH obligatoire, aucun port ouvert en plus) :
 
 ```
-claude mcp add -s user web_suite -- ssh -T -o BatchMode=yes <utilisateur>@<poste> python3 /chemin/vers/WEB_TOOLS/lanceur/mcp_web_suite.py
+claude mcp add -s user web_suite -- ssh -T -o BatchMode=yes <utilisateur>@<poste> /chemin/vers/WEB_TOOLS/bin/mcp_web_suite
 ```
 
 Puis `/mcp` dans Claude Code. Windows, clé SSH, dépannage : [DETAILS](lanceur/docs/DETAILS.md#claude-code-mcp).
@@ -170,11 +173,10 @@ corrections. Détails : [web_bench/README.md](web_bench/README.md).
 ## Divers
 
 - Journaux des outils : `lanceur/journaux/<outil>.log` (bouton **Journal**).
-- `python maj_git.py` : état git de WEB_SUITE, des outils et de `PROJETS/`, avec
+- `bin/maj_git` : état git de WEB_SUITE, des outils et de `PROJETS/`, avec
   commit / pull / push guidés.
-- Tests : `python lanceur/projets.py`, `python lanceur/banc_serveur.py`,
-  `python lanceur/connexion_github.py`, `python lanceur/banc_dependances.py`,
-  `python lanceur/appairage.py`, `python lanceur/banc_mcp.py`, `python lanceur/pilote.py`,
-  `node lanceur/banc_pilote.js`, `python lanceur/claude_pages.py`, `python web_bench/banc_web_bench.py`, `python lanceur/banc_savoir.py`,
+- Tests : `cargo test --workspace` (commun, lanceur, web_bench), puis les bancs, qui pilotent les
+  exécutables : `python lanceur/banc_serveur.py`, `python lanceur/banc_dependances.py`,
+  `python lanceur/banc_mcp.py`, `node lanceur/banc_pilote.js`, `python web_bench/banc_web_bench.py`, `python lanceur/banc_savoir.py`,
   `python lanceur/banc_traces_ia.py` (affichent `OK` ; les deux derniers lisent aussi les dépôts
   des outils). La CI les lance tous.
