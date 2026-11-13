@@ -9,8 +9,9 @@
 //!   2. les suites de points deviennent des tableaux plats [x1,y1,x2,y2,...].
 //!      Un objet {"x":..,"y":..} par sommet, sur un plan de masse decoupe, c'est
 //!      dix fois le poids des nombres qu'il porte.
-//!   Les cles sont courtes pour la meme raison ; la visionneuse reprend le tableau de
-//!   correspondance a l'identique.
+//!
+//! Les cles sont courtes pour la meme raison ; la visionneuse reprend le tableau de
+//! correspondance a l'identique.
 //!
 //! Le fichier accepte tel quel : XML IPC-2581 (.xml, .cvg) ou archive ZIP en
 //! contenant un -- les fabricants livrent souvent la seconde forme.

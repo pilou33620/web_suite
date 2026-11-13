@@ -24,3 +24,4 @@ pub use json::{
 };
 pub use parser::{IPC2581ParseError, IPC2581Parser};
 pub use py::{dumps, Json, Objet};
+pub use roxmltree; // le type des nœuds que prend IPC2581Parser::parse_polygon

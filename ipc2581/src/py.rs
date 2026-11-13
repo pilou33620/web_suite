@@ -440,7 +440,7 @@ mod tests {
         assert_eq!(hypot(1e308, 1e308), 1.4142135623730951e308);
         assert_eq!(hypot(1e308, 48.0), 1e308);
         assert_eq!(sum([-0.0]).to_bits(), 0.0f64.to_bits());
-        assert_eq!(repr_flottant(99201984633078.625), "99201984633078.62");
+        assert_eq!(repr_flottant(99201984633078.62), "99201984633078.62"); // à égale distance de .63
         assert_eq!(hypot(0.0, -0.0), 0.0);
     }
 }

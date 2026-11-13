@@ -18,6 +18,8 @@ use std::fmt;
 use std::sync::{Arc as Partage, OnceLock};
 
 type N<'a, 'i> = roxmltree::Node<'a, 'i>;
+/// Les contours d'une forme utilisateur : [(contour, [trous])].
+type Plans = Vec<(Vec<Point>, Vec<Vec<Point>>)>;
 /// Ce qui, en Python, levait une exception hors IPC2581ParseError : son message.
 type Py<T> = Result<T, String>;
 
@@ -679,7 +681,7 @@ impl IPC2581Parser {
     /// fentes droites de largeur spokeWidth (gap aux revisions anterieures),
     /// la premiere a spokeStartAngle. Rend [(contour, trous)] : un secteur
     /// par contour.
-    fn thermique(noeud: N, k: f64) -> Py<Vec<(Vec<Point>, Vec<Vec<Point>>)>> {
+    fn thermique(noeud: N, k: f64) -> Py<Plans> {
         let f = |cle: &str| Self::safe_float(attr(noeud, cle)) * k;
         let forme = attr_plein(noeud, "shape").unwrap_or("ROUND").to_uppercase();
         let (ro, ri) = (f("outerDiameter") / 2.0, f("innerDiameter") / 2.0);
@@ -747,7 +749,7 @@ impl IPC2581Parser {
         let mul = |pts: Vec<Point>| -> Vec<Point> { pts.iter().map(|p| Point::new(p.x * k, p.y * k)).collect() };
         let mut sd = ShapeDefinition::new(entry_id, "POLYGON");
         sd.fill_property = self.get_fill_desc(noeud);
-        let mut plans: Option<Vec<(Vec<Point>, Vec<Vec<Point>>)>> = None; // [(contour, [trous])] : forme utilisateur
+        let mut plans: Option<Plans> = None; // [(contour, [trous])] : forme utilisateur
         match nom {
             "Circle" => {
                 sd.shape_type = "CIRCLE".into();
@@ -2388,7 +2390,7 @@ impl IPC2581Parser {
                 if haut > larg {
                     (larg, haut, rot) = (haut, larg, rot + 90.0);
                 }
-                if !(haut > 0.0) {
+                if haut <= 0.0 {
                     continue;
                 }
                 let mut drill = Drill::new(
