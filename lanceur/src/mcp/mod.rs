@@ -148,7 +148,7 @@ pub fn nom_outil(id_outil: &str) -> &str {
 }
 
 /// urllib.parse.unquote : les %XX décodés, en UTF-8 (un octet invalide devient « ? » losange).
-fn unquote(t: &str) -> String {
+pub(crate) fn unquote(t: &str) -> String {
     let o = t.as_bytes();
     let (mut i, mut rendu) = (0, Vec::with_capacity(o.len()));
     while i < o.len() {

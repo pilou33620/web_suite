@@ -6,6 +6,8 @@ description = "WEB·SUITE : lanceur des outils, installateur, serveur MCP"
 
 [lib]
 path = "src/lib.rs"
+# Les blocs indentés des commentaires de module sont des lignes de commande, pas des exemples Rust
+doctest = false
 
 # Les exécutables sont les fichiers de src/bin/ (web_suite, mcp_web_suite, installer…).
 
