@@ -8,6 +8,7 @@ la consigne MCP, ni dans le relevé des consignes Gemini, dont chaque source est
 révision figée en tête du relevé.
     python3 lanceur/banc_savoir.py
 """
+import json
 import os
 import re
 import subprocess
@@ -15,9 +16,21 @@ import sys
 
 ICI = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, ICI)
-import mcp_web_suite  # noqa: E402
+from banc_bin import binaire  # noqa: E402
 
 RACINE = os.path.dirname(ICI)
+
+
+def serveur_mcp():
+    """Les outils (nom -> définition) et la consigne du serveur MCP, lus par le protocole, comme Claude Code."""
+    lignes = [json.dumps({"jsonrpc": "2.0", "id": i, "method": m}) for i, m in ((1, "initialize"), (2, "tools/list"))]
+    p = subprocess.run([binaire("mcp_web_suite")], input="".join(l + "\n" for l in lignes).encode("utf-8"),
+                       stdout=subprocess.PIPE, check=True, timeout=30, env=dict(os.environ, WEB_SUITE_DEPOT=RACINE))
+    init, liste = (json.loads(l)["result"] for l in p.stdout.decode("utf-8").split("\n") if l)
+    return {o["name"]: o for o in liste["tools"]}, init["instructions"]
+
+
+OUTILS_MCP, INSTRUCTIONS = serveur_mcp()
 SKILL = os.path.join(RACINE, ".claude", "skills", "web-suite")
 TRACE = os.path.join(RACINE, "lanceur", "docs", "savoir-trace.md")
 MAX_SKILL, MAX_FICHE, MAX_INSTRUCTIONS = 150, 200, 1500
@@ -61,7 +74,7 @@ def enum_de(outils, outil, arg):
 
 def controler(fiches, outils=None, dossier=SKILL, noms_projets=()):
     """fiches : {nom de fichier: texte}. Rend la liste des erreurs (vide si tout va)."""
-    outils = mcp_web_suite.OUTILS_MCP if outils is None else outils
+    outils = OUTILS_MCP if outils is None else outils
     erreurs = []
     if "SKILL.md" not in fiches:
         erreurs.append("SKILL.md manquant")
@@ -132,7 +145,7 @@ def source_figee(chemin, revisions):
 
 def controler_trace(texte, fiches, outils=None, a_faire_permis=A_FAIRE_PERMIS, lire=None, noms_projets=()):
     """Le relevé des consignes Gemini : chaque ligne a une source qui existe et une destination valable."""
-    outils = mcp_web_suite.OUTILS_MCP if outils is None else outils
+    outils = OUTILS_MCP if outils is None else outils
     revisions = dict(REVISION.findall(texte))
     lire = lire or (lambda chemin: source_figee(chemin, revisions))
     erreurs, ids, a_faire, sources = [], set(), 0, {}
@@ -246,7 +259,7 @@ if __name__ == "__main__":
     with open(TRACE, encoding="utf-8") as fd:
         err_trace, a_faire = controler_trace(fd.read(), fiches, noms_projets=noms)
     erreurs += err_trace
-    consigne = mcp_web_suite.INSTRUCTIONS
+    consigne = INSTRUCTIONS
     if len(consigne) > MAX_INSTRUCTIONS or "web-suite" not in consigne:
         erreurs.append("consigne MCP : %d caractères au plus, avec le renvoi au skill web-suite" % MAX_INSTRUCTIONS)
     erreurs += prive("consigne MCP (INSTRUCTIONS)", consigne, noms)
