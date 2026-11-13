@@ -111,7 +111,7 @@ pub fn installer(ids: &[&str], racine: &Path, demander_dependances: bool) -> boo
             if demander_dependances && oui("Installer openEMS maintenant (~50 Mo, Python 3.10 ou 3.11 requis) ?") {
                 outils::installer_openems(o, racine, &ecrire);
             } else {
-                println!("  Plus tard : python lanceur/installer.py antenna");
+                println!("  Plus tard : installer antenna (installer.cmd ou ./installer.sh)");
             }
         }
     }

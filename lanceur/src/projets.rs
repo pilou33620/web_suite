@@ -371,7 +371,7 @@ const REFUS_AUTH: &[&str] = &[
     "repository not found",
 ];
 const CONNEXION: &str = "relancez le lanceur dans son terminal : il propose de s'y connecter, une \
-                         seule fois (ou « python lanceur/connexion_github.py --connecter » ; \
+                         seule fois (ou « bin/connexion_github --connecter » ; \
                          à la main : « gh auth login » puis « gh auth setup-git »).";
 
 pub fn acces_refuse() -> String {
