@@ -122,11 +122,13 @@ affichée.
 ## Vérifier web_bench lui-même
 
 ```
-python web_bench/banc_web_bench.py
 cargo test -p web_bench
 ```
 
-Le banc pilote l'exécutable de l'extérieur, avec de faux outils (il le compile au besoin ;
-`WEB_SUITE_BIN` donne un dossier d'exécutables déjà compilés). Il vérifie le relais, la sonde, le
-passage d'un outil à l'autre, les gardes, les routes arrêtées, les bancs, les rapports et l'arrêt.
-Il est lancé par la CI de web_suite. `cargo test` éprouve les fonctions internes.
+Deux choses sont lancées. Les tests unitaires éprouvent les fonctions internes. Le banc
+`tests/banc_web_bench.rs` pilote l'exécutable de l'extérieur, avec de faux outils : il vérifie le
+relais, la sonde, le passage d'un outil à l'autre, les gardes, les routes arrêtées, les bancs, les
+rapports et l'arrêt. Comme web_bench lance les outils et leurs bancs `banc-*.py` avec Python, les
+faux outils sont de petits scripts Python écrits à la volée dans un dossier temporaire : sans
+`python3` sur le poste, le banc ne vérifie que les options refusées et saute le reste. La CI de
+web_suite lance les deux.

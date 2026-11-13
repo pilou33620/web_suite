@@ -19,6 +19,16 @@ sha2 = "0.10"
 regex = "1"
 chrono = { version = "0.4", default-features = false, features = ["clock"] }
 
+[dev-dependencies]
+# le client HTTPS de tests/banc_serveur.rs (les mêmes versions que commun)
+rustls = { version = "0.23", default-features = false, features = ["ring", "std", "tls12"] }
+rustls-pemfile = "2"
+
+# la fausse Python du banc est l'exécutable du test lui-même : pas de harnais
+[[test]]
+name = "banc_dependances"
+harness = false
+
 [target.'cfg(unix)'.dependencies]
 libc = "0.2"
 

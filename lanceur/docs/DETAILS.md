@@ -238,7 +238,7 @@ Outils MCP (`etat` dans `lanceur/src/mcp/mod.rs`, les autres dans `api_outils.rs
 **L'ancien assistant IA.** Les assistants IA intégrés aux pages de WEB_CAO
 (schéma, PCB, visionneuse, Gestion LIB) et de WEB_ANTENNA sont retirés : Claude, par ce MCP, fait leur
 travail. Les deux serveurs n'ont plus de route de clé ; le MCP continue de refuser `/api/ia`.
-`lanceur/banc_traces_ia.py` vérifie en CI qu'il n'en reste aucune trace.
+`lanceur/tests/banc_traces_ia.rs` vérifie en CI qu'il n'en reste aucune trace.
 
 **Le savoir métier.** Le skill `web-suite` (`.claude/skills/web-suite/`, voir
 [SPEC-mcp-savoir-metier.md](SPEC-mcp-savoir-metier.md)) dit quel outil prendre pour quelle tâche.
@@ -246,7 +246,7 @@ Il a une fiche par métier : PCB (IPC-2152, classes, paires, retour), simulation
 datasheet, composants (IPC-7351B, pcbfp-1, brochage), schéma, routage et antennes. Claude
 Code le charge dans le dépôt web_suite ; ailleurs (Windows en SSH), le serveur MCP envoie un
 résumé dans sa réponse `initialize` (`instructions`) et sert les fiches par l'outil `savoir_lire`. Les règles des anciennes consignes de l'assistant IA
-y sont suivies une à une dans [savoir-trace.md](savoir-trace.md), et `lanceur/banc_savoir.py`
+y sont suivies une à une dans [savoir-trace.md](savoir-trace.md), et `lanceur/tests/banc_savoir.rs`
 vérifie que ce que les fiches citent existe.
 
 Les règles de conception d'une pièce 3D sont un seul fichier, `WEB_3D/regles-conception.md` : `savoir_lire`
@@ -312,28 +312,46 @@ doit rendre `{"jsonrpc": "2.0", "id": 1, "result": {}}`.
 
 ## Tests
 
-- `python lanceur/projets.py` : deux postes et un faux GitHub (dépôt nu) — création,
+Tout est en Rust, sauf le banc de la page : `cargo test --workspace` lance les tests unitaires et
+les bancs. Les bancs sont les tests d'intégration de `lanceur/tests/` : ils pilotent les exécutables
+en boîte noire, dans un dossier temporaire (`tests/commun/` : lancer un exécutable, requêtes HTTP,
+dialogue JSON-RPC sur stdio, faux outil HTTP). Un seul banc :
+`cargo test -p web_suite_lanceur --test banc_mcp` (`-- --nocapture` pour voir son bilan).
+
+Tests unitaires (dans `src/`) :
+
+- `lanceur/src/projets/essais.rs` : deux postes et un faux GitHub (dépôt nu) — création,
   identité git manquante, envoi, clonage sur l'autre poste, `projets.txt`.
-- `python lanceur/banc_serveur.py` : `Host` étranger, `X-WebSuite`, taille des requêtes,
+- `lanceur/src/connexion_github.rs` : la connexion à GitHub au démarrage, sans réseau.
+- `commun/src/appairage/essais.rs` : code, jeton et cookie partagés par les web tools.
+- `commun/src/pilote/essais.rs` : le serveur du canal de pilotage (file, long-poll, ciblage par
+  dernier focus, redistribution, ordres réservés à ce poste, autre origine refusée).
+- `lanceur/src/mcp/mod.rs`, `lanceur/src/claude_pages.rs`, `lanceur/src/outils/essais.rs` : la porte
+  du MCP vers les outils, le panneau « Claude » des pages et ses demandes passées à Claude Code,
+  les journaux et openEMS.
+
+Bancs (`lanceur/tests/`) :
+
+- `banc_serveur` : `Host` étranger, `X-WebSuite`, taille des requêtes,
   jeton du mode réseau (refus, cookie, poste local exempté), code d'appairage (usage
-  unique, expiration, cinq erreurs puis pause).
-- `python lanceur/banc_dependances.py` : pip n'est
+  unique, cinq erreurs puis pause), HTTPS, mise à jour de WEB_SUITE au démarrage.
+- `banc_dependances` : pip n'est
   pas lancé si tout est là, un lancement à qui il manque un paquet lance l'installation, et aucune
-  question openEMS n'est posée hors Windows.
-- `python lanceur/connexion_github.py` : la connexion à GitHub au démarrage, sans réseau.
-- `python lanceur/appairage.py` : code, jeton et cookie partagés par les web tools.
-- `cargo test -p web_suite_lanceur` : la porte du MCP vers les outils, et le panneau « Claude » des pages et ses demandes passées à Claude Code.
-- `python lanceur/banc_traces_ia.py` : plus aucune trace de l'ancien assistant IA.
-- `python lanceur/banc_mcp.py` : serveur MCP en sous-processus — protocole (initialize,
-  ping, erreurs), outil `etat` face à un faux WEB_CAO, routes `/api/github`, `/api/envoyer`,
-  `/api/identite`, `/api/ia`, `/api/appairer` refusées et lanceur en lecture seule, sans
-  qu'aucune requête n'atteigne l'outil, outil arrêté signalé ; outils d'`api-outils` face
+  question openEMS n'est posée hors Windows. La fausse Python est l'exécutable du test lui-même
+  (`harness = false` dans `Cargo.toml`).
+- `banc_traces_ia` : plus aucune trace de l'ancien assistant IA, ici et dans les clones des outils.
+- `banc_savoir` : ce que citent les fiches du skill existe, et le relevé des consignes est relu
+  dans les clones des outils (dans web_suite, ou à côté de lui comme en CI ; sans clone, non relu).
+- `banc_mcp` : serveur MCP en sous-processus — protocole (initialize,
+  ping, erreurs), outil `etat` face à un faux WEB_CAO, outil arrêté signalé ; outils d'`api-outils` face
   à un faux outil qui note chaque requête (bonne route et bonne méthode, garde-fous qui
   refusent sans écrire, résumé sous 100 Ko, jamais `…/lancer`) ; outils du canal de pilotage
-  face à un faux outil (commande déposée, en attente, refusée, capture en image).
-- `python lanceur/pilote.py` : le serveur du canal de pilotage (file, long-poll, ciblage par
-  dernier focus, redistribution, ordres réservés à ce poste, autre origine refusée).
+  face à un faux outil (commande déposée, en attente, refusée, capture en image). Les routes
+  `/api/github`, `/api/envoyer`, `/api/identite`, `/api/ia`, `/api/appairer` refusées et le lanceur
+  en lecture seule : tests unitaires de `lanceur/src/mcp/mod.rs`.
+
+Hors Rust :
+
 - `node lanceur/banc_pilote.js` : la page (un seul relais, changement de relais sans perte,
   cartes, interrupteur, Annuler si rien n'a bougé, aucun texte de Claude lu comme du HTML).
-
-Chacun affiche `OK` si tout passe.
+  Il affiche `OK` si tout passe.

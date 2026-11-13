@@ -4,7 +4,7 @@
 //! descriptions ni les schémas d'arguments des outils : `Pilote.aide("cao_schema_dessiner")`
 //! (WEB_CAO/commun/pilote-cao.js) les lit dans ce fichier. Il est TIRÉ des définitions du MCP
 //! (outils_mcp), une seule source : relancer cet exécutable après avoir changé un outil cao_* ou lib_*.
-//! lanceur/banc_mcp.py échoue tant que le fichier n'est pas à jour, et la CI de web_suite aussi
+//! lanceur/tests/banc_mcp.rs échoue tant que le fichier n'est pas à jour, et la CI de web_suite aussi
 //! (sur son clone de WEB_CAO) : pousser WEB_CAO avant web_suite.
 //!
 //!     aide_pilote             écrit le fichier

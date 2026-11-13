@@ -10,6 +10,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # Python ne sert plus qu'aux faux outils du banc de web_bench (web_bench lance les outils et
+      # leurs bancs avec Python) et aux comparaisons en ligne des copies des outils, plus bas.
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
@@ -17,22 +19,21 @@ jobs:
       - name: Exécutables Rust (lanceur, MCP, web_bench)
         run: cargo build --workspace --bins
 
-      # Les bancs intégrés des anciens modules Python (projets, connexion GitHub, appairage,
-      # canal de pilotage, Claude depuis la page) sont devenus des tests Rust.
-      - name: Tests Rust — commun, lanceur, web_bench
+      # Avant les tests : banc_savoir relit les anciennes consignes que le relevé cite, et
+      # banc_traces_ia les fichiers suivis des outils, dans ces clones.
+      - name: Outils — clones de WEB_CAO, WEB_ANTENNA et WEB_3D à côté du dépôt
+        run: |
+          for o in WEB_CAO WEB_ANTENNA WEB_3D; do
+            git clone --quiet --depth 1 https://github.com/pilou33620/$o.git ../$o
+          done
+
+      # Tests unitaires, et les bancs (lanceur/tests/, web_bench/tests/), qui pilotent les
+      # exécutables en boîte noire : serveur du lanceur (Host, jeton du mode réseau, X-WebSuite),
+      # dépendances (pip seulement s'il manque un paquet), serveur MCP (protocole, outils, refus),
+      # skill web-suite et relevé des consignes, retrait de l'ancien assistant IA, web_bench
+      # (relais, sonde, routes arrêtées, bancs, rapports, avec de faux outils).
+      - name: Tests Rust — commun, ipc2581, lanceur, web_bench, et leurs bancs
         run: cargo test --workspace
-
-      - name: Serveur du lanceur — Host, jeton du mode réseau, X-WebSuite
-        run: python lanceur/banc_serveur.py
-
-      - name: Dépendances — pip seulement s'il manque un paquet, openEMS sans question hors Windows
-        run: python lanceur/banc_dependances.py
-
-      - name: Serveur MCP — protocole, outil etat, publication GitHub et lanceur refusés
-        run: python lanceur/banc_mcp.py
-
-      - name: Banc d'essai web_bench — relais, sonde, outils, routes arrêtées, bancs, rapports (faux outils)
-        run: python web_bench/banc_web_bench.py
 
       # Node 20 comme sur le Pi : BroadcastChannel et crypto y sont globaux, le banc s'en sert
       - uses: actions/setup-node@v4
@@ -50,9 +51,6 @@ jobs:
       # donc que les trois copies restent la même.
       - name: Outils — la mise à jour automatique est la même partout
         run: |
-          for o in WEB_CAO WEB_ANTENNA WEB_3D; do
-            git clone --quiet --depth 1 https://github.com/pilou33620/$o.git ../$o
-          done
           python - <<'EOF'
           import ast, os
           def corps(f):
@@ -99,20 +97,13 @@ jobs:
           done
           echo "canal de pilotage identique dans les trois outils"
 
-      # L'aide des commandes de la page (Pilote.aide) est tirée des définitions du MCP : banc_mcp.py
+      # L'aide des commandes de la page (Pilote.aide) est tirée des définitions du MCP : banc_mcp.rs
       # ne la voit pas ici (WEB_CAO n'est pas dans le dépôt), elle se vérifie sur le clone.
       - name: Outils — WEB_CAO/commun/pilote-aide.json suit les définitions du MCP
         run: |
           target/debug/aide_pilote --stdout | cmp - ../WEB_CAO/commun/pilote-aide.json \
             || { echo "pilote-aide.json périmé : bin/aide_pilote, puis pousser WEB_CAO d'abord"; exit 1; }
           echo "pilote-aide.json à jour"
-
-      # après le clone des outils : le banc relit les anciennes consignes que le relevé cite
-      - name: Skill web-suite — outils et lectures cités, relevé des consignes, rien de privé
-        run: python lanceur/banc_savoir.py
-
-      - name: Retrait de l'ancien assistant IA — aucune trace dans web_suite et ses outils
-        run: python lanceur/banc_traces_ia.py
 
       # Même raison pour le lecteur IPC-2581 : WEB_CAO et WEB_ANTENNA en ont
       # chacun une copie, qui avait divergé (chacune avait une correction que

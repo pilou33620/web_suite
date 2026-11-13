@@ -175,8 +175,10 @@ corrections. Détails : [web_bench/README.md](web_bench/README.md).
 - Journaux des outils : `lanceur/journaux/<outil>.log` (bouton **Journal**).
 - `bin/maj_git` : état git de WEB_SUITE, des outils et de `PROJETS/`, avec
   commit / pull / push guidés.
-- Tests : `cargo test --workspace` (commun, lanceur, web_bench), puis les bancs, qui pilotent les
-  exécutables : `python lanceur/banc_serveur.py`, `python lanceur/banc_dependances.py`,
-  `python lanceur/banc_mcp.py`, `node lanceur/banc_pilote.js`, `python web_bench/banc_web_bench.py`, `python lanceur/banc_savoir.py`,
-  `python lanceur/banc_traces_ia.py` (affichent `OK` ; les deux derniers lisent aussi les dépôts
-  des outils). La CI les lance tous.
+- Tests : `cargo test --workspace` lance tout ce qui est en Rust — les tests unitaires (commun,
+  ipc2581, lanceur, web_bench) et les bancs, qui pilotent les exécutables en boîte noire :
+  `lanceur/tests/` (`banc_serveur`, `banc_dependances`, `banc_mcp`, `banc_savoir`, `banc_traces_ia` ;
+  les deux derniers lisent aussi les dépôts des outils, quand ils sont clonés) et
+  `web_bench/tests/banc_web_bench.rs`. Un seul banc : `cargo test -p web_suite_lanceur --test banc_mcp`.
+  Reste `node lanceur/banc_pilote.js` (la page). Plus aucun fichier Python dans ce dépôt ; la CI
+  lance le tout.

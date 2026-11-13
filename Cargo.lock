@@ -994,6 +994,8 @@ dependencies = [
  "chrono",
  "libc",
  "regex",
+ "rustls",
+ "rustls-pemfile",
  "serde_json",
  "sha2",
  "ureq",

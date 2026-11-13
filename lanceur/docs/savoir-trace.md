@@ -12,7 +12,7 @@ consignes de l'assistant Gemini, jusqu'à l'endroit où le skill `web-suite`
 
 Les numéros de ligne valent aux révisions `WEB_CAO@c814de83f32d3e11d1c2f2d498efa430631bd586`
 et `WEB_ANTENNA@24ba852f80ac21d0efc97a997d08ffe6f8f72c9e`, avant le retrait de Gemini.
-`lanceur/banc_savoir.py` relit chaque source à cette révision et vérifie ce tableau. Une destination est l'une des formes suivantes :
+`lanceur/tests/banc_savoir.rs` relit chaque source à cette révision et vérifie ce tableau. Une destination est l'une des formes suivantes :
 - une fiche du skill (`pcb.md`), qui doit exister ;
 - `outil : nom`, dont l'outil doit exister ;
 - `généré : nom (quoi=x)`, dont l'outil et le `quoi` doivent exister ;
