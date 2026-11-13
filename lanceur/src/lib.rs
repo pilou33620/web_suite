@@ -5,6 +5,7 @@ pub mod catalogue;
 pub mod connexion_github;
 pub mod installer;
 pub mod outils;
+pub mod processus;
 pub mod projets;
 pub mod serveur_lanceur;
 
