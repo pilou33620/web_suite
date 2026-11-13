@@ -314,7 +314,7 @@ impl Lanceur {
         if self.jeton.is_some() && r.param("jeton").is_some() {
             // Le jeton passe dans un cookie et quitte l'adresse : il ne reste
             // ni dans l'historique, ni dans un lien recopié.
-            return Reponse { code: 303, entetes: Vec::new(), corps: Vec::new() }
+            return Reponse { code: 303, entetes: Vec::new(), corps: Vec::new(), suite: None }
                 .entete("Set-Cookie", &self.biscuit_jeton(r))
                 .entete("Location", if chemin.is_empty() { "/" } else { chemin });
         }

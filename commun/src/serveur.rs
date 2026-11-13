@@ -59,6 +59,13 @@ impl Requete<'_> {
         self.methode == "GET" || self.methode == "HEAD"
     }
 
+    /// Le corps brut, à lire soi-même par blocs (envoi d'un gros fichier) : s'en tenir
+    /// à Content-Length, rien ne borne la lecture ici.
+    pub fn flux_corps(&mut self) -> &mut dyn Read {
+        self.lu = true;
+        self.corps
+    }
+
     /// Le corps, s'il tient dans `max` octets. Un corps refusé n'est pas lu.
     pub fn lire_corps(&mut self, max: usize) -> Result<Vec<u8>, ErreurCorps> {
         let n: usize = match self.entete("Content-Length") {
@@ -82,11 +89,14 @@ pub struct Reponse {
     pub code: u16,
     pub entetes: Vec<(String, String)>,
     pub corps: Vec<u8>,
+    /// Envoyé après `corps`, par blocs : un modèle de 200 Mo ne passe pas en mémoire.
+    /// Content-Length est alors à donner dans `entetes`.
+    pub suite: Option<Box<dyn Read + Send>>,
 }
 
 impl Reponse {
     pub fn new(code: u16, type_: &str, corps: impl Into<Vec<u8>>) -> Self {
-        Reponse { code, entetes: vec![("Content-Type".into(), type_.into())], corps: corps.into() }
+        Reponse { code, entetes: vec![("Content-Type".into(), type_.into())], corps: corps.into(), suite: None }
             .entete("Cache-Control", "no-store")
     }
 
@@ -99,9 +109,16 @@ impl Reponse {
     }
 
     pub fn redirection(code: u16, ou: &str) -> Self {
-        Reponse { code, entetes: Vec::new(), corps: Vec::new() }
+        Reponse { code, entetes: Vec::new(), corps: Vec::new(), suite: None }
             .entete("Location", ou)
             .entete("Cache-Control", "no-store")
+    }
+
+    /// Un fichier (ou tout flux) de `taille` octets, envoyé par blocs.
+    pub fn flux(code: u16, type_: &str, taille: u64, suite: impl Read + Send + 'static) -> Self {
+        let mut r = Self::new(code, type_, Vec::new()).entete("Content-Length", &taille.to_string());
+        r.suite = Some(Box::new(suite));
+        r
     }
 
     pub fn entete(mut self, nom: &str, valeur: &str) -> Self {
@@ -210,6 +227,7 @@ pub struct Serveur {
     ecoute: TcpListener,
     tls: RwLock<Option<Arc<ServerConfig>>>,
     arret: AtomicBool,
+    delai: std::sync::atomic::AtomicU64,
 }
 
 fn ecouter(adresse: SocketAddr, double_pile: bool) -> io::Result<TcpListener> {
@@ -247,7 +265,7 @@ impl Serveur {
             };
             for &(ip, double) in piles {
                 if let Ok(ecoute) = ecouter(SocketAddr::new(ip, p), double) {
-                    return Ok(Arc::new(Serveur { ecoute, tls: RwLock::new(None), arret: AtomicBool::new(false) }));
+                    return Ok(Arc::new(Serveur { ecoute, tls: RwLock::new(None), arret: AtomicBool::new(false), delai: Default::default() }));
                 }
             }
         }
@@ -255,6 +273,12 @@ impl Serveur {
             io::ErrorKind::AddrInUse,
             format!("aucun port libre entre {} et {}", port, port.saturating_add(essais.saturating_sub(1))),
         ))
+    }
+
+    /// Délai de chaque lecture du socket (0 : aucun) : un envoi coupé sans fermeture (Wi-Fi
+    /// perdu) ne tient pas un fil indéfiniment. Un envoi lent mais vivant n'est pas coupé.
+    pub fn regler_delai(&self, secondes: u64) {
+        self.delai.store(secondes, Ordering::SeqCst);
     }
 
     pub fn port(&self) -> u16 {
@@ -311,6 +335,10 @@ impl Serveur {
             }
             tcp.set_read_timeout(None)?;
         }
+        let delai = self.delai.load(Ordering::SeqCst);
+        if delai > 0 {
+            tcp.set_read_timeout(Some(Duration::from_secs(delai)))?;
+        }
         let mut lecteur = BufReader::new(flux);
         let mut total = 0;
         let mut ligne = |lecteur: &mut BufReader<Flux>| -> io::Result<String> {
@@ -364,6 +392,9 @@ impl Serveur {
         }
         let flux = lecteur.get_mut();
         flux.write_all(&sortie)?;
+        if let (Some(mut suite), false) = (reponse.suite, tete) {
+            std::io::copy(&mut suite, flux)?;
+        }
         flux.flush()?;
         if let Flux::Tls(s) = flux {
             s.conn.send_close_notify();

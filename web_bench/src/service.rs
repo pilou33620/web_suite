@@ -297,6 +297,7 @@ impl Banc {
                 entetes: vec![("Content-Type".into(), "application/json".into()), ("X-Web-Bench-Bloque".into(), "1".into())],
                 corps: format!("{{\"detail\": \"{}\"}}", ascii("Arrêté par web_bench (route protégée pendant les essais)"))
                     .into_bytes(),
+                suite: None,
             };
         }
         let entetes: Vec<(String, String)> = r.entetes.iter().filter(|(k, _)| !saute(k)).cloned().collect();
@@ -313,7 +314,7 @@ impl Banc {
         if let (true, Some(longueur)) = (r.methode == "HEAD", de_amont("Content-Length")) {
             entetes.push(("Content-Length".into(), longueur));
         }
-        Reponse { code: rep.code, entetes, corps }
+        Reponse { code: rep.code, entetes, corps, suite: None }
     }
 }
 
