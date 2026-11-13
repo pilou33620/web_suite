@@ -38,3 +38,5 @@ web_bench/rapports/
 
 # Rust
 target/
+# Exécutables compilés ou téléchargés (binaires.sh, binaires.cmd)
+bin/
