@@ -479,6 +479,10 @@ fn refus() {
     tardive.extend(b"--><!DOCTYPE IPC-2581 [<!ENTITY a \"aaaa\">]><IPC-2581>&a;</IPC-2581>");
     assert_eq!(refuse(&tardive, "entite tardive"), "Declaration d'entite XML interdite (<!ENTITY).");
     // banc-serveur-routes.py : protection XML Entity Expansion (Billion Laughs / DTD)
+    // en UTF-16 les octets bruts ne montrent pas la déclaration : elle est cherchée dans le texte décodé
+    let mut utf16 = vec![0xFF, 0xFE];
+    utf16.extend("<!DOCTYPE IPC-2581 [<!ENTITY a \"aaaa\">]><IPC-2581>&a;</IPC-2581>".encode_utf16().flat_map(u16::to_le_bytes));
+    assert_eq!(refuse(&utf16, "entite en UTF-16"), "Declaration d'entite XML interdite (<!ENTITY).");
     let xxe = b"<?xml version=\"1.0\"?>\n<!DOCTYPE lolz [\n <!ENTITY lol \"lol\">\n]>\n<IPC-2581></IPC-2581>";
     assert!(IPC2581Parser::new("(flux)", true).parse(xxe).unwrap_err().to_string().contains("interdite"));
     assert_eq!(
