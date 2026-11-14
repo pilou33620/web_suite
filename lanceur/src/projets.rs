@@ -338,11 +338,12 @@ pub fn identite_manquante(racine: &Path) -> bool {
 pub fn definir_identite(racine: &Path, nom: &str, email: &str) -> (bool, String) {
     let nom = nom.split_whitespace().collect::<Vec<_>>().join(" ");
     let email = email.trim();
-    if nom.is_empty() || nom.chars().count() > 100 {
+    // « -… » serait lu par git config comme une option
+    if nom.is_empty() || nom.starts_with('-') || nom.chars().count() > 100 {
         return (false, "Nom invalide.".to_string());
     }
     let forme = regex::Regex::new(r"^[^\s@]+@[^\s@]+\.[^\s@]+$").expect("motif");
-    if email.chars().count() > 200 || !forme.is_match(email) {
+    if email.starts_with('-') || email.chars().count() > 200 || !forme.is_match(email) {
         return (false, "Adresse e-mail invalide.".to_string());
     }
     let _tenu = verrou();

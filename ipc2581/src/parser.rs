@@ -344,6 +344,10 @@ impl IPC2581Parser {
                 return Err(IPC2581ParseError(format!("Erreur lors du parsing de {} : {}", self.xml_file, e)));
             }
         };
+        // le texte décodé aussi : en UTF-16, les octets bruts ne contiennent pas « <!ENTITY »
+        if xml.xml.as_bytes().windows(8).any(|f| f.eq_ignore_ascii_case(b"<!ENTITY")) {
+            return Err(IPC2581ParseError("Declaration d'entite XML interdite (<!ENTITY).".into()));
+        }
         xml::verifier(&xml).map_err(invalide)?;
         let xml = &xml.xml[xml.debut..];
         let options = roxmltree::ParsingOptions { allow_dtd: true, ..Default::default() };
