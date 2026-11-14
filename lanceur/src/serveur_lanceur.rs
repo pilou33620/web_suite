@@ -311,12 +311,13 @@ impl Lanceur {
         if chemin == PAGE_APPAIRAGE {
             return Reponse::redirection(303, "/"); // déjà autorisé : au lanceur
         }
-        if self.jeton.is_some() && r.param("jeton").is_some() {
+        // le vrai jeton seulement : sinon tout client de ce poste le recevrait en cookie avec « ?jeton=x »
+        if self.jeton.as_deref().is_some_and(|j| appairage::jeton_recu(r, j)) && r.param("jeton").is_some() {
             // Le jeton passe dans un cookie et quitte l'adresse : il ne reste
             // ni dans l'historique, ni dans un lien recopié.
             return Reponse { code: 303, entetes: Vec::new(), corps: Vec::new(), suite: None }
                 .entete("Set-Cookie", &self.biscuit_jeton(r))
-                .entete("Location", if chemin.is_empty() { "/" } else { chemin });
+                .entete("Location", appairage::chemin_local(chemin));
         }
         if let Some(nom) = fichier_servi(chemin) {
             return self.fichier(nom);

@@ -531,8 +531,17 @@ pub struct Gestionnaire {
     journaux: PathBuf,
 }
 
+/// Le journal d'un outil, créé en 0600 : il contient son code d'appairage.
+fn ouvrir_journal(chemin: &Path) -> io::Result<fs::File> {
+    let mut o = fs::OpenOptions::new();
+    o.append(true).create(true);
+    #[cfg(unix)]
+    std::os::unix::fs::OpenOptionsExt::mode(&mut o, 0o600);
+    o.open(chemin)
+}
+
 fn ajouter_au_journal(chemin: &Path, texte: &str) {
-    if let Ok(mut f) = fs::OpenOptions::new().append(true).create(true).open(chemin) {
+    if let Ok(mut f) = ouvrir_journal(chemin) {
         let _ = f.write_all(texte.as_bytes());
     }
 }
@@ -802,7 +811,7 @@ impl Gestionnaire {
             &format!("\n=== lancement {} : {}\n", chrono::Local::now().format("%Y-%m-%d %H:%M:%S"), cmd.join(" ")),
         );
         let lancer = || -> io::Result<Child> {
-            let sortie = fs::OpenOptions::new().append(true).create(true).open(&journal)?;
+            let sortie = ouvrir_journal(&journal)?;
             let mut c = Command::new(&cmd[0]);
             c.args(&cmd[1..])
                 .current_dir(dossier(o, &self.racine))

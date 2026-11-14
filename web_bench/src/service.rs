@@ -283,8 +283,9 @@ impl Banc {
 
     // ---- le relais vers l'outil actif
     fn relayer(&self, r: &mut Requete) -> Reponse {
-        let corps = match r.lire_corps(usize::MAX) {
+        let corps = match r.lire_corps(256 * 1024 * 1024) {
             Ok(c) => c,
+            Err(web_tools_commun::serveur::ErreurCorps::TropGrand) => return Reponse::texte(413, "Corps trop gros"),
             Err(_) => return Reponse::texte(400, "Content-Length invalide"),
         };
         let o = self.outil();

@@ -12,6 +12,8 @@ use rustls::{ServerConfig, ServerConnection, StreamOwned};
 
 const ENTETES_MAX: usize = 64 * 1024;
 const MAX_CONNEXIONS: usize = 256;
+/// Délai de lecture et d'écriture (s) sans `regler_delai` : un client muet ne garde pas son fil.
+const DELAI_DEFAUT: u64 = 60;
 
 /// Ce poste (127.x, ::1, ::ffff:127.x) n'entre pas dans le plafond de connexions.
 fn hors_plafond(ip: IpAddr) -> bool {
@@ -85,8 +87,12 @@ impl Requete<'_> {
             return Ok(Vec::new());
         }
         self.lu = true;
-        let mut corps = vec![0; n];
-        self.corps.read_exact(&mut corps).map_err(ErreurCorps::Lecture)?;
+        // le tampon grandit avec ce qui arrive : un Content-Length annoncé ne réserve rien
+        let mut corps = Vec::new();
+        (&mut self.corps).take(n as u64).read_to_end(&mut corps).map_err(ErreurCorps::Lecture)?;
+        if corps.len() < n {
+            return Err(ErreurCorps::Lecture(io::ErrorKind::UnexpectedEof.into()));
+        }
         Ok(corps)
     }
 }
@@ -271,7 +277,7 @@ impl Serveur {
             };
             for &(ip, double) in piles {
                 if let Ok(ecoute) = ecouter(SocketAddr::new(ip, p), double) {
-                    return Ok(Arc::new(Serveur { ecoute, tls: RwLock::new(None), arret: AtomicBool::new(false), delai: Default::default() }));
+                    return Ok(Arc::new(Serveur { ecoute, tls: RwLock::new(None), arret: AtomicBool::new(false), delai: DELAI_DEFAUT.into() }));
                 }
             }
         }
@@ -355,6 +361,7 @@ impl Serveur {
         let delai = self.delai.load(Ordering::SeqCst);
         if delai > 0 {
             tcp.set_read_timeout(Some(Duration::from_secs(delai)))?;
+            tcp.set_write_timeout(Some(Duration::from_secs(delai)))?;
         }
         let mut lecteur = BufReader::new(flux);
         let mut total = 0;
@@ -403,7 +410,8 @@ impl Serveur {
         if !reponse.entetes.iter().any(|(k, _)| k.eq_ignore_ascii_case("Content-Length")) {
             write!(sortie, "Content-Length: {}\r\n", reponse.corps.len())?;
         }
-        sortie.extend_from_slice(b"Connection: close\r\n\r\n");
+        // pas de cadre chez une autre origine : une page piégée ne détourne pas les clics
+        sortie.extend_from_slice(b"X-Frame-Options: SAMEORIGIN\r\nConnection: close\r\n\r\n");
         if !tete {
             sortie.extend_from_slice(&reponse.corps);
         }

@@ -344,7 +344,11 @@ fn erreur(texte: String) -> std::io::Error {
 fn generer(dossier: &Path, openssl: &Path, adresses: &[String], ca_neuve: bool) -> std::io::Result<()> {
     let nom = nom_local();
     let tmp = dossier.join(format!("tmp{}", alea(6).iter().map(|b| format!("{:02x}", b)).collect::<String>()));
-    fs::create_dir(&tmp)?;
+    // 0700 avant que openssl y écrive les clés : un autre compte du poste ne les lit pas au passage
+    let mut creation = fs::DirBuilder::new();
+    #[cfg(unix)]
+    std::os::unix::fs::DirBuilderExt::mode(&mut creation, 0o700);
+    creation.create(&tmp)?;
     let resultat = (|| {
         let lancer = |args: &[&str]| -> std::io::Result<()> {
             let r = Command::new(openssl).args(args).current_dir(&tmp).stdin(Stdio::null()).output()?;
@@ -734,6 +738,11 @@ pub fn biscuit_recu(r: &Requete, nom: &str) -> Option<String> {
 }
 
 /// Le jeton est-il dans l'adresse (?jeton=) ou dans le cookie ?
+/// Le chemin où renvoyer après « ?jeton= » : « //ailleurs.exemple/ » ferait quitter le poste.
+pub fn chemin_local(chemin: &str) -> &str {
+    if chemin.is_empty() || chemin.starts_with("//") || chemin.starts_with("/\\") { "/" } else { chemin }
+}
+
 pub fn jeton_recu(r: &Requete, jeton: &str) -> bool {
     [r.param("jeton"), biscuit_recu(r, BISCUIT)].into_iter().flatten().any(|recu| !recu.is_empty() && egal(&recu, jeton))
 }
@@ -840,7 +849,8 @@ impl Garde {
         let lecture = r.lecture();
         if self.autorise(r) {
             self.visites.noter(r.client.ip());
-            if lecture && r.param("jeton").is_some() {
+            // le vrai jeton seulement : sinon tout client de ce poste le recevrait en cookie avec « ?jeton=x »
+            if lecture && r.param("jeton").is_some() && jeton_recu(r, self.jeton.as_deref().unwrap_or("")) {
                 // Le jeton passe dans un cookie et quitte l'adresse : il ne reste
                 // ni dans l'historique, ni dans un lien recopié.
                 let reste: Vec<String> = params(r.requete())
@@ -848,7 +858,8 @@ impl Garde {
                     .filter(|(k, v)| k != "jeton" && !v.is_empty())
                     .map(|(k, v)| format!("{}={}", encoder_url(k), encoder_url(v)))
                     .collect();
-                let ou = if reste.is_empty() { chemin } else { format!("{}?{}", chemin, reste.join("&")) };
+                let chemin = chemin_local(&chemin);
+                let ou = if reste.is_empty() { chemin.to_string() } else { format!("{}?{}", chemin, reste.join("&")) };
                 return Some(Reponse::texte(303, "").entete("Set-Cookie", &self.biscuit(r)).entete("Location", &ou));
             }
             if lecture && chemin == PAGE {
@@ -884,3 +895,13 @@ impl Garde {
 
 #[cfg(test)]
 mod essais;
+
+#[cfg(test)]
+mod essais_renvoi {
+    #[test]
+    fn le_renvoi_reste_sur_ce_poste() {
+        for (recu, rendu) in [("", "/"), ("/", "/"), ("/page", "/page"), ("//piege.exemple/", "/"), ("/\\piege.exemple", "/")] {
+            assert_eq!(super::chemin_local(recu), rendu, "{:?}", recu);
+        }
+    }
+}
