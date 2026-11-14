@@ -20,7 +20,10 @@ dans `PROJETS/`, synchronisé avec GitHub. Détails complets : [lanceur/docs/DET
 
 ## Installation
 
-Prérequis : Python 3.8+ et git (sans git, pas de mises à jour ni de synchronisation).
+Prérequis : git (sans git, pas de mises à jour ni de synchronisation). Le lanceur est en Rust :
+les scripts ci-dessous prennent ses exécutables dans `bin/` — téléchargés depuis la publication
+« binaires » de GitHub (Windows x86_64, Linux x86_64 et aarch64, macOS aarch64), ou compilés sur
+place si `cargo` est installé. Les trois outils sont livrés de la même façon : rien d'autre à installer.
 
 ```
 git clone https://github.com/pilou33620/WEB_SUITE.git WEB_TOOLS
@@ -31,17 +34,21 @@ git clone https://github.com/pilou33620/WEB_SUITE.git WEB_TOOLS
 | Windows | `installer.cmd` | `demarrer_WEB_SUITE.cmd` |
 | Linux, Raspberry Pi | `./installer.sh` | `./demarrer_WEB_SUITE.sh` |
 
+Sans git ni sources : la publication « binaires » de GitHub porte aussi une archive de production
+par système (`web_suite-prod-<système>`), faite par la CI — les exécutables, ces scripts de
+démarrage et les pages. On la décompresse et on lance les mêmes scripts ; elle ne se met pas à
+jour seule (on reprend l'archive).
+
 L'installateur demande quels outils télécharger (`1`, `1 3`, `4` = tous), ou directement :
-`python lanceur/installer.py cao 3d`.
+`installer.cmd cao 3d` (`./installer.sh cao 3d`).
 
 Dépendances des outils :
 
-- **WEB_CAO** : `numpy` et `scipy`, obligatoires : l'installateur les installe, et le lanceur
-  les installe aussi si un lancement les trouve absents. Sur Raspberry Pi ou Debian, où `pip` refuse la Python du système :
-  `sudo apt install python3-numpy python3-scipy`.
-- **WEB_ANTENNA** : openEMS, dont l'installation automatique est proposée sous Windows seulement
-  (nécessite Python 3.10 ou 3.11 64 bits). Ailleurs, voir `WEB_ANTENNA/requirements.txt`.
-- **WEB_3D** : aucune.
+- **WEB_CAO**, **WEB_3D** : aucune.
+- **WEB_ANTENNA** : openEMS pour lancer des simulations, c'est-à-dire ses deux exécutables
+  `openEMS` et `nf2ff`. Sous Windows, l'installateur (ou le bouton **Installer openEMS**) pose
+  l'archive binaire dans `WEB_ANTENNA/openEMS/`. Ailleurs, installe openEMS de sorte que ces
+  deux exécutables soient dans le `PATH`.
 
 ## Utiliser depuis un autre appareil
 
@@ -70,7 +77,7 @@ PROJETS/
 - Le dépôt est **privé** : chaque poste doit être connecté une fois à votre compte GitHub.
   Sous Windows, une fenêtre de connexion s'ouvre toute seule. Sur un Raspberry Pi,
   le lanceur le propose dans son terminal au démarrage (ou, à tout moment :
-  `python lanceur/connexion_github.py --connecter`).
+  `bin/connexion_github --connecter`).
 - Il est récupéré au démarrage et avant chaque lancement d'outil.
 - À l'arrêt d'un outil, la page propose d'envoyer les modifications sur GitHub (message de
   commit demandé). Le bouton **⇧ Envoyer sur GitHub** reste tant que quelque chose attend.
@@ -98,7 +105,7 @@ ensuite fait quand même sa propre vérification.
 ## Options
 
 ```
-python lanceur/web_suite.py [--port 8100] [--racine DOSSIER] [--installer]
+bin/web_suite [--port 8100] [--racine DOSSIER] [--installer]
                     [--navigateur | --sans-navigateur] [--reseau | --local] [--sans-maj]
 ```
 
@@ -112,17 +119,17 @@ python lanceur/web_suite.py [--port 8100] [--racine DOSSIER] [--installer]
 
 L'ancien assistant IA intégré aux outils est retiré : Claude, par ce serveur MCP, fait son travail.
 
-`lanceur/mcp_web_suite.py` branche Claude Code sur les outils du poste (serveur MCP, sans
+`bin/mcp_web_suite` branche Claude Code sur les outils du poste (serveur MCP, sans
 dépendance). Les outils doivent déjà tourner. Sur le poste des outils :
 
 ```
-claude mcp add -s user web_suite -- python3 /chemin/vers/WEB_TOOLS/lanceur/mcp_web_suite.py
+claude mcp add -s user web_suite -- /chemin/vers/WEB_TOOLS/bin/mcp_web_suite
 ```
 
 Depuis une autre machine, par SSH (clé SSH obligatoire, aucun port ouvert en plus) :
 
 ```
-claude mcp add -s user web_suite -- ssh -T -o BatchMode=yes <utilisateur>@<poste> python3 /chemin/vers/WEB_TOOLS/lanceur/mcp_web_suite.py
+claude mcp add -s user web_suite -- ssh -T -o BatchMode=yes <utilisateur>@<poste> /chemin/vers/WEB_TOOLS/bin/mcp_web_suite
 ```
 
 Puis `/mcp` dans Claude Code. Windows, clé SSH, dépannage : [DETAILS](lanceur/docs/DETAILS.md#claude-code-mcp).
@@ -161,8 +168,8 @@ système 64 bits) : pas besoin de `claude mcp add` pour cela.
 
 `demarrer_web_bench.cmd` (Windows) ou `./demarrer_web_bench.sh` ouvre un banc d'essai visible.
 Il fonctionne pour les trois outils : l'outil choisi s'ouvre en entier dans la page, un
-**clic-partout** clique sur tous ses boutons et relève les erreurs JS, réseau et Python, et
-l'onglet **Bancs** lance ses scripts `banc-*`. L'outil tourne sur des dossiers temporaires :
+**clic-partout** clique sur tous ses boutons et relève les erreurs JS, réseau et serveur, et
+l'onglet **Bancs** lance ses bancs (scripts node `banc-*`, `cargo test`). L'outil tourne sur des dossiers temporaires :
 tes projets et ta LIB ne sont pas touchés, et rien ne part sur GitHub ni dans openEMS. Chaque
 rapport est gardé dans `web_bench/rapports/`, avec un `.md` détaillé à donner à Claude pour les
 corrections. Détails : [web_bench/README.md](web_bench/README.md).
@@ -170,11 +177,11 @@ corrections. Détails : [web_bench/README.md](web_bench/README.md).
 ## Divers
 
 - Journaux des outils : `lanceur/journaux/<outil>.log` (bouton **Journal**).
-- `python maj_git.py` : état git de WEB_SUITE, des outils et de `PROJETS/`, avec
+- `bin/maj_git` : état git de WEB_SUITE, des outils et de `PROJETS/`, avec
   commit / pull / push guidés.
-- Tests : `python lanceur/projets.py`, `python lanceur/banc_serveur.py`,
-  `python lanceur/connexion_github.py`, `python lanceur/banc_dependances.py`,
-  `python lanceur/appairage.py`, `python lanceur/banc_mcp.py`, `python lanceur/pilote.py`,
-  `node lanceur/banc_pilote.js`, `python lanceur/claude_pages.py`, `python web_bench/banc_web_bench.py`, `python lanceur/banc_savoir.py`,
-  `python lanceur/banc_traces_ia.py` (affichent `OK` ; les deux derniers lisent aussi les dépôts
-  des outils). La CI les lance tous.
+- Tests : `cargo test --workspace` lance tout ce qui est en Rust — les tests unitaires (commun,
+  ipc2581, lanceur, web_bench) et les bancs, qui pilotent les exécutables en boîte noire :
+  `lanceur/tests/` (`banc_serveur`, `banc_dependances`, `banc_mcp`, `banc_savoir`, `banc_traces_ia` ;
+  les deux derniers lisent aussi les dépôts des outils, quand ils sont clonés) et
+  `web_bench/tests/banc_web_bench.rs`. Un seul banc : `cargo test -p web_suite_lanceur --test banc_mcp`.
+  Reste `node lanceur/banc_pilote.js` (la page). La CI lance le tout.

@@ -70,7 +70,7 @@
 
     <!-- Bancs -->
     <div class="volet" id="volet-bancs">
-      <p class="aide">Les scripts <code>banc-*</code> de <span class="nom-outil">l'outil</span>, lancés un par un côté serveur. Vert : le script a rendu 0. Cochés d'office : ceux que la CI de l'outil lance.</p>
+      <p class="aide">Les scripts <code>banc-*</code> et les bancs Rust (<code>cargo test</code>) de <span class="nom-outil">l'outil</span>, lancés un par un côté serveur. Vert : le banc a rendu 0. Cochés d'office : ceux que la CI de l'outil lance.</p>
       <div class="commandes">
         <button id="b-bancs-lancer" class="primaire">Lancer la sélection</button>
         <button id="b-bancs-tous">Tout cocher</button>
@@ -89,7 +89,7 @@
 
     <!-- Journal -->
     <div class="volet" id="volet-journal">
-      <p class="aide">Sortie du serveur <span class="nom-outil">de l'outil</span>. Les erreurs Python (Traceback) sont en rouge et comptent dans le clic-partout.</p>
+      <p class="aide">Sortie du serveur <span class="nom-outil">de l'outil</span>. Les paniques du serveur (« panicked at ») sont en rouge et comptent dans le clic-partout.</p>
       <pre id="journal" class="sortie"></pre>
     </div>
   </aside>

@@ -10,38 +10,30 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.12'
-
-      - name: Projets — deux postes et un faux GitHub
-        run: python lanceur/projets.py
-
-      - name: Serveur du lanceur — Host, jeton du mode réseau, X-WebSuite
-        run: python lanceur/banc_serveur.py
-
-      - name: Connexion à GitHub au démarrage (Pi) — sans réseau
-        run: python lanceur/connexion_github.py
-
-      - name: Dépendances — pip seulement s'il manque un paquet, openEMS sans question hors Windows
-        run: python lanceur/banc_dependances.py
-
-      - name: Appairage — code, jeton et cookie partagés par les web tools
-        run: python lanceur/appairage.py
-
-      - name: Serveur MCP — protocole, outil etat, publication GitHub et lanceur refusés
-        run: python lanceur/banc_mcp.py
-
-      - name: Banc d'essai web_bench — relais, sonde, outils, routes arrêtées, bancs, rapports (faux outils)
-        run: python web_bench/banc_web_bench.py
-
-      # Node 20 comme sur le Pi : BroadcastChannel et crypto y sont globaux, le banc s'en sert
+      # Node 20 comme sur le Pi : BroadcastChannel et crypto y sont globaux, banc_pilote.js s'en sert.
+      # Avant les tests Rust : les faux outils du banc de web_bench et le faux claude sont en node.
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
 
-      - name: Canal de pilotage — serveur (pilote.py)
-        run: python lanceur/pilote.py
+      - name: Exécutables Rust (lanceur, MCP, web_bench)
+        run: cargo build --workspace --bins
+
+      # Avant les tests : banc_savoir relit les anciennes consignes que le relevé cite, et
+      # banc_traces_ia les fichiers suivis des outils, dans ces clones.
+      - name: Outils — clones de WEB_CAO, WEB_ANTENNA et WEB_3D à côté du dépôt
+        run: |
+          for o in WEB_CAO WEB_ANTENNA WEB_3D; do
+            git clone --quiet --depth 1 https://github.com/pilou33620/$o.git ../$o
+          done
+
+      # Tests unitaires, et les bancs (lanceur/tests/, web_bench/tests/), qui pilotent les
+      # exécutables en boîte noire : serveur du lanceur (Host, jeton du mode réseau, X-WebSuite),
+      # installateur (outil déjà là, openEMS), serveur MCP (protocole, outils, refus),
+      # skill web-suite et relevé des consignes, retrait de l'ancien assistant IA, web_bench
+      # (relais, sonde, routes arrêtées, bancs, rapports, avec de faux outils).
+      - name: Tests Rust — commun, ipc2581, lanceur, web_bench, et leurs bancs
+        run: cargo test --workspace
 
       - name: "Canal de pilotage — page (pilote.js : relais, cartes, interrupteur)"
         run: node lanceur/banc_pilote.js
@@ -49,89 +41,27 @@ jobs:
       - name: Banc d'essai web_bench — syntaxe de la page
         run: node --check web_bench/page/banc.js && node --check web_bench/page/sonde.js
 
-      - name: Claude depuis la page — le lanceur passe la demande à Claude Code (faux claude)
-        run: python lanceur/claude_pages.py
-
-      # La mise à jour au démarrage est recopiée dans chaque outil, qui doit
-      # tourner seul, sans le lanceur : on ne peut pas la partager. On vérifie
-      # donc que les trois copies restent la même.
-      - name: Outils — la mise à jour automatique est la même partout
-        run: |
-          for o in WEB_CAO WEB_ANTENNA WEB_3D; do
-            git clone --quiet --depth 1 https://github.com/pilou33620/$o.git ../$o
-          done
-          python - <<'EOF'
-          import ast
-          def corps(f):
-              src = open(f, encoding="utf-8").read()
-              for n in ast.walk(ast.parse(src)):
-                  if isinstance(n, ast.FunctionDef) and n.name == "verifier_et_appliquer_maj":
-                      texte = ast.get_source_segment(src, n)
-                      for nom in ("WEB_CAO", "WEB_ANTENNA", "WEB_3D", "RACINE", "ROOT"):
-                          texte = texte.replace(nom, "X")
-                      return [l.split("#")[0].rstrip() for l in texte.splitlines()]
-          ref = corps("../WEB_CAO/web_CAO.py")
-          for f in ("../WEB_ANTENNA/web_antenna.py", "../WEB_3D/web_3D.py"):
-              assert corps(f) == ref, f + " : verifier_et_appliquer_maj diverge de WEB_CAO"
-          print("les trois copies sont identiques")
-          EOF
-
-      # L'appairage (code à 6 chiffres, jeton et cookie partagés) est recopié
-      # dans chaque outil, qui doit tourner seul : les copies restent la même.
-      - name: Outils — appairage.py est le même partout
-        run: |
-          for o in WEB_CAO WEB_ANTENNA WEB_3D; do
-            diff <(tr -d '\r' < lanceur/appairage.py) <(tr -d '\r' < ../$o/appairage.py) > /dev/null \
-              || { echo "appairage.py diffère entre WEB_SUITE et $o"; exit 1; }
-          done
-          echo "appairage.py identique"
-
-      # Le canal de pilotage du MCP est recopié dans chaque outil, qui doit tourner seul :
-      # même règle que appairage.py, l'original est dans lanceur/
-      - name: Outils — pilote.py, pilote.js et pilote.css sont les mêmes partout
+      # Plus de copies de code serveur à comparer : mise à jour, appairage, canal de pilotage et
+      # lecteur IPC-2581 viennent des caisses commun/ et ipc2581/ de ce dépôt, que les outils
+      # prennent en dépendance. Restent les fichiers de page, recopiés dans chaque outil.
+      - name: Outils — pilote.js et pilote.css sont les mêmes partout
         run: |
           verifier() {
-            diff <(tr -d '\r' < "lanceur/$1") <(tr -d '\r' < "../$2") > /dev/null \
-              || { echo "lanceur/$1 diffère de $2"; exit 1; }
+            diff <(tr -d '\r' < "$1") <(tr -d '\r' < "../$2") > /dev/null \
+              || { echo "$1 diffère de $2"; exit 1; }
           }
-          verifier pilote.py WEB_CAO/pilote.py
-          verifier pilote.js WEB_CAO/commun/pilote.js
-          verifier pilote.css WEB_CAO/commun/pilote.css
+          verifier lanceur/pilote.js WEB_CAO/commun/pilote.js
+          verifier lanceur/pilote.css WEB_CAO/commun/pilote.css
           for o in WEB_ANTENNA WEB_3D; do
-            verifier pilote.py $o/pilote.py
-            verifier pilote.js $o/js/pilote.js
-            verifier pilote.css $o/css/pilote.css
+            verifier lanceur/pilote.js $o/js/pilote.js
+            verifier lanceur/pilote.css $o/css/pilote.css
           done
           echo "canal de pilotage identique dans les trois outils"
 
-      # L'aide des commandes de la page (Pilote.aide) est tirée des définitions du MCP : banc_mcp.py
+      # L'aide des commandes de la page (Pilote.aide) est tirée des définitions du MCP : banc_mcp.rs
       # ne la voit pas ici (WEB_CAO n'est pas dans le dépôt), elle se vérifie sur le clone.
       - name: Outils — WEB_CAO/commun/pilote-aide.json suit les définitions du MCP
         run: |
-          python - <<'EOF'
-          import sys
-          sys.path.insert(0, "lanceur")
-          import aide_pilote
-          with open("../WEB_CAO/commun/pilote-aide.json", encoding="utf-8") as f:
-              assert f.read() == aide_pilote.contenu(), (
-                  "pilote-aide.json périmé : python3 lanceur/aide_pilote.py, puis pousser WEB_CAO d'abord")
-          print("pilote-aide.json à jour")
-          EOF
-
-      # après le clone des outils : le banc relit les anciennes consignes que le relevé cite
-      - name: Skill web-suite — outils et lectures cités, relevé des consignes, rien de privé
-        run: python lanceur/banc_savoir.py
-
-      - name: Retrait de l'ancien assistant IA — aucune trace dans web_suite et ses outils
-        run: python lanceur/banc_traces_ia.py
-
-      # Même raison pour le lecteur IPC-2581 : WEB_CAO et WEB_ANTENNA en ont
-      # chacun une copie, qui avait divergé (chacune avait une correction que
-      # l'autre n'avait pas). Une correction se fait désormais des deux côtés.
-      - name: Outils — le lecteur IPC-2581 est le même dans WEB_CAO et WEB_ANTENNA
-        run: |
-          for f in ipc2581_data.py ipc2581_parser.py ipc2581_json.py; do
-            diff <(tr -d '\r' < ../WEB_CAO/python/$f) <(tr -d '\r' < ../WEB_ANTENNA/python/$f) > /dev/null \
-              || { echo "python/$f diffère entre WEB_CAO et WEB_ANTENNA"; exit 1; }
-          done
-          echo "lecteur IPC-2581 identique dans les deux outils"
+          target/debug/aide_pilote --stdout | cmp - ../WEB_CAO/commun/pilote-aide.json \
+            || { echo "pilote-aide.json périmé : bin/aide_pilote, puis pousser WEB_CAO d'abord"; exit 1; }
+          echo "pilote-aide.json à jour"

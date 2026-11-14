@@ -295,7 +295,7 @@ function boutons(o) {
     b.push('<button class="principal" disabled>Mise à jour…</button>');
   } else {
     b.push('<button class="principal" data-action="lancer">▶ Lancer</button>');
-    if (o.openems === false) b.push('<button data-action="openems" title="Télécharge openEMS (~50 Mo), crée env\\ en Python 3.10/3.11 et installe ses paquets">⚙ Installer openEMS</button>');
+    if (o.openems === false) b.push('<button data-action="openems" title="Télécharge l’archive binaire d’openEMS (~50 Mo) dans WEB_ANTENNA\\openEMS">⚙ Installer openEMS</button>');
   }
   if (o.a_envoyer && o.phase !== 'installation') b.push('<button data-action="envoyer" title="commit + push des projets de cet outil vers GitHub">⇧ Envoyer sur GitHub</button>');
   b.push('<button class="discret" data-action="journal">Journal</button>');

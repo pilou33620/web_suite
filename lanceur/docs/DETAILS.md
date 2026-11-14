@@ -8,9 +8,8 @@ Compléments au [README](../../README.md).
 WEB_TOOLS/                  <- ce dépôt
 ├── installer.cmd / .sh     <- télécharge les outils
 ├── demarrer_WEB_SUITE.cmd / .sh  <- lance WEB·SUITE
-├── maj_git.py              <- état git de WEB_SUITE, des outils et de PROJETS
-├── lanceur/                <- web_suite.py, installer.py, outils.py, projets.py, pages,
-│                              mcp_web_suite.py (Claude Code)
+├── bin/                    <- les exécutables (web_suite, installer, maj_git, mcp_web_suite, web_bench…)
+├── lanceur/                <- src/ (lanceur, installateur, serveur MCP de Claude Code), pages
 ├── WEB_CAO/                <- clonés par l'installateur, chacun avec son dépôt git,
 ├── WEB_ANTENNA/               ignorés par le .gitignore de WEB_SUITE
 ├── WEB_3D/
@@ -22,19 +21,18 @@ WEB_TOOLS/                  <- ce dépôt
     └── 3D/                 <- WEB_3D --projets
 ```
 
-Au premier démarrage sans aucun outil, `web_suite.py` pose la question de l'installateur
+Au premier démarrage sans aucun outil, le lanceur pose la question de l'installateur
 en console. La page propose aussi **Télécharger** sur chaque carte et un bouton pour tout
 télécharger d'un coup. Sans git, les outils sont téléchargés en zip.
 
 ## Installation selon le système
 
-- **Linux / Raspberry Pi** : `sudo apt install python3 git python3-numpy python3-scipy` (numpy et
-  scipy sont obligatoires pour WEB_CAO, et pip refuse la Python du système sur Debian).
-- **openEMS (WEB_ANTENNA, Windows)** : l'installateur (ou `python lanceur/installer.py
-  antenna`, ou le bouton **Installer openEMS** de la carte) télécharge openEMS v0.0.36
-  (~50 Mo) dans `WEB_ANTENNA/openEMS/`, crée `WEB_ANTENNA/env/` et y installe les paquets.
-  Les roues openEMS n'existent que pour Python 3.10 / 3.11 64 bits
-  (`winget install Python.Python.3.11`).
+- **Linux / Raspberry Pi** : `sudo apt install git`. Le lanceur et les outils sont des
+  exécutables, téléchargés (ou compilés sur place avec `cargo`) par leurs scripts de démarrage.
+- **openEMS (WEB_ANTENNA)** : l'outil lance les deux exécutables `openEMS` et `nf2ff`. Sous
+  Windows, l'installateur (`installer.cmd antenna`, ou le bouton **Installer openEMS** de la
+  carte) télécharge l'archive binaire openEMS v0.0.36 (~50 Mo) dans `WEB_ANTENNA/openEMS/`.
+  Ailleurs, ces deux exécutables doivent être dans le `PATH`.
 
 ## Appairage d'un appareil
 
@@ -49,7 +47,7 @@ En mode réseau, le lanceur exige un jeton de tout appareil autre que le serveur
   autre Wi-Fi), on ressaisit un code.
 - L'adresse complète `?jeton=…`, toujours affichée, marche aussi sans code.
 - Le jeton est **partagé par tous les web tools du poste** (`~/.web_tools/jeton-reseau.txt`,
-  module `lanceur/appairage.py`, copie identique dans WEB_CAO, WEB_ANTENNA, WEB_3D, web_ferme) et le
+  caisse `commun` (module `appairage`), prise par WEB_CAO, WEB_ANTENNA et WEB_3D) et le
   cookie porte le même nom partout : un appareil appairé au lanceur l'est aussi pour les
   outils (un navigateur envoie le cookie à tous les ports de l'adresse), et inversement.
   L'ancien `lanceur/jeton-reseau.txt` est repris une fois. Supprimer le fichier partagé en
@@ -84,7 +82,7 @@ outil lancé ensuite refait sa propre vérification : `git stash`, mise à jour,
   GitHub pour le cloner, le tirer et l'envoyer. Sous Windows, Git Credential Manager ouvre
   sa fenêtre de connexion. Sur un Pi, le lanceur le propose dans son terminal au
   démarrage (`gh auth login` + `gh auth setup-git`), ou à tout moment avec
-  `python lanceur/connexion_github.py --connecter`. Tant que le poste n'est pas
+  `bin/connexion_github --connecter`. Tant que le poste n'est pas
   connecté, `PROJETS/` reste un simple dossier (pas de dépôt local sans lien avec GitHub) et
   la page l'indique ; il est cloné dès la connexion, ce qui a été créé entre-temps est gardé.
 - **Avant chaque lancement d'outil**, il tire à nouveau. L'outil est lancé pointé sur ses
@@ -155,14 +153,14 @@ sur le serveur sans rien envoyer : une retouche de dernière minute ne fait pas 
 
 ## Claude Code (MCP)
 
-`lanceur/mcp_web_suite.py` est un serveur MCP stdio (Python standard, sans dépendance) :
+L'exécutable `bin/mcp_web_suite` (Rust, `lanceur/src/mcp/`) est un serveur MCP stdio :
 Claude Code le lance lui-même et lui parle sur stdin/stdout. Il appelle les outils sur
 `127.0.0.1`, à leur port du catalogue (CAO 8000, ANTENNA 8732, 3D 8139, lanceur 8100),
 ou au port décalé que le lanceur annonce dans `/api/etat` quand le premier était pris ;
 depuis la boucle locale, aucun jeton n'est demandé. La suite est décrite dans
 [SPEC-mcp.md](SPEC-mcp.md).
 
-Outils MCP (`etat` dans `mcp_web_suite.py`, les autres dans `mcp_api_outils.py`, voir
+Outils MCP (`etat` dans `lanceur/src/mcp/mod.rs`, les autres dans `api_outils.rs`, voir
 [SPEC-mcp-api-outils.md](SPEC-mcp-api-outils.md)) :
 
 - `etat` : qui tourne, sur quel port.
@@ -177,7 +175,7 @@ Outils MCP (`etat` dans `mcp_web_suite.py`, les autres dans `mcp_api_outils.py`,
   ouvert, s'il a un onglet ; `GET /api/projet/lire`, qui ne change pas le projet courant),
   `antenna_openems_etat`, `antenna_openems_suivre`, `antenna_openems_champs`.
 - WEB_3D : `web3d_projets` (comme la page : sans les annexes `.mtl` et images).
-- Pages ouvertes (canal de pilotage, `mcp_pilote.py`, voir
+- Pages ouvertes (canal de pilotage, `pilote.rs`, voir
   [SPEC-mcp-canal-pilote.md](SPEC-mcp-canal-pilote.md)) : `pilote_onglets` (onglets ouverts sur
   ce poste et les appareils appairés), `pilote_capture` (image du canevas), `pilote_suivre`,
   `pilote_interface_lire` et `pilote_interface` (l'écriture dans une page, comme Claude in Chrome :
@@ -187,7 +185,7 @@ Outils MCP (`etat` dans `mcp_web_suite.py`, les autres dans `mcp_api_outils.py`,
   Décision du 2026-11-04 : Claude ne fait que ce que l'utilisateur peut faire à l'interface. Seuls le
   routage, les paires, le dessin du schéma et `web3d_ouvrir` restent des outils qui écrivent ; le reste
   passe par des gestes (la fiche `SKILL` du skill web-suite dit lesquels).
-- Page WEB_3D (`mcp_registre_3d.py`, voir [SPEC-mcp-registre-3d.md](SPEC-mcp-registre-3d.md)) :
+- Page WEB_3D (`registre_3d.rs`, voir [SPEC-mcp-registre-3d.md](SPEC-mcp-registre-3d.md)) :
   `web3d_scene` (fichiers et pièces : uuid, chemin, nom), `web3d_vue` (vue standard, cadrage,
   capture), `web3d_visibilite`, `web3d_coupe`, `web3d_mesurer` (dimensions d'une pièce ou d'un fichier, volume et
   surface jusqu'à 800 000 triangles comme la fiche ; distance avec cote, que l'effacement de la mesure
@@ -197,7 +195,7 @@ Outils MCP (`etat` dans `mcp_web_suite.py`, les autres dans `mcp_api_outils.py`,
   projection (`web3d_vue`) et la tolérance des collisions affichées (`web3d_collisions` avec `afficher`).
   Ranger le STEP d'une pièce dans PROJETS est un geste : `#bRangerPiece` et son champ de nom, dans
   « Exporter une pièce » (`#bExportPiece`).
-- Pages WEB_CAO (`mcp_registre_cao.py`, voir [SPEC-mcp-registre-cao.md](SPEC-mcp-registre-cao.md)) :
+- Pages WEB_CAO (`registre_cao.rs`, voir [SPEC-mcp-registre-cao.md](SPEC-mcp-registre-cao.md)) :
   `cao_schema_lire` (feuilles, composants, composant, nets, net : tout le document),
   `cao_pcb_lire` (empilage, classes, composants, composant, nets, net, drc), `cao_ipc_lire`
   (visionneuse), `cao_sim_lire` (simulations, une partie d'un rapport), `cao_thermique` (échauffement estimé des
@@ -207,28 +205,28 @@ Outils MCP (`etat` dans `mcp_web_suite.py`, les autres dans `mcp_api_outils.py`,
   `WEB_CAO/commun/lecture-cao.js`, reprises de l'ancien assistant IA de la page. Seule exception : la visibilité des couches du PCB
   fait partie du fichier, comme l'œil du panneau ; elle part avec le prochain Enregistrer.
   Surligner un net le met en avant sans sélectionner son routage.
-- Dessin du schéma (`mcp_ecriture_cao.py`, `cao_schema_dessiner`, voir [SPEC-mcp-dessin-schema.md](SPEC-mcp-dessin-schema.md)) :
+- Dessin du schéma (`ecriture_cao.rs`, `cao_schema_dessiner`, voir [SPEC-mcp-dessin-schema.md](SPEC-mcp-dessin-schema.md)) :
   une liste de 40 opérations au plus, en une carte. Les opérations : poser (symbole intégré
   ou ligne du catalogue), relier broche à broche, étiqueter (local, global, VCC, GND),
   déplacer, tourner, miroir, supprimer, supprimer_fil, feuille (créer, renommer), renuméroter.
   La page joue le lot puis le défait avant de montrer la carte ; elle refuse un fil qui
   relierait d'autres broches que celles demandées. Une étape Ctrl+Z. Code de page :
   `WEB_CAO/editeur-schematique/js/28-dessin-pilote.js`, sur le socle `WEB_CAO/commun/ecriture-cao.js`.
-- Page WEB_ANTENNA (`mcp_registre_antenna.py`, voir [SPEC-mcp-registre-antenna.md](SPEC-mcp-registre-antenna.md)) :
+- Page WEB_ANTENNA (`registre_antenna.rs`, voir [SPEC-mcp-registre-antenna.md](SPEC-mcp-registre-antenna.md)) :
   `antenna_lire` (conception, résultats, courbe, balayage, audit avec ses corrections, que le bouton
   Contrôles `#bAudit` du panneau Assistant montre aussi, réglages, carte importée), `antenna_vue` (2D/3D,
   maillage, onglet de résultats, point de balayage, étape, panneau ; capture de la carte, de la 3D ou
   des courbes) et `antenna_openems_chiffrer` (`quoi` : modèle, balayage, tableau S, script ; le modèle de
   la page, sans argument `document`, par les routes de ses devis). Rien n'est
   écrit, aucune préférence, jamais de calcul lancé : écrire se fait par des gestes. Lectures de la page : `WEB_ANTENNA/js/29-lecture-antenna.js`.
-- Routage (`mcp_routage.py`, voir [SPEC-mcp-routage.md](SPEC-mcp-routage.md)) : `cao_router` (routes
+- Routage (`routage.rs`, voir [SPEC-mcp-routage.md](SPEC-mcp-routage.md)) : `cao_router` (routes
   par points de passage, changement de couche par via, vias seules ; 20 routes par carte),
   `cao_paire` (paire différentielle déclarée) et `cao_score` (routage, placement). `cao_pcb_lire` donne aussi `liaisons` et `zone` pour
   préparer les points ; `cao_chemin` (module chemin-auto, `40-chemin-auto.js`) les propose,
   par un chercheur A* sur grille, sans rien écrire (une paire aussi, vias de paire comprises). La page joue le lot puis le défait, montre un aperçu en pointillés et,
   au clic, charge le résultat vu en une étape Ctrl+Z. Une route bloquée ne laisse rien.
   Code de page : `WEB_CAO/editeur-pcb/js/37-routage-pilote.js`.
-- Composants de la LIB (`mcp_composants.py`, voir [SPEC-mcp-composants.md](SPEC-mcp-composants.md)),
+- Composants de la LIB (`composants.rs`, voir [SPEC-mcp-composants.md](SPEC-mcp-composants.md)),
   dans la page Gestion LIB ouverte : `lib_empreinte_generer` (IPC-7351B : chip, SOT, SOIC,
   TSSOP, MSOP, QFN, DFN, DIP, barrette), `lib_empreinte_verifier`, `lib_kicad_convertir`
   (kicad_mod de 200 Ko au plus) et `lib_brochage_verifier` calculent sans rien écrire ; la LIB
@@ -238,7 +236,7 @@ Outils MCP (`etat` dans `mcp_web_suite.py`, les autres dans `mcp_api_outils.py`,
 **L'ancien assistant IA.** Les assistants IA intégrés aux pages de WEB_CAO
 (schéma, PCB, visionneuse, Gestion LIB) et de WEB_ANTENNA sont retirés : Claude, par ce MCP, fait leur
 travail. Les deux serveurs n'ont plus de route de clé ; le MCP continue de refuser `/api/ia`.
-`lanceur/banc_traces_ia.py` vérifie en CI qu'il n'en reste aucune trace.
+`lanceur/tests/banc_traces_ia.rs` vérifie en CI qu'il n'en reste aucune trace.
 
 **Le savoir métier.** Le skill `web-suite` (`.claude/skills/web-suite/`, voir
 [SPEC-mcp-savoir-metier.md](SPEC-mcp-savoir-metier.md)) dit quel outil prendre pour quelle tâche.
@@ -246,7 +244,7 @@ Il a une fiche par métier : PCB (IPC-2152, classes, paires, retour), simulation
 datasheet, composants (IPC-7351B, pcbfp-1, brochage), schéma, routage et antennes. Claude
 Code le charge dans le dépôt web_suite ; ailleurs (Windows en SSH), le serveur MCP envoie un
 résumé dans sa réponse `initialize` (`instructions`) et sert les fiches par l'outil `savoir_lire`. Les règles des anciennes consignes de l'assistant IA
-y sont suivies une à une dans [savoir-trace.md](savoir-trace.md), et `lanceur/banc_savoir.py`
+y sont suivies une à une dans [savoir-trace.md](savoir-trace.md), et `lanceur/tests/banc_savoir.rs`
 vérifie que ce que les fiches citent existe.
 
 Les règles de conception d'une pièce 3D sont un seul fichier, `WEB_3D/regles-conception.md` : `savoir_lire`
@@ -275,10 +273,10 @@ ni aux racines de projets ni au catalogue LIB entier.
 **Sur le poste des outils** (Linux, Pi) :
 
 ```
-claude mcp add -s user web_suite -- python3 /home/pilou/Documents/web_suite/lanceur/mcp_web_suite.py
+claude mcp add -s user web_suite -- /home/pilou/Documents/web_suite/bin/mcp_web_suite
 ```
 
-Windows, outils sur le même PC : `claude mcp add -s user web_suite -- py -3 C:\chemin\WEB_TOOLS\lanceur\mcp_web_suite.py`.
+Windows, outils sur le même PC : `claude mcp add -s user web_suite -- C:\chemin\WEB_TOOLS\bin\mcp_web_suite.exe`.
 
 **Depuis Windows vers le Pi, par SSH** : le MCP tourne sur le Pi, SSH ne fait que
 transporter stdin/stdout. Aucun port à ouvrir, et le trafic est chiffré.
@@ -291,7 +289,7 @@ transporter stdin/stdout. Aucun port à ouvrir, et le trafic est chiffré.
    demander de mot de passe**. Le MCP passe par stdin : une invite de mot de passe le
    bloquerait, `BatchMode=yes` le fait échouer net à la place.
 4. Ajouter :
-   `claude mcp add -s user web_suite -- ssh -T -o BatchMode=yes pilou@<pi> python3 /home/pilou/Documents/web_suite/lanceur/mcp_web_suite.py`
+   `claude mcp add -s user web_suite -- ssh -T -o BatchMode=yes pilou@<pi> /home/pilou/Documents/web_suite/bin/mcp_web_suite`
 
 **Depuis la page** (zone « Demander à Claude » du panneau) : le lanceur lance lui-même
 `claude -p` avec le MCP web_suite, dans le dépôt web_suite ; rien à ajouter. Si la page répond
@@ -307,33 +305,49 @@ l'installeur officiel (`irm https://claude.ai/install.ps1 | iex`) met `claude.ex
 **Dépannage** : `/mcp` affiche l'état de la connexion. Si elle échoue par SSH, un
 `.bashrc` du Pi qui écrit quelque chose (un `echo`) pollue stdout : le déplacer dans
 `.profile` ou le limiter aux shells interactifs. Essai à la main :
-`printf '{"jsonrpc":"2.0","id":1,"method":"ping"}\n' | python3 lanceur/mcp_web_suite.py`
+`printf '{"jsonrpc":"2.0","id":1,"method":"ping"}\n' | bin/mcp_web_suite`
 doit rendre `{"jsonrpc": "2.0", "id": 1, "result": {}}`.
 
 ## Tests
 
-- `python lanceur/projets.py` : deux postes et un faux GitHub (dépôt nu) — création,
+Tout est en Rust, sauf le banc de la page : `cargo test --workspace` lance les tests unitaires et
+les bancs. Les bancs sont les tests d'intégration de `lanceur/tests/` : ils pilotent les exécutables
+en boîte noire, dans un dossier temporaire (`tests/commun/` : lancer un exécutable, requêtes HTTP,
+dialogue JSON-RPC sur stdio, faux outil HTTP). Un seul banc :
+`cargo test -p web_suite_lanceur --test banc_mcp` (`-- --nocapture` pour voir son bilan).
+
+Tests unitaires (dans `src/`) :
+
+- `lanceur/src/projets/essais.rs` : deux postes et un faux GitHub (dépôt nu) — création,
   identité git manquante, envoi, clonage sur l'autre poste, `projets.txt`.
-- `python lanceur/banc_serveur.py` : `Host` étranger, `X-WebSuite`, taille des requêtes,
+- `lanceur/src/connexion_github.rs` : la connexion à GitHub au démarrage, sans réseau.
+- `commun/src/appairage/essais.rs` : code, jeton et cookie partagés par les web tools.
+- `commun/src/pilote/essais.rs` : le serveur du canal de pilotage (file, long-poll, ciblage par
+  dernier focus, redistribution, ordres réservés à ce poste, autre origine refusée).
+- `lanceur/src/mcp/mod.rs`, `lanceur/src/claude_pages.rs`, `lanceur/src/outils/essais.rs` : la porte
+  du MCP vers les outils, le panneau « Claude » des pages et ses demandes passées à Claude Code,
+  les journaux et openEMS.
+
+Bancs (`lanceur/tests/`) :
+
+- `banc_serveur` : `Host` étranger, `X-WebSuite`, taille des requêtes,
   jeton du mode réseau (refus, cookie, poste local exempté), code d'appairage (usage
-  unique, expiration, cinq erreurs puis pause).
-- `python lanceur/banc_dependances.py` : pip n'est
-  pas lancé si tout est là, un lancement à qui il manque un paquet lance l'installation, et aucune
-  question openEMS n'est posée hors Windows.
-- `python lanceur/connexion_github.py` : la connexion à GitHub au démarrage, sans réseau.
-- `python lanceur/appairage.py` : code, jeton et cookie partagés par les web tools.
-- `python lanceur/claude_pages.py` : le panneau « Claude » des pages et ses demandes passées à Claude Code.
-- `python lanceur/banc_traces_ia.py` : plus aucune trace de l'ancien assistant IA.
-- `python lanceur/banc_mcp.py` : serveur MCP en sous-processus — protocole (initialize,
-  ping, erreurs), outil `etat` face à un faux WEB_CAO, routes `/api/github`, `/api/envoyer`,
-  `/api/identite`, `/api/ia`, `/api/appairer` refusées et lanceur en lecture seule, sans
-  qu'aucune requête n'atteigne l'outil, outil arrêté signalé ; outils d'`api-outils` face
+  unique, cinq erreurs puis pause), HTTPS, mise à jour de WEB_SUITE au démarrage.
+- `banc_dependances` : un outil dont le `demarrer_<NOM>` est là est installé, sans rien d'autre
+  à installer, et aucune question openEMS n'est posée hors Windows.
+- `banc_traces_ia` : plus aucune trace de l'ancien assistant IA, ici et dans les clones des outils.
+- `banc_savoir` : ce que citent les fiches du skill existe, et le relevé des consignes est relu
+  dans les clones des outils (dans web_suite, ou à côté de lui comme en CI ; sans clone, non relu).
+- `banc_mcp` : serveur MCP en sous-processus — protocole (initialize,
+  ping, erreurs), outil `etat` face à un faux WEB_CAO, outil arrêté signalé ; outils d'`api-outils` face
   à un faux outil qui note chaque requête (bonne route et bonne méthode, garde-fous qui
   refusent sans écrire, résumé sous 100 Ko, jamais `…/lancer`) ; outils du canal de pilotage
-  face à un faux outil (commande déposée, en attente, refusée, capture en image).
-- `python lanceur/pilote.py` : le serveur du canal de pilotage (file, long-poll, ciblage par
-  dernier focus, redistribution, ordres réservés à ce poste, autre origine refusée).
+  face à un faux outil (commande déposée, en attente, refusée, capture en image). Les routes
+  `/api/github`, `/api/envoyer`, `/api/identite`, `/api/ia`, `/api/appairer` refusées et le lanceur
+  en lecture seule : tests unitaires de `lanceur/src/mcp/mod.rs`.
+
+Hors Rust :
+
 - `node lanceur/banc_pilote.js` : la page (un seul relais, changement de relais sans perte,
   cartes, interrupteur, Annuler si rien n'a bougé, aucun texte de Claude lu comme du HTML).
-
-Chacun affiche `OK` si tout passe.
+  Il affiche `OK` si tout passe.

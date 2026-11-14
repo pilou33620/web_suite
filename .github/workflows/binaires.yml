@@ -1,0 +1,86 @@
+name: exécutables
+
+# Compile les exécutables Rust de WEB_SUITE pour chaque système et les dépose dans la
+# publication « binaires », en deux archives par système :
+# - web_suite-<système> : les exécutables seuls, que binaires.sh / binaires.cmd prennent sur un
+#   clone git sans cargo ;
+# - web_suite-prod-<système> : la production, complète et sans git — les exécutables, les scripts
+#   de démarrage, les pages (html, js, css) et les fiches du skill. Ni sources, ni specs, ni bancs.
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  compiler:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # musl : exécutables statiques, indépendants de la glibc du poste (Raspberry Pi OS)
+          - { os: ubuntu-latest, cible: x86_64-unknown-linux-musl, nom: linux-x86_64 }
+          - { os: ubuntu-24.04-arm, cible: aarch64-unknown-linux-musl, nom: linux-aarch64 }
+          - { os: macos-latest, cible: aarch64-apple-darwin, nom: macos-aarch64 }
+          - { os: windows-latest, cible: x86_64-pc-windows-msvc, nom: windows-x86_64 }
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - run: rustup target add ${{ matrix.cible }}
+
+      - if: contains(matrix.cible, 'musl')
+        run: sudo apt-get update && sudo apt-get install -y musl-tools
+
+      - run: cargo build --release --bins --target ${{ matrix.cible }}
+
+      - name: Archive (les exécutables et le commit dont ils viennent)
+        shell: bash
+        run: |
+          mkdir bin
+          cd target/${{ matrix.cible }}/release
+          if [ "${{ runner.os }}" = Windows ]; then
+            cp ./*.exe ../../../bin/
+          else
+            find . -maxdepth 1 -type f -perm -u+x -exec cp {} ../../../bin/ \;
+          fi
+          cd ../../..
+          git rev-parse HEAD > bin/commit
+          if [ "${{ runner.os }}" = Windows ]; then
+            (cd bin && 7z a ../web_suite-${{ matrix.nom }}.zip .)
+          else
+            tar -czf web_suite-${{ matrix.nom }}.tar.gz -C bin .
+          fi
+
+      - name: Archive de production (exécutables, scripts de démarrage, pages)
+        shell: bash
+        run: |
+          P=prod/web_suite
+          mkdir -p $P/lanceur/docs $P/web_bench $P/.claude/skills
+          cp -r bin $P/
+          cp demarrer_*.sh demarrer_*.cmd installer.sh installer.cmd binaires.sh binaires.cmd README.md $P/
+          # les pages du lanceur (pas banc_pilote.js) et sa notice
+          cp lanceur/*.html lanceur/pilote.js lanceur/pilote.css $P/lanceur/
+          cp lanceur/docs/DETAILS.md lanceur/docs/intro.webp $P/lanceur/docs/
+          cp -r web_bench/page web_bench/README.md $P/web_bench/
+          # les fiches que le serveur MCP sert (savoir métier)
+          cp -r .claude/skills/web-suite $P/.claude/skills/
+          if [ "${{ runner.os }}" = Windows ]; then
+            (cd prod && 7z a ../web_suite-prod-${{ matrix.nom }}.zip web_suite)
+          else
+            tar -czf web_suite-prod-${{ matrix.nom }}.tar.gz -C prod web_suite
+          fi
+
+      - name: Publication
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          # les quatre compilations arrivent ensemble : une seule crée la publication
+          gh release view binaires >/dev/null 2>&1 \
+            || gh release create binaires --title "Exécutables" \
+                 --notes "Exécutables de WEB_SUITE, recompilés à chaque envoi sur main. web_suite-<système> : pris par binaires.sh et binaires.cmd. web_suite-prod-<système> : la production complète (exécutables, scripts de démarrage, pages), à décompresser puis lancer par demarrer_WEB_SUITE." \
+            || true
+          gh release upload binaires web_suite-${{ matrix.nom }}.* web_suite-prod-${{ matrix.nom }}.* --clobber

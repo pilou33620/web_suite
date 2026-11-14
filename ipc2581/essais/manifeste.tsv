@@ -1,0 +1,60 @@
+carte-essai.xml	1	carte-essai.xml	banc-essai.py
+carte-declaree.xml	1	carte-declaree.xml	banc-essai.py
+portee.xml	1	portee.xml	banc-essai.py
+portee2.xml	1	portee2.xml	banc-essai.py
+portee3.xml	1	portee3.xml	banc-essai.py
+portee4.xml	1	portee4.xml	banc-essai.py
+passifs.xml	1	passifs.xml	banc-essai.py
+actifs.xml	1	actifs.xml	banc-essai.py
+dossier.zip	1	dossier.zip	banc-essai.py
+dossier-2.zip	1	dossier.zip	banc-essai.py
+dossier-3.zip	1	dossier.zip	banc-essai.py
+pate.xml	1	pate.xml	banc-essai.py
+seri.xml	1	seri.xml	banc-essai.py
+seri-2.xml	0	seri.xml	banc-essai.py
+textes.xml	1	textes.xml	banc-essai.py
+xml-tronque.xml	1	XML tronque	banc-essai.py
+texte-quelconque.xml	1	texte quelconque	banc-essai.py
+zip-tronque.zip	1	ZIP tronque	banc-essai.py
+cp.xml	1	cp.xml	banc-essai.py
+cp-2.xml	1	cp.xml	banc-essai.py
+cp-3.xml	1	cp.xml	banc-essai.py
+cp-4.xml	1	cp.xml	banc-essai.py
+vide.xml	1	vide.xml	banc-essai.py
+rugueuse.xml	1	rugueuse.xml	banc-essai.py
+place.xml	1	place.xml	banc-essai.py
+regles.xml	1	regles.xml	banc-essai.py
+netpair.xml	1	netpair.xml	banc-essai.py
+huray.xml	1	huray.xml	banc-essai.py
+lisse.xml	1	lisse.xml	banc-essai.py
+corps.xml	1	corps.xml	banc-essai.py
+muet.xml	1	muet.xml	banc-essai.py
+inf.xml	1	inf.xml	banc-essai.py
+via.xml	1	via.xml	banc-essai.py
+mini.xml	1	mini.xml	banc-essai.py
+mini-2.xml	1	mini.xml	banc-essai.py
+mini-3.xml	1	mini.xml	banc-essai.py
+mini-4.xml	1	mini.xml	banc-essai.py
+mini-5.xml	1	mini.xml	banc-essai.py
+mini-6.xml	1	mini.xml	banc-essai.py
+mini-7.xml	1	mini.xml	banc-essai.py
+carte.xml	1	carte.xml	banc-essai.py
+carte-2.xml	1	carte.xml	banc-essai.py
+mini-8.xml	1	mini.xml	banc-essai.py
+mini-9.xml	1	mini.xml	banc-essai.py
+mini-10.xml	1	mini.xml	banc-essai.py
+mini-11.xml	1	mini.xml	banc-essai.py
+mini-12.xml	1	mini.xml	banc-essai.py
+exemple-0.xml	1	exemple-0.xml	banc-ipc2581-export.py
+exemple-0-arrondi.xml	1	exemple-0-arrondi.xml	banc-ipc2581-export.py
+exemple-1.xml	1	exemple-1.xml	banc-ipc2581-export.py
+exemple-1-charge.xml	1	exemple-1-charge.xml	banc-ipc2581-export.py
+exemple-1-fentes.xml	1	exemple-1-fentes.xml	banc-ipc2581-export.py
+patch-2450.xml	1	patch-2450.xml	fichier d'exemple
+patch-2450-2.xml	0	patch-2450.xml	fichier d'exemple
+carte-contre-percage.xml	1	carte-contre-percage.xml	fichier d'exemple
+carte-contre-percage-2.xml	0	carte-contre-percage.xml	fichier d'exemple
+carte-antenne.xml	1	carte-antenne.xml	test/carte-antenne.py
+carte-antenne-2.xml	0	carte-antenne.xml	test/carte-antenne.py
+tout.xml	1	tout.xml	cas limites
+tout-2.xml	0	tout.xml	cas limites

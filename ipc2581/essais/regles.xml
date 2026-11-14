@@ -1,0 +1,182 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<IPC-2581 revision="B" xmlns="http://webstds.ipc.org/2581">
+ <Content roleRef="owner">
+  <FunctionMode mode="USERDEF" level="1"/>
+  <StepRef name="CARTE-ESSAI"/>
+  <DictionaryLineDesc units="MILLIMETER">
+   <EntryLineDesc id="l25"><LineDesc lineEnd="ROUND" lineWidth="0.25"/></EntryLineDesc>
+  </DictionaryLineDesc>
+  <DictionaryStandard units="MILLIMETER">
+   <EntryStandard id="c100"><Circle diameter="1.0"/></EntryStandard>
+   <EntryStandard id="r160"><RectCenter width="1.6" height="0.9"/></EntryStandard>
+  </DictionaryStandard>
+ </Content>
+ <Ecad name="essai">
+  <CadHeader units="MILLIMETER">
+   <Spec name="DielectricLayer-1-2_Dielectric">
+    <Dielectric type="DIELECTRIC_CONSTANT">
+     <Property value="4.37"/>
+    </Dielectric>
+   </Spec>
+   <Spec name="DielectricLayer-1-2_Perte">
+    <Dielectric type="LOSS_TANGENT">
+     <Property value="0.022"/>
+    </Dielectric>
+   </Spec>
+  <Spec name="CLASSE_Rapide">
+    <General type="ELECTRICAL">
+     <Property name="NET_CLASS" text="Rapide"/>
+     <Property name="TRACE_WIDTH" value="0.25" unit="MM"/>
+     <Property name="TRACE_WIDTH" value="250" unit="MICRON" layerOrGroupRef="Conductor-1"/>
+     <Property name="CLEARANCE" value="0.2" unit="MM"/>
+     <Property name="VIA_DIAMETER" value="0.6" unit="MM"/>
+     <Property name="VIA_DRILL" value="0.3" unit="MM"/>
+     <Property name="MAX_LENGTH" value="40" unit="MM"/>
+     <Property name="ALLOWED_LAYER" layerOrGroupRef="Conductor-1"/>
+     <Property name="TOPOLOGY" text="DAISY_CHAIN"/>
+     <Property name="MEMBER" text="SANS_BROCHE"/>
+     <Property name="MEMBER" text="GND"/>
+    </General>
+    <Impedance value="50" tolPlus="10" tolMinus="10" tolPercent="true">
+     <SingleEnded structure="MICROSTRIP_MASK_COVERED">
+      <LineWidth value="0.25" unit="MM"/><RefPlane layerOrGroupRef="Conductor-2"/>
+     </SingleEnded>
+    </Impedance>
+   </Spec>
+   <Spec name="CLASSE_Sans_net">
+    <General type="ELECTRICAL"><Property name="NET_CLASS" text="Sans net"/>
+     <Property name="TRACE_WIDTH" value="0.5" unit="MM"/></General>
+   </Spec>
+   <Spec name="CONTRAINTE_SIG_A">
+    <General type="ELECTRICAL">
+     <Property name="NET" text="SIG_A"/>
+     <Property name="MAX_VIAS" value="2"/>
+     <Property name="MIN_LENGTH" value="0.5" unit="INCH"/>
+     <Property name="BACKDRILL_RULE" text="cp1"/>
+    </General>
+    <Impedance value="55" tolPlus="5.5" tolMinus="5.5"/>
+   </Spec>
+   <Spec name="PAIRE_USB">
+    <General type="ELECTRICAL">
+     <Property name="DIFF_PAIR" text="USB"/>
+     <Property name="NET_P" text="SIG_A"/>
+     <Property name="NET_N" text="SIG_B"/>
+     <Property name="TRACE_WIDTH" value="0.25" unit="MM" tolPlus="0.1" tolMinus="0.05"/>
+     <Property name="GAP" value="0.15" unit="MM" tolPlus="0.25" tolMinus="0.02"/>
+     <Property name="MAX_UNCOUPLED_LENGTH" value="12.7" unit="MM"/>
+    </General>
+    <Impedance value="90" tolPlus="10" tolMinus="10" tolPercent="true">
+     <EdgeCoupled structure="MICROSTRIP_MASK_COVERED">
+      <LineWidth value="0.25" unit="MM"/><Spacing value="0.15" unit="MM"/>
+      <RefPlane layerOrGroupRef="Conductor-2"/>
+     </EdgeCoupled>
+    </Impedance>
+   </Spec>
+   <Spec name="APPARIEMENT_SPI">
+    <General type="ELECTRICAL">
+     <Property name="MATCH_GROUP" text="SPI"/>
+     <Property name="MATCH_MODE" text="DELAY"/>
+     <Property name="MATCH_TOLERANCE" value="10" text="ps"/>
+     <Property name="REFERENCE_NET" text="SIG_A"/>
+     <Property name="MEMBER" text="SIG_A"/>
+     <Property name="MEMBER" text="SANS_BROCHE"/>
+    </General>
+   </Spec>
+   <Spec name="ISOLATION_CLASSES">
+    <General type="ELECTRICAL">
+     <Property name="CLEARANCE" text="Alimentation|Rapide" value="0.5" unit="MM"/>
+    </General>
+   </Spec>
+  </CadHeader>
+  <CadData>
+   <Layer name="Conductor-1" layerFunction="SIGNAL" side="TOP" polarity="POSITIVE"/>
+   <Layer name="DielectricLayer-1-2" layerFunction="DIELPREG" side="INTERNAL"/>
+   <Layer name="Conductor-2" layerFunction="PLANE" side="BOTTOM" polarity="POSITIVE"/>
+   <Layer name="Hole1-2" layerFunction="DRILL" side="ALL"/>
+   <Layer name="Symbol-A" layerFunction="SILKSCREEN" side="TOP"/>
+   <Stackup overallThickness="0.27">
+    <StackupGroup name="AllStackupLayers" thickness="0.27">
+     <StackupLayer layerOrGroupRef="Conductor-1" thickness="0.035" sequence="1"/>
+     <StackupLayer layerOrGroupRef="DielectricLayer-1-2" thickness="0.2" sequence="2">
+      <SpecRef id="DielectricLayer-1-2_Dielectric"/>
+      <SpecRef id="DielectricLayer-1-2_Perte"/>
+     </StackupLayer>
+     <StackupLayer layerOrGroupRef="Conductor-2" thickness="0.035" sequence="3"/>
+    </StackupGroup>
+   </Stackup>
+   <Step name="CARTE-ESSAI">
+    <Datum x="0" y="0"/>
+    <Profile>
+     <Polygon>
+      <PolyBegin x="0" y="0"/>
+      <PolyStepSegment x="40" y="0"/>
+      <PolyStepSegment x="40" y="20"/>
+      <PolyStepSegment x="0" y="20"/>
+      <PolyStepSegment x="0" y="0"/>
+     </Polygon>
+    </Profile>
+    <Package name="R0603" type="CHIP" height="0.45">
+     <Pin number="1" name="1" type="SURFACE">
+      <Location x="-0.75" y="0"/>
+      <StandardPrimitiveRef id="r160"/>
+     </Pin>
+     <Pin number="2" name="2" type="SURFACE">
+      <Location x="0.75" y="0"/>
+      <StandardPrimitiveRef id="r160"/>
+     </Pin>
+    </Package>
+    <Component refDes="R1" packageRef="R0603" part="RES-10K"
+               layerRef="Component-1-A" mountType="SMT" height="0.45">
+     <Xform rotation="90"/>
+     <Location x="10" y="10"/>
+    </Component>
+    <LogicalNet name="SIG_A" netClass="SIGNAL" netPair="SIG_B">
+     <NonstandardAttribute name="NET_CLASS" type="STRING" value="Rapide"/>
+     <NonstandardAttribute name="DIFF_PAIR" type="STRING" value="USB"/>
+     <NonstandardAttribute name="DIFF_PAIR_POLARITY" type="STRING" value="P"/>
+     <PinRef componentRef="R1" pin="1"/>
+     <SpecRef id="CLASSE_Rapide"/>
+     <SpecRef id="CONTRAINTE_SIG_A"/>
+     <SpecRef id="PAIRE_USB"/>
+     <SpecRef id="APPARIEMENT_SPI"/>
+    </LogicalNet>
+    <LogicalNet name="SIG_B" netClass="SIGNAL" netPair="SIG_A">
+     <NonstandardAttribute name="NET_CLASS" type="STRING" value="Rapide"/>
+     <NonstandardAttribute name="DIFF_PAIR" type="STRING" value="USB"/>
+     <NonstandardAttribute name="DIFF_PAIR_POLARITY" type="STRING" value="N"/>
+     <PinRef componentRef="R1" pin="2"/>
+     <SpecRef id="CLASSE_Rapide"/>
+     <SpecRef id="PAIRE_USB"/>
+    </LogicalNet>
+    <LogicalNet name="GND" netClass="GROUND">
+     <NonstandardAttribute name="NET_CLASS" type="STRING" value="Alimentation"/>
+     <PinRef componentRef="R1" pin="2"/>
+    </LogicalNet>
+    <LayerFeature layerRef="Conductor-1">
+     <Set net="SIG_A">
+      <Features>
+       <Line startX="5" startY="5" endX="25" endY="5">
+        <LineDesc lineEnd="ROUND" lineWidth="0.2"/>
+       </Line>
+       <Line startX="25" startY="5" endX="25" endY="15">
+        <LineDescRef id="l25"/>
+       </Line>
+      </Features>
+     </Set>
+     <Set net="SIG_A" padUsage="TERMINATION" geometry="c100">
+      <Pad>
+       <Location x="25" y="15"/>
+       <StandardPrimitiveRef id="c100"/>
+      </Pad>
+     </Set>
+    </LayerFeature>
+    <LayerFeature layerRef="Hole1-2">
+     <Set net="SIG_A" padUsage="VIA" geometry="v25">
+      <Hole name="R0.125" diameter="0.25" platingStatus="PLATED"
+            plusTol="0" minusTol="0" x="25" y="15"/>
+     </Set>
+    </LayerFeature>
+   </Step>
+  </CadData>
+ </Ecad>
+</IPC-2581>

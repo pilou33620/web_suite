@@ -14,9 +14,9 @@ depuis une autre machine par SSH.
 
 **Critères d'acceptation**
 
-1. Sur le poste : `claude mcp add web_suite -- python3 <web_suite>/lanceur/mcp_web_suite.py`,
+1. Sur le poste : `claude mcp add web_suite -- <web_suite>/bin/mcp_web_suite`,
    puis `/mcp` dans Claude Code montre `web_suite` **connecté**.
-2. Depuis une autre machine : `claude mcp add web_suite -- ssh <poste> python3 <web_suite>/lanceur/mcp_web_suite.py`
+2. Depuis une autre machine : `claude mcp add web_suite -- ssh <poste> <web_suite>/bin/mcp_web_suite`
    donne le même résultat, sans aucun port ouvert en plus de SSH.
 3. L'outil MCP `etat` rend, pour le lanceur WEB·SUITE, WEB_CAO, WEB_ANTENNA et WEB_3D :
    lancé ou non, port, adresse.
@@ -53,10 +53,10 @@ Les outils de calcul, de projet et de LIB (`api-outils`), le canal vers la page
 
 ```
 Banc :              python lanceur/banc_mcp.py
-Lancer à la main :  python3 lanceur/mcp_web_suite.py        (attend du JSON-RPC sur stdin)
-Ajouter (poste) :   claude mcp add web_suite -- python3 /home/pilou/Documents/web_suite/lanceur/mcp_web_suite.py
-Ajouter (distant) : claude mcp add web_suite -- ssh pilou@<poste> python3 /home/pilou/Documents/web_suite/lanceur/mcp_web_suite.py
-Windows :           claude mcp add web_suite -- py -3 C:\...\web_suite\lanceur\mcp_web_suite.py
+Lancer à la main :  bin/mcp_web_suite                    (attend du JSON-RPC sur stdin)
+Ajouter (poste) :   claude mcp add web_suite -- /home/pilou/Documents/web_suite/bin/mcp_web_suite
+Ajouter (distant) : claude mcp add web_suite -- ssh pilou@<poste> /home/pilou/Documents/web_suite/bin/mcp_web_suite
+Windows :           claude mcp add web_suite -- C:\...\web_suite\bin\mcp_web_suite.exe
 ```
 
 ## Structure

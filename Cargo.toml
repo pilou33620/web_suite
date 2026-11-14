@@ -1,0 +1,7 @@
+[workspace]
+resolver = "2"
+members = ["commun", "ipc2581", "lanceur", "web_bench"]
+
+[profile.release]
+opt-level = "s"
+strip = true

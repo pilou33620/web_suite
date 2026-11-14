@@ -1,0 +1,167 @@
+<IPC-2581 revision="C" xmlns="http://webstds.ipc.org/2581"><Content>
+<DictionaryFillDesc><EntryFillDesc id="plein"><FillDesc fillProperty="fill"/></EntryFillDesc>
+ <EntryFillDesc id="creux"><FillDesc/></EntryFillDesc></DictionaryFillDesc>
+<DictionaryLineDesc units="MILLIMETER"><EntryLineDesc id="l1"><LineDesc lineWidth="0.2" lineEnd="square"/></EntryLineDesc>
+ <EntryLineDesc id="l2"><LineDesc lineWidth="0,3"/></EntryLineDesc><EntryLineDesc><LineDesc lineWidth="1"/></EntryLineDesc></DictionaryLineDesc>
+<DictionaryStandard units="MILLIMETER">
+ <EntryStandard id="ci"><Circle diameter="1.25"><FillDescRef id="plein"/></Circle></EntryStandard>
+ <EntryStandard id="rc"><RectCenter width="1.6" height="0.9"/></EntryStandard>
+ <EntryStandard id="ov"><Oval width="2" height="0.7"><FillDesc fillProperty="Hollow"/></Oval></EntryStandard>
+ <EntryStandard id="rr"><RectRound width="2" height="1" radius="0.2" upperRight="true" lowerLeft="TRUE" upperLeft="false"/></EntryStandard>
+ <EntryStandard id="rh"><RectCham width="2" height="1" chamfer="0.25" upperLeft="true" lowerRight="true"/></EntryStandard>
+ <EntryStandard id="el"><Ellipse width="3" height="1.1"/></EntryStandard>
+ <EntryStandard id="di"><Diamond width="2" height="1"/></EntryStandard>
+ <EntryStandard id="oc"><Octagon length="2.2"/></EntryStandard>
+ <EntryStandard id="he"><Hexagon length="1.7"/></EntryStandard>
+ <EntryStandard id="tr"><Triangle base="1.3" height="2.1"/></EntryStandard>
+ <EntryStandard id="rk"><RectCorner lowerLeftX="-1" lowerLeftY="-0.5" upperRightX="2" upperRightY="0.75"/></EntryStandard>
+ <EntryStandard id="bu"><Butterfly shape="ROUND" diameter="2.4"/></EntryStandard>
+ <EntryStandard id="bs"><Butterfly shape="SQUARE" side="1.9"/></EntryStandard>
+ <EntryStandard id="do"><Donut shape="ROUND" outerDiameter="2" innerDiameter="1"/></EntryStandard>
+ <EntryStandard id="ds"><Donut shape="SQUARE" outerDiameter="2" innerDiameter="1"/></EntryStandard>
+ <EntryStandard id="dh"><Donut shape="HEXAGON" outerDiameter="2" innerDiameter="1"/></EntryStandard>
+ <EntryStandard id="dO"><Donut shape="OCTAGON" outerDiameter="2.3" innerDiameter="0"/></EntryStandard>
+ <EntryStandard id="th"><Thermal shape="ROUND" outerDiameter="2" innerDiameter="1.2" spokeCount="4" spokeWidth="0.3" spokeStartAngle="45"/></EntryStandard>
+ <EntryStandard id="t2"><Thermal outerDiameter="2" innerDiameter="0.1" spokeCount="3" gap="0.4"/></EntryStandard>
+ <EntryStandard id="t3"><Thermal outerDiameter="2" innerDiameter="1" spokeCount="0"/></EntryStandard>
+ <EntryStandard id="t4"><Thermal outerDiameter="1" innerDiameter="0.5" spokeWidth="3"/></EntryStandard>
+ <EntryStandard id="t5"><Thermal shape="SQUARE" outerDiameter="2" innerDiameter="1" spokeCount="1" spokeWidth="0.2"/></EntryStandard>
+ <EntryStandard id="t6"><Thermal outerDiameter="2" innerDiameter="1" spokeCount="2" spokeWidth="0.2" spokeStartAngle="-30.5"/></EntryStandard>
+ <EntryStandard id="t7"><Thermal outerDiameter="2.5" innerDiameter="1.5" spokeCount="400" spokeWidth="0.01"/></EntryStandard>
+ <EntryStandard id="mo"><Moire diameter="4" ringWidth="0.2" ringGap="0.3" ringNumber="5" lineWidth="0.1" lineLength="5" lineAngle="30"/></EntryStandard>
+ <EntryStandard id="m2"><Moire diameter="4" ringWidth="0.2" ringGap="0.3" ringNumber="500" lineWidth="0.1"/></EntryStandard>
+ <EntryStandard id="co"><Contour><Polygon><PolyBegin x="0" y="0"/><PolyStepSegment x="4" y="0"/><PolyStepCurve x="4" y="2" centerX="4" centerY="1" clockwise="false"/><PolyStepSegment x="0" y="2"/><FillDescRef id="plein"/></Polygon>
+   <Cutout><PolyBegin x="1" y="0.5"/><PolyStepSegment x="2" y="0.5"/><PolyStepSegment x="2" y="1.5"/></Cutout><Cutout><PolyBegin x="1" y="1"/></Cutout></Contour></EntryStandard>
+ <EntryStandard id="c2"><Contour><Polygon><PolyBegin x="0" y="0"/><PolyStepSegment x="1" y="0"/><PolyStepCurve x="0" y="0" centerX="0.5" centerY="0" clockwise="true"/></Polygon></Contour></EntryStandard>
+ <EntryStandard id="po"><Polygon><PolyBegin x="0" y="0"/><PolyStepSegment x="1" y="0"/><PolyStepSegment x="1" y="1"/></Polygon></EntryStandard>
+ <EntryStandard id="vide"/><EntryStandard id="inconnu"><Truc a="1"/></EntryStandard><EntryStandard id="cv"><Contour/></EntryStandard>
+ <EntryStandard><Circle diameter="9"/></EntryStandard>
+</DictionaryStandard>
+<DictionaryUser units="MILLIMETER">
+ <EntryUser id="u1"><UserSpecial><Line startX="0" startY="0" endX="1" endY="1"><LineDescRef id="l1"/></Line>
+   <Line startX="a" startY="0" endX="1" endY="1"/><Line startX="0" startY="0" endX="1"/>
+   <Polyline><PolyBegin x="0" y="0"/><PolyStepSegment x="1" y="0"/><PolyStepCurve x="2" y="1" centerX="1" centerY="1"/><LineDesc lineWidth="0.1"/></Polyline>
+   <Arc startX="0" startY="0" endX="2" endY="0" centerX="1" centerY="0" clockwise="true"><LineDesc lineWidth="0.15"/><FillDesc fillProperty="fill"/></Arc>
+   <Arc startX="0" startY="0" endX="2" endY="0" centerX="nan" centerY="0"/>
+   <Contour><Polygon><PolyBegin x="0" y="0"/><PolyStepSegment x="1" y="0"/><PolyStepSegment x="1" y="1"/></Polygon><Cutout><PolyBegin x="0.2" y="0.1"/><PolyStepSegment x="0.8" y="0.1"/><PolyStepSegment x="0.8" y="0.6"/></Cutout></Contour>
+   <Contour><Polygon><PolyBegin x="0" y="0"/></Polygon></Contour>
+   <Text textString="dico" fontSize="1.5"><Location x="1" y="2"/><Xform rotation="90" mirror="true"/></Text></UserSpecial></EntryUser>
+ <EntryUser><Line startX="0" startY="0" endX="1" endY="1"/></EntryUser><EntryUser id="uvide"/>
+</DictionaryUser>
+</Content><Bom name="b"><BomItem OEMDesignNumberRef="RES_0603_10K_1%" quantity="2"><RefDes name="R1" packageRef="R0603" populate="true"/><RefDes name="R2" populate=" FALSE "/>
+  <RefDes name="R9" packageRef="R0603" layerRef="TOP" populate="false"/><RefDes name="R10"/><RefDes/><Characteristics><Resistance value="10k" tolerance="1%"/></Characteristics></BomItem>
+ <BomItem OEMDesignNumberRef="CAP-22pF"><RefDes name="C1"/><RefDes name="C77"/><Property name="VALUE" value="22p"/></BomItem>
+ <BomItem OEMDesignNumberRef="AUTRE"><RefDes name="R9"/><NonstandardAttribute name="Fabricant" value="ACME"/></BomItem>
+ <BomItem><RefDes name="Q5"/><RefDes name="U1"/></BomItem></Bom><Ecad name="e"><CadHeader units="MILLIMETER">
+<Spec name="CU"><Conductor type="SURFACE_ROUGHNESS_UPFACING"><Property value="1,5" unit="MICRON"/></Conductor>
+ <Conductor type="SURFACE_ROUGHNESS_DOWNFACING"><Property value="0.0001" unit="INCH"/></Conductor><Conductor type="CONDUCTIVITY"><Property value="5.8e7"/></Conductor></Spec>
+<Spec name="CU2"><Conductor type="SURFACE_ROUGHNESS_TREATED"><Property value="2" unit="furlong"/></Conductor></Spec>
+<Spec name="LISSE"><Conductor type="SURFACE_ROUGHNESS_UPFACING"><Property value="0"/></Conductor></Spec>
+<Spec name="HUR"><Conductor type="SURFACE_ROUGHNESS_UPFACING"><Property name="HURAY_NODULE_RADIUS" value="0.5" unit="UM"/><Property name="HURAY_SURFACE_RATIO" value="2.5"/></Conductor></Spec>
+<Spec name="DIEL"><Dielectric type="DIELECTRIC_CONSTANT"><Property value="4.37"/></Dielectric><Dielectric type="LOSS_TANGENT"><Property value="0.011"/></Dielectric><General type="MATERIAL"><Property text="FR-4"/></General></Spec>
+<Spec name="DIEL2"><Dielectric dielectricConstant="3.9" lossTangent="0.004" material="Megtron"/></Spec>
+<Spec id="VIDE"/><Spec name="BD"><Backdrill type="START_LAYER"><Property layerOrGroupRef="BOT"/></Backdrill><Backdrill type="MUST_NOT_CUT_LAYER" layerRef=" IN1 "/><Backdrill type="MAX_STUB_LENGTH"><Property value="0.1" unit="MM"/></Backdrill></Spec>
+<Spec name="CLASSE_R"><General type="ELECTRICAL"><Property name="NET_CLASS" text="Rapide"/><Property name="TRACE_WIDTH" value="0.25" unit="MM"/>
+  <Property name="TRACE_WIDTH" value="0.37" unit="MM" layerOrGroupRef="TOP"/><Property name="CLEARANCE" value="8" unit="MIL"/><Property name="VIA_DIAMETER" value="0.6"/>
+  <Property name="MAX_VIAS" value="3"/><Property name="ALLOWED_LAYER" layerOrGroupRef="TOP"/><Property name="ALLOWED_LAYER" layerOrGroupRef="BOT"/>
+  <Property name="TOPOLOGY" text="daisy_chain"/><Property name="PIN_ORDER" text="U1.1  R1.2 J1.3"/><Property name="MEMBER" text="SANS_BROCHE"/><Property name="BACKDRILL_RULE" text="oui"/>
+  <Property name="MIN_LENGTH" value="abc"/><Property name="MAX_LENGTH" value="1e400"/><Property name="STAR_TOLERANCE" value="nan"/></General>
+ <Impedance value="50" tolPlus="10" tolMinus="10" tolPercent="true"/></Spec>
+<Spec name="PAIRE_D"><General type="ELECTRICAL"><Property name="DIFF_PAIR" text="USB"/><Property name="TRACE_WIDTH" value="0.2" unit="MM" tolPlus="0.02" tolMinus="0.01"/>
+  <Property name="GAP" value="0.15" tolPlus="0.05"/><Property name="MAX_UNCOUPLED_LENGTH" value="2"/><Property name="NET_P" text="DP"/><Property name="RULE" text="CLASSE_R"/></General>
+ <Impedance value="90" tolPlus="9"/></Spec>
+<Spec name="GROUPE_G"><General type="ELECTRICAL"><Property name="MATCH_GROUP" text="DDR"/><Property name="MATCH_MODE" text="delay"/><Property name="MATCH_TOLERANCE" value="5" text="ps"/>
+  <Property name="REFERENCE_NET" text="CLK"/><Property name="MEMBER" text="D0"/><Property name="MEMBER" text="D1"/></General></Spec>
+<Spec name="GROUPE_H"><General><Property name="MATCH_GROUP" text="H"/><Property name="MATCH_TOLERANCE" value="0.25" unit="MM"/></General></Spec>
+<Spec name="MATRICE"><General><Property name="CLEARANCE" text="Rapide|Lent" value="0.3"/><Property name="CLEARANCE" text="A|B" value="0"/><Property name="CLEARANCE" text="C|D" value="12" unit="MIL"/></General></Spec>
+<Spec name="NET_X"><General><Property name="NET" text="A"/><Property name="MAX_LENGTH" value="55.5"/><Property name="MAX_STUB_LENGTH" value="1,5"/></General><Impedance value="75" tolPlus="5" tolPercent="false"/></Spec>
+</CadHeader><CadData><PadStackDef name="PS1"><PadstackHoleDef name="PS1" diameter="0.5" platingStatus="PLATED" layerRef="D1"/>
+ <PadstackPadDef layerRef="TOP" padUse="REGULAR"><StandardPrimitiveRef id="ci"/></PadstackPadDef><PadstackPadDef layerRef="TOP" padUse="ANTIPAD"><Circle diameter="1.9"/></PadstackPadDef>
+ <PadstackPadDef layerRef="IN1" padUse="THERMAL"><StandardPrimitiveRef id="th"/></PadstackPadDef><PadstackPadDef layerRef="BOT" diameter="0.9"/><PadstackPadDef padUse="regular"><StandardPrimitiveRef id="do"/></PadstackPadDef></PadStackDef>
+<PadStackDef name="PSVIA" padUsage="via"><PadstackHoleDef><Circle diameter="0.35"/></PadstackHoleDef><PadstackPadDef layerRef="TOP"><StandardPrimitiveRef id="rc"/></PadstackPadDef></PadStackDef>
+<PadStackDef><PadstackHoleDef name="PARTROU" diameter="0.2"/></PadStackDef><PadStackDef id="PS2"><PadstackPadDef layerRef="TOP" padUsage="VIA"><StandardPrimitiveRef id="rr"/></PadstackPadDef></PadStackDef><PadStackDef/>
+<PadStackDef name="PS1"><PadstackPadDef layerRef="BOT" diameter="1.1"/></PadStackDef>
+<Layer name="TOP" layerFunction="CONDUCTOR" side="TOP"><SpecRef id="CU"/></Layer><Layer name="D12" layerFunction="DIELCORE"><Property name="dk" value="4.1"/><SpecRef id="DIEL"/></Layer>
+<Layer name="IN1" layerFunction="PLANE" side="INTERNAL"/><Layer name="D23" layerFunction="DIELPREG"><SpecRef id="DIEL2"/></Layer>
+<Layer name="BOT" layerFunction="Signal" side="BOTTOM"><SpecRef id="CU2"/></Layer>
+<Layer name="SILK" layerFunction="SILKSCREEN" side="TOP"/><Layer name="CONTOUR" layerFunction="BOARD_OUTLINE"/>
+<Layer name="D1" layerFunction="DRILL"><Span fromLayer="TOP" toLayer="BOT"/></Layer>
+<Layer name="BDL" layerFunction="BACKDRILL" spanFromLayer="BOT" spanToLayer="IN1"><SpecRef id="BD"/></Layer><Layer name="FENTES" layerFunction="ROUT"/><Layer layerFunction="X"/>
+<Stackup overallThickness="1.6"><StackupGroup>
+ <StackupLayer layerOrGroupRef="TOP" thickness="0.035" sequence="1"><SpecRef id="CU"/></StackupLayer>
+ <StackupLayer layerOrGroupRef="D12" thickness="0.2" sequence="2"><Property name="LossTangent" value="0.02"/></StackupLayer>
+ <StackupLayer layerOrGroupRef="IN1" thickness="0.035" sequence="3"><SpecRef id="LISSE"/></StackupLayer>
+ <StackupLayer layerOrGroupRef="D23" thickness="1.2" sequence="4.9"/>
+ <StackupLayer layerOrGroupRef="BOT" thickness="0.035" sequence="5"><SpecRef id="HUR"/></StackupLayer>
+ <StackupLayer thickness="x" sequence="y"/></StackupGroup></Stackup>
+<Step name="s"><Profile><Polygon><PolyBegin x='0' y='0'/><PolyStepSegment x='30' y='0'/><PolyStepSegment x='30' y='20'/><PolyStepCurve x='0' y='0' centerX='15' centerY='10' clockwise='true'/></Polygon><Cutout><PolyBegin x='1' y='1'/><PolyStepSegment x='2' y='1'/><PolyStepSegment x='2' y='2'/></Cutout></Profile>
+<PadStack net="A"><LayerHole name="x" layerRef="D1" diameter="0.3" platingStatus="VIA"><Location x="10" y="10"/></LayerHole>
+ <LayerPad layerRef="TOP"><Xform rotation="45"/><StandardPrimitiveRef id="ci"/><PinRef componentRef="U1" pin="7"/></LayerPad>
+ <LayerPad layerRef="TOP" padUse="ANTIPAD"><StandardPrimitiveRef id="rc"/></LayerPad><LayerPad layerRef="IN1" padUse="THERMAL"><StandardPrimitiveRef id="th"/></LayerPad>
+ <LayerPad layerRef="BOT"><UserPrimitiveRef id="u1"/><PinRef pin="8"/></LayerPad></PadStack>
+<PadStack><LayerPad layerRef="TOP"><Location x="11" y="10"/><StandardPrimitiveRef id="absent"/></LayerPad></PadStack>
+<PadStack><LayerHole diameter="0.3" x="12" y="13"/></PadStack><PadStack><LayerPad layerRef="TOP"/></PadStack>
+<Package name="R0603" height="0.45"><Outline><Polygon><PolyBegin x="-0.8" y="-0.4"/><PolyStepSegment x="0.8" y="-0.4"/><PolyStepSegment x="0.8" y="0.4"/><PolyStepSegment x="-0.8" y="0.4"/></Polygon></Outline>
+ <Pin number="1" type="THRU"><Location x="-0.75" y="0"/><StandardPrimitiveRef id="rc"/></Pin><Pin number="2"><Location x="0.75" y="0"/><Xform rotation="180"/><RectCenter width="0.9" height="0.8"/></Pin><Pin><Circle diameter="0.5"/></Pin></Package>
+<Package name="AVECPAD"><Pin number="1"><Location x="0" y="0"/><Pad padstackDefRef="PS1" net="A"/><Pad><StandardPrimitiveRef id="ci"/><PinRef componentRef="Z" pin="5"/></Pad></Pin></Package>
+<Package id="PARID" height="-1"/><Package/>
+<Component refDes="R1" packageRef="R0603" layerRef="TOP" part="RES_0603_10K_1%%" mountType="SMT"><Location x="5" y="5"/><Xform rotation="90"/></Component>
+<Component refDes="R2" packageRef="R06" layerRef="BOT" part="RES-4R7"><Location x="6" y="5"/><Xform rotation="270" mirror="true"/><NonstandardAttribute name="Tol" value="5%%"/></Component>
+<Component refDes="C1" part="C0603_100nF_+-10%%_X7R" value=""><Property name="MPN" value="GRM188"/><Characteristics><Capacitance value="100n" tolerance="10%%"/><Voltage value="16"/></Characteristics></Component>
+<Component refDes="U1" packageRef="AVECPAD" value="MCU 3.3V"><Property name="CATEGORY" value="Integrated Circuits (ICs)"/></Component>
+<Component refDes="T1"><Property property="Type" val="Transformer"/></Component><Component refDes="XX1" value="4.7uH"/><Component refDes="XX2" value="33 Ohm"/>
+<Component refDes="XX3" value="2K2"/><Component refDes="XX4" value="16MHz"/><Component refDes="XX5" value="1uF"/><Component refDes="L5" part="IND-10uH-20%%"/>
+<Component refDes="U2"><Package name="ENLIGNE"><Pin number="A1"><Location x="1" y="1"/></Pin></Package></Component><Component refDes="U3"><Package name="ENLIGNE"/></Component>
+<Component/><Component refDes="R1" packageRef="AVECPAD"/>
+
+<LogicalNet name="A" netClass="SIGNAL"><PinRef componentRef="R1" pin="1"/><PinRef componentRef="U9" pin="1"/><PinRef componentRef="R1"/><SpecRef id="CLASSE_R"/><SpecRef id="NET_X"/></LogicalNet>
+<LogicalNet name="B" net_class=" GROUND "><PinRef componentRef="R1" pin="2"/><PinRef componentRef="R1" pin="1"/><NonstandardAttribute name="net_class" value="Lent"/></LogicalNet>
+<LogicalNet name="DP" netPair="DN"><SpecRef id="PAIRE_D"/><NonstandardAttribute name="DIFF_PAIR" value="USB"/><NonstandardAttribute name="DIFF_PAIR_POLARITY" value="p"/></LogicalNet>
+<LogicalNet name="DN" netPair="DP"><SpecRef id="PAIRE_D"/></LogicalNet>
+<LogicalNet name="E1" netPair="E2"/><LogicalNet name="E2" netPair="E1"/><LogicalNet name="F1" netPair="F1"/><LogicalNet/>
+<LogicalNet name="D0"><SpecRef id="GROUPE_G"/><SpecRef id="ABSENT"/></LogicalNet><LogicalNet name="D2"><SpecRef id="GROUPE_G"/><SpecRef id="MATRICE"/></LogicalNet>
+
+<LayerFeature layerRef="TOP">
+ <Set net="A"><Features><Location x="1" y="2"/><Xform rotation="30" mirror="true"/>
+   <Line startX="0" startY="0" endX="5" endY="0"><LineDescRef id="l1"/></Line>
+   <Line startX="0" startY="1" endX="5" endY="1"><LineDesc lineWidth="0.2" lineEnd="none"/><FillDescRef id="creux"/></Line>
+   <Polyline><PolyBegin x="0" y="0"/><PolyStepSegment x="1" y="0"/><PolyStepCurve x="2" y="1" centerX="1" centerY="1" clockwise="true"/><LineDescRef id="l2"/></Polyline>
+   <Outline><Polygon><PolyBegin x="0" y="0"/><PolyStepSegment x="1" y="0"/><PolyStepSegment x="1" y="1"/></Polygon><LineDesc lineWidth="0.05" lineEnd="SQUARE"/></Outline>
+   <Arc startX="0" startY="0" endX="2" endY="0" centerX="1" centerY="0" clockwise="true"><LineDescRef id="l1"/></Arc>
+   <Arc startX="0" startY="0" endX="2" endY="0" centerX="1" centerY="0"><LineDescRef id="absent"/></Arc>
+   <Contour><Polygon><PolyBegin x="0" y="0"/><PolyStepSegment x="3" y="0"/><PolyStepSegment x="3" y="3"/><FillDescRef id="plein"/></Polygon><Cutout><PolyBegin x="1" y="0.5"/><PolyStepSegment x="2" y="0.5"/><PolyStepSegment x="2" y="1.5"/></Cutout></Contour>
+   <Text textString="T1"/><Text text="T2" fontSize="2"><Location x="9" y="9"/></Text>
+   <Text textString="T3"><BoundingBox lowerLeftX="0" lowerLeftY="0" upperRightX="4" upperRightY="1.2"/><Xform rotation="-45"/></Text>
+   <Text textString="T4"><BoundingBox lowerLeftX="5" lowerLeftY="0" upperRightX="4" upperRightY="1.2"/></Text><Text/>
+   <UserSpecial><Line startX="0" startY="0" endX="0" endY="5"><LineDescRef id="l1"/></Line><Text textString="US"/></UserSpecial>
+   <StandardPrimitiveRef id="ci"/></Features>
+  <Features><Circle diameter="0.8"/><Location x="3" y="3"/></Features>
+  <Features><Circle diameter="0.8"/><Location x="4" y="3"/></Features>
+  <Features><Donut outerDiameter="2" innerDiameter="1"/></Features>
+  <Features><UserPrimitiveRef id="u1"/><Location x="7" y="7"/></Features>
+  <Pad padUsage="VIA"><Location x="1" y="1"/><StandardPrimitiveRef id="rc"/><PinRef componentRef="R1" pin="1"/></Pad>
+  <Pad padstackDefRef="PS1" net="B"><Location x="2" y="1"/><Xform rotation="90" mirror="TRUE"/></Pad>
+  <Pad geometry="PS2" pinRef="X.9"><Location x="2" y="1"/></Pad>
+  <Pad><Location x="5" y="5"/><StandardPrimitiveRef id="th"/></Pad>
+  <Pad><Location x="5" y="6"/><StandardPrimitiveRef id="do"/></Pad>
+  <Pad><Location x="5" y="7"/><StandardPrimitiveRef id="co"/></Pad>
+ </Set>
+ <Set net=""><Features><Line startX="0" startY="0" endX="1" endY="0" net=""><LineDesc lineWidth="0.1"/></Line>
+   <Line startX="0" startY="0" endX="1" endY="0" net="C"><LineDesc lineWidth="0.1"/></Line></Features></Set>
+ <Features><Line startX="0" startY="0" endX="1" endY="0"><LineDesc lineWidth="0.1"/></Line></Features>
+</LayerFeature>
+<LayerFeature layerRef="SILK"><Set><Features><Location x="0" y="0"/><Text textString="serigraphie"/><Line startX="0" startY="0" endX="1" endY="3"><LineDesc lineWidth="0.12"/></Line></Features></Set></LayerFeature>
+<LayerFeature layerRef="CONTOUR"><Set><Features><Contour><Polygon><PolyBegin x="0" y="0"/><PolyStepSegment x="30" y="0"/><PolyStepSegment x="30" y="20"/><PolyStepSegment x="0" y="20"/></Polygon></Contour></Features></Set></LayerFeature>
+<LayerFeature layerRef="D1"><Span fromLayer="TOP" toLayer="IN1"/>
+ <Set net="A" padUsage="VIA"><Hole name="h1" diameter="0.3" platingStatus="VIA" x="1" y="1"/><Hole diameter="0.3" platingStatus="PLATED"><Location x="2" y="1"/></Hole>
+   <Features><Hole diameter="0.4" platingStatus="NONPLATED" x="3" y="1"/></Features></Set>
+ <Set net="B" geometry="PS1"><Hole diameter="0.5" platingStatus="PLATED" x="2" y="1"/><SpecRef id="BD"/></Set>
+ <Set net="B" geometry="PSVIA"><Hole diameter="0.5" x="12" y="1"/></Set>
+ <Set geometry="INCONNU" padUsage="via"><Hole diameter="0.25" platingStatus="VIA" x="8" y="8"/></Set>
+</LayerFeature>
+<LayerFeature layerRef="BDL"><Set><Hole diameter="0.7" platingStatus="NONPLATED" x="2" y="1.0004"/><Hole diameter="0.7" platingStatus="NONPLATED" x="20" y="10"/></Set></LayerFeature>
+<LayerFeature layerRef="FENTES"><Set net="A"><SlotCavity platingStatus="PLATED"><Location x="4" y="4"/><Xform rotation="-30"/><Oval width="1" height="3"/></SlotCavity>
+  <SlotCavity><Location x="4" y="4"/><Oval width="3" height="1"/></SlotCavity><SlotCavity><Oval width="3" height="1"/></SlotCavity>
+  <SlotCavity><Location x="4" y="4"/><Oval width="3" height="0"/></SlotCavity><SlotCavity><Location x="1" y="1"/><Outline/></SlotCavity></Set></LayerFeature>
+<LayerFeature layerRef="trous-divers"><Set><Hole diameter="1" platingStatus="NONPLATED" x="0" y="0"/></Set></LayerFeature>
+</Step></CadData></Ecad></IPC-2581>

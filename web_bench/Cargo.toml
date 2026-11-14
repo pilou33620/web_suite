@@ -1,0 +1,21 @@
+[package]
+name = "web_bench"
+version = "0.1.0"
+edition = "2021"
+description = "Banc d'essai visible des outils de web_suite"
+
+[[bin]]
+name = "web_bench"
+path = "src/main.rs"
+
+[dependencies]
+web_tools_commun = { path = "../commun" }
+serde_json = { version = "1", features = ["preserve_order"] }
+ureq = "2"
+serde = "1"
+chrono = { version = "0.4", default-features = false, features = ["clock"] }
+# SIGINT, SIGTERM, SIGHUP ; sous Windows Ctrl+C, Ctrl+Pause et la fermeture de la console
+ctrlc = { version = "3", features = ["termination"] }
+
+[target.'cfg(unix)'.dependencies]
+libc = "0.2"
