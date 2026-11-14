@@ -12,7 +12,7 @@
 //!   ainsi de même origine, et la page Banc peut cliquer dans l'outil ouvert dans son cadre.
 //!   Chaque page HTML relayée reçoit en tête la sonde (page/sonde.js), qui note les erreurs JS,
 //!   les requêtes en échec et les dialogues ;
-//! - il découvre et lance les scripts banc-* de chaque outil, un par un ;
+//! - il découvre et lance les bancs de chaque outil (scripts node banc-*, cibles de cargo test), un par un ;
 //! - il garde les rapports du clic-partout dans web_bench/rapports/.
 //!
 //! Écoute sur 127.0.0.1 uniquement : le relais parle aux outils depuis la boucle locale, il ne

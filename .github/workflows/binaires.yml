@@ -1,7 +1,11 @@
 name: exécutables
 
 # Compile les exécutables Rust de WEB_SUITE pour chaque système et les dépose dans la
-# publication « binaires » : binaires.sh / binaires.cmd les y prennent sur les postes sans cargo.
+# publication « binaires », en deux archives par système :
+# - web_suite-<système> : les exécutables seuls, que binaires.sh / binaires.cmd prennent sur un
+#   clone git sans cargo ;
+# - web_suite-prod-<système> : la production, complète et sans git — les exécutables, les scripts
+#   de démarrage, les pages (html, js, css) et les fiches du skill. Ni sources, ni specs, ni bancs.
 on:
   push:
     branches: [main]
@@ -50,6 +54,25 @@ jobs:
             tar -czf web_suite-${{ matrix.nom }}.tar.gz -C bin .
           fi
 
+      - name: Archive de production (exécutables, scripts de démarrage, pages)
+        shell: bash
+        run: |
+          P=prod/web_suite
+          mkdir -p $P/lanceur/docs $P/web_bench $P/.claude/skills
+          cp -r bin $P/
+          cp demarrer_*.sh demarrer_*.cmd installer.sh installer.cmd binaires.sh binaires.cmd README.md $P/
+          # les pages du lanceur (pas banc_pilote.js) et sa notice
+          cp lanceur/*.html lanceur/pilote.js lanceur/pilote.css $P/lanceur/
+          cp lanceur/docs/DETAILS.md lanceur/docs/intro.webp $P/lanceur/docs/
+          cp -r web_bench/page web_bench/README.md $P/web_bench/
+          # les fiches que le serveur MCP sert (savoir métier)
+          cp -r .claude/skills/web-suite $P/.claude/skills/
+          if [ "${{ runner.os }}" = Windows ]; then
+            (cd prod && 7z a ../web_suite-prod-${{ matrix.nom }}.zip web_suite)
+          else
+            tar -czf web_suite-prod-${{ matrix.nom }}.tar.gz -C prod web_suite
+          fi
+
       - name: Publication
         shell: bash
         env:
@@ -58,6 +81,6 @@ jobs:
           # les quatre compilations arrivent ensemble : une seule crée la publication
           gh release view binaires >/dev/null 2>&1 \
             || gh release create binaires --title "Exécutables" \
-                 --notes "Exécutables de WEB_SUITE, recompilés à chaque envoi sur main. Pris par binaires.sh et binaires.cmd." \
+                 --notes "Exécutables de WEB_SUITE, recompilés à chaque envoi sur main. web_suite-<système> : pris par binaires.sh et binaires.cmd. web_suite-prod-<système> : la production complète (exécutables, scripts de démarrage, pages), à décompresser puis lancer par demarrer_WEB_SUITE." \
             || true
-          gh release upload binaires web_suite-${{ matrix.nom }}.* --clobber
+          gh release upload binaires web_suite-${{ matrix.nom }}.* web_suite-prod-${{ matrix.nom }}.* --clobber

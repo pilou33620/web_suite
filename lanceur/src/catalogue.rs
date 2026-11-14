@@ -16,12 +16,11 @@ pub struct Outil {
     pub sous_titre: &'static str,
     pub couleur: &'static str,
     pub depot: &'static str,
-    pub script: &'static str,
     pub port: u16,
     /// En-tête maison exigé sur tout POST/PUT/DELETE (REGLES §2.3).
     pub entete: &'static str,
     pub args: &'static [&'static str],
-    /// "pip" (numpy / scipy, obligatoires), "openems" (archive binaire + venv) ou rien.
+    /// "openems" (les exécutables openEMS et nf2ff, pour les simulations) ou rien.
     pub dependances: Option<&'static str>,
 }
 
@@ -32,11 +31,10 @@ pub const CATALOGUE: &[Outil] = &[
         sous_titre: "Schéma & routage PCB",
         couleur: "#ff9a4d",
         depot: "https://github.com/pilou33620/WEB_CAO.git",
-        script: "web_CAO.py",
         port: 8000,
         entete: "X-WEB_CAO",
         args: &["--local", "--sans-navigateur", "--sans-pause"],
-        dependances: Some("pip"),
+        dependances: None,
     },
     Outil {
         id: "web_antenna",
@@ -44,7 +42,6 @@ pub const CATALOGUE: &[Outil] = &[
         sous_titre: "Simulation d’antennes RF",
         couleur: "#4fe0ff",
         depot: "https://github.com/pilou33620/WEB_ANTENNA.git",
-        script: "web_antenna.py",
         port: 8732,
         entete: "X-WEB_ANTENNA",
         args: &["--local", "--sans-navigateur"],
@@ -56,7 +53,6 @@ pub const CATALOGUE: &[Outil] = &[
         sous_titre: "Modélisation & assemblage 3D",
         couleur: "#8dffb8",
         depot: "https://github.com/pilou33620/WEB_3D.git",
-        script: "web_3D.py",
         port: 8139,
         entete: "X-Web3D",
         args: &["--local", "--sans-navigateur", "--sans-pause"],
@@ -69,7 +65,7 @@ pub fn par_id(id: &str) -> Option<&'static Outil> {
 }
 
 /// La racine du dépôt git WEB_SUITE (là où vivent lanceur/, les outils, PROJETS/).
-/// L'exécutable n'est pas à côté des pages comme l'était web_suite.py : on la donne
+/// L'exécutable n'est pas à côté des pages : on la donne
 /// par WEB_SUITE_DEPOT (scripts demarrer_*), sinon on remonte depuis l'exécutable
 /// puis depuis le dossier courant jusqu'à trouver lanceur/index.html.
 pub fn depot() -> PathBuf {
@@ -97,6 +93,5 @@ pub fn dossier(outil: &Outil, racine: &Path) -> PathBuf {
 pub use web_tools_commun::demarreur;
 
 pub fn est_installe(outil: &Outil, racine: &Path) -> bool {
-    let d = dossier(outil, racine);
-    d.join(outil.script).is_file() || demarreur(&d, outil.nom, outil.script).is_some()
+    demarreur(&dossier(outil, racine), outil.nom).is_some()
 }

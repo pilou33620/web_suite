@@ -8,9 +8,8 @@ Compléments au [README](../../README.md).
 WEB_TOOLS/                  <- ce dépôt
 ├── installer.cmd / .sh     <- télécharge les outils
 ├── demarrer_WEB_SUITE.cmd / .sh  <- lance WEB·SUITE
-├── maj_git.py              <- état git de WEB_SUITE, des outils et de PROJETS
-├── lanceur/                <- web_suite.py, installer.py, outils.py, projets.py, pages,
-│                              src/mcp/ (serveur MCP de Claude Code : bin/mcp_web_suite)
+├── bin/                    <- les exécutables (web_suite, installer, maj_git, mcp_web_suite, web_bench…)
+├── lanceur/                <- src/ (lanceur, installateur, serveur MCP de Claude Code), pages
 ├── WEB_CAO/                <- clonés par l'installateur, chacun avec son dépôt git,
 ├── WEB_ANTENNA/               ignorés par le .gitignore de WEB_SUITE
 ├── WEB_3D/
@@ -22,19 +21,18 @@ WEB_TOOLS/                  <- ce dépôt
     └── 3D/                 <- WEB_3D --projets
 ```
 
-Au premier démarrage sans aucun outil, `web_suite.py` pose la question de l'installateur
+Au premier démarrage sans aucun outil, le lanceur pose la question de l'installateur
 en console. La page propose aussi **Télécharger** sur chaque carte et un bouton pour tout
 télécharger d'un coup. Sans git, les outils sont téléchargés en zip.
 
 ## Installation selon le système
 
-- **Linux / Raspberry Pi** : `sudo apt install python3 git python3-numpy python3-scipy` (numpy et
-  scipy sont obligatoires pour WEB_CAO, et pip refuse la Python du système sur Debian).
-- **openEMS (WEB_ANTENNA, Windows)** : l'installateur (ou `python lanceur/installer.py
-  antenna`, ou le bouton **Installer openEMS** de la carte) télécharge openEMS v0.0.36
-  (~50 Mo) dans `WEB_ANTENNA/openEMS/`, crée `WEB_ANTENNA/env/` et y installe les paquets.
-  Les roues openEMS n'existent que pour Python 3.10 / 3.11 64 bits
-  (`winget install Python.Python.3.11`).
+- **Linux / Raspberry Pi** : `sudo apt install git`. Le lanceur et les outils sont des
+  exécutables, téléchargés (ou compilés sur place avec `cargo`) par leurs scripts de démarrage.
+- **openEMS (WEB_ANTENNA)** : l'outil lance les deux exécutables `openEMS` et `nf2ff`. Sous
+  Windows, l'installateur (`installer.cmd antenna`, ou le bouton **Installer openEMS** de la
+  carte) télécharge l'archive binaire openEMS v0.0.36 (~50 Mo) dans `WEB_ANTENNA/openEMS/`.
+  Ailleurs, ces deux exécutables doivent être dans le `PATH`.
 
 ## Appairage d'un appareil
 
@@ -49,7 +47,7 @@ En mode réseau, le lanceur exige un jeton de tout appareil autre que le serveur
   autre Wi-Fi), on ressaisit un code.
 - L'adresse complète `?jeton=…`, toujours affichée, marche aussi sans code.
 - Le jeton est **partagé par tous les web tools du poste** (`~/.web_tools/jeton-reseau.txt`,
-  module `lanceur/appairage.py`, copie identique dans WEB_CAO, WEB_ANTENNA, WEB_3D, web_ferme) et le
+  caisse `commun` (module `appairage`), prise par WEB_CAO, WEB_ANTENNA et WEB_3D) et le
   cookie porte le même nom partout : un appareil appairé au lanceur l'est aussi pour les
   outils (un navigateur envoie le cookie à tous les ports de l'adresse), et inversement.
   L'ancien `lanceur/jeton-reseau.txt` est repris une fois. Supprimer le fichier partagé en
@@ -84,7 +82,7 @@ outil lancé ensuite refait sa propre vérification : `git stash`, mise à jour,
   GitHub pour le cloner, le tirer et l'envoyer. Sous Windows, Git Credential Manager ouvre
   sa fenêtre de connexion. Sur un Pi, le lanceur le propose dans son terminal au
   démarrage (`gh auth login` + `gh auth setup-git`), ou à tout moment avec
-  `python lanceur/connexion_github.py --connecter`. Tant que le poste n'est pas
+  `bin/connexion_github --connecter`. Tant que le poste n'est pas
   connecté, `PROJETS/` reste un simple dossier (pas de dépôt local sans lien avec GitHub) et
   la page l'indique ; il est cloné dès la connexion, ce qui a été créé entre-temps est gardé.
 - **Avant chaque lancement d'outil**, il tire à nouveau. L'outil est lancé pointé sur ses
@@ -335,10 +333,8 @@ Bancs (`lanceur/tests/`) :
 - `banc_serveur` : `Host` étranger, `X-WebSuite`, taille des requêtes,
   jeton du mode réseau (refus, cookie, poste local exempté), code d'appairage (usage
   unique, cinq erreurs puis pause), HTTPS, mise à jour de WEB_SUITE au démarrage.
-- `banc_dependances` : pip n'est
-  pas lancé si tout est là, un lancement à qui il manque un paquet lance l'installation, et aucune
-  question openEMS n'est posée hors Windows. La fausse Python est l'exécutable du test lui-même
-  (`harness = false` dans `Cargo.toml`).
+- `banc_dependances` : un outil dont le `demarrer_<NOM>` est là est installé, sans rien d'autre
+  à installer, et aucune question openEMS n'est posée hors Windows.
 - `banc_traces_ia` : plus aucune trace de l'ancien assistant IA, ici et dans les clones des outils.
 - `banc_savoir` : ce que citent les fiches du skill existe, et le relevé des consignes est relu
   dans les clones des outils (dans web_suite, ou à côté de lui comme en CI ; sans clone, non relu).

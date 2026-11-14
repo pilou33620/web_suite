@@ -465,7 +465,7 @@ pub fn demarrer() -> Arc<Arret> {
 }
 
 /// Vérification : un faux pilote sur la boucle locale (ce que pilote.py rend au lanceur), et un
-/// faux claude (script Python) qui écrit le flux stream-json de Claude Code et relit ses arguments.
+/// faux claude (script node) qui écrit le flux stream-json de Claude Code et relit ses arguments.
 #[cfg(all(test, unix))]
 mod tests {
     use super::*;
@@ -483,8 +483,8 @@ mod tests {
     #[test]
     fn claude_depuis_la_page() {
         let _verrou = verrou(&essais::ENV);
-        let Some(python) = which("python3") else {
-            eprintln!("python3 introuvable : le faux claude ne peut pas tourner, essai sauté");
+        let Some(node) = which("node") else {
+            eprintln!("node introuvable : le faux claude ne peut pas tourner, essai sauté");
             return;
         };
         let pilote = Arc::new(Mutex::new(FauxPilote::default()));
@@ -525,30 +525,32 @@ mod tests {
         let dossier = std::env::temp_dir().join(format!("claude_pages-{}", std::process::id()));
         let _ = std::fs::remove_dir_all(&dossier);
         std::fs::create_dir_all(&dossier).unwrap();
-        let chaine = |c: &Path| py_repr(&json!(c.to_string_lossy()));
+        let chaine = |c: &Path| json!(c.to_string_lossy()).to_string();
         let journal_args = dossier.join("args.json");
         let faux = dossier.join("claude");
-        std::fs::write(&faux, format!("#!{}\n", python.display()) + &[
-            "import json, os, sys".to_string(),
-            "args = sys.argv[1:]".into(),
-            "if args == ['--version']:".into(),
-            "    print('2.1.301 (Claude Code)'); sys.exit(0)".into(),
-            "if args[:2] == ['auth', 'status']:".into(),
-            format!("    print(json.dumps({{'loggedIn': os.path.exists({}), 'email': 'moi@exemple.fr'}})); sys.exit(0)",
+        std::fs::write(&faux, format!("#!{}\n", node.display()) + &[
+            "const fs = require('fs');".to_string(),
+            "const args = process.argv.slice(2);".into(),
+            "if (args.join(' ') === '--version') { console.log('2.1.301 (Claude Code)'); process.exit(0); }".into(),
+            "if (args[0] === 'auth' && args[1] === 'status') {".into(),
+            format!("  console.log(JSON.stringify({{loggedIn: fs.existsSync({}), email: 'moi@exemple.fr'}})); process.exit(0);",
                     chaine(&dossier.join("connecte"))),
-            "blocs = json.loads(sys.stdin.readline())['message']['content']".into(),
-            "texte = blocs[-1]['text']".into(),
-            format!("json.dump({{'args': args, 'texte': texte, 'blocs': blocs}}, open({}, 'w'))", chaine(&journal_args)),
-            "if texte == 'plante':".into(),
-            "    sys.stderr.write('Erreur : pas connecte'); sys.exit(1)".into(),
-            "sid = 'sess-2' if '--resume' in args else 'sess-1'".into(),
-            "for e in ({'type': 'system', 'subtype': 'init', 'session_id': sid},".into(),
-            "          {'type': 'assistant', 'message': {'content': [{'type': 'text', 'text': 'Je lis la carte.'},".into(),
-            "           {'type': 'tool_use', 'name': 'mcp__web_suite__cao_doc_lire', 'input': {}}]}},".into(),
-            "          {'type': 'user', 'message': {'content': [{'type': 'tool_result', 'content': 'secret'}]}},".into(),
-            "          {'type': 'assistant', 'message': {'content': [{'type': 'text', 'text': 'Fait : 3 nets.'}]}},".into(),
-            "          {'type': 'result', 'subtype': 'success', 'is_error': False, 'result': 'Fait.', 'session_id': sid}):".into(),
-            "    print(json.dumps(e), flush=True)".into()].join("\n")).unwrap();
+            "}".into(),
+            "require('readline').createInterface({input: process.stdin}).once('line', (ligne) => {".into(),
+            "  const blocs = JSON.parse(ligne).message.content;".into(),
+            "  const texte = blocs[blocs.length - 1].text;".into(),
+            format!("  fs.writeFileSync({}, JSON.stringify({{args, texte, blocs}}));", chaine(&journal_args)),
+            "  if (texte === 'plante') { fs.writeSync(2, 'Erreur : pas connecte'); process.exit(1); }".into(),
+            "  const sid = args.includes('--resume') ? 'sess-2' : 'sess-1';".into(),
+            "  for (const e of [{type: 'system', subtype: 'init', session_id: sid},".into(),
+            "      {type: 'assistant', message: {content: [{type: 'text', text: 'Je lis la carte.'},".into(),
+            "       {type: 'tool_use', name: 'mcp__web_suite__cao_doc_lire', input: {}}]}},".into(),
+            "      {type: 'user', message: {content: [{type: 'tool_result', content: 'secret'}]}},".into(),
+            "      {type: 'assistant', message: {content: [{type: 'text', text: 'Fait : 3 nets.'}]}},".into(),
+            "      {type: 'result', subtype: 'success', is_error: false, result: 'Fait.', session_id: sid}])".into(),
+            "    fs.writeSync(1, JSON.stringify(e) + '\\n');".into(),
+            "  process.exit(0);".into(),
+            "});".into()].join("\n")).unwrap();
         {
             use std::os::unix::fs::PermissionsExt;
             std::fs::set_permissions(&faux, std::fs::Permissions::from_mode(0o755)).unwrap();

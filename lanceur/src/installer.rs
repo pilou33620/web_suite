@@ -87,7 +87,6 @@ fn oui(question: &str) -> bool {
 pub fn installer(ids: &[&str], racine: &Path, demander_dependances: bool) -> bool {
     let ecrire = |t: &str| println!("  {}", t);
     let mut installes: Vec<&Outil> = Vec::new();
-    let mut dependances_ok = true;
     for o in ids.iter().filter_map(|oid| par_id(oid)) {
         println!();
         println!("  == {} ==", o.nom);
@@ -97,18 +96,14 @@ pub fn installer(ids: &[&str], racine: &Path, demander_dependances: bool) -> boo
     }
 
     for o in &installes {
-        if o.dependances == Some("pip") && demander_dependances {
+        if o.dependances == Some("openems") && outils::openems_pret(o, racine).is_none() {
             println!();
-            if !outils::installer_dependances(o, racine, &ecrire) {
-                dependances_ok = false;
-            }
-        } else if o.dependances == Some("openems") && outils::openems_pret(o, racine).is_none() {
-            println!();
-            println!("  {} : openEMS ne s'installe tout seul que sous Windows. Ailleurs, voir son requirements.txt.", o.nom);
+            println!("  {} : openEMS ne s'installe tout seul que sous Windows. Ailleurs, ses exécutables", o.nom);
+            println!("  « openEMS » et « nf2ff » doivent être dans le PATH (voir le README de l'outil).");
         } else if o.dependances == Some("openems") && outils::openems_pret(o, racine) == Some(false) {
             println!();
             println!("  {} démarre sans rien d'autre, mais ses simulations demandent openEMS.", o.nom);
-            if demander_dependances && oui("Installer openEMS maintenant (~50 Mo, Python 3.10 ou 3.11 requis) ?") {
+            if demander_dependances && oui("Installer openEMS maintenant (~50 Mo) ?") {
                 outils::installer_openems(o, racine, &ecrire);
             } else {
                 println!("  Plus tard : installer antenna (installer.cmd ou ./installer.sh)");
@@ -122,7 +117,7 @@ pub fn installer(ids: &[&str], racine: &Path, demander_dependances: bool) -> boo
         let suite = if echecs > 0 { format!(", {} échec(s)", echecs) } else { String::new() };
         println!("  Terminé : {} outil(s) prêt(s){}.", installes.len(), suite);
     }
-    echecs == 0 && dependances_ok
+    echecs == 0
 }
 
 const USAGE: &str = "usage: installer [-h] [--racine RACINE] [--sans-dependances] [outils ...]";
@@ -147,8 +142,7 @@ pub fn principal(argv: &[String]) -> i32 {
                 println!("options:");
                 println!("  -h, --help          show this help message and exit");
                 println!("  --racine RACINE     dossier où cloner les outils (défaut : le dossier de WEB_SUITE)");
-                println!("  --sans-dependances  ne pas installer les dépendances (numpy et scipy, sans lesquels WEB_CAO");
-                println!("                      ne démarre pas) ni proposer openEMS");
+                println!("  --sans-dependances  ne pas proposer d'installer openEMS");
                 return 0;
             }
             "--racine" => match args.next() {

@@ -120,7 +120,7 @@ pub fn outils() -> Vec<OutilMcp> {
         outil("antenna_openems_chiffrer",
               &["Vérifie et chiffre le modèle de la page WEB_ANTENNA ouverte, comme ses devis, sans rien lancer : ",
                 "modele (modèle complété, estimation, avis), balayage (points du balayage réglé), tableau_s ",
-                "(matrice S complète), script (script Python autonome). Lancer un calcul reste à faire depuis la page.",
+                "(matrice S complète), script (fichier d'entrée d'openEMS, autonome). Lancer un calcul reste à faire depuis la page.",
                 pilote::DONNEES],
               json!({"type": "object", "required": ["quoi"], "properties": {
                   "quoi": {"type": "string", "enum": CHIFFRAGES}, "onglet": onglet}}),

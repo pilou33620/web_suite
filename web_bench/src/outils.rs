@@ -4,14 +4,13 @@ use std::fs;
 use std::io::{self, BufRead, BufReader, PipeReader};
 use std::path::{Path, PathBuf};
 use std::process::{Child, Command, Stdio};
-use std::sync::{Arc, Mutex, OnceLock};
+use std::sync::{Arc, Mutex};
 use std::time::{Duration, SystemTime};
 
 /// Un outil du catalogue, et comment le lancer sans toucher aux données de l'utilisateur.
 pub struct Conf {
     pub id: &'static str,
     pub nom: &'static str,
-    pub script: &'static str,
     pub lib: bool,
     /// {projets} et {lib} sont remplacés par les dossiers temporaires.
     pub args: &'static [&'static str],
@@ -27,36 +26,31 @@ pub const CATALOGUE: &[Conf] = &[
     Conf {
         id: "cao",
         nom: "WEB_CAO",
-        script: "web_CAO.py",
         lib: true,
         args: &["--local", "--sans-navigateur", "--sans-pause", "--sans-maj", "--projets", "{projets}", "--lib", "{lib}"],
         // la simulation se lance à la main ici : rien de lourd par défaut
         noire: "",
-        // Ce que la CI de WEB_CAO fait en plus des banc-* (voir son .github/workflows/ci.yml) :
-        // - les essais qui ne s'appellent pas banc-* ;
+        // Les essais node qui ne s'appellent pas banc-* ;
         essais: &[
             "editeur-pcb/test/harness.js",
             "editeur-schematique/test/harness.js",
             "visionneuse-ipc2581/test/harness-sim.js",
         ],
-        // - les préparations : l'assemblage du monofichier, et l'export que harness.js écrit ;
+        // les préparations, comme la CI de WEB_CAO : l'assemblage du monofichier (rust/outils),
+        // et l'export que harness.js écrit avant le banc Rust qui le relit ;
         preparations: &[
-            ("editeur-pcb/test/harness.js", &[&["python", "editeur-pcb/outils/build-monofichier.py"]]),
-            ("editeur-schematique/test/harness.js", &[&["python", "editeur-schematique/outils/build-monofichier.py"]]),
-            (
-                "editeur-pcb/test/banc-ipc2581-export.py",
-                &[&["python", "editeur-pcb/outils/build-monofichier.py"], &["node", "editeur-pcb/test/harness.js"]],
-            ),
+            ("editeur-pcb/test/harness.js", &[MONOFICHIER_PCB]),
+            ("editeur-schematique/test/harness.js", &[MONOFICHIER_SCHEMA]),
+            ("cargo test -p outils --test banc_ipc2581_export", &[MONOFICHIER_PCB, &["node", "editeur-pcb/test/harness.js"]]),
         ],
-        // - la LIB privée (WEB_SUITE_PROJETS) : sans elle, la CI saute ces bancs-là et donne aux
-        //   autres une LIB factice minimale (WEB_CAO_LIB_MINIMALE, python/test/lib_essai.py).
-        lib_reelle: &["python/test/banc-lib-routes.py", "python/test/banc-rf.py", "gestion-lib/test/banc-catalogue.js"],
+        // le banc qui éprouve le CONTENU de la LIB privée (WEB_SUITE_PROJETS) : sauté sans elle.
+        // Les bancs Rust la cherchent eux-mêmes, et sautent seuls les cas qui la demandent.
+        lib_reelle: &["gestion-lib/test/banc-catalogue.js"],
         routes: None,
     },
     Conf {
         id: "antenna",
         nom: "WEB_ANTENNA",
-        script: "web_antenna.py",
         lib: false,
         // --sans-banc : pas de mesure de vitesse du poste au démarrage
         args: &["--local", "--sans-navigateur", "--sans-maj", "--sans-banc", "--projets", "{projets}"],
@@ -72,28 +66,30 @@ pub const CATALOGUE: &[Conf] = &[
     Conf {
         id: "3d",
         nom: "WEB_3D",
-        script: "web_3D.py",
         lib: false,
         args: &["--local", "--sans-navigateur", "--sans-pause", "--sans-maj", "--projets", "{projets}"],
         noire: "",
-        // les essais propres de appairage.py et pilote.py, que la CI de WEB_3D lance aussi
-        essais: &["appairage.py", "pilote.py"],
+        essais: &[],
         preparations: &[],
         lib_reelle: &[],
         routes: None,
     },
 ];
 
+const MONOFICHIER_PCB: &[&str] = &["cargo", "run", "-q", "-p", "outils", "--bin", "build-monofichier", "--", "editeur-pcb"];
+const MONOFICHIER_SCHEMA: &[&str] =
+    &["cargo", "run", "-q", "-p", "outils", "--bin", "build-monofichier", "--", "editeur-schematique"];
+
 /// dossiers où l'on ne cherche ni bancs ni pages
 pub const DOSSIERS_IGNORES: &[&str] = &[
-    ".git", "graphify-out", "node_modules", "tasks", "__pycache__", "projets", "LIB", "vendor", "env", "venv", ".venv",
-    "dist", "docs",
+    ".git", "graphify-out", "node_modules", "tasks", "projets", "LIB", "vendor", "dist", "docs", "target", "bin",
 ];
+const DELAI_DEMARRAGE: Duration = Duration::from_secs(900);
 const MAX_JOURNAL: usize = 4000; // lignes gardées du journal d'un outil
 const GROS_FICHIER: u64 = 256 * 1024; // o : au-delà (modèles 3D STEP…), un lien dur plutôt qu'une copie
 
 /// les gros modèles Murata de lib_simulation : ni l'outil ni le clic-partout n'en ont besoin, et
-/// les recopier à chaque démarrage prendrait des minutes (même choix que python/test/lib_essai.py)
+/// les recopier à chaque démarrage prendrait des minutes
 /// (les anciens motifs : ".git", "CAPA G*", "INDUC *", "*.zip")
 fn lib_ignoree(nom: &str) -> bool {
     // fnmatch ne distingue pas la casse sous Windows
@@ -138,7 +134,7 @@ fn copier_arbre(source: &Path, cible: &Path) -> io::Result<()> {
     Ok(())
 }
 
-/// La LIB factice de la CI de WEB_CAO sans la LIB privée (python/test/lib_essai.py) : de quoi
+/// Une LIB factice, sans la LIB privée : de quoi
 /// que l'outil démarre et réponde, au lieu d'un dossier vide qui fait échouer chaque page.
 fn lib_minimale(dossier: &Path) -> io::Result<()> {
     for d in ["lib_empreinte_pcb", "lib_empreinte_schematique", "lib_simulation"] {
@@ -218,31 +214,6 @@ pub fn trouver_chromium() -> Option<String> {
         .map(str::to_string)
 }
 
-/// L'interpréteur Python qui lance les outils et leurs bancs (l'ancien sys.executable). On
-/// demande son vrai chemin au lanceur trouvé : arrêter « py » n'arrêterait pas le Python
-/// qu'il a lancé.
-pub fn python() -> &'static str {
-    static PYTHON: OnceLock<String> = OnceLock::new();
-    PYTHON.get_or_init(|| {
-        let candidats: &[&str] = if cfg!(windows) { &["py", "python"] } else { &["python3", "python"] };
-        for c in candidats {
-            let sortie = Command::new(c)
-                .args(["-c", "import sys; print(sys.executable)"])
-                .env("PYTHONIOENCODING", "utf-8")
-                .stdin(Stdio::null())
-                .stderr(Stdio::null())
-                .output();
-            if let Ok(s) = sortie {
-                let chemin = String::from_utf8_lossy(&s.stdout).trim().to_string();
-                if s.status.success() && !chemin.is_empty() {
-                    return chemin;
-                }
-            }
-        }
-        candidats[candidats.len() - 1].to_string()
-    })
-}
-
 /// Lance une commande dans `dossier`, sans entrée, la sortie et les erreurs dans le même tuyau.
 pub fn lancer(cmd: &[String], dossier: &Path, env: &[(String, String)]) -> io::Result<(Child, PipeReader)> {
     let (lecture, ecriture) = io::pipe()?;
@@ -254,6 +225,9 @@ pub fn lancer(cmd: &[String], dossier: &Path, env: &[(String, String)]) -> io::R
         .stdin(Stdio::null())
         .stdout(ecriture.try_clone()?)
         .stderr(ecriture);
+    // son propre groupe : demarrer_<NOM> lance l'exécutable et cargo test son banc, `tuer` les arrête tous
+    #[cfg(unix)]
+    std::os::unix::process::CommandExt::process_group(&mut commande, 0);
     // `commande` (et avec elle notre bout d'écriture du tuyau) est lâchée au retour :
     // la lecture finit quand le processus ferme sa sortie.
     Ok((commande.spawn()?, lecture))
@@ -359,12 +333,11 @@ impl Outil {
             .map_err(es)?;
         }
         let port = port_libre().map_err(es)?;
-        let mut cmd = web_tools_commun::demarreur(&self.dossier, self.conf.nom, self.conf.script)
-            .unwrap_or_else(|| vec![python().to_string(), self.conf.script.to_string()]);
+        let mut cmd = web_tools_commun::demarreur(&self.dossier, self.conf.nom)
+            .ok_or_else(|| format!("{} n'est pas installé dans {}", self.nom(), self.dossier.display()))?;
         cmd.extend(["--port".into(), port.to_string()]);
         cmd.extend(self.conf.args.iter().map(|a| remplir(a, &projets, &lib)));
-        let env = [("WEB_TOOLS_HTTP", "1"), ("PYTHONUNBUFFERED", "1"), ("PYTHONIOENCODING", "utf-8")]
-            .map(|(k, v)| (k.to_string(), v.to_string()));
+        let env = [("WEB_TOOLS_HTTP".to_string(), "1".to_string())];
         let (processus, sortie) = lancer(&cmd, &self.dossier, &env).map_err(es)?;
         {
             let mut m = self.marche.lock().unwrap();
@@ -373,7 +346,9 @@ impl Outil {
         }
         let journal = self.journal.clone();
         std::thread::spawn(move || lire(sortie, &journal));
-        for _ in 0..300 {
+        // demarrer_<NOM> compile d'abord l'exécutable quand cargo est là : la première fois, des minutes
+        let limite = std::time::Instant::now() + DELAI_DEMARRAGE;
+        while std::time::Instant::now() < limite {
             if !self.en_marche() {
                 let j = self.journal.lock().unwrap();
                 let fin = &j.lignes[j.lignes.len().saturating_sub(30)..];
@@ -417,14 +392,14 @@ impl Outil {
         };
         if let Some(mut p) = processus {
             if matches!(p.try_wait(), Ok(None)) {
-                terminer(&mut p);
+                tuer(&mut p, false);
                 for _ in 0..100 {
                     if !matches!(p.try_wait(), Ok(None)) {
                         break;
                     }
                     std::thread::sleep(Duration::from_millis(50));
                 }
-                let _ = p.kill();
+                tuer(&mut p, true);
                 let _ = p.wait();
             }
             // l'état « arrêté » reste lisible (en_marche), comme l'ancien poll()
@@ -436,15 +411,27 @@ impl Outil {
     }
 }
 
-/// Demande l'arrêt (SIGTERM) : l'outil ferme ses propres processus. Windows n'a que l'arrêt net.
-fn terminer(p: &mut Child) {
+/// Arrête le processus et ses enfants. Pas `net` : l'arrêt est demandé (SIGTERM), l'outil ferme
+/// ses propres processus ; Windows n'a que l'arrêt net.
+pub fn tuer(p: &mut Child, net: bool) {
     #[cfg(unix)]
-    // SAFETY: kill(2) sur le PID d'un enfant pas encore attendu : le PID est à nous.
+    // SAFETY: kill(2) sur le groupe d'un enfant lancé par `lancer` (process_group) : il est à nous.
     unsafe {
-        libc::kill(p.id() as libc::pid_t, libc::SIGTERM);
+        libc::killpg(p.id() as libc::pid_t, if net { libc::SIGKILL } else { libc::SIGTERM });
     }
     #[cfg(not(unix))]
-    let _ = p.kill();
+    {
+        let _ = net;
+        let _ = Command::new("taskkill")
+            .args(["/PID", &p.id().to_string(), "/T", "/F"])
+            .stdin(Stdio::null())
+            .stdout(Stdio::null())
+            .stderr(Stdio::null())
+            .status();
+    }
+    if net {
+        let _ = p.kill();
+    }
 }
 
 fn remplir(arg: &str, projets: &Path, lib: &Path) -> String {
@@ -467,15 +454,12 @@ fn lire(sortie: PipeReader, journal: &Mutex<Journal>) {
     }
 }
 
-/// Les outils installés à la racine de web_suite (un dossier par outil, comme installer.py),
+/// Les outils installés à la racine de web_suite (un dossier par outil, avec son demarrer_<NOM>),
 /// dans l'ordre du catalogue.
 pub fn trouver_outils(racine: &Path) -> Vec<Arc<Outil>> {
     CATALOGUE
         .iter()
-        .filter(|conf| {
-            let d = racine.join(conf.nom);
-            d.join(conf.script).is_file() || web_tools_commun::demarreur(&d, conf.nom, conf.script).is_some()
-        })
+        .filter(|conf| web_tools_commun::demarreur(&racine.join(conf.nom), conf.nom).is_some())
         .map(|conf| {
             let dossier = racine.join(conf.nom);
             Arc::new(Outil::new(conf, std::path::absolute(&dossier).unwrap_or(dossier)))

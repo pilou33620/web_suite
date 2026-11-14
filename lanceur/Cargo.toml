@@ -24,11 +24,6 @@ chrono = { version = "0.4", default-features = false, features = ["clock"] }
 rustls = { version = "0.23", default-features = false, features = ["ring", "std", "tls12"] }
 rustls-pemfile = "2"
 
-# la fausse Python du banc est l'exécutable du test lui-même : pas de harnais
-[[test]]
-name = "banc_dependances"
-harness = false
-
 [target.'cfg(unix)'.dependencies]
 libc = "0.2"
 

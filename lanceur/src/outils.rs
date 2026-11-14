@@ -3,10 +3,10 @@
 //! Partagé par serveur_lanceur.rs (le lanceur web) et installer.rs (le menu en
 //! console). Le catalogue et les emplacements sont dans catalogue.rs.
 //!
-//! Les outils sont encore en Python : le lanceur les lance avec la Python du
-//! poste (`python()`), comme le faisait web_suite.py avec sys.executable.
+//! Chaque outil est un exécutable Rust : le lanceur le lance par son
+//! demarrer_<NOM>.sh/.cmd, qui le compile ou le télécharge au besoin.
 
-use std::collections::{BTreeSet, HashMap};
+use std::collections::HashMap;
 use std::fs;
 use std::io::{self, Read, Seek, Write};
 use std::net::{Ipv4Addr, SocketAddr, TcpListener, TcpStream};
@@ -32,21 +32,13 @@ const ENVOI_AUTO_MIN: u64 = 60;
 const ENVOI_AUTO_MAX: u64 = 300;
 pub const JOURNAL_MAX: u64 = 1024 * 1024; // o : au-delà, le journal passe en .log.1 au lancement suivant
 
-// Dernière version stable d'openEMS pour Windows. Ses roues Python n'existent
-// que pour CPython 3.10 et 3.11 : c'est ce qui impose un venv à part.
+// Dernière version stable d'openEMS pour Windows : l'archive binaire officielle.
 const OPENEMS_URL: &str = "https://github.com/thliebig/openEMS-Project/releases/download/v0.0.36/openEMS_v0.0.36.zip";
 // L'empreinte de cette archive, relevée le 02/10/2026 (GitHub n'en publie pas
 // pour cette version). Les binaires qu'elle contient sont exécutés : une archive
 // tronquée ou différente est refusée avant d'être extraite. Changer OPENEMS_URL
 // demande de changer l'empreinte avec elle.
 const OPENEMS_SHA256: &str = "e0d62b1176c0897ad18876b45667de877d7d3b58b37c0be95545f9b988896059";
-const OPENEMS_VERIF: &str = "import os,sys\n\
-    d=sys.argv[1]\n\
-    os.add_dll_directory(d)\n\
-    os.environ['PATH']=d+os.pathsep+os.environ.get('PATH','')\n\
-    import CSXCAD, openEMS\n\
-    from importlib.metadata import version\n\
-    print('openEMS', version('openEMS'), '/ Python', sys.version.split()[0])\n";
 const DUREE_CODE: f64 = 600.0; // s : un code d'appairage vit 10 min (Appairage::DUREE)
 
 fn re_url() -> &'static Regex {
@@ -67,21 +59,6 @@ fn maintenant() -> f64 {
 
 fn chaine(p: &Path) -> String {
     p.to_string_lossy().into_owned()
-}
-
-/// La Python qui lance les outils et installe leurs paquets (sys.executable de
-/// l'ancien lanceur) : WEB_SUITE_PYTHON, sinon celle que prenaient les scripts
-/// demarrer_* (py sous Windows, python3 ailleurs), sinon python.
-pub fn python() -> String {
-    static PYTHON: OnceLock<String> = OnceLock::new();
-    PYTHON
-        .get_or_init(|| {
-            std::env::var("WEB_SUITE_PYTHON").ok().filter(|p| !p.is_empty()).unwrap_or_else(|| {
-                let prefere = if WINDOWS { "py" } else { "python3" };
-                if quel(prefere).is_some() { prefere } else { "python" }.to_string()
-            })
-        })
-        .clone()
 }
 
 pub fn git_disponible() -> bool {
@@ -177,7 +154,7 @@ pub fn installer(outil: &Outil, racine: &Path, ecrire: Ecrire) -> bool {
         return true;
     }
     if non_vide(&cible) {
-        ecrire(&format!("[X] {} existe mais ne contient pas {} : dossier laissé intact.", cible.display(), outil.script));
+        ecrire(&format!("[X] {} existe mais ne contient pas demarrer_{} : dossier laissé intact.", cible.display(), outil.nom));
         return false;
     }
     let _ = fs::create_dir_all(racine);
@@ -218,7 +195,7 @@ fn executer(cmd: &[&str], ecrire: Ecrire, cwd: Option<&Path>) -> i32 {
     let lancer = || -> io::Result<(Child, io::PipeReader)> {
         let (lecteur, ecrivain) = io::pipe()?; // sortie et erreurs dans le même tuyau
         let mut c = Command::new(cmd[0]);
-        c.args(&cmd[1..]).stdin(Stdio::null()).stdout(ecrivain.try_clone()?).stderr(ecrivain).env("PYTHONIOENCODING", "utf-8");
+        c.args(&cmd[1..]).stdin(Stdio::null()).stdout(ecrivain.try_clone()?).stderr(ecrivain);
         if let Some(d) = cwd {
             c.current_dir(d);
         }
@@ -231,7 +208,7 @@ fn executer(cmd: &[&str], ecrire: Ecrire, cwd: Option<&Path>) -> i32 {
             return -1;
         }
     };
-    // git et pip réécrivent leur ligne de progression avec \r : on découpe dessus aussi.
+    // git réécrit sa ligne de progression avec \r : on découpe dessus aussi.
     let mut tampon: Vec<u8> = Vec::new();
     let dire = |ligne: &[u8]| {
         let texte = String::from_utf8_lossy(ligne);
@@ -289,140 +266,25 @@ fn extraire<R: Read + Seek>(z: &mut zip::ZipArchive<R>, prefixe: &str, cible: &P
     Ok(())
 }
 
-/// Lignes utiles d'un requirements.txt -> [(ligne, nom pip en minuscules)].
-///
-/// Les options (-r, --index-url…) et les lignes sans nom reconnaissable ont un nom vide.
-pub fn lire_requirements(req: &Path) -> io::Result<Vec<(String, String)>> {
-    let nom_pip = Regex::new(r"^[A-Za-z0-9][A-Za-z0-9._-]*").expect("motif");
-    let mut lignes = Vec::new();
-    for brut in fs::read_to_string(req)?.lines() {
-        let ligne = brut.split('#').next().unwrap_or("").trim();
-        if ligne.is_empty() {
-            continue;
-        }
-        let nom = if ligne.starts_with('-') { None } else { nom_pip.find(ligne) };
-        lignes.push((ligne.to_string(), nom.map(|m| m.as_str().to_lowercase().replace('_', "-")).unwrap_or_default()));
-    }
-    Ok(lignes)
-}
-
-/// Importable par la Python qui lance les outils (testé dans un processus neuf).
-fn module_present(nom: &str) -> bool {
-    let mut cmd = Command::new(python());
-    cmd.args(["-c", &format!("import {}", nom)]).stdin(Stdio::null()).stdout(Stdio::null()).stderr(Stdio::null());
-    sans_fenetre(&mut cmd).status().is_ok_and(|s| s.success())
-}
-
-/// Paquets obligatoires de l'outil que la Python du lanceur ne sait pas importer.
-///
-/// shortcut: le nom pip sert de nom d'import, à revoir si un paquet les distingue.
-pub fn modules_manquants(outil: &Outil, racine: &Path) -> Vec<String> {
-    let req = dossier(outil, racine).join("requirements.txt");
-    if outil.dependances != Some("pip") || !req.is_file() {
-        return Vec::new();
-    }
-    let noms: BTreeSet<String> =
-        lire_requirements(&req).unwrap_or_default().into_iter().map(|(_, nom)| nom).filter(|n| !n.is_empty()).collect();
-    noms.into_iter().filter(|nom| !module_present(nom)).collect()
-}
-
-/// Installe ce qui manque du requirements.txt de l'outil, pour ceux qui s'y prêtent.
-///
-/// Rien n'est lancé si tout est là : sur Debian, pip refuse la Python du système
-/// (externally-managed-environment) même quand apt a déjà tout installé.
-pub fn installer_dependances(outil: &Outil, racine: &Path, ecrire: Ecrire) -> bool {
-    let req = dossier(outil, racine).join("requirements.txt");
-    if outil.dependances != Some("pip") || !req.is_file() {
-        return true;
-    }
-    let manquants = modules_manquants(outil, racine);
-    if manquants.is_empty() {
-        ecrire("[OK] Dépendances déjà présentes.");
-        return true;
-    }
-    ecrire(&format!("pip install -r {}", req.display()));
-    let code = executer(&[&python(), "-m", "pip", "install", "--disable-pip-version-check", "-r", &chaine(&req)], ecrire, None);
-    if code == 0 {
-        ecrire("[OK] Dépendances installées.");
-        return true;
-    }
-    ecrire(&format!("[!] pip a échoué (code {}) : l'outil ne démarrera pas sans {}.", code, manquants.join(", ")));
-    if !WINDOWS {
-        let paquets: Vec<String> = manquants.iter().map(|nom| format!("python3-{}", nom)).collect();
-        ecrire(&format!("    Sur Raspberry Pi ou Debian : sudo apt install {}", paquets.join(" ")));
-    }
-    false
-}
-
 // ---------------------------------------------------------------------------
 // openEMS (WEB_ANTENNA)
 // ---------------------------------------------------------------------------
-// Trois morceaux, que WEB_ANTENNA sait retrouver tout seul une fois en place :
-//   WEB_ANTENNA/openEMS/   l'archive binaire (DLL, openEMS.exe, roues Python)
-//   WEB_ANTENNA/env/       un venv Python 3.10 ou 3.11, où les roues s'installent
-//   requirements.txt       numpy, h5py, et CSXCAD/openEMS pris dans openEMS/python
+// WEB_ANTENNA lance les deux exécutables d'openEMS, « openEMS » et « nf2ff ». Il les cherche
+// dans WEB_ANTENNA/openEMS/ (l'archive binaire de Windows, avec ses DLL), sinon dans le PATH.
 fn dossier_openems(outil: &Outil, racine: &Path) -> PathBuf {
     dossier(outil, racine).join("openEMS")
 }
 
-fn python_env(outil: &Outil, racine: &Path) -> PathBuf {
-    dossier(outil, racine).join("env").join("Scripts").join("python.exe")
-}
-
-/// Test rapide (sans lancer Python) : binaires en place et roues installées dans env/.
+/// Les deux exécutables sont-ils dans WEB_ANTENNA/openEMS/ ?
 ///
-/// None hors Windows : l'installation automatique y est refusée (voir
-/// installer_openems), la page n'a donc pas à proposer son bouton.
+/// None hors Windows : rien ne s'y installe tout seul (openEMS vient du système, par
+/// le PATH), la page n'a donc pas à proposer son bouton.
 pub fn openems_pret(outil: &Outil, racine: &Path) -> Option<bool> {
     if outil.dependances != Some("openems") || !WINDOWS {
         return None;
     }
-    let paquets = dossier(outil, racine).join("env").join("Lib").join("site-packages");
-    Some(
-        dossier_openems(outil, racine).join("CSXCAD.dll").is_file()
-            && python_env(outil, racine).is_file()
-            && paquets.join("openEMS").is_dir()
-            && paquets.join("CSXCAD").is_dir(),
-    )
-}
-
-/// Sortie d'une commande courte, ou "" si elle échoue.
-fn sortie(cmd: &[&str], delai: f64) -> String {
-    let mut c = Command::new(cmd[0]);
-    c.args(&cmd[1..]);
-    match sortie_commande(sans_fenetre(&mut c), delai, None) {
-        Ok(r) if r.code == 0 => r.stdout.trim().to_string(),
-        _ => String::new(),
-    }
-}
-
-/// "3.10" pour un Python 64 bits, "" sinon (32 bits, introuvable, cassé).
-fn version_python(exe: &str) -> String {
-    sortie(&[exe, "-c", "import sys,struct;print('%d.%d' % sys.version_info[:2] if struct.calcsize('P') == 8 else '')"], 30.0)
-}
-
-/// Versions de Python pour lesquelles l'archive fournit des roues : {"3.10", "3.11"}.
-fn versions_roues(dossier_oe: &Path) -> BTreeSet<String> {
-    let roue = Regex::new(r"-cp3(\d+)-").expect("motif");
-    let Ok(noms) = fs::read_dir(dossier_oe.join("python")) else { return BTreeSet::new() };
-    noms.flatten()
-        .map(|e| e.file_name().to_string_lossy().into_owned())
-        .filter(|nom| nom.ends_with(".whl"))
-        .filter_map(|nom| roue.captures(&nom).map(|m| format!("3.{}", &m[1])))
-        .collect()
-}
-
-/// Un Python 64 bits de l'une de ces versions, ou None. Le lanceur py d'abord.
-fn trouver_python(versions: &BTreeSet<String>) -> Option<String> {
-    for v in versions.iter().rev() {
-        let exe = sortie(&["py", &format!("-{}", v), "-c", "import sys;print(sys.executable)"], 30.0);
-        if !exe.is_empty() && &version_python(&exe) == v {
-            return Some(exe);
-        }
-    }
-    let candidats = std::iter::once(python())
-        .chain(versions.iter().rev().filter_map(|v| quel(&format!("python{}", v)).map(|p| chaine(&p))));
-    candidats.into_iter().find(|exe| versions.contains(&version_python(exe)))
+    let oe = dossier_openems(outil, racine);
+    Some(oe.join("openEMS.exe").is_file() && oe.join("nf2ff.exe").is_file())
 }
 
 /// Télécharge l'archive openEMS et l'extrait dans `cible`. Renvoie true si CSXCAD.dll y est.
@@ -483,120 +345,39 @@ fn telecharger_openems(agent: &ureq::Agent, url: &str, cible: &Path, ecrire: Ecr
     fait && cible.join("CSXCAD.dll").is_file()
 }
 
-/// Chemin long et réel (os.path.realpath), sans le préfixe \\?\ que Windows y ajoute.
-fn chemin_reel(p: &Path) -> PathBuf {
-    let reel = fs::canonicalize(p).unwrap_or_else(|_| p.to_path_buf());
-    match reel.to_str().and_then(|s| s.strip_prefix(r"\\?\")) {
-        Some(court) if !court.starts_with("UNC") => PathBuf::from(court),
-        _ => reel,
-    }
-}
-
-/// Installe openEMS pour WEB_ANTENNA : archive binaire, venv env/, pip. Renvoie true si prêt.
-///
-/// Chaque étape déjà faite est sautée : on peut relancer après avoir corrigé
-/// ce qui manquait (typiquement : installer Python 3.10 ou 3.11).
+/// Installe openEMS pour WEB_ANTENNA : l'archive binaire, extraite dans WEB_ANTENNA/openEMS/.
+/// Renvoie true si openEMS.exe et nf2ff.exe y sont.
 pub fn installer_openems(outil: &Outil, racine: &Path, ecrire: Ecrire) -> bool {
     if outil.dependances != Some("openems") {
         return true;
     }
     if !WINDOWS {
-        ecrire(&format!(
-            "[!] Installation automatique d'openEMS : Windows seulement. Voir le guide en tête de {}.",
-            dossier(outil, racine).join("requirements.txt").display()
-        ));
+        ecrire("[!] Installation automatique d'openEMS : Windows seulement. Ailleurs, installez openEMS");
+        ecrire("    de sorte que ses exécutables « openEMS » et « nf2ff » soient dans le PATH.");
         return false;
     }
     if !est_installe(outil, racine) {
         ecrire(&format!("[X] {} n'est pas installé.", outil.nom));
         return false;
     }
-    // Chemin long et réel : venv échoue sur un nom court 8.3 (PIERRE~1.REN).
-    let racine = &chemin_reel(racine);
-    let base = dossier(outil, racine);
-    let longueur = chaine(&base).chars().count();
-    if longueur > 140 {
-        // pip écrit dans env\Lib\site-packages des chemins de ~120 caractères de plus.
-        ecrire(&format!("[!] Dossier très profond ({} caractères) : Windows limite les chemins à 260,", longueur));
-        ecrire("    pip risque d'échouer (« WinError 206 »). Rapprochez WEB_SUITE de la racine du disque.");
-    }
-
-    // 1. Les binaires
     let oe = dossier_openems(outil, racine);
-    if oe.join("CSXCAD.dll").is_file() {
-        ecrire(&format!("[OK] Binaires openEMS déjà présents : {}", oe.display()));
-    } else if oe.is_dir() && non_vide(&oe) {
-        ecrire(&format!("[X] {} existe mais ne contient pas CSXCAD.dll : dossier laissé intact.", oe.display()));
+    if openems_pret(outil, racine) == Some(true) {
+        ecrire(&format!("[OK] openEMS déjà présent : {}", oe.display()));
+        return true;
+    }
+    if oe.is_dir() && non_vide(&oe) {
+        ecrire(&format!("[X] {} existe mais ne contient pas openEMS.exe et nf2ff.exe : dossier laissé intact.", oe.display()));
         ecrire("    Videz-le ou supprimez-le, puis relancez l'installation d'openEMS.");
         return false;
-    } else if !telecharger_openems(&client(), OPENEMS_URL, &oe, ecrire) {
-        return false;
-    } else {
-        ecrire("[OK] Binaires openEMS installés.");
     }
-
-    let mut versions = versions_roues(&oe);
-    if versions.is_empty() {
-        versions = ["3.10", "3.11"].into_iter().map(String::from).collect();
-    }
-    let liste = versions.iter().cloned().collect::<Vec<_>>().join(" ou ");
-
-    // 2. Le venv
-    let py_env = python_env(outil, racine);
-    let py = chaine(&py_env);
-    let dossier_env = base.join("env");
-    if py_env.is_file() {
-        let v = version_python(&py);
-        if !versions.contains(&v) {
-            ecrire(&format!(
-                "[X] {} existe déjà avec Python {} : openEMS demande Python {} (64 bits).",
-                dossier_env.display(),
-                if v.is_empty() { "?" } else { &v },
-                liste
-            ));
-            ecrire("    Supprimez ce dossier env\\ puis relancez l'installation d'openEMS.");
-            return false;
-        }
-        ecrire(&format!("[OK] Environnement Python {} déjà présent : env\\", v));
-        if sortie(&[&py, "-m", "pip", "--version"], 30.0).is_empty() {
-            ecrire("pip manque dans env\\ : réinstallation par ensurepip");
-            if executer(&[&py, "-m", "ensurepip", "--upgrade", "--default-pip"], ecrire, None) != 0 {
-                ecrire("[X] Impossible de réparer pip : supprimez env\\ et relancez.");
-                return false;
-            }
-        }
-    } else {
-        let Some(exe) = trouver_python(&versions) else {
-            ecrire(&format!("[X] Aucun Python {} 64 bits sur ce poste, et les roues openEMS n'existent", liste));
-            ecrire("    que pour ces versions. Installez Python 3.11 64 bits :");
-            ecrire("      https://www.python.org/downloads/windows/   ou   winget install Python.Python.3.11");
-            ecrire("    puis relancez l'installation d'openEMS (les binaires sont gardés).");
-            return false;
-        };
-        ecrire(&format!("Création de l'environnement env\\ avec {}", exe));
-        if executer(&[&exe, "-m", "venv", &chaine(&dossier_env)], ecrire, None) != 0 || !py_env.is_file() {
-            // Un env\ à moitié créé (sans pip) serait pris pour bon à la relance.
-            let _ = fs::remove_dir_all(&dossier_env);
-            ecrire("[X] La création de env\\ a échoué.");
-            return false;
-        }
-    }
-
-    // 3. Les paquets. cwd = l'outil : requirements.txt cherche les roues dans openEMS/python.
-    ecrire("pip install -r requirements.txt  (numpy, h5py, CSXCAD, openEMS)");
-    let code = executer(&[&py, "-m", "pip", "install", "--disable-pip-version-check", "-r", "requirements.txt"], ecrire, Some(&base));
-    if code != 0 {
-        ecrire(&format!("[X] pip a échoué (code {}) : voir les lignes ci-dessus.", code));
+    if !telecharger_openems(&client(), OPENEMS_URL, &oe, ecrire) {
         return false;
     }
-
-    // 4. La preuve : import CSXCAD, openEMS avec les DLL de l'archive.
-    let rapport = sortie(&[&py, "-c", OPENEMS_VERIF, &chaine(&oe)], 60.0);
-    if rapport.is_empty() {
-        ecrire("[X] openEMS est installé mais « import openEMS » échoue encore.");
+    if openems_pret(outil, racine) != Some(true) {
+        ecrire("[X] L'archive ne contient pas openEMS.exe et nf2ff.exe à côté de CSXCAD.dll : format inattendu.");
         return false;
     }
-    ecrire(&format!("[OK] {} — les simulations de {} sont disponibles.", rapport, outil.nom));
+    ecrire(&format!("[OK] openEMS installé — les simulations de {} sont disponibles.", outil.nom));
     true
 }
 
@@ -619,7 +400,7 @@ pub fn repond(port: u16) -> bool {
 ///
 /// Sans lui, fermer la fenêtre de WEB_SUITE laisserait tourner des serveurs
 /// sans fenêtre, impossibles à arrêter autrement que par le gestionnaire des
-/// tâches. Les petits-enfants (WEB_ANTENNA qui se relance dans son venv)
+/// tâches. Les petits-enfants (l'exécutable que lance demarrer_<NOM>.cmd)
 /// héritent du job.
 #[cfg(windows)]
 struct Job(Option<windows_sys::Win32::Foundation::HANDLE>);
@@ -948,10 +729,7 @@ impl Gestionnaire {
     }
 
     pub fn installer(self: &Arc<Self>, oid: &str) -> bool {
-        fn complet(o: &Outil, racine: &Path, ecrire: Ecrire) -> bool {
-            installer(o, racine, ecrire) && installer_dependances(o, racine, ecrire)
-        }
-        self.installer_en_fond(oid, complet, "Installé.")
+        self.installer_en_fond(oid, installer, "Installé.")
     }
 
     pub fn installer_openems(self: &Arc<Self>, oid: &str) -> bool {
@@ -998,35 +776,18 @@ impl Gestionnaire {
             // La lib ou un projet a pu changer sur un autre PC depuis le démarrage.
             self.noter(o.id, &projets::tirer(&self.racine));
         }
-        // Hors du verrou : importer numpy et scipy prend une seconde sur un Pi.
-        let manquants = if est_installe(o, &self.racine) { modules_manquants(o, &self.racine) } else { Vec::new() };
-        {
-            let mut etats = self.etats();
-            let e = etats.get_mut(o.id).expect("outil du catalogue");
-            self.actualiser(o, e);
-            if e.en_route() {
-                return true;
-            }
-            if !est_installe(o, &self.racine) {
-                e.phase = Some("erreur");
-                e.message = "Outil non installé.".to_string();
-                return false;
-            }
-        }
-        if !manquants.is_empty() {
-            // une mise à jour peut les avoir rendus obligatoires
-            self.installer_en_fond(oid, installer_dependances, "Dépendances installées : relancez l'outil.");
-            return false;
-        }
         let mut etats = self.etats();
         let e = etats.get_mut(o.id).expect("outil du catalogue");
         self.actualiser(o, e);
         if e.en_route() {
             return true;
         }
+        let Some(mut cmd) = crate::catalogue::demarreur(&dossier(o, &self.racine), o.nom) else {
+            e.phase = Some("erreur");
+            e.message = "Outil non installé.".to_string();
+            return false;
+        };
         let port = port_libre(o.port);
-        let mut cmd: Vec<String> = crate::catalogue::demarreur(&dossier(o, &self.racine), o.nom, o.script)
-            .unwrap_or_else(|| vec![python(), "-u".into(), o.script.into()]);
         cmd.extend(["--port".into(), port.to_string()]);
         cmd.extend(o.args.iter().filter(|x| !(self.reseau && **x == "--local")).map(|x| x.to_string()));
         let deja_maj = self.maj_deja_faite(o.id);
@@ -1045,8 +806,6 @@ impl Gestionnaire {
             let mut c = Command::new(&cmd[0]);
             c.args(&cmd[1..])
                 .current_dir(dossier(o, &self.racine))
-                .env("PYTHONIOENCODING", "utf-8")
-                .env("PYTHONUNBUFFERED", "1")
                 .env_remove("WEBSUITE_JETON")
                 .stdin(Stdio::null())
                 .stdout(sortie.try_clone()?)
@@ -1164,7 +923,7 @@ fn tourner(chemin: &Path) {
     }
 }
 
-/// Arrête le serveur et ses enfants (le venv de WEB_ANTENNA en est un).
+/// Arrête le serveur et ses enfants (l'exécutable que lance demarrer_<NOM> en est un).
 fn tuer(proc: &mut Child) {
     #[cfg(windows)]
     {
@@ -1187,7 +946,7 @@ fn tuer(proc: &mut Child) {
     }
     #[cfg(unix)]
     unsafe {
-        // Tout le groupe : le serveur relancé dans son venv (WEB_ANTENNA) aussi.
+        // Tout le groupe : l'exécutable lancé par demarrer_<NOM>.sh aussi.
         libc::killpg(proc.id() as libc::pid_t, libc::SIGKILL);
     }
     let _ = proc.kill();

@@ -6,7 +6,7 @@
 //! Restent permis :
 //! - l'historique : les docs de lanceur/docs (specs, relevé du savoir) et les tasks/ ;
 //! - ce qui cite l'assistant pour s'en garder : les routes interdites du MCP (lanceur/src/mcp/mod.rs) et
-//!   leurs tests (tests/banc_mcp.rs), les tests de 404 des serveurs (python/test/), les .gitignore du
+//!   leurs tests (tests/banc_mcp.rs), les tests de 404 des serveurs (tests/banc*), les .gitignore du
 //!   fichier de clé ;
 //! - graphify-out/, l'analyse générée du code d'un outil (elle garde les noms de l'ancien code) ;
 //! - le banc du savoir, qui relit les anciennes consignes à une révision figée, et ce banc-ci.
@@ -25,7 +25,7 @@ use regex::Regex;
 
 const PERMIS_WEB_SUITE: &[&str] = &[r"^lanceur/docs/(SPEC-|savoir-trace)", r"^lanceur/src/mcp/mod\.rs$",
                                     r"^lanceur/tests/banc_(mcp|savoir|traces_ia)\.rs$", r"\.gitignore$"];
-const PERMIS_OUTIL: &[&str] = &[r"^tasks/", r"^graphify-out/", r"^python/test/banc-(serveur|lib-routes|serveur-routes)\.py$", r"\.gitignore$"];
+const PERMIS_OUTIL: &[&str] = &[r"^tasks/", r"^graphify-out/", r"^(rust/serveur/)?tests/banc", r"\.gitignore$"];
 
 /// fichiers : {chemin: texte}. Rend les traces hors des chemins permis : [(chemin, n°, ligne)].
 fn chercher(fichiers: &BTreeMap<String, String>, permis: &[&str]) -> Vec<(String, usize, String)> {
@@ -64,14 +64,14 @@ fn fichiers(paires: &[(&str, &str)]) -> BTreeMap<String, String> {
 fn essais() {
     let faux = fichiers(&[("js/page.js", "fetch('https://generativelanguage.googleapis.com')"),
                           ("tasks/todo.md", "retirer ia-assistant.js"),
-                          ("python/test/banc-serveur.py", "GET /api/ia/cle -> 404"),
-                          ("python/test/autre.py", "bIaAssistant"),
+                          ("tests/banc_serveur.rs", "GET /api/ia/cle -> 404"),
+                          ("src/autre.rs", "bIaAssistant"),
                           ("css/x.css", "rien à signaler")]);
     let t = chercher(&faux, PERMIS_OUTIL);
-    assert_eq!(t.iter().map(|(c, _, _)| c.as_str()).collect::<Vec<_>>(), ["js/page.js", "python/test/autre.py"], "{t:?}");
+    assert_eq!(t.iter().map(|(c, _, _)| c.as_str()).collect::<Vec<_>>(), ["js/page.js", "src/autre.rs"], "{t:?}");
     assert!(chercher(&fichiers(&[("lanceur/docs/SPEC-x.md", "comme Gemini")]), PERMIS_WEB_SUITE).is_empty());
     assert!(!chercher(&fichiers(&[("lanceur/docs/DETAILS.md", "Gemini")]), PERMIS_WEB_SUITE).is_empty()); // doc vivante : pas permise
-    assert!(!chercher(&fichiers(&[("lanceur/outil.py", "Gemma 4")]), PERMIS_WEB_SUITE).is_empty());
+    assert!(!chercher(&fichiers(&[("lanceur/src/outil.rs", "Gemma 4")]), PERMIS_WEB_SUITE).is_empty());
     assert!(chercher(&fichiers(&[("A-FAIRE.md", "fait jusqu'à retrait-gemini (SPEC-mcp-retrait-gemini.md)")]), PERMIS_WEB_SUITE).is_empty());
 }
 

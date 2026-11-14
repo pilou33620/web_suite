@@ -1,4 +1,4 @@
-# Les bancs portés de Python changent PATH, HOME et d'autres variables du processus :
+# Les bancs changent PATH, HOME et d'autres variables du processus :
 # en parallèle ils se marchent dessus (git introuvable en plein essai).
 [env]
 RUST_TEST_THREADS = "1"

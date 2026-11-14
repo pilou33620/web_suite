@@ -1,24 +1,59 @@
-//! Les bancs d'un outil : scripts banc-*.py / .js / .mjs, lancés un par un.
+//! Les bancs d'un outil : scripts node banc-*.js / .mjs et cibles de `cargo test`, lancés un par un.
 
 use std::fs;
 use std::io::{self, Read};
 use std::path::Path;
-use std::process::Child;
+use std::process::{Child, Command, Stdio};
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::{Arc, Mutex};
 use std::time::{Duration, Instant};
 
 use serde_json::{json, Value};
 
-use crate::outils::{horloge, lancer, python, trouver_chromium, which, Outil, DOSSIERS_IGNORES};
+use crate::outils::{horloge, lancer, trouver_chromium, tuer, which, Outil, DOSSIERS_IGNORES};
 
 const DELAI_BANC: Duration = Duration::from_secs(300); // au-delà, un banc est arrêté et compté « délai dépassé »
+// shortcut: un seul délai pour compiler et essayer ; à séparer (cargo test --no-run d'abord) si un banc Rust traîne.
+const DELAI_CARGO: Duration = Duration::from_secs(1800);
 const MAX_SORTIE: usize = 40000; // caractères gardés de la sortie d'un banc
 
-/// L'ancienne expression : ^banc[-_].+\.(py|js|mjs)$
+/// L'ancienne expression : ^banc[-_].+\.(js|mjs)$
 fn est_banc(nom: &str) -> bool {
     let Some(suite) = nom.strip_prefix("banc-").or_else(|| nom.strip_prefix("banc_")) else { return false };
-    [".py", ".js", ".mjs"].iter().any(|ext| suite.strip_suffix(ext).is_some_and(|milieu| !milieu.is_empty()))
+    [".js", ".mjs"].iter().any(|ext| suite.strip_suffix(ext).is_some_and(|milieu| !milieu.is_empty()))
+}
+
+/// Les bancs Rust d'un espace de travail, d'après `cargo metadata` : par caisse, ses essais
+/// unitaires (« cargo test -p caisse --lib --bins »), puis une entrée par cible de tests/.
+/// L'identifiant d'un banc Rust est sa commande.
+fn bancs_cargo(meta: &Value) -> Vec<String> {
+    let mut ids = Vec::new();
+    for caisse in meta["packages"].as_array().into_iter().flatten() {
+        let Some(nom) = caisse["name"].as_str() else { continue };
+        let cibles: Vec<(&str, &str)> = caisse["targets"]
+            .as_array()
+            .into_iter()
+            .flatten()
+            .filter(|c| c["test"] != false)
+            .filter_map(|c| Some((c["kind"][0].as_str()?, c["name"].as_str()?)))
+            .collect();
+        let a = |genres: &[&str]| cibles.iter().any(|(genre, _)| genres.contains(genre));
+        let unitaires: Vec<&str> = [(a(&["lib", "rlib", "cdylib", "staticlib", "dylib", "proc-macro"]), "--lib"), (a(&["bin"]), "--bins")]
+            .iter()
+            .filter_map(|(present, option)| present.then_some(*option))
+            .collect();
+        if !unitaires.is_empty() {
+            ids.push(format!("cargo test -p {} {}", nom, unitaires.join(" ")));
+        }
+        ids.extend(cibles.iter().filter(|(genre, _)| *genre == "test").map(|(_, cible)| format!("cargo test -p {} --test {}", nom, cible)));
+    }
+    ids
+}
+
+/// La CI lance-t-elle ce banc Rust ? Tout l'espace de travail, sa caisse entière, ou lui.
+fn cargo_dans_ci(ci: &str, id: &str) -> bool {
+    let caisse: String = id.split(' ').take(4).collect::<Vec<_>>().join(" "); // « cargo test -p caisse »
+    ci.contains("cargo test --workspace") || ci.lines().any(|l| l.trim_end().ends_with(&caisse) || l.contains(id))
 }
 
 /// Les options que la CI donne à node pour ce fichier (--experimental-websocket…).
@@ -139,19 +174,19 @@ impl Bancs {
     pub fn arreter(&self) {
         self.arret.store(true, Ordering::SeqCst);
         if let Some(p) = self.courant.lock().unwrap().as_mut() {
-            let _ = p.kill();
+            tuer(p, true);
         }
     }
 
-    /// La commande d'un banc ou d'une préparation : la même Python que les outils, ou node avec
-    /// les options que la CI lui donne pour ce fichier (--experimental-websocket…).
-    fn commande(&self, args: &[&str]) -> Option<Vec<String>> {
+    /// La commande d'un banc ou d'une préparation : cargo, ou node avec les options que la CI
+    /// lui donne pour ce fichier (--experimental-websocket…). Err : le programme qui manque.
+    fn commande(&self, args: &[&str]) -> Result<Vec<String>, &'static str> {
         let suite = args[1..].iter().map(|a| a.to_string());
-        if args[0] == "python" {
-            return Some(std::iter::once(python().to_string()).chain(suite).collect());
+        if args[0] == "cargo" {
+            return Ok(std::iter::once(which("cargo").ok_or("cargo")?).chain(suite).collect());
         }
-        let node = which("node")?;
-        Some(std::iter::once(node).chain(options_node(&self.ci, args[1])).chain(suite).collect())
+        let node = which("node").ok_or("node")?;
+        Ok(std::iter::once(node).chain(options_node(&self.ci, args[1])).chain(suite).collect())
     }
 
     /// Lance une commande et rend (code, sortie) ; code None si le délai est dépassé.
@@ -164,7 +199,8 @@ impl Bancs {
             let _ = tuyau.read_to_end(&mut sortie);
             let _ = envoi.send(sortie);
         });
-        let limite = Instant::now() + DELAI_BANC;
+        let cargo = Path::new(&cmd[0]).file_stem().is_some_and(|n| n == "cargo");
+        let limite = Instant::now() + if cargo { DELAI_CARGO } else { DELAI_BANC };
         let (mut sortie, mut code) = (None, None);
         // le verrou de `courant` n'est tenu qu'un instant : arreter() peut tuer le processus
         while sortie.is_none() || code.is_none() {
@@ -178,7 +214,7 @@ impl Bancs {
             }
             if Instant::now() > limite {
                 if let Some(p) = self.courant.lock().unwrap().as_mut() {
-                    let _ = p.kill();
+                    tuer(p, true);
                     let _ = p.wait();
                 }
                 let sortie = sortie.or_else(|| reception.recv().ok()).unwrap_or_default();
@@ -196,19 +232,13 @@ impl Bancs {
 
     fn derouler(&self, file: &[usize]) {
         let conf = self.outil.conf;
-        let mut env = vec![("PYTHONIOENCODING".to_string(), "utf-8".to_string()), ("WEB_TOOLS_HTTP".into(), "1".into())];
+        let mut env = vec![("WEB_TOOLS_HTTP".to_string(), "1".to_string())];
         if let Some(chromium) = trouver_chromium() {
             env.push(("CHROMIUM".into(), chromium));
         }
         let lib = if conf.lib { self.outil.lib_reelle() } else { None };
-        if conf.lib {
-            match &lib {
-                Some(lib) if std::env::var_os("WEB_CAO_LIB").is_none() => {
-                    env.push(("WEB_CAO_LIB".into(), lib.to_string_lossy().into_owned()))
-                }
-                Some(_) => {}
-                None => env.push(("WEB_CAO_LIB_MINIMALE".into(), "1".into())), // comme la CI sans la LIB privée
-            }
+        if let Some(lib) = lib.as_ref().filter(|_| std::env::var_os("WEB_CAO_LIB").is_none()) {
+            env.push(("WEB_CAO_LIB".into(), lib.to_string_lossy().into_owned()));
         }
         let arret = || self.arret.load(Ordering::SeqCst);
         for &i in file {
@@ -231,11 +261,15 @@ impl Bancs {
                 );
                 continue;
             }
-            let cmds: Option<Vec<Vec<String>>> = preparations(conf, &id).iter().map(|c| self.commande(c)).collect();
-            let cmd = self.commande(&[if id.ends_with(".py") { "python" } else { "node" }, &id]);
-            let (Some(cmds), Some(cmd)) = (cmds, cmd) else {
-                self.noter(i, "ignore", "node est introuvable : ce banc JavaScript ne peut pas tourner.".into());
-                continue;
+            let cmds: Result<Vec<Vec<String>>, _> = preparations(conf, &id).iter().map(|c| self.commande(c)).collect();
+            // un banc Rust est sa commande ; les autres sont des scripts node
+            let mots: Vec<&str> = if id.starts_with("cargo ") { id.split(' ').collect() } else { vec!["node", &id] };
+            let (cmds, cmd) = match (cmds, self.commande(&mots)) {
+                (Ok(cmds), Ok(cmd)) => (cmds, cmd),
+                (Err(manque), _) | (_, Err(manque)) => {
+                    self.noter(i, "ignore", format!("{} est introuvable : ce banc ne peut pas tourner.", manque));
+                    continue;
+                }
             };
             let debut = horloge();
             {
@@ -323,8 +357,8 @@ fn parcourir(dossier: &Path, rel: &str, trouves: &mut Vec<String>) {
     }
 }
 
-/// Les scripts banc-* de l'outil, plus les essais que sa CI lance sous un autre nom
-/// (harness.js…). Ceux que la CI lance (.github/workflows/ci.yml) sont marqués : ils sont
+/// Les scripts banc-* de l'outil, les essais que sa CI lance sous un autre nom (harness.js…),
+/// et ses bancs Rust. Ceux que la CI lance (.github/workflows/ci.yml) sont marqués : ils sont
 /// cochés d'office. Les autres demandent parfois une préparation (LIB privée, dossier PROJETS).
 fn decouvrir(outil: &Outil, ci: &str) -> Vec<Essai> {
     let conf = outil.conf;
@@ -335,10 +369,22 @@ fn decouvrir(outil: &Outil, ci: &str) -> Vec<Essai> {
             trouves.push(e.to_string());
         }
     }
+    // sans cargo (poste qui prend les exécutables publiés) : pas de bancs Rust
+    if let (true, Some(cargo)) = (outil.dossier.join("Cargo.toml").is_file(), which("cargo")) {
+        let sortie = Command::new(cargo)
+            .args(["metadata", "--no-deps", "--format-version", "1"])
+            .current_dir(&outil.dossier)
+            .stdin(Stdio::null())
+            .stderr(Stdio::null())
+            .output();
+        if let Some(meta) = sortie.ok().and_then(|s| serde_json::from_slice::<Value>(&s.stdout).ok()) {
+            trouves.extend(bancs_cargo(&meta));
+        }
+    }
     let mut liste: Vec<Essai> = trouves
         .into_iter()
         .map(|rel| Essai {
-            ci: ci.contains(&rel),
+            ci: if rel.starts_with("cargo ") { cargo_dans_ci(ci, &rel) } else { ci.contains(&rel) },
             debut: None,
             etat: "attente",
             duree: None,
@@ -360,12 +406,31 @@ mod tests {
 
     #[test]
     fn noms_des_bancs() {
-        for nom in ["banc-a.py", "banc_b.js", "banc-c.mjs", "banc-x.py.js"] {
+        for nom in ["banc-a.js", "banc_b.js", "banc-c.mjs", "banc-x.py.js"] {
             assert!(est_banc(nom), "{}", nom);
         }
-        for nom in ["banc-.py", "banc.py", "xbanc-a.py", "banc-a.txt", "banc-a.py~", "harness.js"] {
+        for nom in ["banc-.js", "banc.js", "xbanc-a.js", "banc-a.txt", "banc-a.js~", "banc-a.py", "harness.js"] {
             assert!(!est_banc(nom), "{}", nom);
         }
+    }
+
+    #[test]
+    fn bancs_rust() {
+        let cible = |genre: &str, nom: &str| json!({"kind": [genre], "name": nom, "test": true});
+        let meta = json!({"packages": [
+            {"name": "serveur", "targets": [cible("lib", "serveur"), cible("bin", "web_x"), cible("test", "banc_routes"),
+                                            cible("example", "demo"), {"kind": ["test"], "name": "eteint", "test": false}]},
+            {"name": "outils", "targets": [cible("bin", "build-monofichier"), cible("custom-build", "build-script-build")]},
+            {"name": "vide", "targets": [cible("bench", "vitesse")]},
+        ]});
+        let ids = bancs_cargo(&meta);
+        assert_eq!(ids, ["cargo test -p serveur --lib --bins", "cargo test -p serveur --test banc_routes", "cargo test -p outils --bins"]);
+        assert!(bancs_cargo(&json!({})).is_empty());
+        assert!(ids.iter().all(|id| cargo_dans_ci("  run: cargo test --workspace\n", id)));
+        let ci = "  run: cargo test -p serveur\n  run: cargo test -p outils --test banc_essai -- --nocapture\n";
+        assert!(cargo_dans_ci(ci, &ids[0]) && cargo_dans_ci(ci, &ids[1]) && !cargo_dans_ci(ci, &ids[2]));
+        assert!(cargo_dans_ci(ci, "cargo test -p outils --test banc_essai"));
+        assert!(!cargo_dans_ci(ci, "cargo test -p outils --test banc_ruban"));
     }
 
     #[test]
@@ -379,18 +444,16 @@ mod tests {
         assert_eq!(options_node("node --a x.js", "x.js"), ["--a"]);
     }
 
-    /// Le faux WEB_CAO de l'ancien banc_web_bench.py, avec le catalogue qu'il y substituait :
-    /// un essai sous un autre nom, une préparation en Python, un banc qui exige la LIB privée.
+    /// Un faux WEB_CAO : un essai sous un autre nom, une préparation, un banc qui exige la LIB privée.
     static FAUX: Conf = Conf {
         id: "cao",
         nom: "WEB_CAO",
-        script: "web_CAO.py",
         lib: true,
         args: &[],
         noire: "",
         essais: &["test/harness.js"],
-        preparations: &[("test/banc-bon.py", &[&["python", "prep.py"]])],
-        lib_reelle: &["test/banc-lib.py"],
+        preparations: &[("test/banc-bon.js", &[&["node", "prep.js"]])],
+        lib_reelle: &["test/banc-lib.js"],
         routes: None,
     };
 
@@ -415,26 +478,26 @@ mod tests {
         fs::create_dir_all(cao.join(".github/workflows")).unwrap();
         fs::create_dir_all(temp.join("PROJETS/LIB_CAO")).unwrap();
         fs::write(temp.join("PROJETS/LIB_CAO/LIB_composants.csv"), "ref;valeur\n").unwrap();
-        fs::write(cao.join(".github/workflows/ci.yml"), "run: python test/banc-mauvais.py\n").unwrap();
+        fs::write(cao.join(".github/workflows/ci.yml"), "run: node test/banc-mauvais.js\n").unwrap();
         fs::write(cao.join("test/harness.js"), "console.log('harness ok')\n").unwrap();
-        fs::write(cao.join("prep.py"), "open('prepare.txt', 'w').write('fait')\nprint('préparé')\n").unwrap();
+        fs::write(cao.join("prep.js"), "require('fs').writeFileSync('prepare.txt', 'fait')\nconsole.log('préparé')\n").unwrap();
         fs::write(
-            cao.join("test/banc-lib.py"),
-            "import os, sys\nprint(os.environ.get('WEB_CAO_LIB'))\n\
-             sys.exit(0 if os.path.isfile(os.path.join(os.environ['WEB_CAO_LIB'], 'LIB_composants.csv')) else 4)\n",
+            cao.join("test/banc-lib.js"),
+            "console.log(process.env.WEB_CAO_LIB)\n\
+             process.exit(require('fs').existsSync(process.env.WEB_CAO_LIB + '/LIB_composants.csv') ? 0 : 4)\n",
         )
         .unwrap();
-        fs::write(cao.join("test/banc-bon.py"), "print('OK')\n").unwrap();
-        fs::write(cao.join("test/banc-mauvais.py"), "import sys\nprint('raté')\nsys.exit(3)\n").unwrap();
-        fs::write(cao.join("graphify-out/banc-ignore.py"), "raise SystemExit(1)\n").unwrap();
+        fs::write(cao.join("test/banc-bon.js"), "console.log('OK')\n").unwrap();
+        fs::write(cao.join("test/banc-mauvais.js"), "console.log('raté')\nprocess.exit(3)\n").unwrap();
+        fs::write(cao.join("graphify-out/banc-ignore.js"), "process.exit(1)\n").unwrap();
 
         let bancs = Bancs::new(Arc::new(Outil::new(&FAUX, cao.clone())));
         // bancs : graphify-out ignoré, l'essai harness.js ajouté ; celui de la CI vient en tête
         let e = bancs.etat();
         let ids: Vec<String> = e["bancs"].as_array().unwrap().iter().map(|b| b["id"].as_str().unwrap().to_string()).collect();
-        assert_eq!(ids, ["test/banc-mauvais.py", "test/banc-bon.py", "test/banc-lib.py", "test/harness.js"]);
-        assert_eq!(bancs.ids_ci(), ["test/banc-mauvais.py"]);
-        assert_eq!(e["bancs"][1]["preparation"], json!(["python prep.py"]));
+        assert_eq!(ids, ["test/banc-mauvais.js", "test/banc-bon.js", "test/banc-lib.js", "test/harness.js"]);
+        assert_eq!(bancs.ids_ci(), ["test/banc-mauvais.js"]);
+        assert_eq!(e["bancs"][1]["preparation"], json!(["node prep.js"]));
         assert_eq!(e["bancs"][2]["lib_reelle"], true);
 
         assert!(bancs.lancer(&ids));
@@ -442,27 +505,33 @@ mod tests {
         let e = attendre(&bancs);
         let etats: Vec<(&str, Option<i64>)> =
             e["bancs"].as_array().unwrap().iter().map(|b| (b["etat"].as_str().unwrap(), b["code"].as_i64())).collect();
-        let harness = if which("node").is_some() { ("ok", Some(0)) } else { ("ignore", None) };
-        assert_eq!(etats, [("echec", Some(3)), ("ok", Some(0)), ("ok", Some(0)), harness], "{}", e);
-        let bon = bancs.sortie("test/banc-bon.py").unwrap();
-        assert!(bon.contains("préparé") && bon.contains("(préparation)") && bon.contains("$ test/banc-bon.py"), "{}", bon);
+        if which("node").is_none() {
+            assert_eq!(etats, [("ignore", None); 4], "{}", e);
+            assert!(bancs.sortie("test/banc-bon.js").unwrap().starts_with("node est introuvable"));
+            println!("SAUTÉ : pas de node sur ce poste");
+            fs::remove_dir_all(&temp).unwrap();
+            return;
+        }
+        assert_eq!(etats, [("echec", Some(3)), ("ok", Some(0)), ("ok", Some(0)), ("ok", Some(0))], "{}", e);
+        let bon = bancs.sortie("test/banc-bon.js").unwrap();
+        assert!(bon.contains("préparé") && bon.contains("(préparation)") && bon.contains("$ test/banc-bon.js"), "{}", bon);
         assert!(cao.join("prepare.txt").is_file());
-        assert!(bancs.sortie("test/banc-mauvais.py").unwrap().contains("raté"));
+        assert!(bancs.sortie("test/banc-mauvais.js").unwrap().contains("raté"));
         assert!(bancs.sortie("inconnu").is_none());
 
         // sans la LIB privée : le banc qui l'exige est sauté, comme dans la CI
         fs::remove_dir_all(temp.join("PROJETS")).unwrap();
-        assert!(bancs.lancer(&["test/banc-lib.py".to_string()]));
+        assert!(bancs.lancer(&["test/banc-lib.js".to_string()]));
         let e = attendre(&bancs);
         assert_eq!(e["bancs"][2]["etat"], "ignore", "{}", e);
-        assert!(bancs.sortie("test/banc-lib.py").unwrap().starts_with("Sauté"));
+        assert!(bancs.sortie("test/banc-lib.js").unwrap().starts_with("Sauté"));
 
         // un banc arrêté en route : compté « arrete », avec −signal pour code
-        fs::write(cao.join("test/banc-bon.py"), "import time\nprint('parti', flush=True)\ntime.sleep(60)\n").unwrap();
-        fs::write(cao.join("prep.py"), "").unwrap();
-        assert!(bancs.lancer(&["test/banc-bon.py".to_string(), "test/banc-mauvais.py".to_string()]));
+        fs::write(cao.join("test/banc-bon.js"), "console.log('parti')\nsetTimeout(() => {}, 60000)\n").unwrap();
+        fs::write(cao.join("prep.js"), "").unwrap();
+        assert!(bancs.lancer(&["test/banc-bon.js".to_string(), "test/banc-mauvais.js".to_string()]));
         for _ in 0..600 {
-            if bancs.sortie("test/banc-bon.py").is_some() && bancs.etat()["bancs"][1]["etat"] == "en_cours" {
+            if bancs.sortie("test/banc-bon.js").is_some() && bancs.etat()["bancs"][1]["etat"] == "en_cours" {
                 break;
             }
             std::thread::sleep(Duration::from_millis(50));

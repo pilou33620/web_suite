@@ -106,13 +106,3 @@ fn code_appairage_du_journal() {
     assert_eq!(code_du_journal(&d.join("absent.log"), &mut e), None, "pas de journal : pas de code");
     let _ = fs::remove_dir_all(&d);
 }
-
-#[test]
-fn requirements() {
-    let d = tmp("req");
-    let req = d.join("requirements.txt");
-    fs::write(&req, "# commentaire\nnumpy>=1.24.0\nscipy>=1.10.0   # solveur DC\nNumPy==2.0      # doublon\n-r autre.txt\nMon_Paquet\n").unwrap();
-    let noms: Vec<String> = lire_requirements(&req).unwrap().into_iter().map(|(_, n)| n).collect();
-    assert_eq!(noms, ["numpy", "scipy", "numpy", "", "mon-paquet"]);
-    let _ = fs::remove_dir_all(&d);
-}

@@ -6,6 +6,8 @@
 DEPOT_BINAIRES="https://github.com/pilou33620/web_suite/releases/download/binaires"
 
 obtenir_binaires() {
+  # archive de production (publication « binaires », sans les sources) : ses executables sont deja la
+  if [ ! -f Cargo.toml ] && [ -x bin/web_suite ]; then return 0; fi
   mkdir -p bin
   if command -v cargo >/dev/null 2>&1; then
     cargo build --release --bins || return 1

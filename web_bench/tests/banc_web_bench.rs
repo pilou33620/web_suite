@@ -4,15 +4,16 @@
 //!
 //! L'exécutable web_bench est piloté de l'extérieur : un sous-processus, et des requêtes HTTP.
 //! Un faux WEB_CAO et un faux WEB_3D (de petits serveurs qui acceptent les options de web_bench)
-//! sont créés dans une fausse racine de web_suite ; le faux WEB_CAO a deux bancs, l'un réussit,
-//! l'autre échoue. On vérifie le relais (la page reçoit la sonde, un POST passe avec son corps et
-//! ses en-têtes), le passage d'un outil à l'autre, les gardes (Host étranger, POST de l'API sans
-//! en-tête), la découverte et le lancement des bancs, l'enregistrement d'un rapport, et l'arrêt
-//! (outils arrêtés, dossiers temporaires effacés).
+//! sont créés dans une fausse racine de web_suite ; le faux WEB_CAO a des bancs node, dont un qui
+//! échoue, et une petite caisse Rust (ses bancs cargo, et l'outil de préparation). On vérifie le
+//! relais (la page reçoit la sonde, un POST passe avec son corps et ses en-têtes), le passage d'un
+//! outil à l'autre, les gardes (Host étranger, POST de l'API sans en-tête), la découverte et le
+//! lancement des bancs, l'enregistrement d'un rapport, et l'arrêt (outils arrêtés, dossiers
+//! temporaires effacés).
 //!
-//! web_bench lance les outils et leurs bancs banc-*.py avec Python : les faux, écrits à la volée
-//! dans le dossier temporaire, sont donc en Python. Sans python3 (py ou python sous Windows),
-//! seules les options refusées sont vérifiées et le reste est sauté.
+//! web_bench lance un outil par son demarrer_<NOM> : celui des faux lance un petit serveur node,
+//! écrit à la volée dans le dossier temporaire. Sans node, seules les options refusées sont
+//! vérifiées et le reste est sauté.
 #[path = "../../lanceur/tests/commun/http.rs"]
 mod http;
 
@@ -27,28 +28,37 @@ use serde_json::{json, Value};
 
 const EXE: &str = env!("CARGO_BIN_EXE_web_bench");
 
-const FAUX_CAO: &str = r#"
-import argparse, http.server, json, os
-ap = argparse.ArgumentParser()
-ap.add_argument("--port", type=int); ap.add_argument("--projets"); ap.add_argument("--lib")
-a, _ = ap.parse_known_args()
-NOM = os.path.basename(os.path.dirname(os.path.abspath(__file__))).encode()
-class G(http.server.BaseHTTPRequestHandler):
-    def log_message(self, *x): print("requete", self.path, flush=True)
-    def _r(self, code, corps, type_):
-        self.send_response(code); self.send_header("Content-Type", type_)
-        self.send_header("Content-Length", str(len(corps))); self.end_headers(); self.wfile.write(corps)
-    def do_GET(self):
-        if self.path.endswith(".html") or self.path == "/":
-            return self._r(200, b"<!DOCTYPE html><html><head><title>t</title></head><body>" + NOM + b"</body></html>", "text/html")
-        self._r(404, b"non", "text/plain")
-    def do_POST(self):
-        n = int(self.headers.get("Content-Length") or 0)
-        rendu = {"corps": self.rfile.read(n).decode(), "host": self.headers.get("Host"),
-                 "entete": self.headers.get("X-WEB_CAO"), "lib": a.lib, "projets": a.projets}
-        self._r(200, json.dumps(rendu).encode(), "application/json")
-http.server.ThreadingHTTPServer(("127.0.0.1", a.port), G).serve_forever()
+const FAUX_SERVEUR: &str = r#"
+const http = require("http"), path = require("path");
+const arg = (nom) => { const i = process.argv.indexOf(nom); return i < 0 ? null : process.argv[i + 1]; };
+const NOM = path.basename(__dirname);
+http.createServer((q, r) => {
+  console.log("requete", q.url);
+  const rendre = (code, corps, type) => {
+    r.writeHead(code, { "Content-Type": type, "Content-Length": Buffer.byteLength(corps) });
+    r.end(corps);
+  };
+  if (q.method === "POST") {
+    const morceaux = [];
+    q.on("data", (m) => morceaux.push(m));
+    q.on("end", () => rendre(200, JSON.stringify({ corps: Buffer.concat(morceaux).toString(), host: q.headers.host,
+      entete: q.headers["x-web_cao"], lib: arg("--lib"), projets: arg("--projets") }), "application/json"));
+  } else if (q.url.endsWith(".html") || q.url === "/") {
+    rendre(200, "<!DOCTYPE html><html><head><title>t</title></head><body>" + NOM + "</body></html>", "text/html");
+  } else rendre(404, "non", "text/plain");
+}).listen(Number(arg("--port")), "127.0.0.1");
+process.on("SIGTERM", () => process.exit(0));
 "#;
+
+/// Un faux outil : son demarrer_<NOM>, comme les vrais, et le serveur node qu'il lance.
+fn faux_outil(dossier: &Path, nom: &str) {
+    ecrire(&dossier.join("serveur.js"), FAUX_SERVEUR);
+    if cfg!(windows) {
+        ecrire(&dossier.join(format!("demarrer_{nom}.cmd")), "@node \"%~dp0serveur.js\" %*\r\n");
+    } else {
+        ecrire(&dossier.join(format!("demarrer_{nom}.sh")), "node \"$(dirname \"$0\")/serveur.js\" \"$@\"\n");
+    }
+}
 
 fn ecrire(chemin: &Path, texte: &str) {
     fs::create_dir_all(chemin.parent().unwrap()).unwrap();
@@ -66,7 +76,7 @@ fn copier_arbre(source: &Path, cible: &Path) {
     }
 }
 
-/// La commande répond-elle (python3, node) ?
+/// La commande répond-elle (node) ?
 fn present(commande: &str) -> bool {
     Command::new(commande).arg("--version").stdin(Stdio::null()).stdout(Stdio::null()).stderr(Stdio::null())
         .status().is_ok_and(|s| s.success())
@@ -110,23 +120,30 @@ fn banc() {
     // une fausse racine de web_suite : les pages du banc, et les rapports, y vivent aussi
     copier_arbre(&Path::new(env!("CARGO_MANIFEST_DIR")).join("page"), &temp.join("web_bench").join("page"));
     let cao = temp.join("WEB_CAO");
-    ecrire(&cao.join("web_CAO.py"), FAUX_CAO);
-    ecrire(&temp.join("WEB_3D").join("web_3D.py"), FAUX_CAO);
+    faux_outil(&cao, "WEB_CAO");
+    faux_outil(&temp.join("WEB_3D"), "WEB_3D");
     ecrire(&temp.join("WEB_3D").join("conception.html"), "<html></html>");
     // la vraie LIB de WEB_CAO, que le banc copie sans y toucher
     ecrire(&temp.join("PROJETS").join("LIB_CAO").join("LIB_composants.csv"), "ref;valeur\n");
-    // ce que la CI fait en plus des banc-* (catalogue de web_bench) : un essai sous un autre
-    // nom, sa préparation, et un banc qui exige la LIB privée (il voit la LIB par WEB_CAO_LIB)
-    let (harness, prep, banc_lib) = ("editeur-pcb/test/harness.js", "editeur-pcb/outils/build-monofichier.py", "python/test/banc-lib-routes.py");
+    // le catalogue de web_bench : un essai node sous un autre nom, sa préparation par un outil
+    // Rust de la caisse « outils », et un banc qui exige la LIB privée (vue par WEB_CAO_LIB)
+    let (harness, banc_lib) = ("editeur-pcb/test/harness.js", "gestion-lib/test/banc-catalogue.js");
+    let (rust_unitaires, rust_banc) = ("cargo test -p outils --bins", "cargo test -p outils --test banc_bon");
     ecrire(&cao.join(harness), "console.log('harness ok')\n");
-    ecrire(&cao.join(prep), "open('prepare.txt', 'w').write('fait')\nprint('préparé')\n");
+    ecrire(&cao.join("Cargo.toml"),
+           "[workspace]\n[package]\nname = \"outils\"\nversion = \"0.1.0\"\nedition = \"2021\"\n\
+            [[bin]]\nname = \"build-monofichier\"\npath = \"src/main.rs\"\n");
+    ecrire(&cao.join("src").join("main.rs"),
+           "fn main() {\n    std::fs::write(\"prepare.txt\", \"fait\").unwrap();\n    \
+            println!(\"préparé {}\", std::env::args().nth(1).unwrap_or_default());\n}\n");
+    ecrire(&cao.join("tests").join("banc_bon.rs"), "#[test]\nfn bon() {\n    println!(\"banc rust\");\n}\n");
     ecrire(&cao.join(banc_lib),
-           "import os, sys\nprint(os.environ.get('WEB_CAO_LIB'))\n\
-            sys.exit(0 if os.path.isfile(os.path.join(os.environ['WEB_CAO_LIB'], 'LIB_composants.csv')) else 4)\n");
+           "console.log(process.env.WEB_CAO_LIB)\n\
+            process.exit(require('fs').existsSync(process.env.WEB_CAO_LIB + '/LIB_composants.csv') ? 0 : 4)\n");
     ecrire(&cao.join("index.html"), "<html></html>");
-    ecrire(&cao.join("test").join("banc-bon.py"), "print('OK')\n");
-    ecrire(&cao.join("test").join("banc-mauvais.py"), "import sys\nprint('raté')\nsys.exit(3)\n");
-    ecrire(&cao.join("graphify-out").join("banc-ignore.py"), "raise SystemExit(1)\n");
+    ecrire(&cao.join("test").join("banc-bon.js"), "console.log('OK')\n");
+    ecrire(&cao.join("test").join("banc-mauvais.js"), "console.log('raté')\nprocess.exit(3)\n");
+    ecrire(&cao.join("graphify-out").join("banc-ignore.js"), "process.exit(1)\n");
 
     // options refusées et aide, sans rien démarrer
     let contient = |octets: &[u8], motif: &str| String::from_utf8_lossy(octets).contains(motif);
@@ -139,9 +156,8 @@ fn banc() {
     let r = Command::new(EXE).arg("--racine").arg(&vide).output().unwrap();
     assert!(r.status.code() == Some(2) && contient(&r.stdout, "Aucun outil trouvé"), "{r:?}");
 
-    let pythons: &[&str] = if cfg!(windows) { &["py", "python"] } else { &["python3", "python"] };
-    if !pythons.iter().any(|p| present(p)) {
-        println!("SAUTÉ : pas de Python sur ce poste (web_bench lance les outils et leurs bancs avec Python)");
+    if !present("node") {
+        println!("SAUTÉ : pas de node sur ce poste (les faux outils sont des serveurs node)");
         return;
     }
 
@@ -158,7 +174,7 @@ fn banc() {
     }
     assert!(debut.contains("[*] Outils trouvés : WEB_CAO, WEB_3D"), "{debut}");
     assert!(debut.contains("[*] Démarrage de WEB_CAO (dossiers temporaires)..."), "{debut}");
-    assert!(debut.contains("[*] Bancs trouvés : WEB_CAO 4, WEB_3D 0"), "{debut}");
+    assert!(debut.contains("[*] Bancs trouvés : WEB_CAO 6, WEB_3D 0"), "{debut}");
     let (avant, apres) = ("Page Banc : http://127.0.0.1:", "/__banc/   (Ctrl+C pour arrêter)");
     let port: u16 = debut.split_once(avant).and_then(|(_, suite)| suite.split_once(apres)).and_then(|(p, _)| p.parse().ok())
         .unwrap_or_else(|| panic!("adresse de la page Banc attendue dans :\n{debut}"));
@@ -174,7 +190,8 @@ fn banc() {
         lire("/__banc/api/journal?depuis=0").json()["lignes"].as_array().unwrap().iter().map(|l| l.as_str().unwrap().to_string()).collect()
     };
     let attendre_bancs = || -> Value {
-        for _ in 0..300 {
+        // les bancs Rust du faux outil se compilent d'abord
+        for _ in 0..3000 {
             let e = lire("/__banc/api/bancs").json();
             if e["en_cours"] == false {
                 return e;
@@ -220,38 +237,36 @@ fn banc() {
     assert_eq!(requete("GET", "/index.html", b"", &[("Host", &piege)]).code, 403);
     let r = requete("POST", "/__banc/api/bancs/lancer", b"{}", &hote);
     assert!(r.code == 403 && r.json() == json!({"erreur": "en-tête X-Web-Bench manquant"}), "{} {}", r.code, r.texte());
-    assert_eq!(lire("/__banc/../../WEB_CAO/web_CAO.py").code, 404);
+    assert_eq!(lire("/__banc/../../WEB_CAO/serveur.js").code, 404);
 
     // page Banc et sonde servies
     for f in ["/__banc/", "/__banc/banc.js", "/__banc/sonde.js", "/__banc/banc.css"] {
         assert_eq!(lire(f).code, 200, "{f}");
     }
 
-    // bancs : graphify-out ignoré, l'essai harness.js ajouté, tous lancés
+    // bancs : graphify-out et target ignorés, l'essai harness.js et les bancs Rust ajoutés, tous lancés
     let ids: Vec<Value> = lire("/__banc/api/bancs").json()["bancs"].as_array().unwrap().iter().map(|b| b["id"].clone()).collect();
-    assert_eq!(ids, [harness, banc_lib, "test/banc-bon.py", "test/banc-mauvais.py"].map(|i| json!(i)));
+    assert_eq!(ids, [rust_unitaires, rust_banc, harness, banc_lib, "test/banc-bon.js", "test/banc-mauvais.js"].map(|i| json!(i)));
     let r = requete("POST", "/__banc/api/bancs/lancer", json!({"ids": ids}).to_string().as_bytes(), &maison);
     assert!(r.code == 200 && r.json() == json!({"ok": true}), "{} {}", r.code, r.texte());
     let e = attendre_bancs();
     let etats = |e: &Value, champs: &dyn Fn(&Value) -> Value| -> Value {
         Value::Object(e["bancs"].as_array().unwrap().iter().map(|b| (b["id"].as_str().unwrap().to_string(), champs(b))).collect())
     };
-    let node = present("node");
-    let attendu = json!({"test/banc-bon.py": ["ok", 0], banc_lib: ["ok", 0], "test/banc-mauvais.py": ["echec", 3],
-                         harness: if node { json!(["ok", 0]) } else { json!(["ignore", null]) }});
-    assert_eq!(etats(&e, &|b| json!([b["etat"], b["code"]])), attendu);
-    if node {
-        let sortie = lire(&format!("/__banc/api/bancs/sortie?id={harness}")).json()["sortie"].as_str().unwrap().to_string();
-        assert!(sortie.contains("préparé") && sortie.contains("(préparation)") && sortie.contains("harness ok"), "{sortie}");
-        assert!(cao.join("prepare.txt").is_file(), "préparation non lancée");
-    }
+    let sortie = |id: &str| lire(&format!("/__banc/api/bancs/sortie?id={}", id.replace(' ', "%20"))).json()["sortie"].as_str().unwrap().to_string();
+    let attendu = json!({rust_unitaires: ["ok", 0], rust_banc: ["ok", 0], harness: ["ok", 0], banc_lib: ["ok", 0],
+                         "test/banc-bon.js": ["ok", 0], "test/banc-mauvais.js": ["echec", 3]});
+    assert_eq!(etats(&e, &|b| json!([b["etat"], b["code"]])), attendu, "{}", sortie(rust_banc));
+    assert!(sortie(rust_banc).contains("test bon ... ok"), "{}", sortie(rust_banc));
+    let s = sortie(harness);
+    assert!(s.contains("préparé editeur-pcb") && s.contains("(préparation)") && s.contains("harness ok"), "{s}");
+    assert!(cao.join("prepare.txt").is_file(), "préparation non lancée");
     // sans la LIB privée : le banc qui l'exige est sauté, comme dans la CI
     fs::remove_dir_all(temp.join("PROJETS")).unwrap();
     requete("POST", "/__banc/api/bancs/lancer", json!({"ids": [banc_lib]}).to_string().as_bytes(), &maison);
     let e = attendre_bancs();
     assert!(etats(&e, &|b| b["etat"].clone())[banc_lib] == "ignore", "{e}");
-    let sortie = lire("/__banc/api/bancs/sortie?id=test/banc-mauvais.py").json();
-    assert!(sortie["sortie"].as_str().unwrap().contains("raté"), "{sortie}");
+    assert!(sortie("test/banc-mauvais.js").contains("raté"));
 
     // journal de l'outil
     assert!(journal().iter().any(|l| l.contains("requete")));

@@ -252,7 +252,7 @@ function echap() {
 
 /* ---------------------------------------------------------------- journal du serveur */
 let journalFin = 0;
-const TRACE = /Traceback|^\s*\w*(Error|Exception)\b/;
+const TRACE = /panicked at|^\s*\w*(Error|Exception)\b/;
 async function lireJournal() {
   const r = await api("journal?depuis=" + journalFin);
   journalFin = r.fin;
@@ -350,13 +350,13 @@ async function essayerElement(page, el, k, delai, hist, url) {
   if (res.duree > 1500) res.evts.push({ type: "lent", message: "le clic a bloqué la page " + res.duree + " ms" });
   journalFin = j0;
   const lignes = await lireJournal().catch(() => []);
-  const i = lignes.findIndex((l) => /Traceback/.test(l));
+  const i = lignes.findIndex((l) => /panicked at/.test(l));
   if (i >= 0) {
-    // le Traceback entier : de « Traceback » à la ligne de l'exception (sans indentation)
+    // la panique entière : « thread … panicked at fichier:ligne: », son message, jusqu'à la ligne « note: »
     let f = i + 1;
-    while (f < lignes.length && f < i + 80 && /^\s/.test(lignes[f])) f++;
-    res.evts.push({ type: "serveur", message: "erreur Python dans " + nomOutil() + " : " + (lignes[f] || "").trim(),
-      detail: lignes.slice(i, f + 1).join("\n") });
+    while (f < lignes.length && f < i + 20 && !/^note:|panicked at/.test(lignes[f])) f++;
+    res.evts.push({ type: "serveur", message: "panique du serveur " + nomOutil() + " : " + (lignes[i + 1] || "").trim(),
+      detail: lignes.slice(i, f).join("\n") });
   }
   const graves = res.evts.map((e) => GRAVITE[e.type] || "info");
   res.etat = graves.includes("erreur") ? "erreur" : graves.includes("avert") ? "avert" : "ok";
@@ -510,7 +510,7 @@ async function lancerClic() {
 }
 
 /* Où chercher dans le code : la première ligne de la pile qui n'est pas du banc, ou le
-   fichier Python du Traceback, ou la route appelée. */
+   fichier Rust de la panique du serveur, ou la route appelée. */
 function lignePile(pile) {
   for (const l of String(pile || "").split("\n")) {
     const m = l.match(/(?:https?:\/\/[^/\s)]+)?(\/[^\s):]+\.(?:js|mjs|html))(?::(\d+))(?::(\d+))?/);
@@ -525,9 +525,8 @@ function nettoyerPile(t, outil) {
 }
 function sourceDe(e) {
   if (e.type === "serveur") {
-    const ms = [...String(e.detail).matchAll(/File "([^"]+)", line (\d+)(?:, in (\S+))?/g)];
-    const d = ms[ms.length - 1];
-    return d ? d[1].replace(/^.*?[\\/](WEB_[A-Z0-9]+[\\/])/i, "$1").replace(/\\/g, "/") + ":" + d[2] + (d[3] ? " (" + d[3] + ")" : "") : "";
+    const d = String(e.detail).match(/panicked at (.+?):(\d+)(?::\d+)?:?\s*$/m);
+    return d ? d[1].replace(/^.*?[\\/](WEB_[A-Z0-9]+[\\/])/i, "$1").replace(/\\/g, "/") + ":" + d[2] : "";
   }
   if (e.requete) return e.requete.methode + " " + e.requete.url.split("?")[0];
   if (e.source && !/^:|__banc|^undefined/.test(e.source)) return nomOutil() + e.source;
@@ -634,7 +633,7 @@ function rapportMarkdown(rap) {
       if (q.envoye) { L.push("- **Corps envoyé** :"); bloc(q.envoye, "json"); }
       if (q.reponse) { L.push("- **Réponse du serveur** :"); bloc(q.reponse); }
     }
-    if (ex.detail) { L.push("- **" + (p.type === "serveur" ? "Traceback Python" : "Pile d'appels") + "** :"); bloc(ex.detail, p.type === "serveur" ? "python" : ""); }
+    if (ex.detail) { L.push("- **" + (p.type === "serveur" ? "Panique du serveur" : "Pile d'appels") + "** :"); bloc(ex.detail); }
     else if (ex.pile && !ex.requete) { L.push("- **Pile d'appels** :"); bloc(ex.pile); }
   });
   const bancs = rap.bancs || [];
