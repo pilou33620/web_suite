@@ -11,6 +11,12 @@ use std::time::Duration;
 use rustls::{ServerConfig, ServerConnection, StreamOwned};
 
 const ENTETES_MAX: usize = 64 * 1024;
+const MAX_CONNEXIONS: usize = 256;
+
+/// Ce poste (127.x, ::1, ::ffff:127.x) n'entre pas dans le plafond de connexions.
+fn hors_plafond(ip: IpAddr) -> bool {
+    ip.to_canonical().is_loopback()
+}
 
 pub struct Requete<'a> {
     pub methode: String,
@@ -296,15 +302,26 @@ impl Serveur {
 
     /// Sert jusqu'à `arreter()`.
     pub fn servir(self: &Arc<Self>, service: Arc<Service>) {
+        let places = Arc::new(std::sync::atomic::AtomicUsize::new(0));
         for flux in self.ecoute.incoming() {
             if self.arret.load(Ordering::SeqCst) {
                 break;
             }
             let Ok(flux) = flux else { continue };
-            let (serveur, service) = (self.clone(), service.clone());
+            // Un autre appareil ne tient pas plus de MAX_CONNEXIONS fils à la fois (connexions
+            // muettes) : la suivante est fermée d'emblée. Ce poste n'est jamais compté.
+            let comptee = !flux.peer_addr().is_ok_and(|a| hors_plafond(a.ip()));
+            if comptee && places.fetch_add(1, Ordering::SeqCst) >= MAX_CONNEXIONS {
+                places.fetch_sub(1, Ordering::SeqCst);
+                continue;
+            }
+            let (serveur, service, places) = (self.clone(), service.clone(), places.clone());
             std::thread::spawn(move || {
                 // Le navigateur a fermé la connexion avant la réponse : rien à dire.
                 let _ = serveur.connexion(flux, &*service);
+                if comptee {
+                    places.fetch_sub(1, Ordering::SeqCst);
+                }
             });
         }
     }
@@ -402,5 +419,20 @@ impl Serveur {
         }
         let _ = tcp.shutdown(std::net::Shutdown::Write);
         Ok(())
+    }
+}
+
+#[cfg(test)]
+mod essais_plafond {
+    use super::*;
+
+    #[test]
+    fn seul_ce_poste_est_hors_plafond() {
+        for a in ["127.0.0.1", "::1", "::ffff:127.0.0.1"] {
+            assert!(hors_plafond(a.parse().unwrap()), "{a}");
+        }
+        for a in ["192.168.1.20", "fd7a:115c:a1e0::1"] {
+            assert!(!hors_plafond(a.parse().unwrap()), "{a}");
+        }
     }
 }
