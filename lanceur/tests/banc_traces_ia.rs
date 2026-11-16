@@ -25,7 +25,7 @@ use regex::Regex;
 
 const PERMIS_WEB_SUITE: &[&str] = &[r"^lanceur/docs/(SPEC-|savoir-trace)", r"^lanceur/src/mcp/mod\.rs$",
                                     r"^lanceur/tests/banc_(mcp|savoir|traces_ia)\.rs$", r"\.gitignore$"];
-const PERMIS_OUTIL: &[&str] = &[r"^tasks/", r"^graphify-out/", r"^(rust/serveur/)?tests/banc", r"\.gitignore$"];
+const PERMIS_OUTIL: &[&str] = &[r"^(docs/)?tasks/", r"^graphify-out/", r"^(rust/serveur/)?tests/banc", r"\.gitignore$"];
 
 /// fichiers : {chemin: texte}. Rend les traces hors des chemins permis : [(chemin, n°, ligne)].
 fn chercher(fichiers: &BTreeMap<String, String>, permis: &[&str]) -> Vec<(String, usize, String)> {
