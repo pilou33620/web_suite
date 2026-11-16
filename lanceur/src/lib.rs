@@ -7,6 +7,7 @@ pub mod installer;
 pub mod outils;
 pub mod processus;
 pub mod projets;
+pub mod sans_git;
 pub mod serveur_lanceur;
 
 pub mod claude_pages;

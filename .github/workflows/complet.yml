@@ -1,0 +1,66 @@
+name: archive complète
+
+# L'archive à télécharger sur un nouveau poste : WEB_SUITE-complet-<système>, un seul dossier
+# WEB_SUITE/ avec le lanceur et les trois outils (leurs archives de production), sans git ni
+# sources. On la décompresse et on lance demarrer_WEB_SUITE. Elle se met ensuite à jour seule :
+# chaque partie compare son bin/prod.sha256 à l'empreinte publiée (lanceur/src/sans_git.rs).
+#
+# Refaite après chaque publication des exécutables de WEB_SUITE, et chaque nuit pour reprendre
+# les dernières versions des outils (une archive un peu ancienne se rattrape au premier lancement).
+on:
+  workflow_run:
+    workflows: [exécutables]
+    types: [completed]
+  schedule:
+    - cron: "17 3 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  assembler:
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { nom: windows-x86_64, ext: zip }
+          - { nom: linux-x86_64, ext: tar.gz }
+          - { nom: linux-aarch64, ext: tar.gz }
+          - { nom: macos-aarch64, ext: tar.gz }
+    steps:
+      - name: Assemblage
+        shell: bash
+        run: |
+          set -euo pipefail
+          # dossier dans WEB_SUITE/ : "" pour le lanceur lui-même, le nom de l'outil sinon
+          partie() {
+            local depot=$1 prefixe=$2 dossier=$3
+            local a="$prefixe-prod-${{ matrix.nom }}.${{ matrix.ext }}"
+            local url="https://github.com/pilou33620/$depot/releases/download/binaires/$a"
+            curl -fsSL -o "$a" "$url"
+            curl -fsSL -o "$a.sha256" "$url.sha256"
+            [ "$(sha256sum "$a" | cut -d' ' -f1)" = "$(cat "$a.sha256")" ] || { echo "empreinte fausse : $a"; exit 1; }
+            rm -rf tmp && mkdir tmp
+            if [ "${{ matrix.ext }}" = zip ]; then unzip -q "$a" -d tmp; else tar -xzf "$a" -C tmp; fi
+            mkdir -p "WEB_SUITE/$dossier"
+            cp -a tmp/*/. "WEB_SUITE/$dossier/"
+            # l'empreinte de ce qui est installé : la première mise à jour sait qu'elle est à jour
+            cp "$a.sha256" "WEB_SUITE/$dossier/bin/prod.sha256"
+          }
+          partie web_suite web_suite ""
+          partie WEB_CAO web_cao WEB_CAO
+          partie WEB_ANTENNA web_antenna WEB_ANTENNA
+          partie WEB_3D web_3d WEB_3D
+          f="WEB_SUITE-complet-${{ matrix.nom }}.${{ matrix.ext }}"
+          if [ "${{ matrix.ext }}" = zip ]; then zip -qr "$f" WEB_SUITE; else tar -czf "$f" WEB_SUITE; fi
+          sha256sum "$f" | cut -d' ' -f1 > "$f.sha256"
+          echo "FICHIER=$f" >> "$GITHUB_ENV"
+
+      - name: Publication
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release upload binaires "$FICHIER" "$FICHIER.sha256" --clobber -R "${{ github.repository }}"

@@ -20,10 +20,35 @@ dans `PROJETS/`, synchronisé avec GitHub. Détails complets : [lanceur/docs/DET
 
 ## Installation
 
-Prérequis : git (sans git, pas de mises à jour ni de synchronisation). Le lanceur est en Rust :
-les scripts ci-dessous prennent ses exécutables dans `bin/` — téléchargés depuis la publication
-« binaires » de GitHub (Windows x86_64, Linux x86_64 et aarch64, macOS aarch64), ou compilés sur
-place si `cargo` est installé. Les trois outils sont livrés de la même façon : rien d'autre à installer.
+### Le plus simple : l'archive complète (sans git, sans rien installer)
+
+Dans la [publication « binaires »](https://github.com/pilou33620/web_suite/releases/tag/binaires),
+prendre **une seule archive**, celle du système :
+
+| Système | Archive |
+|---|---|
+| Windows | `WEB_SUITE-complet-windows-x86_64.zip` |
+| Linux x86_64 | `WEB_SUITE-complet-linux-x86_64.tar.gz` |
+| Raspberry Pi (64 bits) | `WEB_SUITE-complet-linux-aarch64.tar.gz` |
+| macOS (Apple) | `WEB_SUITE-complet-macos-aarch64.tar.gz` |
+
+La décompresser où l'on veut : elle donne un seul dossier `WEB_SUITE/` (le lanceur et les trois
+outils), puis double-cliquer sur `demarrer_WEB_SUITE.cmd` (Windows) ou lancer `./demarrer_WEB_SUITE.sh`.
+
+- **Mises à jour sans git** : à chaque démarrage, le lanceur compare chaque partie (lui-même et
+  chaque outil) à la dernière version publiée, télécharge ce qui a changé (empreinte SHA-256
+  vérifiée), le recopie par-dessus et redémarre. `PROJETS/`, `openEMS/`, les réglages et les
+  projets ne sont jamais touchés.
+- **Projets synchronisés** : sous Windows sans git, le lanceur installe au premier démarrage Git
+  portable dans `WEB_SUITE/git/` (environ 60 Mo, rien dans le système), avec sa fenêtre de connexion
+  GitHub. Sous Linux et macOS, installer git (`sudo apt install git`) ; sans lui, `PROJETS/` reste local.
+
+### Pour développer : le dépôt git
+
+Prérequis : git. Le lanceur est en Rust : les scripts ci-dessous prennent ses exécutables dans
+`bin/` — téléchargés depuis la publication « binaires » de GitHub (Windows x86_64, Linux x86_64 et
+aarch64, macOS aarch64), ou compilés sur place si `cargo` est installé. Les trois outils sont livrés
+de la même façon : rien d'autre à installer.
 
 ```
 git clone https://github.com/pilou33620/WEB_SUITE.git WEB_TOOLS
@@ -37,10 +62,9 @@ git clone https://github.com/pilou33620/WEB_SUITE.git WEB_TOOLS
 À la racine, seul le lanceur du système en cours reste visible : le premier lancement masque
 l'autre (`.sh` sous Windows, `.cmd` sous Linux). Les autres scripts sont dans `scripts/`.
 
-Sans git ni sources : la publication « binaires » de GitHub porte aussi une archive de production
-par système (`web_suite-prod-<système>`), faite par la CI — les exécutables, ces scripts de
-démarrage et les pages. On la décompresse et on lance les mêmes scripts ; elle ne se met pas à
-jour seule (on reprend l'archive).
+Les autres archives de la publication sont des rouages : `web_suite-<système>` (exécutables seuls,
+pris par `scripts/binaires`) et `web_suite-prod-<système>` (le lanceur seul, sans les outils, qui sert
+aux mises à jour de l'archive complète).
 
 L'installateur demande quels outils télécharger (`1`, `1 3`, `4` = tous), ou directement :
 `scripts\installer.cmd cao 3d` (`./scripts/installer.sh cao 3d`).
@@ -97,7 +121,8 @@ saisir sur https://github.com/login/device, depuis n'importe quel appareil.
 
 ## Mises à jour
 
-WEB_SUITE et les outils se mettent à jour au démarrage (`git pull --ff-only`). Le bilan
+WEB_SUITE et les outils se mettent à jour au démarrage : `git pull --ff-only` pour un clone git,
+la publication « binaires » pour l'archive complète (voir *Installation*). Le bilan
 s'affiche dans la page et dans le terminal. Si des fichiers sont modifiés, le lanceur n'y touche
 pas ; un outil lancé ensuite refait alors sa propre vérification : il met ses modifications de
 côté (`git stash`), se met à jour, puis les reprend (`git stash pop`). Il la refait aussi quand la

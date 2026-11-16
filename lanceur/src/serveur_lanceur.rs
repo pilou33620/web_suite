@@ -74,11 +74,13 @@ fn vider() {
 }
 
 /// -> (true si WEB_SUITE vient d'être mis à jour et doit redémarrer, dernier message).
+const DEPOT_WEB_SUITE: &str = "https://github.com/pilou33620/web_suite";
+
 fn verifier_et_appliquer_maj() -> (bool, String) {
     println!("  Recherche de mises à jour de WEB_SUITE...");
     vider();
     let dernier = std::cell::RefCell::new(String::new());
-    let statut = outils::maj_depot(&depot(), &|texte| {
+    let statut = outils::maj_depot(&depot(), (DEPOT_WEB_SUITE, "web_suite"), &|texte| {
         *dernier.borrow_mut() = texte.to_string();
         println!("    {}", texte);
         vider();
@@ -564,6 +566,12 @@ pub fn principal(argv: &[String]) -> i32 {
     if seulement_installer {
         return installer::principal(&["--racine".to_string(), racine.to_string_lossy().into_owned()]);
     }
+
+    // Windows sans git : Git portable dans <racine>/git/, pour PROJETS et les mises à jour.
+    crate::sans_git::preparer_git(&racine, &|texte| {
+        println!("  {}", texte);
+        vider();
+    });
 
     let deja_maj = std::env::var("WEB_SUITE_DEJA_MAJ").as_deref() == Ok("1");
     let mut bilan_suite = std::env::var("WEB_SUITE_BILAN_MAJ").ok().filter(|b| !b.is_empty()).unwrap_or_else(|| {

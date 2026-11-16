@@ -36,3 +36,11 @@ target/
 
 # Cache le lanceur Windows sous Linux (ecrit par demarrer_*.sh)
 .hidden
+
+# Git portable (Windows sans git) et restes d une mise a jour sans git (lanceur/src/sans_git.rs)
+/git/
+/PortableGit.7z.exe
+.maj/
+.maj.zip
+.maj.tar.gz
+*.ancien

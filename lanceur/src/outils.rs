@@ -87,9 +87,15 @@ fn git(dossier: &Path, args: &[&str], delai: f64) -> io::Result<Sortie> {
 ///
 /// Renvoie 'maj', 'a_jour', 'hors_ligne', 'sans_git', 'modifie' (fichiers
 /// modifiés : rien n'est touché) ou 'echec'.
-pub fn maj_depot(dossier: &Path, ecrire: Ecrire) -> &'static str {
+///
+/// Une copie de production (sans .git ni sources) se met à jour depuis la publication
+/// « binaires » : `archive` = (https://github.com/<compte>/<dépôt>, préfixe des archives).
+pub fn maj_depot(dossier: &Path, archive: (&str, &str), ecrire: Ecrire) -> &'static str {
+    if crate::sans_git::est_copie_prod(dossier) {
+        return crate::sans_git::maj_archive(dossier, archive.0, archive.1, ecrire);
+    }
     if !dossier.join(".git").is_dir() {
-        return "sans_git"; // copie zip : rien à comparer
+        return "sans_git"; // copie zip des sources : rien à comparer
     }
     if !git_disponible() {
         ecrire("git introuvable : mises à jour non vérifiées.");
@@ -232,7 +238,7 @@ fn executer(cmd: &[&str], ecrire: Ecrire, cwd: Option<&Path>) -> i32 {
 }
 
 /// Extrait les entrées de l'archive qui commencent par `prefixe` dans `cible`.
-fn extraire<R: Read + Seek>(z: &mut zip::ZipArchive<R>, prefixe: &str, cible: &Path) -> io::Result<()> {
+pub(crate) fn extraire<R: Read + Seek>(z: &mut zip::ZipArchive<R>, prefixe: &str, cible: &Path) -> io::Result<()> {
     for i in 0..z.len() {
         let mut entree = z.by_index(i)?;
         let nom = entree.name().to_string();
@@ -697,7 +703,7 @@ impl Gestionnaire {
             let g = self.clone();
             std::thread::spawn(move || {
                 let dernier = Mutex::new(String::new());
-                let statut = maj_depot(&dossier(o, &g.racine), &|texte| {
+                let statut = maj_depot(&dossier(o, &g.racine), (o.depot.trim_end_matches(".git"), o.id), &|texte| {
                     *dernier.lock().unwrap() = texte.to_string();
                     g.noter(o.id, texte);
                 });
