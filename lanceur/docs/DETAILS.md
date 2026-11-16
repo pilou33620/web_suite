@@ -6,8 +6,8 @@ Compléments au [README](../../README.md).
 
 ```
 WEB_TOOLS/                  <- ce dépôt
-├── installer.cmd / .sh     <- télécharge les outils
-├── demarrer_WEB_SUITE.cmd / .sh  <- lance WEB·SUITE
+├── demarrer_WEB_SUITE.cmd / .sh  <- lance WEB·SUITE (seul celui du système reste visible)
+├── scripts/                <- installer, demarrer_web_bench, binaires (.cmd / .sh)
 ├── bin/                    <- les exécutables (web_suite, installer, maj_git, mcp_web_suite, web_bench…)
 ├── lanceur/                <- src/ (lanceur, installateur, serveur MCP de Claude Code), pages
 ├── WEB_CAO/                <- clonés par l'installateur, chacun avec son dépôt git,
@@ -30,7 +30,7 @@ télécharger d'un coup. Sans git, les outils sont téléchargés en zip.
 - **Linux / Raspberry Pi** : `sudo apt install git`. Le lanceur et les outils sont des
   exécutables, téléchargés (ou compilés sur place avec `cargo`) par leurs scripts de démarrage.
 - **openEMS (WEB_ANTENNA)** : l'outil lance les deux exécutables `openEMS` et `nf2ff`. Sous
-  Windows, l'installateur (`installer.cmd antenna`, ou le bouton **Installer openEMS** de la
+  Windows, l'installateur (`scripts\installer.cmd antenna`, ou le bouton **Installer openEMS** de la
   carte) télécharge l'archive binaire openEMS v0.0.36 (~50 Mo) dans `WEB_ANTENNA/openEMS/`.
   Ailleurs, ces deux exécutables doivent être dans le `PATH`.
 

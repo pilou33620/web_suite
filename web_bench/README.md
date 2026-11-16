@@ -13,7 +13,7 @@ lance les essais et montre les résultats. Les essais se lancent outil par outil
 
 ## Démarrer
 
-Depuis la racine de web_suite, une fois les outils installés (`installer.cmd` / `installer.sh`) :
+Depuis la racine de web_suite, une fois les outils installés (`scripts\installer.cmd` / `scripts/installer.sh`) :
 
 | Système | Démarrer |
 |---|---|

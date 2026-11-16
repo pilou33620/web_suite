@@ -34,6 +34,9 @@ git clone https://github.com/pilou33620/WEB_SUITE.git WEB_TOOLS
 | Windows | `scripts\installer.cmd` | `demarrer_WEB_SUITE.cmd` |
 | Linux, Raspberry Pi | `./scripts/installer.sh` | `./demarrer_WEB_SUITE.sh` |
 
+À la racine, seul le lanceur du système en cours reste visible : le premier lancement masque
+l'autre (`.sh` sous Windows, `.cmd` sous Linux). Les autres scripts sont dans `scripts/`.
+
 Sans git ni sources : la publication « binaires » de GitHub porte aussi une archive de production
 par système (`web_suite-prod-<système>`), faite par la CI — les exécutables, ces scripts de
 démarrage et les pages. On la décompresse et on lance les mêmes scripts ; elle ne se met pas à

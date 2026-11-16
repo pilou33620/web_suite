@@ -1,6 +1,6 @@
 //! Le catalogue des outils et les emplacements sur le disque.
 //!
-//!     WEB_TOOLS/         <- ce dépôt (installer.cmd, demarrer_WEB_SUITE.cmd)
+//!     WEB_TOOLS/         <- ce dépôt (demarrer_WEB_SUITE.cmd, scripts/installer.cmd)
 //!     ├── lanceur/       <- pages du lanceur, journaux/
 //!     ├── WEB_CAO/       <- un dépôt git par outil, cloné ici
 //!     ├── WEB_ANTENNA/
