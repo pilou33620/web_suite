@@ -31,8 +31,8 @@ git clone https://github.com/pilou33620/WEB_SUITE.git WEB_TOOLS
 
 | Système | Installer les outils | Démarrer |
 |---|---|---|
-| Windows | `installer.cmd` | `demarrer_WEB_SUITE.cmd` |
-| Linux, Raspberry Pi | `./installer.sh` | `./demarrer_WEB_SUITE.sh` |
+| Windows | `scripts\installer.cmd` | `demarrer_WEB_SUITE.cmd` |
+| Linux, Raspberry Pi | `./scripts/installer.sh` | `./demarrer_WEB_SUITE.sh` |
 
 Sans git ni sources : la publication « binaires » de GitHub porte aussi une archive de production
 par système (`web_suite-prod-<système>`), faite par la CI — les exécutables, ces scripts de
@@ -40,7 +40,7 @@ démarrage et les pages. On la décompresse et on lance les mêmes scripts ; ell
 jour seule (on reprend l'archive).
 
 L'installateur demande quels outils télécharger (`1`, `1 3`, `4` = tous), ou directement :
-`installer.cmd cao 3d` (`./installer.sh cao 3d`).
+`scripts\installer.cmd cao 3d` (`./scripts/installer.sh cao 3d`).
 
 Dépendances des outils :
 
@@ -166,7 +166,7 @@ système 64 bits) : pas besoin de `claude mcp add` pour cela.
 
 ## Banc d'essai (web_bench)
 
-`demarrer_web_bench.cmd` (Windows) ou `./demarrer_web_bench.sh` ouvre un banc d'essai visible.
+`scripts\demarrer_web_bench.cmd` (Windows) ou `./scripts/demarrer_web_bench.sh` ouvre un banc d'essai visible.
 Il fonctionne pour les trois outils : l'outil choisi s'ouvre en entier dans la page, un
 **clic-partout** clique sur tous ses boutons et relève les erreurs JS, réseau et serveur, et
 l'onglet **Bancs** lance ses bancs (scripts node `banc-*`, `cargo test`). L'outil tourne sur des dossiers temporaires :

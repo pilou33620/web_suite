@@ -134,7 +134,7 @@ fn main() -> ExitCode {
     let outils = outils::trouver_outils(&racine);
     if outils.is_empty() {
         println!(
-            "[!] Aucun outil trouvé dans {}. Installe-les avec installer.cmd / installer.sh, \
+            "[!] Aucun outil trouvé dans {}. Installe-les avec scripts/installer.cmd / scripts/installer.sh, \
              ou indique leur dossier : --racine CHEMIN",
             racine.display()
         );

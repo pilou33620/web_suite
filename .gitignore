@@ -33,3 +33,6 @@ web_bench/rapports/
 target/
 # Exécutables compilés ou téléchargés (binaires.sh, binaires.cmd)
 /bin/
+
+# Cache le lanceur Windows sous Linux (ecrit par demarrer_*.sh)
+.hidden

@@ -1,7 +1,9 @@
 #!/bin/sh
 # Lancement de WEB_SUITE (Linux, Raspberry Pi) : garde le terminal ouvert en cas d'erreur.
 cd "$(dirname "$0")" || exit 1
-. ./binaires.sh
+# Un seul fichier a cliquer : le lanceur Windows (.cmd) est masque du gestionnaire de fichiers.
+ls *.cmd > .hidden 2>/dev/null
+. ./scripts/binaires.sh
 # Le lanceur sort avec le code 75 quand il vient de se mettre a jour (git pull) :
 # on reprend les executables de la nouvelle version, puis on le relance.
 export WEB_SUITE_RELANCEUR=1 WEB_SUITE_DEPOT="$PWD"

@@ -1,7 +1,9 @@
 #!/bin/sh
 # Banc d'essai web_bench (WEB_CAO, WEB_ANTENNA, WEB_3D) : garde le terminal ouvert en cas d'erreur.
-cd "$(dirname "$0")" || exit 1
-. ./binaires.sh
+cd "$(dirname "$0")/.." || exit 1
+# Un seul fichier a cliquer : le lanceur Windows (.cmd) est masque du gestionnaire de fichiers.
+ls *.cmd > .hidden 2>/dev/null
+. ./scripts/binaires.sh
 export WEB_SUITE_DEPOT="$PWD"
 if ! { obtenir_binaires && bin/web_bench "$@"; }; then
   echo

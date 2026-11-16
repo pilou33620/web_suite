@@ -60,7 +60,7 @@ jobs:
           P=prod/web_suite
           mkdir -p $P/lanceur/docs $P/web_bench $P/.claude/skills
           cp -r bin $P/
-          cp demarrer_*.sh demarrer_*.cmd installer.sh installer.cmd binaires.sh binaires.cmd README.md $P/
+          cp -r scripts $P/ && cp demarrer_*.sh demarrer_*.cmd README.md $P/
           # les pages du lanceur (pas banc_pilote.js) et sa notice
           cp lanceur/*.html lanceur/pilote.js lanceur/pilote.css $P/lanceur/
           cp lanceur/docs/DETAILS.md lanceur/docs/intro.webp $P/lanceur/docs/

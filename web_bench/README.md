@@ -17,8 +17,8 @@ Depuis la racine de web_suite, une fois les outils installés (`installer.cmd` /
 
 | Système | Démarrer |
 |---|---|
-| Windows | `demarrer_web_bench.cmd` |
-| Linux, Raspberry Pi | `./demarrer_web_bench.sh` |
+| Windows | `scripts\demarrer_web_bench.cmd` |
+| Linux, Raspberry Pi | `./scripts/demarrer_web_bench.sh` |
 
 web_bench est un exécutable Rust (caisse `web_bench`). Pour le lancer à la main, depuis la racine
 de web_suite :

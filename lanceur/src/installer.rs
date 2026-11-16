@@ -106,7 +106,7 @@ pub fn installer(ids: &[&str], racine: &Path, demander_dependances: bool) -> boo
             if demander_dependances && oui("Installer openEMS maintenant (~50 Mo) ?") {
                 outils::installer_openems(o, racine, &ecrire);
             } else {
-                println!("  Plus tard : installer antenna (installer.cmd ou ./installer.sh)");
+                println!("  Plus tard : installer antenna (scripts\installer.cmd ou ./scripts/installer.sh)");
             }
         }
     }
