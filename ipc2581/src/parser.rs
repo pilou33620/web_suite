@@ -2203,7 +2203,7 @@ impl IPC2581Parser {
             let xf_special = if self.userspecial_absolu { None } else { xf };
             self.simples(special_node, layer_ref, net_name, xf_special, mir)?;
             for text_node in self.findall(special_node, "Text") {
-                let t = self.process_text(text_node, layer_ref, net_name, None);
+                let t = self.process_text(text_node, layer_ref, net_name, loc_defaut);
                 self.design.texts.extend(t);
             }
         }

@@ -630,3 +630,24 @@ fn nombres_non_finis() {
         )))
     );
 }
+
+#[test]
+fn un_texte_du_userspecial_se_place_par_le_location_du_features() {
+    // l'editeur PCB de WEB_CAO ecrit ses reperes ainsi : traits et <Text> dans
+    // un <UserSpecial>, relatifs au <Location> du <Features>
+    let m = modele(
+        &mini(
+            r#"
+    <LayerFeature layerRef="TOP"><Set><Features><Location x="12.5" y="7"/><UserSpecial>
+     <Polyline><PolyBegin x="-1" y="0"/><PolyStepSegment x="1" y="0"/><LineDesc lineWidth="0.15"/></Polyline>
+     <Text textString="R1" fontSize="3"><Xform rotation="90"/></Text>
+    </UserSpecial></Features></Set></LayerFeature>"#,
+        ),
+        "mini.xml",
+    );
+    let t = &m["textes"][0];
+    assert_eq!(t["t"].as_str(), Some("R1"));
+    proche(t["x"].as_f64().unwrap(), 12.5);
+    proche(t["y"].as_f64().unwrap(), 7.0);
+    assert_eq!(t["r"].as_i64(), Some(90));
+}
