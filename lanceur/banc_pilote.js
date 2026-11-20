@@ -765,6 +765,32 @@ function onglet(serveur, stockage, page, nomCanal) {
       assert.ok(sources.includes(nom), "cible réservée introuvable dans les sources : " + c);
     }
   }
+  // Serveur en panne : la boucle dort entre deux essais. Relais perdu puis repris pendant ce repos :
+  // une seule boucle d'écoute doit rester. Sans garde, l'ancienne repartait à son réveil à côté de la
+  // nouvelle (deux long-polls).
+  {
+    const serv6 = fauxServeur(), stock6 = stockagePartage(), canal6 = "banc6." + Math.random();
+    const R6 = Object.assign({}, REGLAGES, { repos: 300 });
+    let aVisible = true, bVisible = false, panne = false;
+    const fetch6 = (url, opts) => panne && url.includes("/api/pilote/attendre")
+      ? Promise.resolve({ ok: false, status: 503, json: async () => ({}) }) : serv6.fetch(url, opts);
+    const A6 = creer({ fetch: fetch6, BroadcastChannel, stockage: stock6, canal: canal6, visible: () => aVisible }, R6).declarer({ page: "pcb" });
+    const B6 = creer({ fetch: fetch6, BroadcastChannel, stockage: stock6, canal: canal6, visible: () => bVisible }, R6).declarer({ page: "schema" });
+    await attendreQue(() => A6.relais && !B6.relais, 2000, "A tient le relais");
+    panne = true;
+    await pause(REGLAGES.attenteServeur + 50);             // l'écoute en cours finit, l'essai suivant échoue : A dort dans son repos
+    aVisible = false; bVisible = true;
+    await attendreQue(() => B6.relais && !A6.relais, 2000, "B prend le relais");
+    B6.arreter();                                          // « bye » : A est réélu aussitôt, bien avant la fin du repos
+    await attendreQue(() => A6.relais, 2000, "A reprend le relais");
+    panne = false;
+    await pause(20);
+    serv6.maxEnCours = serv6.enCours;
+    await pause(R6.repos + 200);
+    assert.strictEqual(serv6.maxEnCours, 1, "une seule boucle d'écoute après un relais perdu puis repris");
+    A6.arreter();
+  }
+
   console.log("OK");
   process.exit(0);
 })().catch(e => { console.error(e); process.exit(1); });
