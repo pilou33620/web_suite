@@ -842,6 +842,7 @@ impl Garde {
         }
         if !self.actif {
             self.visites.noter(r.client.ip());
+            r.filtree = true;
             return None;
         }
         let code = self.code.as_ref().expect("garde actif");
@@ -868,6 +869,7 @@ impl Garde {
             if r.methode == "POST" && chemin == ROUTE {
                 return Some(Reponse::json(200, &json!({"ok": true, "message": "Cet appareil est déjà autorisé."})));
             }
+            r.filtree = true;
             return None;
         }
         if lecture && chemin == PAGE {

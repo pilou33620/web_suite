@@ -3,6 +3,7 @@
 use super::*;
 use std::io::{Read, Write};
 use std::net::TcpStream;
+use crate::serveur::Duplex;
 use std::sync::atomic::{AtomicBool, Ordering};
 
 pub static DISTANT: AtomicBool = AtomicBool::new(false);
@@ -282,5 +283,133 @@ fn banc() {
     let vieille = empreinte_ca().unwrap();
     assert!(a_refaire(&d, &["127.0.0.1".to_string()]) && contexte_tls().is_ok());
     assert!(empreinte_ca().unwrap() != vieille && !a_refaire(&d, &adresses_poste()));
+    let _ = fs::remove_dir_all(&tmp);
+}
+
+/// La tête d'une réponse, lue octet par octet : ce qui suit reste dans le flux.
+fn lire_tete(c: &mut TcpStream) -> String {
+    let mut tete = Vec::new();
+    let mut o = [0u8; 1];
+    while !tete.ends_with(b"\r\n\r\n") {
+        if c.read(&mut o).unwrap() == 0 {
+            break;
+        }
+        tete.push(o[0]);
+    }
+    String::from_utf8_lossy(&tete).into_owned()
+}
+
+fn ouvrir_ws(port: u16, entetes: &[(&str, &str)]) -> (TcpStream, String) {
+    let mut d = "GET /ws HTTP/1.1\r\nHost: 127.0.0.1\r\nUpgrade: websocket\r\nConnection: Upgrade\r\n\
+                 Sec-WebSocket-Version: 13\r\nSec-WebSocket-Protocol: chat, binary\r\n"
+        .to_string();
+    if !entetes.iter().any(|(k, _)| *k == "Sec-WebSocket-Key") {
+        d += "Sec-WebSocket-Key: dGhlIHNhbXBsZSBub25jZQ==\r\n";
+    }
+    for (k, v) in entetes {
+        d += &format!("{}: {}\r\n", k, v);
+    }
+    let mut c = TcpStream::connect(("127.0.0.1", port)).unwrap();
+    c.set_read_timeout(Some(std::time::Duration::from_secs(5))).unwrap();
+    c.write_all((d + "\r\n").as_bytes()).unwrap();
+    let tete = lire_tete(&mut c);
+    (c, tete)
+}
+
+#[test]
+fn websocket() {
+    let tmp = std::env::temp_dir().join(format!("websocket-essai-{}", std::process::id()));
+    fs::create_dir_all(&tmp).unwrap();
+    std::env::set_var("WEB_TOOLS_JETON_FICHIER", tmp.join("jeton.txt"));
+    // le service : la garde, puis un écho d'une trame (masquée par le client, en clair au retour)
+    let service = |g: Arc<Garde>, filtrer: bool| {
+        Arc::new(move |r: &mut Requete| {
+            if filtrer {
+                if let Some(rep) = g.filtrer(r) {
+                    return rep;
+                }
+            }
+            if r.chemin() != "/ws" {
+                return Reponse::texte(200, "ok");
+            }
+            r.websocket(&["binary"], |c: &mut dyn Duplex| {
+                let _ = c.delai_lecture(Some(std::time::Duration::from_secs(5)));
+                let mut t = [0u8; 6];
+                if c.read_exact(&mut t).is_err() {
+                    return; // client parti sans trame
+                }
+                let mut donnees = vec![0u8; (t[1] & 0x7F) as usize];
+                if c.read_exact(&mut donnees).is_err() {
+                    return;
+                }
+                for (i, o) in donnees.iter_mut().enumerate() {
+                    *o ^= t[2 + i % 4];
+                }
+                let _ = c.write_all(&[0x82, donnees.len() as u8]).and_then(|_| c.write_all(&donnees));
+            })
+        })
+    };
+    let trame = |c: &mut TcpStream| {
+        let masque = [1u8, 2, 3, 4];
+        let mut t = vec![0x82, 0x80 | 5];
+        t.extend_from_slice(&masque);
+        t.extend(b"salut".iter().enumerate().map(|(i, o)| o ^ masque[i % 4]));
+        c.write_all(&t).unwrap();
+        let mut retour = [0u8; 7];
+        c.read_exact(&mut retour).unwrap();
+        retour
+    };
+
+    DISTANT.store(false, Ordering::SeqCst);
+    let local = Arc::new(Garde::new("TEST", false, None, None));
+    let srv = Serveur::ouvrir(0, false, 1).unwrap();
+    srv.servir_en_fond(service(local.clone(), true));
+    let port = srv.port();
+    // poignée de main : clé et réponse de l'exemple de la RFC 6455
+    let (mut c, tete) = ouvrir_ws(port, &[]);
+    assert!(tete.starts_with("HTTP/1.1 101 Switching Protocols\r\n"), "{tete}");
+    assert!(tete.contains("\r\nSec-WebSocket-Accept: s3pPLMBiTxaQ9kYGzzhZRbK+xOo=\r\n"), "{tete}");
+    assert!(tete.contains("\r\nConnection: Upgrade\r\n") && tete.contains("\r\nUpgrade: websocket\r\n"));
+    assert!(tete.contains("\r\nSec-WebSocket-Protocol: binary\r\n"));
+    assert!(!tete.contains("Content-Length") && !tete.contains("close"), "{tete}");
+    assert_eq!(&trame(&mut c), b"\x82\x05salut"); // une trame dans chaque sens
+    let mut fin = Vec::new();
+    assert_eq!(c.read_to_end(&mut fin).unwrap(), 0); // la connexion se ferme au retour de l'outil
+    // une connexion ordinaire ne change pas
+    let mut c = TcpStream::connect(("127.0.0.1", port)).unwrap();
+    c.write_all(&demande("GET", "/", &[], "")).unwrap();
+    let mut brut = Vec::new();
+    c.read_to_end(&mut brut).unwrap();
+    let texte = String::from_utf8_lossy(&brut).into_owned();
+    assert!(texte.starts_with("HTTP/1.0 200 OK\r\n") && texte.contains("Connection: close\r\n") && texte.ends_with("\r\n\r\nok"));
+    // refus : autre site, pas de clé, Host inconnu
+    let code = |tete: &str| tete.split(' ').nth(1).unwrap_or("").to_string();
+    assert_eq!(code(&ouvrir_ws(port, &[("Origin", "https://piege.example")]).1), "403");
+    assert_eq!(code(&ouvrir_ws(port, &[("Origin", "http://127.0.0.1")]).1), "101");
+    assert_eq!(code(&ouvrir_ws(port, &[("Sec-WebSocket-Key", "")]).1), "400");
+    let mut c = TcpStream::connect(("127.0.0.1", port)).unwrap();
+    c.write_all(b"GET /ws HTTP/1.1\r\nHost: piege.example\r\nUpgrade: websocket\r\nSec-WebSocket-Key: abc\r\n\r\n").unwrap();
+    assert_eq!(code(&lire_tete(&mut c)), "403");
+    srv.arreter();
+
+    // sans Garde::filtrer, jamais de bascule
+    let srv = Serveur::ouvrir(0, false, 1).unwrap();
+    srv.servir_en_fond(service(local, false));
+    assert_eq!(code(&ouvrir_ws(srv.port(), &[]).1), "403");
+    srv.arreter();
+
+    // mode réseau : un autre appareil sans jeton est refusé, avec le jeton il passe
+    let muet: Afficher = Arc::new(|_: &str| {});
+    let reseau = Arc::new(Garde::new("TEST", true, Some(muet), None));
+    let srv = Serveur::ouvrir(0, false, 1).unwrap();
+    srv.servir_en_fond(service(reseau.clone(), true));
+    DISTANT.store(true, Ordering::SeqCst);
+    assert_eq!(code(&ouvrir_ws(srv.port(), &[]).1), "403");
+    let biscuit = format!("{}={}", BISCUIT, reseau.jeton.as_ref().unwrap());
+    let (mut c, tete) = ouvrir_ws(srv.port(), &[("Cookie", biscuit.as_str())]);
+    assert_eq!(code(&tete), "101");
+    assert_eq!(&trame(&mut c), b"\x82\x05salut");
+    DISTANT.store(false, Ordering::SeqCst);
+    srv.arreter();
     let _ = fs::remove_dir_all(&tmp);
 }

@@ -33,7 +33,21 @@ pub struct Requete<'a> {
     pub tls_actif: bool,
     corps: &'a mut dyn Read,
     lu: bool,
+    /// Garde::filtrer a laissé passer cette requête (condition d'un WebSocket).
+    pub(crate) filtree: bool,
+    bascule: Option<Box<dyn FnOnce(&mut dyn Duplex)>>,
 }
+
+/// La connexion rendue à l'outil après le 101 d'un WebSocket : elle se lit et s'écrit.
+pub trait Duplex: Read + Write {
+    /// Délai de chaque lecture (None : aucun). Une lecture qui le dépasse rend une erreur
+    /// WouldBlock ou TimedOut (selon le système), et la connexion reste utilisable : en TLS, lire
+    /// et écrire se font dans le même fil, en lisant avec un délai court.
+    fn delai_lecture(&mut self, delai: Option<Duration>) -> io::Result<()>;
+}
+
+/// Clé fixe de la poignée de main WebSocket (RFC 6455).
+const GUID_WEBSOCKET: &str = "258EAFA5-E914-47DA-95CA-C5AB0DC85B11";
 
 #[derive(Debug)]
 pub enum ErreurCorps {
@@ -94,6 +108,42 @@ impl Requete<'_> {
             return Err(ErreurCorps::Lecture(io::ErrorKind::UnexpectedEof.into()));
         }
         Ok(corps)
+    }
+
+    /// WebSocket (RFC 6455) : rend le 101 de la poignée de main et garde `suite`, que le serveur
+    /// appelle avec la connexion une fois le 101 envoyé, dans le fil de cette connexion ; elle se
+    /// ferme au retour de `suite`. Refus : 403 si Garde::filtrer n'a pas laissé passer la requête,
+    /// ou si Origin est un autre site ; 400 si ce n'est pas une demande de WebSocket.
+    /// `protocoles` : les sous-protocoles acceptés (le premier que le client propose est rendu).
+    pub fn websocket(&mut self, protocoles: &[&str], suite: impl FnOnce(&mut dyn Duplex) + 'static) -> Reponse {
+        if !self.filtree {
+            return Reponse::texte(403, "Requête refusée");
+        }
+        if let Some(origine) = self.entete("Origin") {
+            // un WebSocket ignore la règle de même origine : une page d'un autre site ne s'y connecte pas
+            let hote = origine.split_once("://").map(|(_, h)| h).unwrap_or("").split('/').next().unwrap_or("");
+            if hote.is_empty() || !hote.eq_ignore_ascii_case(self.entete("Host").unwrap_or("")) {
+                return Reponse::texte(403, "Requête refusée (autre site)");
+            }
+        }
+        let upgrade = self.entete("Upgrade").is_some_and(|u| u.eq_ignore_ascii_case("websocket"));
+        let Some(cle) = self.entete("Sec-WebSocket-Key").filter(|c| upgrade && !c.is_empty()) else {
+            return Reponse::texte(400, "WebSocket attendu");
+        };
+        use base64::Engine;
+        use sha1::{Digest, Sha1};
+        let accept = base64::engine::general_purpose::STANDARD.encode(Sha1::digest(format!("{}{}", cle, GUID_WEBSOCKET)));
+        // Connection exactement « Upgrade » : les anciens Safari n'acceptent rien d'autre
+        let mut rep = Reponse { code: 101, entetes: Vec::new(), corps: Vec::new(), suite: None }
+            .entete("Upgrade", "websocket")
+            .entete("Connection", "Upgrade")
+            .entete("Sec-WebSocket-Accept", &accept);
+        let offerts = self.entete("Sec-WebSocket-Protocol").unwrap_or("");
+        if let Some(p) = offerts.split(',').map(str::trim).find(|p| protocoles.contains(p)) {
+            rep = rep.entete("Sec-WebSocket-Protocol", p);
+        }
+        self.bascule = Some(Box::new(suite));
+        rep
     }
 }
 
@@ -230,6 +280,33 @@ impl Write for Flux {
             Flux::Clair(s) => s.flush(),
             Flux::Tls(s) => s.flush(),
         }
+    }
+}
+
+/// La connexion d'un WebSocket : ce qui reste à lire du tampon, puis le flux (clair ou TLS).
+struct Connexion<'a> {
+    lecteur: &'a mut BufReader<Flux>,
+    tcp: &'a TcpStream,
+}
+
+impl Read for Connexion<'_> {
+    fn read(&mut self, buf: &mut [u8]) -> io::Result<usize> {
+        self.lecteur.read(buf)
+    }
+}
+
+impl Write for Connexion<'_> {
+    fn write(&mut self, buf: &[u8]) -> io::Result<usize> {
+        self.lecteur.get_mut().write(buf)
+    }
+    fn flush(&mut self) -> io::Result<()> {
+        self.lecteur.get_mut().flush()
+    }
+}
+
+impl Duplex for Connexion<'_> {
+    fn delai_lecture(&mut self, delai: Option<Duration>) -> io::Result<()> {
+        self.tcp.set_read_timeout(delai)
     }
 }
 
@@ -400,8 +477,26 @@ impl Serveur {
             tls_actif: tls.is_some(),
             corps: &mut lecteur,
             lu: false,
+            filtree: false,
+            bascule: None,
         };
         let reponse = service(&mut requete);
+        let bascule = if reponse.code == 101 { requete.bascule.take() } else { None };
+        drop(requete);
+        if let Some(suite) = bascule {
+            // WebSocket : 101 en HTTP/1.1 sans Content-Length ni « Connection: close », puis l'outil
+            let mut tete = String::from("HTTP/1.1 101 Switching Protocols\r\n");
+            for (k, v) in &reponse.entetes {
+                tete += &format!("{}: {}\r\n", k, v);
+            }
+            tete += "\r\n";
+            lecteur.get_mut().write_all(tete.as_bytes())?;
+            lecteur.get_mut().flush()?;
+            let mut connexion = Connexion { lecteur: &mut lecteur, tcp: &tcp };
+            // une panique de l'outil ferme cette connexion, sans tuer le fil qui la compte
+            let _ = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| suite(&mut connexion)));
+            return Serveur::fermer(lecteur.get_mut(), &tcp);
+        }
         let mut sortie = Vec::with_capacity(reponse.corps.len() + 256);
         write!(sortie, "HTTP/1.0 {} {}\r\n", reponse.code, raison(reponse.code))?;
         for (k, v) in &reponse.entetes {
@@ -420,6 +515,10 @@ impl Serveur {
         if let (Some(mut suite), false) = (reponse.suite, tete) {
             std::io::copy(&mut suite, flux)?;
         }
+        Serveur::fermer(flux, &tcp)
+    }
+
+    fn fermer(flux: &mut Flux, tcp: &TcpStream) -> io::Result<()> {
         flux.flush()?;
         if let Flux::Tls(s) = flux {
             s.conn.send_close_notify();
