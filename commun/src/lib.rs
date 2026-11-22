@@ -2,6 +2,8 @@
 //! version, prise en dépendance git par chaque outil (plus de copies à comparer).
 pub mod appairage;
 pub mod pilote;
+#[cfg(feature = "production")]
+pub mod production;
 pub mod serveur;
 
 use std::path::Path;

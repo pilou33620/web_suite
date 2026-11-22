@@ -11,7 +11,7 @@ doctest = false # les schémas indentés des en-têtes de module ne sont pas du 
 # Les exécutables sont les fichiers de src/bin/ (web_suite, mcp_web_suite, installer…).
 
 [dependencies]
-web_tools_commun = { path = "../commun" }
+web_tools_commun = { path = "../commun", features = ["production"] }
 serde_json = { version = "1", features = ["preserve_order"] }
 ureq = "2"
 zip = { version = "2", default-features = false, features = ["deflate"] }

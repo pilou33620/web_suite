@@ -237,40 +237,8 @@ fn executer(cmd: &[&str], ecrire: Ecrire, cwd: Option<&Path>) -> i32 {
     proc.wait().ok().and_then(|s| s.code()).unwrap_or(-1)
 }
 
-/// Extrait les entrées de l'archive qui commencent par `prefixe` dans `cible`.
-pub(crate) fn extraire<R: Read + Seek>(z: &mut zip::ZipArchive<R>, prefixe: &str, cible: &Path) -> io::Result<()> {
-    for i in 0..z.len() {
-        let mut entree = z.by_index(i)?;
-        let nom = entree.name().to_string();
-        let Some(relatif) = nom.strip_prefix(prefixe).filter(|r| !r.is_empty()) else { continue };
-        // Le chemin remis d'aplomb (normpath) doit rester sous `cible`.
-        let mut morceaux: Vec<&str> = Vec::new();
-        let mut dehors = relatif.starts_with('/');
-        for m in relatif.split(|c| c == '/' || (WINDOWS && c == '\\')) {
-            match m {
-                "" | "." => {}
-                ".." => dehors |= morceaux.pop().is_none(),
-                _ => {
-                    dehors |= WINDOWS && m.contains(':');
-                    morceaux.push(m);
-                }
-            }
-        }
-        if dehors || morceaux.is_empty() {
-            continue; // entrée hors du dossier : ignorée
-        }
-        let chemin = morceaux.iter().fold(cible.to_path_buf(), |p, m| p.join(m));
-        if nom.ends_with('/') {
-            fs::create_dir_all(&chemin)?;
-        } else {
-            if let Some(parent) = chemin.parent() {
-                fs::create_dir_all(parent)?;
-            }
-            io::copy(&mut entree, &mut fs::File::create(&chemin)?)?;
-        }
-    }
-    Ok(())
-}
+// L'extraction confinée des archives zip : dans la caisse commune (production.rs).
+pub(crate) use web_tools_commun::production::extraire;
 
 // ---------------------------------------------------------------------------
 // openEMS (WEB_ANTENNA)
