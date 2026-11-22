@@ -758,7 +758,8 @@ fn html(texte: &str) -> String {
 
 /// Le contrôle d'accès d'un serveur, à appeler par filtrer() en tête de chaque requête.
 ///
-/// actif=false (le serveur n'écoute que sur 127.0.0.1) : seul l'en-tête Host est vérifié.
+/// actif=false (le serveur n'écoute que sur une boucle locale, 127.0.0.1 ou ::1) : seul l'en-tête
+/// Host est vérifié. Écoute sur une autre adresse (Serveur::ouvrir_sur) : actif=true.
 pub struct Garde {
     pub nom: String,
     pub actif: bool,

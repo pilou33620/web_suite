@@ -192,20 +192,31 @@ impl Reponse {
 fn raison(code: u16) -> &'static str {
     match code {
         200 => "OK",
+        201 => "Created",
         204 => "No Content",
         206 => "Partial Content",
+        301 => "Moved Permanently",
+        302 => "Found",
         303 => "See Other",
         304 => "Not Modified",
         307 => "Temporary Redirect",
         400 => "Bad Request",
+        401 => "Unauthorized",
         403 => "Forbidden",
         404 => "Not Found",
         405 => "Method Not Allowed",
         409 => "Conflict",
+        411 => "Length Required",
         413 => "Request Entity Too Large",
+        415 => "Unsupported Media Type",
+        416 => "Requested Range Not Satisfiable",
+        422 => "Unprocessable Entity",
         429 => "Too Many Requests",
         500 => "Internal Server Error",
+        501 => "Not Implemented",
+        502 => "Bad Gateway",
         503 => "Service Unavailable",
+        504 => "Gateway Timeout",
         _ => "",
     }
 }
@@ -363,7 +374,7 @@ impl Serveur {
             };
             for &(ip, double) in piles {
                 if let Ok(ecoute) = ecouter(SocketAddr::new(ip, p), double) {
-                    return Ok(Arc::new(Serveur { ecoute, tls: RwLock::new(None), arret: AtomicBool::new(false), delai: DELAI_DEFAUT.into() }));
+                    return Ok(Serveur::neuf(ecoute));
                 }
             }
         }
@@ -371,6 +382,36 @@ impl Serveur {
             io::ErrorKind::AddrInUse,
             format!("aucun port libre entre {} et {}", port, port.saturating_add(essais.saturating_sub(1))),
         ))
+    }
+
+    /// Écoute sur la seule adresse `ip` (option --host) : 127.0.0.1, ::1, une adresse du poste
+    /// (192.168.1.20, fd7a:…), ou 0.0.0.0 / :: pour toutes les interfaces (:: en double pile).
+    /// Mêmes `essais` ports à partir de `port` et même tri HTTP/HTTPS sur le port qu'`ouvrir`.
+    /// Seul un port pris fait passer au suivant : une adresse absente du poste est refusée
+    /// d'emblée (AddrNotAvailable), comme une IPv6 de lien local (fe80::, il y faudrait l'interface).
+    /// Une adresse qui n'est pas une boucle locale est le mode réseau : la Garde doit le savoir,
+    /// `Garde::new(nom, !ip.to_canonical().is_loopback(), …)`, sinon le réseau entre sans jeton.
+    pub fn ouvrir_sur(ip: IpAddr, port: u16, essais: u16) -> io::Result<Arc<Serveur>> {
+        let ip = ip.to_canonical(); // ::ffff:192.168.1.20 est 192.168.1.20
+        let double = ip == IpAddr::V6(Ipv6Addr::UNSPECIFIED);
+        let dernier = port.saturating_add(essais.saturating_sub(1));
+        let mut cause = String::from("port déjà pris");
+        for p in port..=dernier {
+            if double && p != 0 && !ipv4_libre(p) {
+                continue;
+            }
+            match ecouter(SocketAddr::new(ip, p), double) {
+                Ok(ecoute) => return Ok(Serveur::neuf(ecoute)),
+                // Windows rend PermissionDenied pour un port réservé ; Linux, pour un port < 1024
+                Err(e) if matches!(e.kind(), io::ErrorKind::AddrInUse | io::ErrorKind::PermissionDenied) => cause = e.to_string(),
+                Err(e) => return Err(io::Error::new(e.kind(), format!("écoute impossible sur {} : {}", ip, e))),
+            }
+        }
+        Err(io::Error::new(io::ErrorKind::AddrInUse, format!("aucun port libre sur {} entre {} et {} ({})", ip, port, dernier, cause)))
+    }
+
+    fn neuf(ecoute: TcpListener) -> Arc<Serveur> {
+        Arc::new(Serveur { ecoute, tls: RwLock::new(None), arret: AtomicBool::new(false), delai: DELAI_DEFAUT.into() })
     }
 
     /// Délai de chaque lecture du socket (0 : aucun) : un envoi coupé sans fermeture (Wi-Fi
@@ -425,7 +466,12 @@ impl Serveur {
 
     pub fn arreter(&self) {
         self.arret.store(true, Ordering::SeqCst);
-        let _ = TcpStream::connect((Ipv4Addr::LOCALHOST, self.port())); // réveille accept()
+        // réveille accept() : par l'adresse d'écoute si elle est précise (ouvrir_sur), sinon 127.0.0.1
+        let ip = match self.ecoute.local_addr() {
+            Ok(a) if !a.ip().is_unspecified() => a.ip(),
+            _ => IpAddr::V4(Ipv4Addr::LOCALHOST),
+        };
+        let _ = TcpStream::connect((ip, self.port()));
     }
 
     fn connexion(&self, tcp: TcpStream, service: &Service) -> io::Result<()> {
@@ -559,5 +605,37 @@ mod essais_plafond {
         assert_eq!(decoder_chemin("/js/a%20b.js"), "/js/a b.js");
         assert_eq!(params("nom=a+b&x=c%2Bd"), vec![("nom".to_string(), "a b".to_string()), ("x".to_string(), "c+d".to_string())]);
         assert_eq!(decoder_url("a+b"), "a b");
+    }
+}
+
+#[cfg(test)]
+mod essais_ecoute {
+    use super::*;
+    use std::io::{Read, Write};
+
+    #[test]
+    fn libelles_de_statut() {
+        assert_eq!(raison(501), "Not Implemented");
+        assert_eq!(raison(422), "Unprocessable Entity");
+        for c in [200, 201, 204, 206, 301, 302, 303, 304, 400, 401, 403, 404, 405, 409, 411, 413, 415, 416, 422, 429, 500, 501, 502, 503, 504] {
+            assert!(!raison(c).is_empty(), "{c}");
+        }
+    }
+
+    #[test]
+    fn ouvrir_sur_une_adresse_precise() {
+        let local = IpAddr::V4(Ipv4Addr::LOCALHOST);
+        let srv = Serveur::ouvrir_sur(local, 0, 1).unwrap();
+        assert_eq!(srv.ecoute.local_addr().unwrap().ip(), local);
+        srv.servir_en_fond(Arc::new(|_: &mut Requete| Reponse::texte(501, "non")));
+        let mut c = TcpStream::connect((local, srv.port())).unwrap();
+        c.write_all(b"GET / HTTP/1.0\r\nHost: 127.0.0.1\r\n\r\n").unwrap();
+        let mut brut = String::new();
+        c.read_to_string(&mut brut).unwrap();
+        assert!(brut.starts_with("HTTP/1.0 501 Not Implemented\r\n"), "{brut}");
+        srv.arreter();
+        // 192.0.2.1 (RFC 5737, réservée à la documentation) n'est sur aucun poste
+        let e = Serveur::ouvrir_sur("192.0.2.1".parse().unwrap(), 8000, 10).err().expect("refus attendu");
+        assert_eq!(e.kind(), io::ErrorKind::AddrNotAvailable, "{e}");
     }
 }
