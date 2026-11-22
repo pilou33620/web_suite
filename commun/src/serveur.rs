@@ -221,15 +221,24 @@ pub fn params(requete: &str) -> Vec<(String, String)> {
         .collect()
 }
 
-/// unquote_plus : %XX et « + ».
+/// unquote_plus : %XX et « + ». Pour les paramètres seulement : un chemin passe par decoder_chemin.
 pub fn decoder_url(s: &str) -> String {
+    decoder(s, true)
+}
+
+/// unquote : %XX seulement. « + » reste « + » dans un chemin (/js/a+b.js).
+pub fn decoder_chemin(s: &str) -> String {
+    decoder(s, false)
+}
+
+fn decoder(s: &str, plus_en_espace: bool) -> String {
     let b = s.as_bytes();
     let mut out = Vec::with_capacity(b.len());
     let mut i = 0;
     while i < b.len() {
         let hex = |c: u8| (c as char).to_digit(16);
         match b[i] {
-            b'+' => out.push(b' '),
+            b'+' if plus_en_espace => out.push(b' '),
             b'%' if i + 2 < b.len() && hex(b[i + 1]).is_some() && hex(b[i + 2]).is_some() => {
                 out.push((hex(b[i + 1]).unwrap() * 16 + hex(b[i + 2]).unwrap()) as u8);
                 i += 2;
@@ -541,5 +550,14 @@ mod essais_plafond {
         for a in ["192.168.1.20", "fd7a:115c:a1e0::1"] {
             assert!(!hors_plafond(a.parse().unwrap()), "{a}");
         }
+    }
+
+    #[test]
+    fn plus_garde_dans_le_chemin_espace_dans_les_parametres() {
+        assert_eq!(decoder_chemin("/js/a+b.js"), "/js/a+b.js");
+        assert_eq!(decoder_chemin("/js/a%2Bb.js"), "/js/a+b.js");
+        assert_eq!(decoder_chemin("/js/a%20b.js"), "/js/a b.js");
+        assert_eq!(params("nom=a+b&x=c%2Bd"), vec![("nom".to_string(), "a b".to_string()), ("x".to_string(), "c+d".to_string())]);
+        assert_eq!(decoder_url("a+b"), "a b");
     }
 }
